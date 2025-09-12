@@ -6,41 +6,61 @@ repo_url: https://github.com/zaber-dev/Zeython
 site_author: Md Mahedi Zaman Zaber
 edit_uri: edit/main/docs/
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
-  - Architecture: architecture.md
-  - Configuration: configuration.md
-  - Configuration Reference: config-reference.md
-  - Models: models.md
-  - Database: database.md
-  - API: api.md
-  - Examples: examples.md
+  - Overview:
+    - Overview: index.md
+    - Getting Started: getting-started.md
+    - Examples: examples.md
+  - Guide:
+    - Architecture: architecture.md
+    - Configuration: configuration.md
+    - Configuration Reference: config-reference.md
+    - API & Routes: api.md
   - Services:
     - Web: services/web.md
     - Discord: services/discord.md
+  - Models & Database:
+    - Models: models.md
+    - Database: database.md
   - Advanced:
     - Authentication: authentication.md
     - File Management: file-management.md
     - Vendor Integrations: vendor-integrations.md
     - Error Monitoring: error-monitoring.md
-    - Deployment: deployment.md
     - Performance: performance.md
+    - Deployment: deployment.md
     - Testing: testing.md
     - Troubleshooting: troubleshooting.md
     - Security: security.md
     - FAQ: faq.md
-  - Migration: migration.md
   - For Developers:
     - Developer Setup: developer-setup.md
     - Coding Standards: coding-standards.md
     - Service Development: service-development.md
     - Debugging: debugging.md
+  - Migration: migration.md
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
   features:
-    - navigation.tabs
     - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - toc.integrate
+    - search.suggest
+    - search.highlight
     - content.code.copy
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
 markdown_extensions:
   - admonition
   - codehilite
@@ -50,5 +70,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/zaber-dev/Zeython
+  copyright: "© {year} Md Mahedi Zaman Zaber"
 plugins:
   - search
+  - tags
+  - social

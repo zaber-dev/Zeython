@@ -31,6 +31,11 @@ Welcome to the Zeython docs. This site complements the README and LEARN guide wi
 - Service Development → service-development.md
 - Debugging → debugging.md
 
+## Versions
+This site currently shows the latest documentation. Planned versions (coming soon):
+- main (latest)
+- v1.x (legacy)
+
 ## Migration
 - Migration Guide → migration.md
 
