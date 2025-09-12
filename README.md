@@ -13,7 +13,6 @@ Repository: https://github.com/zaber-dev/Zeython
 
 ## Documentation
 
-- Start here: [LEARN.md](LEARN.md)
 - Full docs: [docs/index.md](docs/index.md)
 - Developer guide: [docs/developer-setup.md](docs/developer-setup.md)
 
