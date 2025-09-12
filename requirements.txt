@@ -3,4 +3,5 @@ sqlalchemy
 python-dotenv
 flask
 mkdocs
-mkdocs-material
+mkdocs-material[imaging]
+mkdocs-tags-plugin
