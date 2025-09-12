@@ -11,6 +11,12 @@ variables, so the web app and the bot don't depend on one another.
 
 Repository: https://github.com/zaber-dev/Zeython
 
+## Documentation
+
+- Start here: [LEARN.md](LEARN.md)
+- Full docs: [docs/index.md](docs/index.md)
+- Developer guide: [docs/developer-setup.md](docs/developer-setup.md)
+
 ## Project Structure
 
 ```bash
