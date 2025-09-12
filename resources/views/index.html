@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zeython</title>
+</head>
+<body>
+    <h1>Welcome to Zeython</h1>
+        <p>Modular MVC framework for Python with multi-service support.</p>
+
+        <!-- About Zeython banner -->
+        <!-- If using Jinja2 includes, replace with: {% include '_about_zeython.html' %} -->
+        <div>
+                <!-- Static include for now -->
+        
+        </div>
+        <script>
+            // Dynamically fetch and inject the about snippet if served statically
+            fetch('/_about_zeython.html').then(r=>{ if(r.ok) return r.text(); }).then(html=>{
+                if(html){
+                    const host = document.currentScript.previousElementSibling;
+                    host.outerHTML = html;
+                }
+            }).catch(()=>{});
+        </script>
+</body>
+</html>

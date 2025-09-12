@@ -1,0 +1,4 @@
+disnake
+sqlalchemy
+python-dotenv
+flask
