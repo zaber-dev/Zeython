@@ -114,3 +114,9 @@ If you have any questions or need assistance, feel free to reach out by:
 - Mailing me at: zaber@zealtyro.com
 
 Thank you for helping to improve this project! 😊
+
+---
+
+For a more detailed contributor environment and workflow, see the Developer Setup guide:
+
+- docs/developer-setup.md

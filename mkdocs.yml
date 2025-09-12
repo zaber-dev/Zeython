@@ -1,0 +1,54 @@
+site_name: Zeython Docs
+site_description: Zeython — Flask MVC Structure with Modular Service Architecture
+site_url: https://zaber-dev.github.io/Zeython/
+repo_name: zaber-dev/Zeython
+repo_url: https://github.com/zaber-dev/Zeython
+site_author: Md Mahedi Zaman Zaber
+edit_uri: edit/main/docs/
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - Configuration: configuration.md
+  - Configuration Reference: config-reference.md
+  - Models: models.md
+  - Database: database.md
+  - API: api.md
+  - Examples: examples.md
+  - Services:
+    - Web: services/web.md
+    - Discord: services/discord.md
+  - Advanced:
+    - Authentication: authentication.md
+    - File Management: file-management.md
+    - Vendor Integrations: vendor-integrations.md
+    - Error Monitoring: error-monitoring.md
+    - Deployment: deployment.md
+    - Performance: performance.md
+    - Testing: testing.md
+    - Troubleshooting: troubleshooting.md
+    - Security: security.md
+    - FAQ: faq.md
+  - Migration: migration.md
+  - For Developers:
+    - Developer Setup: developer-setup.md
+    - Coding Standards: coding-standards.md
+    - Service Development: service-development.md
+    - Debugging: debugging.md
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/zaber-dev/Zeython
+plugins:
+  - search

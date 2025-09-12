@@ -2,3 +2,5 @@ disnake
 sqlalchemy
 python-dotenv
 flask
+mkdocs
+mkdocs-material
