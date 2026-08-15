@@ -1,7 +1,0 @@
-disnake
-sqlalchemy
-python-dotenv
-flask
-mkdocs
-mkdocs-material[imaging]
-mkdocs-tags-plugin

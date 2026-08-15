@@ -1,36 +1,68 @@
 # Getting Started
 
-This guide brings your Zeython app online in minutes.
+## Requirements
 
-## Prerequisites
-- Python 3.9+
-- pip
+- Python 3.11+
 
 ## Install
+
 ```bash
-git clone https://github.com/zaber-dev/Zeython.git
-cd Zeython
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate
+pip install zeython
 ```
 
-## Configure
-Create `.env` in the project root:
+## Scaffold a project
 
-```env
-FLASK_HOST=127.0.0.1
-FLASK_PORT=5000
-DATABASE_URL=sqlite:///database.db
-```
-
-For Discord (optional):
-```env
-DISCORD_TOKEN=your_discord_token_here
-DISCORD_PREFIX=!
-```
-
-## Run
 ```bash
-python config/application.py
+zeython new "My Blog"
+cd my_blog
+pip install -e .
+cp .env.example .env
 ```
 
-Open http://127.0.0.1:5000/
+This generates:
+
+```
+my_blog/
+├── app/
+│   ├── Controllers/     # request handlers
+│   ├── Models/          # async Active Record models
+│   └── Middleware/       # ASGI middleware
+├── routes/
+│   └── web.py           # route definitions
+├── migrations/           # Alembic migrations
+├── tests/
+├── main.py               # application entry point
+├── alembic.ini
+└── .env.example
+```
+
+## Run it
+
+```bash
+zeython serve
+```
+
+Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try the
+generated `/users` resource too:
+
+```bash
+curl -X POST http://127.0.0.1:8000/users \
+  -H 'Content-Type: application/json' \
+  -d '{"name": "Ada", "email": "ada@example.com"}'
+
+curl http://127.0.0.1:8000/users
+```
+
+If you get a database error, run the initial migration first:
+
+```bash
+zeython db migrate
+```
+
+## Next steps
+
+- Read [Architecture](architecture.md) to understand the container, service providers, and router.
+- Read [Database & Migrations](database.md) to add your own models.
+- Read [CLI Reference](cli.md) for the full list of `zeython make:*` generators.
