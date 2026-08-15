@@ -1,0 +1,50 @@
+site_name: Zeython Docs
+site_description: Zeython — an async-first, batteries-included MVC framework for Python
+site_url: https://zaber-dev.github.io/Zeython/
+repo_name: zaber-dev/Zeython
+repo_url: https://github.com/zaber-dev/Zeython
+site_author: Md Mahedi Zaman Zaber
+edit_uri: edit/main/docs/
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - CLI Reference: cli.md
+  - Database & Migrations: database.md
+  - Testing: testing.md
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/zaber-dev/Zeython
+  copyright: "© {year} Md Mahedi Zaman Zaber"
+plugins:
+  - search
+  - tags

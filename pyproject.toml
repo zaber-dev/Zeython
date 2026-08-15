@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zeython"
+version = "1.0.0"
+description = "An async-first, batteries-included MVC framework for Python."
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.11"
+authors = [
+    { name = "Md Mahedi Zaman Zaber" },
+]
+keywords = ["framework", "mvc", "asgi", "web", "async"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
+]
+dependencies = [
+    "starlette>=0.38",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "aiosqlite>=0.20",
+    "alembic>=1.13",
+    "python-dotenv>=1.0",
+    "jinja2>=3.1",
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+postgres = ["asyncpg>=0.29"]
+mysql = ["asyncmy>=0.2.9"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/zaber-dev/Zeython"
+Documentation = "https://github.com/zaber-dev/Zeython/tree/main/docs"
+Repository = "https://github.com/zaber-dev/Zeython"
+Issues = "https://github.com/zaber-dev/Zeython/issues"
+Changelog = "https://github.com/zaber-dev/Zeython/blob/main/CHANGELOG.md"
+
+[project.scripts]
+zeython = "zeython.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/zeython"]
+
+[tool.hatch.build]
+include = [
+    "src/zeython/**/*.py",
+    "src/zeython/cli/templates/**/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["src/zeython/cli/templates"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+exclude = ["^src/zeython/cli/templates/"]

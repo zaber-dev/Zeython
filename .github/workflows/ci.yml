@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests
+      - run: mypy src/zeython
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - run: pytest -v
+
+  scaffold-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e .
+      - name: Generate a project and verify it boots
+        run: |
+          zeython new "CI Smoke Test" --path /tmp/ci-smoke-test
+          cd /tmp/ci-smoke-test
+          cp .env.example .env
+          pip install -e ".[dev]" 2>/dev/null || pip install -e . pytest pytest-asyncio httpx
+          python -m alembic revision --autogenerate -m "initial"
+          python -m alembic upgrade head
+          pytest -v
