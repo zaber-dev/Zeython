@@ -1,5 +1,42 @@
 # Testing
 
-- Use `pytest` (add to requirements if not present)
-- Organize tests in `tests/`
-- Test services lifecycle and model logic
+Zeython ships `zeython.testing.client`, an `httpx.AsyncClient` wired directly to
+your application's ASGI callable — no real sockets, no running server required.
+
+```python
+# tests/test_users.py
+from zeython.testing import client
+from main import app
+
+async def test_create_user():
+    async with client(app) as http:
+        response = await http.post("/users", json={"name": "Ada", "email": "ada@example.com"})
+
+    assert response.status_code == 201
+    assert response.json()["email"] == "ada@example.com"
+```
+
+Generated projects come with `asyncio_mode = "auto"` set in `pyproject.toml`
+(via pytest-asyncio), so `async def test_...` functions run without extra
+markers or fixtures. Run the suite with:
+
+```bash
+pytest
+```
+
+## Testing models directly
+
+For unit tests that don't need HTTP, open a session yourself:
+
+```python
+from zeython.db.session import Database
+
+async def test_post_creation():
+    db = Database("sqlite+aiosqlite:///:memory:")
+    async with db.engine.begin() as conn:
+        await conn.run_sync(Post.metadata.create_all)
+
+    async with db.session():
+        post = await Post.create(title="Hello", body="World")
+        assert post.id is not None
+```

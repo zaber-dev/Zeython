@@ -1,159 +1,153 @@
-# Zeython — Modular Flask + Discord Bot Starter
+# Zeython
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](requirements.txt)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![CI](https://github.com/zaber-dev/Zeython/actions/workflows/ci.yml/badge.svg)](https://github.com/zaber-dev/Zeython/actions/workflows/ci.yml)
 
-Zeython is an MVC-structured Python starter built on **Flask**, with an
-**optional Discord bot** (via [disnake](https://github.com/DisnakeDev/disnake))
-that can be enabled independently of the web server. A small service
-manager coordinates whichever of the two you turn on through environment
-variables, so the web app and the bot don't depend on one another.
+**Zeython** is an async-first, batteries-included MVC framework for Python —
+a dependency injection container, a service-provider boot lifecycle, an
+Active-Record-style async ORM, and a Laravel-style CLI, built on top of
+[Starlette](https://www.starlette.io/) and [SQLAlchemy 2.0](https://docs.sqlalchemy.org/).
 
-Repository: https://github.com/zaber-dev/Zeython
+Zeython is created by **Md Mahedi Zaman Zaber**.
+
+> **Note:** Zeython 2.0 is a from-scratch, breaking rewrite of the earlier
+> Flask + Discord bot template. Nothing about that version carries forward —
+> the framework is now an installable package, not a repo you clone and edit
+> in place. See [CHANGELOG.md](CHANGELOG.md) for details.
+
+## Why Zeython
+
+Python has excellent web *libraries*. It has very few opinionated, batteries-included
+*frameworks* in the Django/Laravel/Rails sense — most teams end up hand-rolling the
+same dependency injection container, request-scoped database session, and CLI
+scaffolding on every project. Zeython does that assembly once:
+
+- **Async all the way down** — request handling, the ORM, and migrations, with
+  no bolted-on `asyncio.run` calls.
+- **Request-scoped database sessions** via `contextvars`, not a session shared
+  globally or a fresh one hand-rolled per call.
+- **Convention over configuration** — controllers, models, and routes live in
+  predictable places (`app/Controllers`, `app/Models`, `routes/`).
+- **A real CLI** — `zeython new`, `zeython serve`, `zeython make:*`,
+  `zeython db:*` cover project creation, code generation, and migrations.
+- **Small, typed, tested core** — the framework itself ships full type hints
+  and a pytest suite; it is not scaffolding wrapped around unfinished features.
+
+## Quick start
+
+```bash
+pip install zeython
+zeython new "My Blog"
+cd my_blog
+pip install -e .
+cp .env.example .env
+zeython serve
+```
+
+Visit `http://127.0.0.1:8000`.
+
+## A taste of it
+
+```python
+# app/Models/post.py
+from sqlalchemy import String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+from zeython import Model
+
+class Post(Model):
+    __tablename__ = "posts"
+    title: Mapped[str] = mapped_column(String(255))
+    body: Mapped[str] = mapped_column(Text)
+```
+
+```python
+# app/Controllers/post_controller.py
+from starlette.responses import JSONResponse
+from zeython import Controller, NotFoundException
+from app.Models.post import Post
+
+class PostController(Controller):
+    async def index(self, request):
+        return JSONResponse([p.to_dict() for p in await Post.all()])
+
+    async def show(self, request):
+        post = await Post.find(int(request.path_params["id"]))
+        if post is None:
+            raise NotFoundException("Post not found")
+        return JSONResponse(post.to_dict())
+
+    async def store(self, request):
+        data = await request.json()
+        post = await Post.create(**data)
+        return JSONResponse(post.to_dict(), status_code=201)
+```
+
+```python
+# routes/web.py
+from main import app
+from app.Controllers.post_controller import PostController
+
+app.router.resource("/posts", PostController)
+```
+
+```bash
+zeython make model Post
+zeython make controller Post
+zeython db revision -m "add posts table"
+zeython db migrate
+```
+
+## Project structure
+
+```
+my_blog/
+├── app/
+│   ├── Controllers/      # request handlers
+│   ├── Models/           # async Active Record models
+│   └── Middleware/       # ASGI middleware
+├── routes/
+│   └── web.py            # route definitions
+├── migrations/            # Alembic migrations
+├── tests/
+├── main.py                # application entry point
+├── alembic.ini
+└── .env.example
+```
 
 ## Documentation
 
-- Full docs: [docs/index.md](docs/index.md)
-- Developer guide: [docs/developer-setup.md](docs/developer-setup.md)
+- [docs/index.md](docs/index.md) — overview
+- [docs/getting-started.md](docs/getting-started.md)
+- [docs/architecture.md](docs/architecture.md) — container, providers, router, ORM
+- [docs/cli.md](docs/cli.md) — full CLI reference
+- [docs/database.md](docs/database.md) — models and migrations
+- [docs/testing.md](docs/testing.md)
 
-## Project Structure
+Full rendered docs: https://zaber-dev.github.io/Zeython/
 
-```bash
-.
-├── app
-│   ├── Actions             # Utility functions (pagination, embeds, webhook handling, etc.)
-│   ├── Commands            # Discord command handling (optional service)
-│   │   ├── Context         # Traditional Discord commands
-│   │   └── Slash           # Slash commands for Discord
-│   ├── Controllers         # Controller logic for web and services
-│   │   ├── Flask           # Controllers specific to the Flask web app
-│   │   └── Discord         # Controllers for the Discord bot (optional)
-│   ├── Core                # Service interface, service manager, config
-│   │   ├── service.py      # Service interface and base classes
-│   │   ├── service_manager.py  # Service lifecycle management
-│   │   └── config.py       # Configuration management
-│   ├── Models              # SQLAlchemy models for the application
-│   ├── Services            # Service implementations
-│   │   ├── web_service.py  # Flask web service
-│   │   └── discord_service.py  # Discord bot service (optional)
-│   └── Views               # Flask templates
-├── config
-│   ├── boot.py             # Legacy entry point (deprecated)
-│   └── application.py      # Modular application bootstrap (recommended)
-├── database
-│   └── db.py               # SQLAlchemy engine/session setup
-├── resources                # Static and template files for Flask
-│   ├── css                 # CSS files
-│   ├── js                  # JavaScript files
-│   └── views               # HTML templates
-├── routes
-│   ├── api.py               # Routes for API endpoints
-│   └── web.py                # Routes for web pages
-├── storage                   # User file storage (uploads, etc.)
-├── vendor                    # Placeholder for third-party integrations
-├── requirements.txt          # Python dependencies (flask, disnake, sqlalchemy, python-dotenv)
-├── Dockerfile                # Docker containerization file
-└── .env_example               # Environment configuration template
-```
+## Framework development
 
-## What's actually implemented
-
-- **Two independent services** — a Flask web app (`app/Services/web_service.py`)
-  and an optional Discord bot (`app/Services/discord_service.py`), each
-  started or skipped by `app/Core/service_manager.py` depending on which
-  environment variables are set. A couple of real routes exist
-  (`routes/web.py`, `routes/api.py`) plus example Discord ping/greet
-  commands under `app/Commands/`.
-- **An enhanced SQLAlchemy base model** (`app/Models/base_model.py`) —
-  active-record-style `create`/`get`/`update`/`delete`, field-level
-  validators, a soft-delete mixin, an audit-fields mixin, a simple
-  in-memory cache, and dict/JSON (de)serialization.
-- **Additional data models** for users/sessions, balances, file uploads,
-  and vendor/webhook/error-log records (`app/Models/*.py`) — schema and
-  helper methods built on the base model above. These are not wired up to
-  a working end-to-end flow yet (no OAuth login route, no webhook
-  receiver endpoint, etc. exist in `routes/`).
-- **Docker support** — a `Dockerfile` that installs `requirements.txt` and
-  runs `config/application.py`.
-
-See [MVC_ENHANCEMENTS.md](MVC_ENHANCEMENTS.md) for the model layer in more
-detail, and [EXAMPLES.md](EXAMPLES.md) for usage snippets.
-
-## Getting Started
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/zaber-dev/Zeython.git
-   cd Zeython
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure services** — copy `.env_example` to `.env` and fill in
-   whichever service(s) you want to run:
-   ```bash
-   cp .env_example .env
-   ```
-
-   **Web only**:
-   ```env
-   FLASK_HOST=127.0.0.1
-   FLASK_PORT=5000
-   DATABASE_URL=sqlite:///database.db
-   ```
-
-   **Web + Discord**:
-   ```env
-   FLASK_HOST=127.0.0.1
-   FLASK_PORT=5000
-   DISCORD_TOKEN=your_discord_token_here
-   DISCORD_PREFIX=!
-   DATABASE_URL=sqlite:///database.db
-   ```
-
-4. **Run it**:
-   ```bash
-   # Modular system (recommended)
-   python config/application.py
-
-   # Legacy entry point (deprecated)
-   python config/boot.py
-   ```
-
-### Docker
+Working on Zeython itself (not an app built with it):
 
 ```bash
-docker build -t zeython .
-docker run -e FLASK_HOST=0.0.0.0 -e FLASK_PORT=5000 -p 5000:5000 zeython
+git clone https://github.com/zaber-dev/Zeython.git
+cd Zeython
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+pytest
+ruff check src tests
+mypy src/zeython
 ```
 
-### Adding a new service
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-```python
-from app.Core.service import ThreadedService
+## For AI coding agents
 
-class MyService(ThreadedService):
-    def is_enabled(self) -> bool:
-        return self.config.get('enabled', False)
-
-    def _run(self):
-        # Your service logic here
-        pass
-```
-
-```python
-from app.Core.service_manager import service_manager
-service_manager.register_service_class(MyService, "my_service")
-```
-
-## Collaboration
-
-Contributions are welcome — fork the repository and open a pull request.
-Check the **issues** section for current needs, or suggest your own.
+See [AGENTS.md](AGENTS.md) for framework conventions written for agentic coding
+tools (Claude Code, Cursor, Copilot Workspace, etc.) working in a Zeython codebase.
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0.
+GNU General Public License v3.0. See [LICENSE](LICENSE).

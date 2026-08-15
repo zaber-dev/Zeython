@@ -1,43 +1,36 @@
-# Zeython Documentation
+# Zeython
 
-Welcome to the Zeython docs. This site complements the README and LEARN guide with focused topics.
+Zeython is an async-first, batteries-included MVC framework for Python, built on
+[Starlette](https://www.starlette.io/) and [SQLAlchemy 2.0](https://docs.sqlalchemy.org/).
+It gives you a dependency injection container, a service-provider boot lifecycle, an
+Active-Record-style async ORM, and a Laravel-style `zeython` CLI — the pieces most
+hand-rolled Python web projects end up building themselves, done once and done well.
 
-## Quick links
-- Getting Started → getting-started.md
-- Architecture → architecture.md
-- Configuration → configuration.md
-- Configuration Reference → config-reference.md
-- Models → models.md
-- Database → database.md
-- Services → services/web.md, services/discord.md
-- API & Routes → api.md
-- Examples → examples.md
+## Why Zeython
 
-## Advanced topics
-- Authentication → authentication.md
-- File Management → file-management.md
-- Vendor Integrations → vendor-integrations.md
-- Error Monitoring → error-monitoring.md
-- Deployment → deployment.md
-- Performance → performance.md
-- Testing → testing.md
-- Troubleshooting → troubleshooting.md
-- Security → security.md
-- FAQ → faq.md
+Python has excellent web *libraries* (Starlette, SQLAlchemy, Alembic, uvicorn) but
+assembling them into a coherent, opinionated application structure is left as an
+exercise to every team. Zeython is that assembly: a real framework with conventions,
+not a template you copy and diverge from.
 
-## For developers
-- Developer Setup → developer-setup.md
-- Coding Standards → coding-standards.md
-- Service Development → service-development.md
-- Debugging → debugging.md
+- **Async all the way down.** Request handling, the ORM, and migrations are async
+  from the start — no bolted-on `asyncio.run` calls.
+- **Request-scoped database sessions**, not a global session shared across requests
+  or a fresh session hand-rolled per call.
+- **Convention over configuration.** Controllers, models, and routes live in
+  predictable places (`app/Controllers`, `app/Models`, `routes/`).
+- **A real CLI.** `zeython new`, `zeython serve`, `zeython make:*`, and
+  `zeython db:*` cover the whole day-to-day loop.
 
-## Versions
-This site currently shows the latest documentation. Planned versions (coming soon):
-- main (latest)
-- v1.x (legacy)
+## Documentation
 
-## Migration
-- Migration Guide → migration.md
+- [Getting Started](getting-started.md) — install the framework and scaffold your first project
+- [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
+- [CLI Reference](cli.md) — every `zeython` command
+- [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
+- [Testing](testing.md) — writing tests against a Zeython application
 
-## About Zeython
-Zeython is a modular MVC framework for Python built on Flask with a service manager that can run multiple services in parallel.
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/zaber-dev/Zeython/blob/main/CONTRIBUTING.md)
+in the repository root.

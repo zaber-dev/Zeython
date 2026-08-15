@@ -1,122 +1,74 @@
 # Contributing to Zeython
 
-Thank you for considering contributing to **Zeython**! We welcome contributions to improve the project, whether it's fixing bugs, adding new features, or enhancing documentation. Follow this guide to get started with contributing.
+Thanks for considering a contribution. Zeython is a young project moving
+fast, so the most valuable contributions right now are: bug reports against
+real usage, missing pieces in the core framework (`src/zeython/`), and
+documentation gaps.
 
-## How Can You Contribute?
+## Reporting bugs
 
-### 1. Reporting Bugs
-If you find any bugs, please open an issue in the repository and include:
-- A clear description of the bug.
-- Steps to reproduce the issue.
-- Any relevant error messages or screenshots.
+Open an issue with:
+- A clear description of the bug and what you expected instead.
+- A minimal reproduction (a few lines against `zeython`, or `zeython new` + a diff).
+- The Zeython version (`python -c "import zeython; print(zeython.__version__)"`) and Python version.
 
-### 2. Suggesting Features or Improvements
-If you have ideas for features or improvements, please open an issue with:
-- A detailed description of the feature or improvement.
-- How it benefits the project.
-- If possible, include any references or examples.
+## Proposing features
 
-### 3. Submitting Code Contributions
+Open an issue describing the problem before the implementation. Framework-level
+additions (new core modules, CLI commands, breaking API changes) should be
+discussed there first — application-level features belong in your own app, not
+the framework.
 
-#### **Forking the Repository**
-1. Fork the repository by clicking the "Fork" button on GitHub.
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/zaber-dev/Zeython.git
-   cd your-fork
-   ```
+## Development setup
 
-#### **Creating a New Branch**
-Always create a new branch for your changes to avoid polluting the `main` branch:
 ```bash
-git checkout -b feature-or-bugfix-description
+git clone https://github.com/zaber-dev/Zeython.git
+cd Zeython
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-#### **Making Changes**
-- Ensure that your code follows the project's structure.
-- If you're adding a new feature:
-  - Follow the MVC architecture.
-  - Update or create relevant views, controllers, models, or commands.
-- If you're fixing a bug, add a detailed explanation in the pull request.
+Repository layout:
 
-#### **Writing Tests**
-- If you're adding a new feature or fixing a bug, consider writing tests to ensure the changes work as expected.
-- Place your tests in an appropriate testing file (to be created if needed).
-
-#### **Commit Messages**
-- Write clear and descriptive commit messages.
-- Follow the format:
-  ```
-  Fix: Corrected pagination bug in Actions.
-  Feature: Added new Discord slash command for user stats.
-  ```
-
-#### **Pushing Your Changes**
-```bash
-git push origin feature-or-bugfix-description
+```
+src/zeython/            # the framework itself
+  application.py         # Application (ASGI app, boot lifecycle)
+  container.py            # dependency injection container
+  routing.py               # Router, Controller, resource()
+  config.py                 # .env-backed configuration
+  providers.py               # ServiceProvider, DatabaseServiceProvider, RouteServiceProvider
+  db/                          # async SQLAlchemy session + Model base class
+  cli/                          # the `zeython` command (new/serve/make/db)
+  cli/templates/starter/         # files copied by `zeython new`
+tests/                    # the framework's own test suite
+docs/                     # mkdocs source
 ```
 
-#### **Creating a Pull Request**
-- Go to your fork on GitHub and click the "Compare & Pull Request" button.
-- Write a description of your changes in the PR.
-- Reference any related issues in the PR.
-- Request a review from one of the maintainers.
+## Making changes
 
-## Code Style
+- Keep the core small and typed. Every public function/method should have type
+  hints; `mypy src/zeython` must pass clean.
+- Add tests for anything you change in `src/zeython/` — `pytest` must pass.
+- Run `ruff check src tests` before opening a PR; CI enforces it.
+- If you change `src/zeython/cli/templates/starter/`, regenerate a project with
+  `zeython new` and confirm it boots (`zeython serve`) and its own `pytest`
+  passes — the CI `scaffold-smoke-test` job does this automatically, but it's
+  much faster to catch locally.
+- Commit messages: short, imperative, descriptive (`Fix session leak in
+  DatabaseSessionMiddleware`, `Add zeython make:provider command`).
 
-- Follow **PEP8** for Python code.
-- Use clear and descriptive variable and function names.
-- Keep functions and methods small and focused.
-- Comment your code where necessary, especially for complex logic.
-- Ensure that any changes to the database layer are handled cleanly.
+## Pull requests
 
-## Development Setup
+1. Fork the repository and create a branch off `main`.
+2. Make your change with tests.
+3. `pytest && ruff check src tests && mypy src/zeython`
+4. Open a PR describing the change and, for behavior changes, why it's needed.
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/zaber-dev/Zeython.git
-   cd your-repo
-   ```
+## License
 
-2. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+By contributing, you agree your contributions are licensed under the project's
+GNU General Public License v3.0.
 
-3. **Set up Environment Variables**:
-   Create a `.env` file in the root directory with necessary environment variables.
+## Questions
 
-4. **Run the Application**:
-   ```bash
-   python config/boot.py
-   ```
-
-5. **Run Tests** (if available):
-   ```bash
-   pytest
-   ```
-
-6. **Docker (Optional)**:
-   If you'd like to work in a Docker environment:
-   ```bash
-   docker build -t zeython .
-   docker run -d -p 5000:5000 zeython
-   ```
-
-## Contributor License Agreement (CLA)
-
-By submitting code to this repository, you agree that your contributions will be licensed under the same license as the project: **GNU General Public License v3.0**.
-
-## Communication
-
-If you have any questions or need assistance, feel free to reach out by:
-- Opening an issue.
-- Mailing me at: zaber@zealtyro.com
-
-Thank you for helping to improve this project! 😊
-
----
-
-For a more detailed contributor environment and workflow, see the Developer Setup guide:
-
-- docs/developer-setup.md
+Open an issue, or reach out to zaber@zealtyro.com.

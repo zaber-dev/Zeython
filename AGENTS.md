@@ -1,0 +1,81 @@
+# AGENTS.md
+
+Guidance for AI coding agents (Claude Code, Cursor, Copilot Workspace, etc.)
+working in a Zeython codebase — either the framework itself, or an application
+built with it.
+
+## What Zeython is
+
+An async-first MVC framework: ASGI (Starlette) + async SQLAlchemy 2.0, a
+dependency injection container, a service-provider boot lifecycle, and a
+`zeython` CLI. Full details: [docs/architecture.md](docs/architecture.md).
+
+## If you're working in the framework itself (`src/zeython/`)
+
+- Read `docs/architecture.md` first — it explains the container/provider/router
+  relationship; don't guess at it from file names.
+- Every public API needs type hints. `mypy src/zeython` must pass with zero
+  errors before you're done.
+- Add or update tests in `tests/` for any behavior change. `pytest` must pass.
+- Run `ruff check src tests` — fix, don't suppress, unless there's a real
+  reason (document it with a `# noqa: CODE` and a one-line comment why).
+- `src/zeython/cli/templates/starter/` is copied verbatim by `zeython new` and
+  is **not** type-checked or linted as part of the package (see the `exclude`
+  entries in `pyproject.toml`) — those files run in a *generated project's*
+  context, not the framework's. If you touch them, verify by hand:
+  ```bash
+  pip install -e .
+  zeython new "Agent Smoke Test" --path /tmp/agent-smoke-test
+  cd /tmp/agent-smoke-test && cp .env.example .env && pip install -e .
+  python -m alembic revision --autogenerate -m x && python -m alembic upgrade head
+  pytest
+  ```
+- Don't add a dependency to `pyproject.toml` for something solvable in a few
+  lines of stdlib. The framework's value is a small, trustworthy core.
+
+## If you're working in an application built with Zeython
+
+- Models go in `app/Models/`, subclass `zeython.Model`, and get registered in
+  `app/Models/__init__.py` (so Alembic autogenerate can see them). Use
+  `zeython make model <Name>` rather than hand-rolling this.
+- Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
+  are plain `async def method(self, request) -> Response`.
+- Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
+  `main.py`. Function routes use `@app.get(...)`; CRUD resources use
+  `app.router.resource("/path", SomeController)`.
+- Database access inside a request handler never needs a session parameter —
+  `Model.create/find/all/...` pull the request-scoped session automatically.
+  Outside a request (scripts, one-off tasks), wrap the code in
+  `async with database.session():` — see docs/architecture.md.
+- After changing a model's columns, generate and apply a migration:
+  `zeython db revision -m "..."` then `zeython db migrate`. Never edit
+  `database.db` directly or hand-edit an already-applied migration file.
+- Use `zeython.testing.client` for endpoint tests — it hits the ASGI app
+  in-process (no real server, no port binding).
+
+## Common pitfalls specific to this framework
+
+- **Routes registered after boot don't appear.** `Application` builds the
+  underlying Starlette app lazily, on first request. If you programmatically
+  add routes, do it inside a `ServiceProvider.register()` (or before the app's
+  `.asgi` property is first accessed), not after.
+- **`current_session()` raises `RuntimeError` outside a request/session
+  block** — this is intentional (no silent session-per-call fallback). If you
+  hit it in a script or test, wrap the code in `async with database.session():`.
+- **Soft delete is the default.** `model.delete()` sets `is_deleted=True`
+  rather than removing the row; pass `soft=False` for a hard delete, and
+  remember `find`/`all`/`find_by` exclude soft-deleted rows unless you pass
+  `include_deleted=True`.
+
+## Verifying your work
+
+There is no manual QA substitute here — run the actual checks:
+
+```bash
+pytest                        # framework tests, or the app's own tests
+ruff check src tests          # framework only
+mypy src/zeython              # framework only
+```
+
+For an app, also boot it and hit a real endpoint (`zeython serve` +
+`curl`), don't just rely on the test suite passing.
