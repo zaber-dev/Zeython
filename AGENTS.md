@@ -52,6 +52,12 @@ dependency injection container, a service-provider boot lifecycle, and a
   (returns `None`). Never hand-roll password hashing — use
   `zeython.hash_password`/`verify_password` (PBKDF2-HMAC-SHA256), and never
   log or serialize a password/hash field — put it in the model's `__hidden__`.
+- File uploads always go through `zeython.storage.store_upload()`, never
+  `open(f"uploads/{upload.filename}", "wb")` or similar — the client's
+  filename is untrusted input, and `store_upload()` is what keeps a stored
+  key from becoming a path-traversal or overwrite vector. Pass
+  `allowed_extensions`/`max_size` explicitly; don't accept arbitrary files
+  at an unbounded size. See `docs/storage.md`.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in

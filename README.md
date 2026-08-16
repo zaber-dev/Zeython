@@ -117,6 +117,10 @@ my_blog/
 - [docs/architecture.md](docs/architecture.md) — container, providers, router, ORM
 - [docs/cli.md](docs/cli.md) — full CLI reference
 - [docs/database.md](docs/database.md) — models and migrations
+- [docs/validation.md](docs/validation.md) — declarative model validation
+- [docs/views.md](docs/views.md) — server-rendered HTML with Jinja2
+- [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
+- [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/testing.md](docs/testing.md)
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/

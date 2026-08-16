@@ -67,6 +67,10 @@ class Router:
         """Mount another router's routes under an optional additional prefix."""
         self.routes.append(Mount(prefix or "/", routes=router.routes))
 
+    def mount(self, path: str, app: Any, *, name: str | None = None) -> None:
+        """Mount an arbitrary ASGI app (e.g. ``starlette.staticfiles.StaticFiles``) at a path prefix."""
+        self.routes.append(Mount(path, app=app, name=name))
+
     def resource(self, path: str, controller_cls: type[Controller], *, only: Iterable[str] | None = None) -> None:
         """Register RESTful CRUD routes bound to a controller's methods.
 
