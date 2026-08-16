@@ -10,6 +10,16 @@ An async-first MVC framework: ASGI (Starlette) + async SQLAlchemy 2.0, a
 dependency injection container, a service-provider boot lifecycle, and a
 `zeython` CLI. Full details: [docs/architecture.md](docs/architecture.md).
 
+## If you have MCP tool access
+
+Zeython ships its own MCP server (`zeython mcp`, requires the `mcp` extra).
+If it's connected, prefer `list_routes`/`list_models`/`app_info` over
+grepping `routes/web.py` or `app/Models/*.py` by hand — they reflect the
+project's actual registered routes and mapped schema, not what the source
+*looks like* it does. Prefer `search_docs` over recalling a Zeython API
+from training data; it searches the docs bundled with the exact installed
+framework version. See [docs/ai-agents.md](docs/ai-agents.md).
+
 ## If you're working in the framework itself (`src/zeython/`)
 
 - Read `docs/architecture.md` first — it explains the container/provider/router

@@ -19,6 +19,7 @@ nav:
   - Rate Limiting: rate-limiting.md
   - Background Jobs: queues.md
   - Mail: mail.md
+  - AI Agents: ai-agents.md
   - Testing: testing.md
 theme:
   name: material

@@ -43,12 +43,14 @@ dependencies = [
 postgres = ["asyncpg>=0.29"]
 mysql = ["asyncmy>=0.2.9"]
 s3 = ["boto3>=1.34"]
+mcp = ["mcp>=1.29,<2"]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "httpx>=0.27",
     "ruff>=0.6",
     "mypy>=1.10",
+    "mcp>=1.29,<2",
 ]
 
 [project.urls]
@@ -63,6 +65,9 @@ zeython = "zeython.cli.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zeython"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"docs" = "zeython/_docs"
 
 [tool.hatch.build]
 include = [

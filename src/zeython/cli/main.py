@@ -64,6 +64,21 @@ def serve(
     )
 
 
+@app.command()
+def mcp() -> None:
+    """Start the MCP server (stdio) for AI coding agents. Requires the `mcp` extra -- see docs/ai-agents.md."""
+    try:
+        from zeython.mcp.server import main as run_mcp_server
+    except ImportError as exc:
+        typer.secho(
+            "The MCP server requires the `mcp` extra. Install it with: pip install zeython[mcp]",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1) from exc
+
+    run_mcp_server()
+
+
 @make_app.command("model")
 def make_model(name: str = typer.Argument(..., help="Model name, e.g. Post")) -> None:
     """Generate a new database model in app/Models/."""
