@@ -23,6 +23,7 @@
 | `Mailer` | `zeython.mail` | Outbound email: `LogMailer` by default (zero setup), `SmtpMailer` opt-in. A job's `handle()` can declare `mailer: Mailer` and get it autowired (see [Mail](mail.md)). |
 | `AI` | `zeython.ai` | A swappable LLM client for your own app code: `complete()`, `EchoAI` by default (no credentials), `AnthropicAI` opt-in via the `ai` extra (see [AI](ai.md)). |
 | MCP server | `zeython.mcp` | Read-only project introspection for AI coding agents (`zeython mcp`): real registered routes, real mapped models, app info, and search over the bundled docs — an opt-in `mcp` extra, not imported by the framework core (see [AI Agents](ai-agents.md)). |
+| `Command` | `zeython.console` | The `app/Console/Commands/` extension point: one `Command` subclass per file, wired to the app's own container/config, run with `zeython command <name>` and listed with `zeython commands` (see [Console Commands](console-commands.md)). |
 
 ## Logging
 

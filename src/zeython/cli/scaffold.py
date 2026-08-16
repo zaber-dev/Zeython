@@ -112,6 +112,18 @@ class {class_name}(Job):
         """Do the background work. Dispatch with: await dispatch(request, {class_name}(...))"""
 '''
 
+COMMAND_TEMPLATE = '''from zeython import Command
+
+
+class {class_name}(Command):
+    """Run with: zeython command {command_name}"""
+
+    help = "TODO: describe what this command does."
+
+    async def handle(self, *args: str) -> None:
+        ...
+'''
+
 
 def _write_new_file(path: Path, content: str) -> None:
     if path.exists():
@@ -172,4 +184,15 @@ def make_job(name: str, cwd: Path) -> Path:
     slug = to_snake_case(name)
     path = cwd / "app" / "Jobs" / f"{slug}.py"
     _write_new_file(path, JOB_TEMPLATE.format(class_name=class_name))
+    return path
+
+
+def make_command(name: str, cwd: Path) -> Path:
+    if not name.endswith("Command"):
+        name = f"{name}Command"
+    class_name = to_pascal_case(name)
+    slug = to_snake_case(name)
+    command_name = slug.removesuffix("_command").replace("_", "-")
+    path = cwd / "app" / "Console" / "Commands" / f"{slug}.py"
+    _write_new_file(path, COMMAND_TEMPLATE.format(class_name=class_name, command_name=command_name))
     return path
