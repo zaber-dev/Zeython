@@ -60,6 +60,39 @@ class Model(Base):
         if errors:
             raise ValidationException(errors)
 
+    # -- Lifecycle hooks ---------------------------------------------------------
+    #
+    # No-op by default; override in a subclass to hook into save()/delete().
+    # save() calls, in order: saving() -> creating() or updating() -> (write
+    # to the database) -> created() or updated() -> saved(). The
+    # creating()/updating() hooks run *before* validate_or_raise(), so they're
+    # the right place to derive/default a field (e.g. normalizing an email)
+    # that validation then checks -- not just to react after the fact.
+
+    async def saving(self) -> None:
+        """Runs before every save() -- both create and update."""
+
+    async def saved(self) -> None:
+        """Runs after every successful save() -- both create and update."""
+
+    async def creating(self) -> None:
+        """Runs before a new record's first save()."""
+
+    async def created(self) -> None:
+        """Runs after a new record's first save()."""
+
+    async def updating(self) -> None:
+        """Runs before saving changes to an existing record."""
+
+    async def updated(self) -> None:
+        """Runs after saving changes to an existing record."""
+
+    async def deleting(self) -> None:
+        """Runs before delete() -- soft or hard."""
+
+    async def deleted(self) -> None:
+        """Runs after delete() -- soft or hard."""
+
     @classmethod
     async def create(cls, **attributes: Any) -> Self:
         instance = cls(**attributes)
@@ -120,10 +153,17 @@ class Model(Base):
         return results[0] if results else None
 
     async def save(self) -> Self:
+        is_new = self.id is None
+        await self.saving()
+        await (self.creating() if is_new else self.updating())
+
         self.validate_or_raise()
         session = current_session()
         session.add(self)
         await session.flush()
+
+        await (self.created() if is_new else self.updated())
+        await self.saved()
         return self
 
     async def update(self, **attributes: Any) -> Self:
@@ -132,6 +172,7 @@ class Model(Base):
         return await self.save()
 
     async def delete(self, *, soft: bool = True) -> None:
+        await self.deleting()
         session = current_session()
         if soft:
             self.is_deleted = True
@@ -141,6 +182,7 @@ class Model(Base):
         else:
             await session.delete(self)
             await session.flush()
+        await self.deleted()
 
     async def restore(self) -> Self:
         self.is_deleted = False

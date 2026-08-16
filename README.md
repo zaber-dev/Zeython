@@ -123,6 +123,7 @@ my_blog/
 - [docs/database.md](docs/database.md) — models and migrations
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
 - [docs/validation.md](docs/validation.md) — declarative model validation
+- [docs/model-events.md](docs/model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
 - [docs/views.md](docs/views.md) — server-rendered HTML with Jinja2
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
