@@ -18,7 +18,10 @@ async def test_create_user():
 
 Generated projects come with `asyncio_mode = "auto"` set in `pyproject.toml`
 (via pytest-asyncio), so `async def test_...` functions run without extra
-markers or fixtures. Run the suite with:
+markers or fixtures. `pytest`/`pytest-asyncio`/`httpx` live behind the
+`dev` extra (`pip install -e ".[dev]"` — see the project's own README),
+not the base install, so a production deployment doesn't pull in test
+tooling it'll never use. Run the suite with:
 
 ```bash
 pytest

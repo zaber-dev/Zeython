@@ -36,7 +36,7 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   ```bash
   pip install -e .
   zeython new "Agent Smoke Test" --path /tmp/agent-smoke-test
-  cd /tmp/agent-smoke-test && cp .env.example .env && pip install -e .
+  cd /tmp/agent-smoke-test && cp .env.example .env && pip install -e ".[dev]"
   python -m alembic revision --autogenerate -m x && python -m alembic upgrade head
   pytest
   ```
