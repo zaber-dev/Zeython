@@ -1,6 +1,15 @@
 """Zeython: an async-first, batteries-included MVC framework for Python."""
 
 from zeython.application import Application
+from zeython.auth import (
+    Authenticatable,
+    AuthManager,
+    AuthServiceProvider,
+    current_user,
+    login,
+    logout,
+    require_auth,
+)
 from zeython.config import Config
 from zeython.container import Container
 from zeython.db import Database, Model
@@ -15,6 +24,7 @@ from zeython.exceptions import (
     UnauthorizedException,
     ValidationException,
 )
+from zeython.hashing import hash_password, verify_password
 from zeython.providers import (
     CorsServiceProvider,
     DatabaseServiceProvider,
@@ -43,6 +53,15 @@ __all__ = [
     "CorsServiceProvider",
     "Views",
     "render",
+    "Authenticatable",
+    "AuthManager",
+    "AuthServiceProvider",
+    "login",
+    "logout",
+    "current_user",
+    "require_auth",
+    "hash_password",
+    "verify_password",
     "HTTPException",
     "BadRequestException",
     "UnauthorizedException",

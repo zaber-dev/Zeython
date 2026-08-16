@@ -45,6 +45,13 @@ dependency injection container, a service-provider boot lifecycle, and a
 - Server-rendered HTML goes through `zeython.views.render(request, name,
   context)`, reading from `resources/views/` — register `ViewServiceProvider`
   in `main.py` first (`docs/views.md`). Don't hand-roll Jinja2 environments.
+- Auth is session-based (`docs/authentication.md`): mix `Authenticatable`
+  into your user model for `set_password()`/`check_password()`, register
+  `AuthServiceProvider(app, user_model=User)`, and guard routes with
+  `await require_auth(request)` (raises 401) or `await current_user(request)`
+  (returns `None`). Never hand-roll password hashing — use
+  `zeython.hash_password`/`verify_password` (PBKDF2-HMAC-SHA256), and never
+  log or serialize a password/hash field — put it in the model's `__hidden__`.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in

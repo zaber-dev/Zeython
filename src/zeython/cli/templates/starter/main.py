@@ -1,8 +1,11 @@
-from zeython import Application, DatabaseServiceProvider, RouteServiceProvider, ViewServiceProvider
+from zeython import Application, AuthServiceProvider, DatabaseServiceProvider, RouteServiceProvider, ViewServiceProvider
+
+from app.Models.user import User
 
 app = Application()
 app.register(DatabaseServiceProvider)
 app.register(ViewServiceProvider)
+app.register(AuthServiceProvider(app, user_model=User))
 app.register(RouteServiceProvider(app, modules=("routes.web",)))
 
 if __name__ == "__main__":
