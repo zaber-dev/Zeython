@@ -138,6 +138,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `zeython command <name>`, list them with `zeython commands`. There's no
   in-process scheduler — point cron (or your platform's equivalent) at the
   command itself. See `docs/console-commands.md`.
+- Need realistic model instances for a test, or demo/reference data in the
+  database? Write a `Factory` in `database/factories/` (`zeython make
+  factory <Model>`) rather than constructing a model by hand in every test
+  -- `await SomeFactory().create()` persists one, `.create_many(n)` persists
+  several, `.make()` builds one without touching the database. Compose
+  factories into a `Seeder` (`database/seeders/`, `zeython make seeder
+  <Name>`) and run it with `zeython db seed`. See `docs/database-seeding.md`.
 - Send email via `zeython.Mailer`/`Message` (`docs/mail.md`), never
   `smtplib` directly in a handler — and send it from a `Job`
   (`await dispatch(request, ...)`), not inline in the request. `MAIL_DRIVER`

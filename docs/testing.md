@@ -43,3 +43,7 @@ async def test_post_creation():
         post = await Post.create(title="Hello", body="World")
         assert post.id is not None
 ```
+
+For anything beyond a one-off row, a `Factory` (`database/factories/`) is
+usually less repetitive than constructing models by hand in every test --
+see [Factories & Seeders](database-seeding.md).

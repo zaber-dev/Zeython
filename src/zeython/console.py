@@ -23,7 +23,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from zeython.cli.loader import sync_app_modules
+from zeython.cli.loader import sync_project_modules
 
 if TYPE_CHECKING:
     from zeython.application import Application
@@ -67,12 +67,12 @@ def discover_commands(project_root: Path) -> dict[str, type[Command]]:
     root_str = str(project_root)
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
-    sync_app_modules(project_root)
+    sync_project_modules(project_root)
 
     # A freshly-scaffolded command file may not exist yet as far as the
     # path-based finder's directory-listing cache is concerned (e.g. right
     # after `zeython make command` wrote it) -- safe to call unconditionally,
-    # unlike the sys.modules purge in sync_app_modules() above, since this
+    # unlike the sys.modules purge in sync_project_modules() above, since this
     # only clears finder caches and never un-registers an already-imported
     # module.
     importlib.invalidate_caches()
