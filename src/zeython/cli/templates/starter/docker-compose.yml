@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./storage:/app/storage
+      # The default DATABASE_URL (sqlite+aiosqlite:///./database.db) lives
+      # inside the container -- uncomment to persist it on the host instead
+      # of losing it on every `docker compose down`:
+      # - ./database.db:/app/database.db
+
+  # Uncomment for Postgres instead of the SQLite default. Set
+  # DATABASE_URL=postgresql+asyncpg://zeython:zeython@db:5432/zeython in
+  # .env and add `asyncpg` to pyproject.toml's dependencies.
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: zeython
+  #     POSTGRES_PASSWORD: zeython
+  #     POSTGRES_DB: zeython
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+  # Uncomment for RedisCache/RedisRateLimiter instead of the in-memory
+  # defaults -- see docs/redis.md. Requires `pip install zeython[redis]`.
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+
+# volumes:
+#   postgres_data:

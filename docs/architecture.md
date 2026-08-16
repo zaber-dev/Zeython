@@ -26,6 +26,7 @@
 | `Command` | `zeython.console` | The `app/Console/Commands/` extension point: one `Command` subclass per file, wired to the app's own container/config, run with `zeython command <name>` and listed with `zeython commands` (see [Console Commands](console-commands.md)). |
 | `Factory` | `zeython.database.factory` | Model factories for tests and seeding: `make()`/`create()`/`create_many()`, sequence-based uniqueness, no bundled fake-data dependency (see [Factories & Seeders](database-seeding.md)). |
 | `Seeder` | `zeython.database.seeder` | The `database/seeders/` extension point: `run()` inserts seed data (typically via a `Factory`), `self.call(...)` composes seeders, run with `zeython db seed` (see [Factories & Seeders](database-seeding.md)). |
+| `HealthCheckServiceProvider` | `zeython.health` | Registers `/up`: `200`/`503` with a real database connectivity check when `Database` is bound -- what a load balancer or Kubernetes probe expects (see [Health Check](health-check.md)). |
 
 ## Logging
 

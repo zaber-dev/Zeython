@@ -5,6 +5,7 @@ from zeython import (
     AuthServiceProvider,
     CacheServiceProvider,
     DatabaseServiceProvider,
+    HealthCheckServiceProvider,
     MailServiceProvider,
     OpenApiServiceProvider,
     QueueServiceProvider,
@@ -18,6 +19,7 @@ from app.Models.user import User
 from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
 
 app = Application()
+app.register(HealthCheckServiceProvider)
 app.register(DatabaseServiceProvider)
 app.register(ViewServiceProvider)
 app.register(StorageServiceProvider)
