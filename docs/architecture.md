@@ -24,6 +24,8 @@
 | `AI` | `zeython.ai` | A swappable LLM client for your own app code: `complete()`, `EchoAI` by default (no credentials), `AnthropicAI` opt-in via the `ai` extra (see [AI](ai.md)). |
 | MCP server | `zeython.mcp` | Read-only project introspection for AI coding agents (`zeython mcp`): real registered routes, real mapped models, app info, and search over the bundled docs — an opt-in `mcp` extra, not imported by the framework core (see [AI Agents](ai-agents.md)). |
 | `Command` | `zeython.console` | The `app/Console/Commands/` extension point: one `Command` subclass per file, wired to the app's own container/config, run with `zeython command <name>` and listed with `zeython commands` (see [Console Commands](console-commands.md)). |
+| `Factory` | `zeython.database.factory` | Model factories for tests and seeding: `make()`/`create()`/`create_many()`, sequence-based uniqueness, no bundled fake-data dependency (see [Factories & Seeders](database-seeding.md)). |
+| `Seeder` | `zeython.database.seeder` | The `database/seeders/` extension point: `run()` inserts seed data (typically via a `Factory`), `self.call(...)` composes seeders, run with `zeython db seed` (see [Factories & Seeders](database-seeding.md)). |
 
 ## Logging
 

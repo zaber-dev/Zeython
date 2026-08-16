@@ -15,32 +15,39 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_current_app_root: str | None = None
+_current_project_root: str | None = None
+#: Top-level project-owned packages this guard purges on a project switch --
+#: `app` (models, controllers, ...) and `database` (factories, seeders).
+_TRACKED_PACKAGES = ("app", "database")
 
 
-def sync_app_modules(project_root: Path) -> None:
-    """Purge cached ``app``/``app.*`` modules if ``project_root`` differs from
-    the last project asked about in this process.
+def sync_project_modules(project_root: Path) -> None:
+    """Purge cached ``app``/``database`` modules if ``project_root`` differs
+    from the last project asked about in this process.
 
     A process that inspects more than one project in sequence -- this
     package's own test suite; hypothetically a long-lived process like the
-    MCP server -- would otherwise silently resolve ``app`` against whatever
-    differently-rooted package happens to already be cached in
-    ``sys.modules``, since a bare ``importlib.import_module("app...")``
+    MCP server -- would otherwise silently resolve ``app``/``database``
+    against whatever differently-rooted package happens to already be
+    cached in ``sys.modules``, since a bare ``importlib.import_module(...)``
     reuses that cache without re-consulting ``sys.path`` at all.
 
     Calls for the *same* project deliberately do nothing: re-importing
     would re-run every model's class body a second time, and SQLAlchemy's
     process-global registry rejects redefining the same table twice.
     """
-    global _current_app_root
+    global _current_project_root
     root_str = str(project_root)
-    if _current_app_root == root_str:
+    if _current_project_root == root_str:
         return
-    for module_name in [name for name in sys.modules if name == "app" or name.startswith("app.")]:
+    for module_name in [
+        name
+        for name in sys.modules
+        if any(name == package or name.startswith(f"{package}.") for package in _TRACKED_PACKAGES)
+    ]:
         del sys.modules[module_name]
     importlib.invalidate_caches()
-    _current_app_root = root_str
+    _current_project_root = root_str
 
 
 def load_app(project_root: Path) -> Any:
@@ -63,7 +70,7 @@ def load_app(project_root: Path) -> Any:
     root_str = str(project_root)
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
-    sync_app_modules(project_root)
+    sync_project_modules(project_root)
 
     previous_cwd = Path.cwd()
     os.chdir(project_root)
@@ -84,4 +91,4 @@ def _import_main() -> Any:
     return main.app
 
 
-__all__ = ["load_app", "sync_app_modules"]
+__all__ = ["load_app", "sync_project_modules"]

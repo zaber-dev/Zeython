@@ -24,6 +24,8 @@ zeython make middleware RequestLogger  # app/Middleware/request_logger.py
 zeython make provider Payment        # app/Providers/payment_service_provider.py
 zeython make job SendWelcomeEmail    # app/Jobs/send_welcome_email_job.py
 zeython make command PruneOldPosts   # app/Console/Commands/prune_old_posts_command.py
+zeython make factory Post            # database/factories/post_factory.py
+zeython make seeder User             # database/seeders/user_seeder.py
 ```
 
 ## Custom commands
@@ -46,3 +48,12 @@ zeython db downgrade <revision>
 
 These are thin wrappers around `alembic` using the project's `alembic.ini` and
 `migrations/` directory, generated automatically by `zeython new`.
+
+## Seeding
+
+```bash
+zeython db seed                        # runs DatabaseSeeder
+zeython db seed --class UserSeeder      # runs a specific seeder instead
+```
+
+See [Factories & Seeders](database-seeding.md).

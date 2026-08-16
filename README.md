@@ -135,6 +135,7 @@ my_blog/
 - [docs/console-commands.md](docs/console-commands.md) — writing your own `zeython command <name>` CLI commands
 - [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
 - [docs/database.md](docs/database.md) — models and migrations
+- [docs/database-seeding.md](docs/database-seeding.md) — model factories and seeders
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
 - [docs/validation.md](docs/validation.md) — declarative model validation
 - [docs/model-events.md](docs/model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks

@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from zeython.cli.loader import load_app, sync_app_modules
+from zeython.cli.loader import load_app, sync_project_modules
 
 __all__ = ["load_app", "describe_routes", "describe_models", "describe_app"]
 
@@ -40,7 +40,7 @@ def describe_models(project_root: Path) -> list[dict[str, Any]]:
     root_str = str(project_root)
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
-    sync_app_modules(project_root)
+    sync_project_modules(project_root)
     importlib.import_module("app.Models")
 
     from zeython.db import Model

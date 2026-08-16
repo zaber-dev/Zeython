@@ -125,6 +125,30 @@ class {class_name}(Command):
 '''
 
 
+FACTORY_TEMPLATE = '''from zeython import Factory
+
+from app.Models.{model_slug} import {model_class_name}
+
+
+class {class_name}(Factory[{model_class_name}]):
+    model = {model_class_name}
+
+    def definition(self, sequence: int) -> dict:
+        return {{
+            # TODO: default attributes for {model_class_name}, e.g.:
+            # "name": f"{model_class_name} {{sequence}}",
+        }}
+'''
+
+SEEDER_TEMPLATE = '''from zeython import Seeder
+
+
+class {class_name}(Seeder):
+    async def run(self) -> None:
+        ...
+'''
+
+
 def _write_new_file(path: Path, content: str) -> None:
     if path.exists():
         raise FileExistsError(f"{path} already exists")
@@ -195,4 +219,29 @@ def make_command(name: str, cwd: Path) -> Path:
     command_name = slug.removesuffix("_command").replace("_", "-")
     path = cwd / "app" / "Console" / "Commands" / f"{slug}.py"
     _write_new_file(path, COMMAND_TEMPLATE.format(class_name=class_name, command_name=command_name))
+    return path
+
+
+def make_factory(name: str, cwd: Path) -> Path:
+    if not name.endswith("Factory"):
+        name = f"{name}Factory"
+    class_name = to_pascal_case(name)
+    model_class_name = class_name.removesuffix("Factory")
+    model_slug = to_snake_case(model_class_name)
+    slug = to_snake_case(name)
+    path = cwd / "database" / "factories" / f"{slug}.py"
+    _write_new_file(
+        path,
+        FACTORY_TEMPLATE.format(class_name=class_name, model_class_name=model_class_name, model_slug=model_slug),
+    )
+    return path
+
+
+def make_seeder(name: str, cwd: Path) -> Path:
+    if not name.endswith("Seeder"):
+        name = f"{name}Seeder"
+    class_name = to_pascal_case(name)
+    slug = to_snake_case(name)
+    path = cwd / "database" / "seeders" / f"{slug}.py"
+    _write_new_file(path, SEEDER_TEMPLATE.format(class_name=class_name))
     return path

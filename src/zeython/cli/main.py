@@ -18,7 +18,7 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 make_app = typer.Typer(help="Generate application building blocks.", no_args_is_help=True)
-db_app = typer.Typer(help="Database migration commands (powered by Alembic).", no_args_is_help=True)
+db_app = typer.Typer(help="Database migration and seeding commands.", no_args_is_help=True)
 app.add_typer(make_app, name="make")
 app.add_typer(db_app, name="db")
 
@@ -123,6 +123,20 @@ def make_command(name: str = typer.Argument(..., help="Command name, e.g. PruneO
     typer.secho(f"Created {path}", fg=typer.colors.GREEN)
 
 
+@make_app.command("factory")
+def make_factory(name: str = typer.Argument(..., help="Model name, e.g. Post or PostFactory")) -> None:
+    """Generate a new model factory in database/factories/."""
+    path = scaffold.make_factory(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
+@make_app.command("seeder")
+def make_seeder(name: str = typer.Argument(..., help="Seeder name, e.g. User or UserSeeder")) -> None:
+    """Generate a new database seeder in database/seeders/."""
+    path = scaffold.make_seeder(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
 @app.command(name="commands")
 def list_commands() -> None:
     """List custom commands defined in app/Console/Commands/."""
@@ -189,6 +203,42 @@ def db_revision(message: str = typer.Option(..., "-m", "--message", help="Migrat
 def db_downgrade(revision: str = typer.Argument("-1", help="Target revision, defaults to one step back")) -> None:
     """Revert the most recent migration(s)."""
     _run_alembic("downgrade", revision)
+
+
+@db_app.command("seed")
+def db_seed(
+    seeder_class: str = typer.Option(
+        "DatabaseSeeder", "--class", help="Seeder class to run -- see: database/seeders/"
+    ),
+) -> None:
+    """Run a database seeder (DatabaseSeeder by default)."""
+    from zeython.database.seeder import discover_seeders
+    from zeython.db import Database
+
+    project_root = Path.cwd()
+    discovered = discover_seeders(project_root)
+    seeder_cls = discovered.get(seeder_class)
+    if seeder_cls is None:
+        available = ", ".join(sorted(discovered)) or "(none found -- see database/seeders/)"
+        typer.secho(f"Unknown seeder '{seeder_class}'. Available: {available}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    application = load_app(project_root)
+
+    async def _seed() -> None:
+        database = application.container.make(Database)
+        try:
+            async with database.session():
+                await seeder_cls(application).run()
+        finally:
+            # A one-shot CLI process exits right after this anyway, but
+            # disposing explicitly avoids leaving an open aiosqlite
+            # connection (and its background thread) for the process to
+            # clean up on its way out.
+            await database.dispose()
+
+    asyncio.run(_seed())
+    typer.secho(f"Seeded using {seeder_class}.", fg=typer.colors.GREEN)
 
 
 def main() -> None:
