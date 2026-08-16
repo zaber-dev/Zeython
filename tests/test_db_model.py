@@ -8,12 +8,64 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from zeython.db import Model
 from zeython.db.session import Database
+from zeython.validation import required
 
 
 class Article(Model):
     __tablename__ = "articles"
 
     title: Mapped[str] = mapped_column(String(255))
+
+
+class Widget(Model):
+    """Records which lifecycle hooks fired, and in what order."""
+
+    __tablename__ = "widgets"
+
+    name: Mapped[str] = mapped_column(String(255))
+
+    def __init__(self, **kwargs: object) -> None:
+        super().__init__(**kwargs)
+        self.events: list[str] = []
+
+    async def saving(self) -> None:
+        self.events.append("saving")
+
+    async def saved(self) -> None:
+        self.events.append("saved")
+
+    async def creating(self) -> None:
+        self.events.append("creating")
+        self.name = self.name.strip()
+
+    async def created(self) -> None:
+        self.events.append("created")
+
+    async def updating(self) -> None:
+        self.events.append("updating")
+
+    async def updated(self) -> None:
+        self.events.append("updated")
+
+    async def deleting(self) -> None:
+        self.events.append("deleting")
+
+    async def deleted(self) -> None:
+        self.events.append("deleted")
+
+
+class SlugPost(Model):
+    """Derives `slug` from `title` in `creating()`, before `__rules__` validates it."""
+
+    __tablename__ = "slug_posts"
+    __rules__ = {"slug": [required()]}
+
+    title: Mapped[str] = mapped_column(String(255))
+    slug: Mapped[str] = mapped_column(String(255), default="")
+
+    async def creating(self) -> None:
+        if not self.slug:
+            self.slug = self.title.lower().replace(" ", "-")
 
 
 @pytest_asyncio.fixture
@@ -80,3 +132,46 @@ async def test_to_dict_serializes_columns(database: Database) -> None:
 async def test_model_methods_require_an_active_session() -> None:
     with pytest.raises(RuntimeError):
         await Article.find(1)
+
+
+# -- Lifecycle hooks ------------------------------------------------------------------
+
+
+async def test_creating_and_created_fire_only_on_the_first_save(database: Database) -> None:
+    async with session_scope(database):
+        widget = Widget(name="  Widget A  ")
+        assert widget.events == []
+
+        await widget.save()
+
+        assert widget.events == ["saving", "creating", "created", "saved"]
+        assert widget.name == "Widget A"  # mutated by creating() before flush
+
+
+async def test_updating_and_updated_fire_on_a_subsequent_save(database: Database) -> None:
+    async with session_scope(database):
+        widget = await Widget.create(name="Original")
+        widget.events.clear()
+
+        await widget.update(name="Changed")
+
+        assert widget.events == ["saving", "updating", "updated", "saved"]
+
+
+async def test_deleting_and_deleted_fire_around_delete(database: Database) -> None:
+    async with session_scope(database):
+        widget = await Widget.create(name="ToDelete")
+        widget.events.clear()
+
+        await widget.delete()
+
+        assert widget.events == ["deleting", "deleted"]
+
+
+async def test_creating_hook_runs_before_validation(database: Database) -> None:
+    # SlugPost.creating() derives `slug` from `title`; __rules__ requires
+    # `slug`. If hooks ran after validate_or_raise() instead of before,
+    # this would raise ValidationException on an empty slug.
+    async with session_scope(database):
+        post = await SlugPost.create(title="Hello World")
+        assert post.slug == "hello-world"

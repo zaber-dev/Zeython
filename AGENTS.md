@@ -60,6 +60,14 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   (`docs/validation.md`) instead of hand-checking `request.json()` fields —
   `create()`/`save()`/`update()` already raise `ValidationException` (a 422
   JSON response) for you.
+- For behavior that should always run around a save or delete (normalizing
+  a field, deriving one, cache invalidation), override the model's
+  lifecycle hooks (`creating`/`created`/`updating`/`updated`/`deleting`/
+  `deleted`, plus `saving`/`saved` for both create and update) rather than
+  repeating that logic in every controller that touches the model.
+  `creating()`/`updating()` run *before* `__rules__` validation, so they're
+  the right place to derive a field validation then checks. See
+  `docs/model-events.md`.
 - Server-rendered HTML goes through `zeython.views.render(request, name,
   context)`, reading from `resources/views/` — register `ViewServiceProvider`
   in `main.py` first (`docs/views.md`). Don't hand-roll Jinja2 environments.

@@ -20,3 +20,9 @@ class User(Model, Authenticatable):
     # relationship(), no framework wrapper needed to define it. Loading it
     # safely (Post.all(include=("author",))) is where Zeython adds value.
     posts: Mapped[list["Post"]] = relationship(back_populates="author")  # noqa: F821
+
+    async def saving(self) -> None:
+        # Runs before every create *and* update (see docs/model-events.md).
+        # Without this, "ada@example.com" and "Ada@Example.com" would pass
+        # the unique constraint as two different rows.
+        self.email = self.email.strip().lower()

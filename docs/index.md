@@ -30,6 +30,7 @@ not a template you copy and diverge from.
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
 - [Relationships](relationships.md) — defining and safely loading relationships in async code
 - [Validation](validation.md) — declarative model validation rules
+- [Model Events](model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
 - [Views](views.md) — server-rendered HTML with Jinja2
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
