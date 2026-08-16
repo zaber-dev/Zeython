@@ -8,50 +8,13 @@ without going through the MCP protocol layer at all -- these are just
 from __future__ import annotations
 
 import importlib
-import os
 import sys
 from pathlib import Path
 from typing import Any
 
+from zeython.cli.loader import load_app, sync_app_modules
 
-def load_app(project_root: Path) -> Any:
-    """Import ``main`` from ``project_root`` the same way ``zeython serve`` does.
-
-    Temporarily changes the process's working directory to ``project_root``
-    while importing: ``Application()`` (called at module scope in every
-    generated ``main.py``) loads ``.env`` relative to ``Path.cwd()``, not
-    relative to wherever this function's caller happens to be running from
-    -- an MCP server is typically a long-lived process whose own cwd has no
-    particular relationship to the project it's currently being asked
-    about, so without this, config would silently come from the wrong
-    place (or nowhere).
-
-    Raises ``ModuleNotFoundError`` if there's no ``main.py`` there, or
-    ``AttributeError`` if it has no ``app`` -- both are accurate, actionable
-    errors for "this isn't a Zeython project root," so they're left to
-    propagate rather than being caught and reworded.
-    """
-    root_str = str(project_root)
-    if root_str not in sys.path:
-        sys.path.insert(0, root_str)
-
-    previous_cwd = Path.cwd()
-    os.chdir(project_root)
-    try:
-        return _import_main()
-    finally:
-        os.chdir(previous_cwd)
-
-
-def _import_main() -> Any:
-    if "main" in sys.modules:
-        # A long-lived MCP server process may be asked about the same project
-        # more than once; reload so edits since the last call are reflected.
-        main = importlib.reload(sys.modules["main"])
-    else:
-        main = importlib.import_module("main")
-
-    return main.app
+__all__ = ["load_app", "describe_routes", "describe_models", "describe_app"]
 
 
 def describe_routes(app: Any) -> list[dict[str, str]]:
@@ -77,6 +40,7 @@ def describe_models(project_root: Path) -> list[dict[str, Any]]:
     root_str = str(project_root)
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
+    sync_app_modules(project_root)
     importlib.import_module("app.Models")
 
     from zeython.db import Model
@@ -121,6 +85,3 @@ def describe_app(app: Any) -> dict[str, Any]:
         "zeython_version": zeython.__version__,
         "providers": [type(provider).__name__ for provider in app.providers],
     }
-
-
-__all__ = ["load_app", "describe_routes", "describe_models", "describe_app"]

@@ -20,6 +20,7 @@ from zeython.auth import (
 from zeython.authorization import AuthorizationServiceProvider, Gate, authorize
 from zeython.cache import Cache, CacheServiceProvider, InMemoryCache, RedisCache
 from zeython.config import Config
+from zeython.console import Command
 from zeython.container import Container
 from zeython.db import Database, Model, Page
 from zeython.exceptions import (
@@ -82,6 +83,7 @@ __all__ = [
     "AIServiceProvider",
     "Application",
     "Config",
+    "Command",
     "Container",
     "Controller",
     "Database",

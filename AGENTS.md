@@ -131,6 +131,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   registered): `await ai.complete(prompt, system=...)`. Defaults to
   `EchoAI` (no network, no credentials) until `AI_PROVIDER=anthropic` is
   configured. See `docs/ai.md`.
+- A one-off or scheduled script that needs the app's own container/config
+  (a data import, a cron-driven cleanup) is a `Command` in
+  `app/Console/Commands/`, not a standalone script hand-rolling its own
+  `Application()`. `zeython make command <Name>` scaffolds one; run it with
+  `zeython command <name>`, list them with `zeython commands`. There's no
+  in-process scheduler — point cron (or your platform's equivalent) at the
+  command itself. See `docs/console-commands.md`.
 - Send email via `zeython.Mailer`/`Message` (`docs/mail.md`), never
   `smtplib` directly in a handler — and send it from a `Job`
   (`await dispatch(request, ...)`), not inline in the request. `MAIL_DRIVER`
