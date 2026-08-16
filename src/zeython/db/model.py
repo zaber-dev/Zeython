@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Any, ClassVar, Self
 
 from sqlalchemy import Boolean, DateTime, Integer, inspect, select
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, selectinload
 
 from zeython.db.session import Base, current_session
 from zeython.exceptions import ValidationException
@@ -65,37 +66,57 @@ class Model(Base):
         return await instance.save()
 
     @classmethod
-    async def find(cls, id_: Any, *, include_deleted: bool = False) -> Self | None:
+    def _with_includes(cls, stmt: Any, include: Iterable[str]) -> Any:
+        """Apply ``selectinload()`` for each relationship name in ``include``.
+
+        This is what makes touching a relationship afterward safe: without
+        it, accessing an unloaded relationship on an async session raises
+        ``MissingGreenlet`` rather than lazily fetching it the way a sync
+        session would. See docs/relationships.md.
+        """
+        for name in include:
+            stmt = stmt.options(selectinload(getattr(cls, name)))
+        return stmt
+
+    @classmethod
+    async def find(cls, id_: Any, *, include_deleted: bool = False, include: Iterable[str] = ()) -> Self | None:
         session = current_session()
         stmt = select(cls).where(cls.id == id_)
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
+        stmt = cls._with_includes(stmt, include)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
     @classmethod
-    async def all(cls, *, include_deleted: bool = False) -> list[Self]:
+    async def all(cls, *, include_deleted: bool = False, include: Iterable[str] = ()) -> list[Self]:
         session = current_session()
         stmt = select(cls)
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
+        stmt = cls._with_includes(stmt, include)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
     @classmethod
-    async def find_by(cls, *, include_deleted: bool = False, **filters: Any) -> list[Self]:
+    async def find_by(
+        cls, *, include_deleted: bool = False, include: Iterable[str] = (), **filters: Any
+    ) -> list[Self]:
         session = current_session()
         stmt = select(cls)
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
         for field, value in filters.items():
             stmt = stmt.where(getattr(cls, field) == value)
+        stmt = cls._with_includes(stmt, include)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
     @classmethod
-    async def first_where(cls, *, include_deleted: bool = False, **filters: Any) -> Self | None:
-        results = await cls.find_by(include_deleted=include_deleted, **filters)
+    async def first_where(
+        cls, *, include_deleted: bool = False, include: Iterable[str] = (), **filters: Any
+    ) -> Self | None:
+        results = await cls.find_by(include_deleted=include_deleted, include=include, **filters)
         return results[0] if results else None
 
     async def save(self) -> Self:
@@ -126,7 +147,14 @@ class Model(Base):
         self.deleted_at = None
         return await self.save()
 
-    def to_dict(self, *, exclude: tuple[str, ...] = ()) -> dict[str, Any]:
+    def to_dict(self, *, exclude: tuple[str, ...] = (), include: tuple[str, ...] = ()) -> dict[str, Any]:
+        """Serialize columns, plus any eagerly-loaded relationships named in ``include``.
+
+        Raises ``RuntimeError`` (not the framework's problem to swallow) if
+        a name in ``include`` wasn't eager-loaded on the query that fetched
+        this instance -- see docs/relationships.md for why serializing an
+        unloaded relationship isn't something this silently attempts.
+        """
         hidden = set(self.__hidden__) | set(exclude)
         mapper = inspect(self.__class__)
         result: dict[str, Any] = {}
@@ -137,6 +165,24 @@ class Model(Base):
             if isinstance(value, datetime):
                 value = value.isoformat()
             result[column.name] = value
+
+        if include:
+            unloaded = inspect(self).unloaded
+            for name in include:
+                if name in unloaded:
+                    raise RuntimeError(
+                        f"Cannot serialize unloaded relationship '{name}' on {type(self).__name__}. "
+                        f"Eager-load it first, e.g. "
+                        f"`await {type(self).__name__}.find(id, include=('{name}',))`."
+                    )
+                related = getattr(self, name)
+                if isinstance(related, list):
+                    result[name] = [item.to_dict() if isinstance(item, Model) else item for item in related]
+                elif isinstance(related, Model):
+                    result[name] = related.to_dict()
+                else:
+                    result[name] = related
+
         return result
 
     def __repr__(self) -> str:
