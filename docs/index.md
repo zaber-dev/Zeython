@@ -33,6 +33,7 @@ not a template you copy and diverge from.
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
+- [Background Jobs](queues.md) — dispatching work off the request/response cycle
 - [Testing](testing.md) — writing tests against a Zeython application
 
 ## Contributing

@@ -122,6 +122,7 @@ my_blog/
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
+- [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
 - [docs/testing.md](docs/testing.md)
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/

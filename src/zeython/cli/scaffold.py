@@ -101,6 +101,17 @@ class {class_name}(ServiceProvider):
         """Run once every provider has registered."""
 '''
 
+JOB_TEMPLATE = '''from dataclasses import dataclass
+
+from zeython import Job
+
+
+@dataclass
+class {class_name}(Job):
+    async def handle(self) -> None:
+        """Do the background work. Dispatch with: await dispatch(request, {class_name}(...))"""
+'''
+
 
 def _write_new_file(path: Path, content: str) -> None:
     if path.exists():
@@ -151,4 +162,14 @@ def make_provider(name: str, cwd: Path) -> Path:
     slug = to_snake_case(name)
     path = cwd / "app" / "Providers" / f"{slug}.py"
     _write_new_file(path, PROVIDER_TEMPLATE.format(class_name=class_name))
+    return path
+
+
+def make_job(name: str, cwd: Path) -> Path:
+    if not name.endswith("Job"):
+        name = f"{name}Job"
+    class_name = to_pascal_case(name)
+    slug = to_snake_case(name)
+    path = cwd / "app" / "Jobs" / f"{slug}.py"
+    _write_new_file(path, JOB_TEMPLATE.format(class_name=class_name))
     return path
