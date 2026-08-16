@@ -39,6 +39,7 @@ not a template you copy and diverge from.
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
 - [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
+- [Redis (Distributed)](redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
 - [Background Jobs](queues.md) — dispatching work off the request/response cycle
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
 - [AI](ai.md) — calling an LLM from your own app code

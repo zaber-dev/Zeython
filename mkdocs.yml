@@ -22,6 +22,7 @@ nav:
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
   - Caching: caching.md
+  - Redis (Distributed): redis.md
   - Background Jobs: queues.md
   - Mail: mail.md
   - AI: ai.md

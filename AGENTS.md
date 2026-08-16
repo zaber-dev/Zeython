@@ -120,7 +120,11 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   check-then-compute-then-store pattern in one call. Remember to
   `cache.forget(key)` wherever the underlying data changes — a cache with
   no invalidation path just serves stale data forever. See
-  `docs/caching.md`.
+  `docs/caching.md`. Both `Cache` and `RateLimiter` default to in-memory,
+  process-local backends; if you're running more than one worker
+  process/machine, bind `RedisCache`/`RedisRateLimiter` instead (`pip
+  install zeython[redis]`) so cached values and rate-limit counts are
+  actually shared, not per-worker. See `docs/redis.md`.
 - To call an LLM from app code (not to give an AI agent tools to operate on
   the project itself -- that's `zeython.mcp`, see `docs/ai-agents.md`), use
   `zeython.AI` (bound in the container once `AIServiceProvider` is
