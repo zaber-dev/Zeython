@@ -1,4 +1,5 @@
 from zeython import (
+    ApiAuthServiceProvider,
     Application,
     AuthorizationServiceProvider,
     AuthServiceProvider,
@@ -24,6 +25,7 @@ app.register(RateLimitServiceProvider)
 app.register(MailServiceProvider)
 app.register(QueueServiceProvider)
 app.register(AuthServiceProvider(app, user_model=User))
+app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)
 app.register(PostPolicyServiceProvider(app))
 app.register(RouteServiceProvider(app, modules=("routes.web",)))
