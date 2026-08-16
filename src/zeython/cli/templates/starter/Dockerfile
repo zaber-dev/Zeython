@@ -10,8 +10,13 @@ WORKDIR /app
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# A local wheel directory pip should also check, in addition to the default
+# index -- for a private index/vendored dependency not published there.
+# Unused (and harmless to leave unset) once every dependency, including
+# zeython itself, is on a real index.
+ARG PIP_FIND_LINKS=
 COPY . .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir ${PIP_FIND_LINKS:+--find-links "$PIP_FIND_LINKS"} .
 
 
 FROM python:3.12-slim
