@@ -44,16 +44,20 @@ my_blog/
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try the
-generated `/users` resource too:
+Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try
+registering a user and listing them:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/users \
+curl -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
-  -d '{"name": "Ada", "email": "ada@example.com"}'
+  -d '{"name": "Ada", "email": "ada@example.com", "password": "hunter2"}'
 
 curl http://127.0.0.1:8000/users
 ```
+
+`/users` is paginated (see [Database & Migrations](database.md#pagination))
+— the response is `{"items": [...], "page": 1, "total": 1, ...}`, not a
+bare array.
 
 If you get a database error, run the initial migration first:
 

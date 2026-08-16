@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar, Generic, Self, TypeVar
 
-from sqlalchemy import Boolean, DateTime, Integer, inspect, select
+from sqlalchemy import Boolean, DateTime, Integer, func, inspect, select
 from sqlalchemy.orm import Mapped, mapped_column, selectinload
 
 from zeython.db.session import Base, current_session
@@ -16,6 +17,33 @@ from zeython.validation import Rule
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+T = TypeVar("T")
+
+
+@dataclass(frozen=True)
+class Page(Generic[T]):
+    """One page of results from :meth:`Model.paginate`."""
+
+    items: list[T]
+    page: int
+    per_page: int
+    total: int
+
+    @property
+    def total_pages(self) -> int:
+        if self.per_page <= 0:
+            return 0
+        return -(-self.total // self.per_page)  # ceil division
+
+    @property
+    def has_next(self) -> bool:
+        return self.page < self.total_pages
+
+    @property
+    def has_prev(self) -> bool:
+        return self.page > 1
 
 
 class Model(Base):
@@ -130,6 +158,41 @@ class Model(Base):
         stmt = cls._with_includes(stmt, include)
         result = await session.execute(stmt)
         return list(result.scalars().all())
+
+    @classmethod
+    async def paginate(
+        cls,
+        *,
+        page: int = 1,
+        per_page: int = 20,
+        include_deleted: bool = False,
+        include: Iterable[str] = (),
+    ) -> Page[Self]:
+        """One page of results, plus the total row count for building pager UI.
+
+        ``total`` (and therefore ``total_pages``) reflects every matching
+        row, not just this page -- it costs a second query (a ``COUNT(*)``
+        over the same filters) to get that number. If you only need the
+        rows themselves, ``all()`` is cheaper.
+        """
+        if page < 1:
+            raise ValueError("page must be >= 1")
+        if per_page < 1:
+            raise ValueError("per_page must be >= 1")
+
+        session = current_session()
+        stmt = select(cls)
+        if not include_deleted:
+            stmt = stmt.where(cls.is_deleted.is_(False))
+
+        total = (await session.execute(select(func.count()).select_from(stmt.subquery()))).scalar_one()
+
+        stmt = cls._with_includes(stmt, include)
+        stmt = stmt.limit(per_page).offset((page - 1) * per_page)
+        result = await session.execute(stmt)
+        items = list(result.scalars().all())
+
+        return Page(items=items, page=page, per_page=per_page, total=total)
 
     @classmethod
     async def find_by(

@@ -46,6 +46,35 @@ to eager-load relationships — required reading before you define your first
 code differently than you'd expect from sync SQLAlchemy. See
 [Relationships](relationships.md).
 
+## Pagination
+
+`all()` loads every matching row — fine for a small table, not for a
+listing endpoint whose table grows without bound. `paginate()` is the
+same query, sliced:
+
+```python
+page = await Post.paginate(page=1, per_page=20)
+
+page.items         # list[Post] -- this page's rows
+page.page          # 1
+page.per_page      # 20
+page.total         # every matching row, not just this page
+page.total_pages   # ceil(total / per_page)
+page.has_next       # page < total_pages
+page.has_prev       # page > 1
+```
+
+`total` costs a second query (a `COUNT(*)` over the same filters) to
+compute — that's the price of knowing `total_pages`/`has_next` up front,
+not a bug. If you don't need that, `all()` with a hand-rolled `limit`
+isn't available on `Model` directly, but nothing stops you from writing
+a raw `select()` for that one case.
+
+`paginate()` accepts the same `include_deleted`/`include=(...)` keywords
+as `find`/`all`/`find_by`. `zeython new` wires it into the generated
+`GET /users` (`?page=`/`?per_page=`, defaulting to `1`/`20`) — see
+`app/Controllers/user_controller.py`.
+
 ## Migrations
 
 ```bash

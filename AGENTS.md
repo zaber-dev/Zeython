@@ -108,6 +108,12 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `cache.forget(key)` wherever the underlying data changes — a cache with
   no invalidation path just serves stale data forever. See
   `docs/caching.md`.
+- To call an LLM from app code (not to give an AI agent tools to operate on
+  the project itself -- that's `zeython.mcp`, see `docs/ai-agents.md`), use
+  `zeython.AI` (bound in the container once `AIServiceProvider` is
+  registered): `await ai.complete(prompt, system=...)`. Defaults to
+  `EchoAI` (no network, no credentials) until `AI_PROVIDER=anthropic` is
+  configured. See `docs/ai.md`.
 - Send email via `zeython.Mailer`/`Message` (`docs/mail.md`), never
   `smtplib` directly in a handler — and send it from a `Job`
   (`await dispatch(request, ...)`), not inline in the request. `MAIL_DRIVER`

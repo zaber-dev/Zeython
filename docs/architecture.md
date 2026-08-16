@@ -8,7 +8,7 @@
 | `Container` | `zeython.container` | A type-hint-driven dependency injection container: `bind`, `singleton`, `instance`, `make`, and `call` (autowired function invocation). |
 | `ServiceProvider` | `zeython.providers` | The seam where cross-cutting concerns register bindings (`register()`) and wire themselves up (`boot()`). |
 | `Router` | `zeython.routing` | Decorator-based routing (`@app.get(...)`), route groups (`include`), and RESTful `resource()` registration — compiles to Starlette `Route`/`Mount` objects. |
-| `Model` | `zeython.db.Model` | An async Active-Record base class: `create`, `find`, `all`, `find_by`, `save`, `update`, `delete` (soft by default), `to_dict`, plus declarative validation via `__rules__` (see [Validation](validation.md)), overridable lifecycle hooks (`creating`/`created`/`updating`/`updated`/`deleting`/`deleted`, see [Model Events](model-events.md)), and safe relationship eager-loading via `include=` (see [Relationships](relationships.md)). |
+| `Model` | `zeython.db.Model` | An async Active-Record base class: `create`, `find`, `all`, `find_by`, `paginate` (see [Database & Migrations](database.md#pagination)), `save`, `update`, `delete` (soft by default), `to_dict`, plus declarative validation via `__rules__` (see [Validation](validation.md)), overridable lifecycle hooks (`creating`/`created`/`updating`/`updated`/`deleting`/`deleted`, see [Model Events](model-events.md)), and safe relationship eager-loading via `include=` (see [Relationships](relationships.md)). |
 | `Config` | `zeython.config` | Layered `.env` + process-environment configuration with dot-path access (`config.get("database.url")`). |
 | `Views` | `zeython.views` | Jinja2 rendering by convention from `resources/views/`, bound via `ViewServiceProvider` (see [Views](views.md)). |
 | `CorsServiceProvider` | `zeython.providers` | Opt-in, `.env`-configured CORS support wrapping Starlette's `CORSMiddleware`. |
@@ -18,6 +18,7 @@
 | `Cache` | `zeython.cache` | An in-memory TTL cache: `get`/`put`/`forget`/`has`/`flush`, plus `remember()` for get-or-compute (see [Caching](caching.md)). |
 | `Queue` | `zeython.queue` | Background jobs: `Job` + `dispatch()`, `InMemoryQueue` (background task, no lifespan wiring needed) by default, `SyncQueue` for tests (see [Background Jobs](queues.md)). |
 | `Mailer` | `zeython.mail` | Outbound email: `LogMailer` by default (zero setup), `SmtpMailer` opt-in. A job's `handle()` can declare `mailer: Mailer` and get it autowired (see [Mail](mail.md)). |
+| `AI` | `zeython.ai` | A swappable LLM client for your own app code: `complete()`, `EchoAI` by default (no credentials), `AnthropicAI` opt-in via the `ai` extra (see [AI](ai.md)). |
 | MCP server | `zeython.mcp` | Read-only project introspection for AI coding agents (`zeython mcp`): real registered routes, real mapped models, app info, and search over the bundled docs — an opt-in `mcp` extra, not imported by the framework core (see [AI Agents](ai-agents.md)). |
 
 ## Logging
