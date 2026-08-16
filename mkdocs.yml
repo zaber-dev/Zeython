@@ -15,12 +15,14 @@ nav:
   - Validation: validation.md
   - Model Events: model-events.md
   - Views: views.md
+  - Frontend & CSS: frontend.md
   - Authentication: authentication.md
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
   - Caching: caching.md
   - Background Jobs: queues.md
   - Mail: mail.md
+  - AI: ai.md
   - AI Agents: ai-agents.md
   - Testing: testing.md
 theme:

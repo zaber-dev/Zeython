@@ -30,6 +30,10 @@ scaffolding on every project. Zeython does that assembly once:
   direct tools to inspect a project's actual routes and database schema, and
   to search documentation bundled with the exact installed framework
   version, instead of guessing. See [docs/ai-agents.md](docs/ai-agents.md).
+- **AI-capable apps** — `zeython.ai` binds an LLM client (`AI`) in the
+  container for your own routes and jobs to call, zero-config by default
+  (`EchoAI`, no credentials needed) and one line to switch to a real
+  Anthropic-backed client. See [docs/ai.md](docs/ai.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   and a pytest suite; it is not scaffolding wrapped around unfinished features.
 
@@ -124,13 +128,15 @@ my_blog/
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
 - [docs/validation.md](docs/validation.md) — declarative model validation
 - [docs/model-events.md](docs/model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
-- [docs/views.md](docs/views.md) — server-rendered HTML with Jinja2
+- [docs/views.md](docs/views.md)
+- [docs/frontend.md](docs/frontend.md) — Tailwind out of the box (dev), moving to a compiled build
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
 - [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
+- [docs/ai.md](docs/ai.md) — calling an LLM from your own app code
 - [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents
 - [docs/testing.md](docs/testing.md)
 

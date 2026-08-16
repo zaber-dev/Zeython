@@ -6,6 +6,9 @@ can inspect a real, running-shaped Zeython project instead of guessing at
 its routes, its database schema, or the framework's own API from
 training-data memory.
 
+> Looking for how to call an LLM *from your own app code* (not an agent
+> operating on the project)? See [AI](ai.md) instead.
+
 ## Setup
 
 ```bash

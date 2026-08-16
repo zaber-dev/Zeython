@@ -2,13 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ project_name }}</title>
+    <!--
+      Tailwind's Play CDN: zero-config styling for local development, no
+      build step required. It is NOT meant for production (it compiles
+      utility classes in the browser on every load, with nothing purged) --
+      swap it for a compiled build before you ship. See docs/frontend.md.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <h1>{{ project_name }}</h1>
-    <p>{{ tagline }}</p>
-    <p>Rendered by Jinja2 from <code>resources/views/welcome.html</code> — see
-       <code>routes/web.py</code> for the route and
-       <a href="https://github.com/zaber-dev/Zeython/blob/main/docs/views.md">docs/views.md</a>.</p>
+  <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <main class="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-16">
+      <p class="text-sm font-medium text-indigo-600">Zeython</p>
+      <h1 class="mt-2 text-4xl font-bold tracking-tight text-slate-900">{{ project_name }}</h1>
+      <p class="mt-4 text-lg text-slate-600">{{ tagline }}</p>
+
+      <div class="mt-10 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-sm text-slate-600">
+          Rendered by Jinja2 from
+          <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm text-slate-800">resources/views/welcome.html</code>
+          — see
+          <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm text-slate-800">routes/web.py</code>
+          for the route and
+          <a
+            class="font-medium text-indigo-600 underline decoration-indigo-300 underline-offset-2 hover:text-indigo-700"
+            href="https://github.com/zaber-dev/Zeython/blob/main/docs/views.md"
+          >docs/views.md</a>.
+        </p>
+      </div>
+    </main>
   </body>
 </html>
