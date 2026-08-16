@@ -82,3 +82,11 @@ jobs:
             -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
           test "$OWNER_DELETE" = "204"
           test ! -s /tmp/delete.out  # a 204 must have an empty body
+          TOKEN_JSON=$(curl -s -X POST http://127.0.0.1:8000/api/token -H 'Content-Type: application/json' \
+            -d '{"email":"ada@example.com","password":"hunter2"}')
+          TOKEN=$(python3 -c "import json; print(json.loads('''$TOKEN_JSON''')['token'])")
+          API_ME_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+            http://127.0.0.1:8000/api/me)
+          test "$API_ME_STATUS" = "200"
+          NO_TOKEN_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/me)
+          test "$NO_TOKEN_STATUS" = "401"

@@ -34,6 +34,7 @@ not a template you copy and diverge from.
 - [Views](views.md) — server-rendered HTML with Jinja2
 - [Frontend & CSS](frontend.md) — Tailwind out of the box (dev), moving to a compiled build
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
+- [API Authentication](api-authentication.md) — bearer tokens for clients that can't use cookies
 - [Authorization](authorization.md) — named abilities (`Gate`), `authorize()` route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults

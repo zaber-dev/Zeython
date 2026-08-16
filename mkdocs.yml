@@ -17,6 +17,7 @@ nav:
   - Views: views.md
   - Frontend & CSS: frontend.md
   - Authentication: authentication.md
+  - API Authentication: api-authentication.md
   - Authorization: authorization.md
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md

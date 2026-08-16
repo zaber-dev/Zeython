@@ -78,6 +78,12 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   (returns `None`). Never hand-roll password hashing — use
   `zeython.hash_password`/`verify_password` (PBKDF2-HMAC-SHA256), and never
   log or serialize a password/hash field — put it in the model's `__hidden__`.
+- Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
+  tokens (`require_api_auth`, `docs/api-authentication.md`) are two
+  separate auth paths -- never mix them in one handler, and don't reach
+  for token auth by default. Cookies are the right choice for a browser
+  client; add `zeython.api_auth` specifically for clients that can't carry
+  a cookie jar (a mobile app, a separate SPA, a server-to-server caller).
 - "Is anyone logged in" (`require_auth`) is not "can this user do this
   specific thing." For that, define a named ability on `Gate`
   (`gate.define("delete-post", lambda user, post: post.author_id ==
