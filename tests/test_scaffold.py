@@ -1,0 +1,174 @@
+from pathlib import Path
+
+import pytest
+
+from zeython.cli import scaffold
+
+# -- naming helpers -------------------------------------------------------------------
+
+
+def test_to_snake_case_converts_pascal_case() -> None:
+    assert scaffold.to_snake_case("PostController") == "post_controller"
+
+
+def test_to_snake_case_converts_spaced_words() -> None:
+    assert scaffold.to_snake_case("My Blog") == "my_blog"
+
+
+def test_to_snake_case_is_idempotent_on_already_snake_case() -> None:
+    assert scaffold.to_snake_case("send_welcome_email") == "send_welcome_email"
+
+
+def test_to_pascal_case_converts_snake_case() -> None:
+    assert scaffold.to_pascal_case("send_welcome_email") == "SendWelcomeEmail"
+
+
+def test_to_pascal_case_converts_spaced_words() -> None:
+    assert scaffold.to_pascal_case("My Blog") == "MyBlog"
+
+
+# -- new_project ------------------------------------------------------------------------
+
+
+def test_new_project_creates_the_full_directory_layout(tmp_path: Path) -> None:
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    for expected in (
+        "main.py",
+        "alembic.ini",
+        ".env.example",
+        "app/__init__.py",
+        "app/Controllers/__init__.py",
+        "app/Models/__init__.py",
+        "app/Middleware/__init__.py",
+        "app/Jobs/__init__.py",
+        "app/Providers/__init__.py",
+        "routes/web.py",
+        "migrations/env.py",
+    ):
+        assert (destination / expected).is_file(), f"missing {expected}"
+
+
+def test_new_project_renders_placeholders(tmp_path: Path) -> None:
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    pyproject = (destination / "pyproject.toml").read_text()
+    assert "my_blog" in pyproject
+    assert "{{" not in pyproject
+
+    env_example = (destination / ".env.example").read_text()
+    assert "My Blog" in env_example
+    assert "{{" not in env_example
+
+
+def test_new_project_generates_a_fresh_secret_key_each_time(tmp_path: Path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    scaffold.new_project("First", first)
+    scaffold.new_project("Second", second)
+
+    def secret_key(env_example: Path) -> str:
+        for line in env_example.read_text().splitlines():
+            if line.startswith("APP_SECRET_KEY="):
+                return line
+        raise AssertionError("APP_SECRET_KEY not found")
+
+    assert secret_key(first / ".env.example") != secret_key(second / ".env.example")
+
+
+def test_new_project_skips_pycache_directories(tmp_path: Path) -> None:
+    # A pip install of the framework bytecode-compiles the template .py files,
+    # leaving __pycache__ dirs alongside them in an installed copy -- those
+    # must never be copied into a generated project.
+    pycache = scaffold._TEMPLATES_DIR / "__pycache__"
+    pycache.mkdir(exist_ok=True)
+    (pycache / "junk.pyc").write_bytes(b"")
+    try:
+        destination = tmp_path / "my_blog"
+        scaffold.new_project("My Blog", destination)
+        assert not any(destination.rglob("__pycache__"))
+    finally:
+        import shutil
+
+        shutil.rmtree(pycache, ignore_errors=True)
+
+
+def test_new_project_raises_if_destination_exists_and_is_not_empty(tmp_path: Path) -> None:
+    destination = tmp_path / "my_blog"
+    destination.mkdir()
+    (destination / "keep.txt").write_text("pre-existing")
+
+    with pytest.raises(FileExistsError):
+        scaffold.new_project("My Blog", destination)
+
+
+def test_new_project_allows_an_existing_empty_destination(tmp_path: Path) -> None:
+    destination = tmp_path / "my_blog"
+    destination.mkdir()
+    scaffold.new_project("My Blog", destination)  # must not raise
+    assert (destination / "main.py").is_file()
+
+
+# -- make_model / make_controller / make_middleware / make_provider / make_job --------
+
+
+@pytest.fixture
+def project(tmp_path: Path) -> Path:
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+    return destination
+
+
+def test_make_model_creates_the_file_and_registers_the_import(project: Path) -> None:
+    path = scaffold.make_model("Comment", project)
+
+    assert path == project / "app" / "Models" / "comment.py"
+    assert "class Comment(Model):" in path.read_text()
+    assert '__tablename__ = "comments"' in path.read_text()
+
+    init_contents = (project / "app" / "Models" / "__init__.py").read_text()
+    assert "from app.Models.comment import Comment" in init_contents
+
+
+def test_make_model_raises_if_the_file_already_exists(project: Path) -> None:
+    scaffold.make_model("Comment", project)
+    with pytest.raises(FileExistsError):
+        scaffold.make_model("Comment", project)
+
+
+def test_make_controller_appends_controller_suffix_once(project: Path) -> None:
+    path = scaffold.make_controller("Comment", project)
+    assert path == project / "app" / "Controllers" / "comment_controller.py"
+    assert "class CommentController(Controller):" in path.read_text()
+
+
+def test_make_controller_does_not_double_the_suffix(project: Path) -> None:
+    path = scaffold.make_controller("CommentController", project)
+    assert path == project / "app" / "Controllers" / "comment_controller.py"
+    assert "class CommentController(Controller):" in path.read_text()
+
+
+def test_make_middleware_creates_the_file(project: Path) -> None:
+    path = scaffold.make_middleware("RequestLogger", project)
+    assert path == project / "app" / "Middleware" / "request_logger.py"
+    assert "class RequestLogger:" in path.read_text()
+
+
+def test_make_provider_appends_service_provider_suffix(project: Path) -> None:
+    path = scaffold.make_provider("Payment", project)
+    assert path == project / "app" / "Providers" / "payment_service_provider.py"
+    assert "class PaymentServiceProvider(ServiceProvider):" in path.read_text()
+
+
+def test_make_provider_does_not_double_an_existing_provider_suffix(project: Path) -> None:
+    path = scaffold.make_provider("PaymentProvider", project)
+    assert path == project / "app" / "Providers" / "payment_provider.py"
+    assert "class PaymentProvider(ServiceProvider):" in path.read_text()
+
+
+def test_make_job_appends_job_suffix(project: Path) -> None:
+    path = scaffold.make_job("SendInvoice", project)
+    assert path == project / "app" / "Jobs" / "send_invoice_job.py"
+    assert "class SendInvoiceJob(Job):" in path.read_text()
