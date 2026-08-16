@@ -28,4 +28,8 @@ app.post("/login", name="auth.login")(auth.login)
 app.post("/logout", name="auth.logout")(auth.logout)
 app.get("/me", name="auth.me")(auth.me)
 
+# Bearer-token path for clients that can't use cookies -- see docs/api-authentication.md.
+app.post("/api/token", name="auth.token")(auth.token)
+app.get("/api/me", name="auth.api_me")(auth.api_me)
+
 app.post("/uploads", name="uploads.store")(UploadController().store)

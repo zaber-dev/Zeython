@@ -1,6 +1,12 @@
 """Zeython: an async-first, batteries-included MVC framework for Python."""
 
 from zeython.ai import AI, AIResponse, AIServiceProvider, AnthropicAI, EchoAI
+from zeython.api_auth import (
+    ApiAuthServiceProvider,
+    TokenManager,
+    current_api_user,
+    require_api_auth,
+)
 from zeython.application import Application
 from zeython.auth import (
     Authenticatable,
@@ -123,6 +129,10 @@ __all__ = [
     "Gate",
     "authorize",
     "AuthorizationServiceProvider",
+    "TokenManager",
+    "current_api_user",
+    "require_api_auth",
+    "ApiAuthServiceProvider",
     "hash_password",
     "verify_password",
     "HTTPException",

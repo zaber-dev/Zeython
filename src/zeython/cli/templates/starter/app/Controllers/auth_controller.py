@@ -1,6 +1,7 @@
 from starlette.responses import JSONResponse
 
 from zeython import AuthManager, Controller, UnauthorizedException, ValidationException
+from zeython.api_auth import TokenManager, require_api_auth
 from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
@@ -16,6 +17,12 @@ class AuthController(Controller):
 
     Session-based: a successful register/login sets a signed cookie (see
     AuthServiceProvider in main.py); logout clears it. See docs/authentication.md.
+
+    `token`/`api_me` are the separate bearer-token path for clients that
+    can't use cookies (a mobile app, a separate SPA) -- see
+    docs/api-authentication.md. The two never mix in one handler: a cookie
+    session and a bearer token are verified differently and a handler
+    should be unambiguous about which one it expects.
 
     Login and register are throttled per client IP (see docs/rate-limiting.md)
     -- without this, an attacker can try passwords against /login as fast as
@@ -62,4 +69,20 @@ class AuthController(Controller):
         user = await current_user(request)
         if user is None:
             raise UnauthorizedException("Not logged in.")
+        return JSONResponse(user.to_dict())
+
+    async def token(self, request):
+        await throttle(request, key=f"api-token:{client_ip(request)}", limit=5, window=60)
+
+        data = await request.json()
+        manager: AuthManager = request.app.state.container.make(AuthManager)
+        user = await manager.attempt(data.get("email", ""), data.get("password", ""))
+        if user is None:
+            raise UnauthorizedException("Invalid email or password.")
+
+        tokens: TokenManager = request.app.state.container.make(TokenManager)
+        return JSONResponse({"token": tokens.issue(user), "token_type": "Bearer"})
+
+    async def api_me(self, request):
+        user = await require_api_auth(request)
         return JSONResponse(user.to_dict())
