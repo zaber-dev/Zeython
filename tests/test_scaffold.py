@@ -63,6 +63,22 @@ def test_new_project_renders_placeholders(tmp_path: Path) -> None:
     assert "{{" not in env_example
 
 
+def test_new_project_pyproject_declares_a_dev_extra_with_pytest(tmp_path: Path) -> None:
+    # docs/testing.md and the generated README both tell users to run
+    # `pytest` after `pip install -e ".[dev]"` -- if the generated
+    # pyproject.toml has no `dev` extra, pip silently installs without it
+    # (a missing extra is a warning, not an error) and `pytest` is never
+    # actually on PATH. Guards against that regressing silently again.
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    pyproject = (destination / "pyproject.toml").read_text()
+    assert "[project.optional-dependencies]" in pyproject
+    assert "pytest" in pyproject
+    assert "pytest-asyncio" in pyproject
+    assert "httpx" in pyproject
+
+
 def test_new_project_generates_a_fresh_secret_key_each_time(tmp_path: Path) -> None:
     first = tmp_path / "first"
     second = tmp_path / "second"
