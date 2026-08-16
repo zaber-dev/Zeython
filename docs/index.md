@@ -28,6 +28,7 @@ not a template you copy and diverge from.
 - [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
 - [CLI Reference](cli.md) — every `zeython` command
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
+- [Relationships](relationships.md) — defining and safely loading relationships in async code
 - [Validation](validation.md) — declarative model validation rules
 - [Views](views.md) — server-rendered HTML with Jinja2
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
