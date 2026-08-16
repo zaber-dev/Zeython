@@ -13,6 +13,7 @@ nav:
   - Database & Migrations: database.md
   - Relationships: relationships.md
   - Validation: validation.md
+  - Model Events: model-events.md
   - Views: views.md
   - Authentication: authentication.md
   - File Storage: storage.md
