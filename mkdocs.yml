@@ -10,6 +10,7 @@ nav:
   - Getting Started: getting-started.md
   - Architecture: architecture.md
   - CLI Reference: cli.md
+  - OpenAPI & API Docs: openapi.md
   - Database & Migrations: database.md
   - Relationships: relationships.md
   - Validation: validation.md

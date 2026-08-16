@@ -35,6 +35,7 @@ from zeython.exceptions import (
 )
 from zeython.hashing import hash_password, verify_password
 from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
+from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.providers import (
     CorsServiceProvider,
     DatabaseServiceProvider,
@@ -122,6 +123,10 @@ __all__ = [
     "LogMailer",
     "SmtpMailer",
     "MailServiceProvider",
+    "describe",
+    "model_schema",
+    "generate_openapi",
+    "OpenApiServiceProvider",
     "Authenticatable",
     "AuthManager",
     "AuthServiceProvider",
