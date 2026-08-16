@@ -34,6 +34,7 @@ not a template you copy and diverge from.
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
+- [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [Background Jobs](queues.md) — dispatching work off the request/response cycle
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
 - [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
