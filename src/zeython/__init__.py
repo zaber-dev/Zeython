@@ -25,6 +25,7 @@ from zeython.exceptions import (
     ValidationException,
 )
 from zeython.hashing import hash_password, verify_password
+from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
 from zeython.providers import (
     CorsServiceProvider,
     DatabaseServiceProvider,
@@ -95,6 +96,11 @@ __all__ = [
     "SyncQueue",
     "dispatch",
     "QueueServiceProvider",
+    "Mailer",
+    "Message",
+    "LogMailer",
+    "SmtpMailer",
+    "MailServiceProvider",
     "Authenticatable",
     "AuthManager",
     "AuthServiceProvider",

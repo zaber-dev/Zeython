@@ -10,15 +10,15 @@ wiring required.
 ```python
 # app/Jobs/send_welcome_email_job.py
 from dataclasses import dataclass
-from zeython import Job
+from zeython import Job, Mailer, Message
 
 @dataclass
 class SendWelcomeEmailJob(Job):
     to_email: str
     name: str
 
-    async def handle(self) -> None:
-        ...  # your actual email-sending code
+    async def handle(self, mailer: Mailer) -> None:
+        await mailer.send(Message(to=self.to_email, subject="Welcome!", body=f"Hi {self.name}"))
 ```
 
 ```bash
@@ -29,6 +29,16 @@ Jobs are plain Python objects — the default queue never serializes them, so
 constructor arguments can be anything (a `User` instance, an open file), not
 just JSON-safe values. That's a trade-off, not a free lunch: see
 [the process-local limitation](#the-default-queue-is-process-local) below.
+
+### Injecting dependencies into `handle()`
+
+Beyond `self`, `handle()` can declare any type-hinted parameter bound in the
+container — `mailer: Mailer` above is resolved automatically when the queue
+runs the job, the same autowiring `Container.call` uses everywhere else in
+the framework. This is how `QueueServiceProvider` wires things up; if you
+construct a `Queue` yourself without a container, `handle()` is called with
+no extra arguments, so any declared params must be resolvable or the call
+fails with a plain `TypeError` — loud, not silently ignored.
 
 ## Dispatching from a request
 

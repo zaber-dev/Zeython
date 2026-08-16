@@ -128,6 +128,7 @@ my_blog/
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
+- [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
 - [docs/testing.md](docs/testing.md)
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/

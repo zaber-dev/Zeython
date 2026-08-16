@@ -71,8 +71,15 @@ dependency injection container, a service-provider boot lifecycle, and a
   `zeython.queue` — not awaited inline in the handler. `zeython make job
   <Name>` scaffolds one. Remember the default queue is process-local (a job
   pushed but not yet run is lost on crash/restart) — that's fine for a
-  welcome email, not for anything you'd be upset to silently lose. See
+  welcome email, not for anything you'd be upset to silently lose. A job's
+  `handle()` can declare typed params (e.g. `handle(self, mailer: Mailer)`)
+  and get them autowired from the container, same as anywhere else. See
   `docs/queues.md`.
+- Send email via `zeython.Mailer`/`Message` (`docs/mail.md`), never
+  `smtplib` directly in a handler — and send it from a `Job`
+  (`await dispatch(request, ...)`), not inline in the request. `MAIL_DRIVER`
+  defaults to `log` (writes to logs, doesn't actually send), which is
+  correct for local dev — don't switch it to `smtp` without the user asking.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in

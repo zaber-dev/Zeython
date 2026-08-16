@@ -22,6 +22,7 @@ from abc import ABC, abstractmethod
 
 from starlette.requests import Request
 
+from zeython.container import Container
 from zeython.providers import ServiceProvider
 
 logger = logging.getLogger("zeython.queue")
@@ -41,6 +42,13 @@ class Job(ABC):
 
             async def handle(self) -> None:
                 ...
+
+    ``handle()`` can also declare type-hinted parameters beyond ``self`` to
+    have them resolved from the container that dispatched the job (the same
+    autowiring ``Container.call`` uses everywhere else)::
+
+        async def handle(self, mailer: Mailer) -> None:
+            await mailer.send(...)
     """
 
     #: How many times to attempt `handle()` before giving up and logging failure.
@@ -51,7 +59,21 @@ class Job(ABC):
 
 
 class Queue(ABC):
-    """Accepts jobs to run in the background."""
+    """Accepts jobs to run in the background.
+
+    ``container``, if given, is used to autowire any extra type-hinted
+    parameters on a job's ``handle()`` — see :class:`Job`. Without one,
+    ``handle()`` is called with no arguments beyond ``self``.
+    """
+
+    def __init__(self, *, container: Container | None = None) -> None:
+        self.container = container
+
+    async def _invoke(self, job: Job) -> None:
+        if self.container is not None:
+            await self.container.call(job.handle)
+        else:
+            await job.handle()
 
     @abstractmethod
     async def push(self, job: Job) -> None: ...
@@ -67,7 +89,8 @@ class InMemoryQueue(Queue):
     "task was destroyed but it is pending" warnings at interpreter exit).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, container: Container | None = None) -> None:
+        super().__init__(container=container)
         self._queue: asyncio.Queue[Job] = asyncio.Queue()
         self._worker_task: asyncio.Task[None] | None = None
 
@@ -102,7 +125,7 @@ class InMemoryQueue(Queue):
     async def _run_with_retries(self, job: Job) -> None:
         for attempt in range(1, job.max_attempts + 1):
             try:
-                await job.handle()
+                await self._invoke(job)
                 return
             except Exception:
                 logger.exception(
@@ -120,7 +143,7 @@ class SyncQueue(Queue):
     """
 
     async def push(self, job: Job) -> None:
-        await job.handle()
+        await self._invoke(job)
 
 
 async def dispatch(request: Request, job: Job) -> None:
@@ -144,7 +167,9 @@ class QueueServiceProvider(ServiceProvider):
 
     def register(self) -> None:
         driver = self.config.get("queue.driver", "memory")
-        queue: Queue = SyncQueue() if driver == "sync" else InMemoryQueue()
+        queue: Queue = (
+            SyncQueue(container=self.container) if driver == "sync" else InMemoryQueue(container=self.container)
+        )
         self.container.singleton(Queue, lambda: queue)
 
 

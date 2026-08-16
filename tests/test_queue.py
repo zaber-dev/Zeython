@@ -6,6 +6,7 @@ from starlette.responses import JSONResponse
 
 from zeython.application import Application
 from zeython.config import Config
+from zeython.container import Container
 from zeython.queue import InMemoryQueue, Job, Queue, QueueServiceProvider, SyncQueue, dispatch
 from zeython.testing import client
 
@@ -180,3 +181,52 @@ async def test_sync_driver_runs_dispatched_jobs_immediately(tmp_path: Path) -> N
 async def test_queue_is_available_in_the_container(tmp_path: Path) -> None:
     app = _make_app(tmp_path)
     assert isinstance(app.container.make(Queue), InMemoryQueue)
+
+
+# -- Job dependency injection via the container --------------------------------------
+
+
+class Greeter:
+    def greeting(self) -> str:
+        return "hello from the container"
+
+
+@dataclass
+class InjectedJob(Job):
+    """A job whose handle() declares an extra typed param, resolved from the container."""
+
+    log: list[str]
+
+    async def handle(self, greeter: Greeter) -> None:
+        self.log.append(greeter.greeting())
+
+
+async def test_in_memory_queue_injects_dependencies_into_handle(tmp_path: Path) -> None:
+    container = Container()
+    container.singleton(Greeter)
+    queue = InMemoryQueue(container=container)
+    log: list[str] = []
+
+    await queue.push(InjectedJob(log=log))
+    await queue.join()
+
+    assert log == ["hello from the container"]
+    await queue.close()
+
+
+async def test_sync_queue_injects_dependencies_into_handle(tmp_path: Path) -> None:
+    container = Container()
+    container.singleton(Greeter)
+    queue = SyncQueue(container=container)
+    log: list[str] = []
+
+    await queue.push(InjectedJob(log=log))
+
+    assert log == ["hello from the container"]
+
+
+async def test_queue_without_container_cannot_resolve_extra_handle_params() -> None:
+    queue = SyncQueue()  # no container -- matches the pre-DI default behavior
+
+    with pytest.raises(TypeError):
+        await queue.push(InjectedJob(log=[]))
