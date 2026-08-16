@@ -18,7 +18,7 @@ from zeython.auth import (
     require_auth,
 )
 from zeython.authorization import AuthorizationServiceProvider, Gate, authorize
-from zeython.cache import Cache, CacheServiceProvider, InMemoryCache
+from zeython.cache import Cache, CacheServiceProvider, InMemoryCache, RedisCache
 from zeython.config import Config
 from zeython.container import Container
 from zeython.db import Database, Model, Page
@@ -55,6 +55,7 @@ from zeython.rate_limit import (
     RateLimiter,
     RateLimitResult,
     RateLimitServiceProvider,
+    RedisRateLimiter,
     client_ip,
     throttle,
 )
@@ -95,6 +96,7 @@ __all__ = [
     "render",
     "Cache",
     "InMemoryCache",
+    "RedisCache",
     "CacheServiceProvider",
     "Storage",
     "LocalStorage",
@@ -104,6 +106,7 @@ __all__ = [
     "StorageServiceProvider",
     "RateLimiter",
     "InMemoryRateLimiter",
+    "RedisRateLimiter",
     "RateLimitResult",
     "throttle",
     "client_ip",
