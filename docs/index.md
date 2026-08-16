@@ -27,6 +27,7 @@ not a template you copy and diverge from.
 - [Getting Started](getting-started.md) — install the framework and scaffold your first project
 - [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
 - [CLI Reference](cli.md) — every `zeython` command
+- [Console Commands](console-commands.md) — writing your own `zeython command <name>` CLI commands
 - [OpenAPI & API Docs](openapi.md) — generated spec + Swagger UI at `/docs`, from your actual routes
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
 - [Relationships](relationships.md) — defining and safely loading relationships in async code

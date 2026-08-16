@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ from pathlib import Path
 import typer
 
 from zeython.cli import scaffold
+from zeython.cli.loader import load_app
 
 app = typer.Typer(
     name="zeython",
@@ -112,6 +114,52 @@ def make_job(name: str = typer.Argument(..., help="Job name, e.g. SendWelcomeEma
     """Generate a new background job in app/Jobs/."""
     path = scaffold.make_job(name, Path.cwd())
     typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
+@make_app.command("command")
+def make_command(name: str = typer.Argument(..., help="Command name, e.g. PruneOldPosts")) -> None:
+    """Generate a new custom CLI command in app/Console/Commands/."""
+    path = scaffold.make_command(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
+@app.command(name="commands")
+def list_commands() -> None:
+    """List custom commands defined in app/Console/Commands/."""
+    from zeython.console import discover_commands
+
+    discovered = discover_commands(Path.cwd())
+    if not discovered:
+        typer.echo("No custom commands found in app/Console/Commands/.")
+        return
+
+    for name in sorted(discovered):
+        help_text = discovered[name].help
+        typer.echo(f"  {name}" + (f"  -  {help_text}" if help_text else ""))
+
+
+@app.command(
+    name="command",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+)
+def run_command(
+    ctx: typer.Context,
+    name: str = typer.Argument(..., help="Custom command name -- see: zeython commands"),
+) -> None:
+    """Run a custom command defined in app/Console/Commands/."""
+    from zeython.console import discover_commands
+
+    project_root = Path.cwd()
+    discovered = discover_commands(project_root)
+    command_cls = discovered.get(name)
+    if command_cls is None:
+        available = ", ".join(sorted(discovered)) or "(none found -- see app/Console/Commands/)"
+        typer.secho(f"Unknown command '{name}'. Available: {available}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    application = load_app(project_root)
+    command_instance = command_cls(application)
+    asyncio.run(command_instance.handle(*ctx.args))
 
 
 def _run_alembic(*args: str) -> None:

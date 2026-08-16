@@ -23,7 +23,17 @@ zeython make controller Post         # app/Controllers/post_controller.py (PostC
 zeython make middleware RequestLogger  # app/Middleware/request_logger.py
 zeython make provider Payment        # app/Providers/payment_service_provider.py
 zeython make job SendWelcomeEmail    # app/Jobs/send_welcome_email_job.py
+zeython make command PruneOldPosts   # app/Console/Commands/prune_old_posts_command.py
 ```
+
+## Custom commands
+
+```bash
+zeython commands                     # list every command in app/Console/Commands/
+zeython command prune-old-posts      # run one, with any trailing args passed through raw
+```
+
+See [Console Commands](console-commands.md) for how to write one.
 
 ## Database migrations (Alembic)
 
