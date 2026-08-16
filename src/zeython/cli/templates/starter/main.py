@@ -2,6 +2,7 @@ from zeython import (
     Application,
     AuthServiceProvider,
     DatabaseServiceProvider,
+    QueueServiceProvider,
     RateLimitServiceProvider,
     RouteServiceProvider,
     StorageServiceProvider,
@@ -15,6 +16,7 @@ app.register(DatabaseServiceProvider)
 app.register(ViewServiceProvider)
 app.register(StorageServiceProvider)
 app.register(RateLimitServiceProvider)
+app.register(QueueServiceProvider)
 app.register(AuthServiceProvider(app, user_model=User))
 app.register(RouteServiceProvider(app, modules=("routes.web",)))
 

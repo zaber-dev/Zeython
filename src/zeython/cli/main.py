@@ -92,6 +92,13 @@ def make_provider(name: str = typer.Argument(..., help="Service provider name, e
     typer.secho(f"Created {path}", fg=typer.colors.GREEN)
 
 
+@make_app.command("job")
+def make_job(name: str = typer.Argument(..., help="Job name, e.g. SendWelcomeEmail")) -> None:
+    """Generate a new background job in app/Jobs/."""
+    path = scaffold.make_job(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
 def _run_alembic(*args: str) -> None:
     if not (Path.cwd() / "alembic.ini").exists():
         typer.secho(
