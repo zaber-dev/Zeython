@@ -32,12 +32,14 @@ not a template you copy and diverge from.
 - [Validation](validation.md) — declarative model validation rules
 - [Model Events](model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
 - [Views](views.md) — server-rendered HTML with Jinja2
+- [Frontend & CSS](frontend.md) — Tailwind out of the box (dev), moving to a compiled build
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
 - [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [Background Jobs](queues.md) — dispatching work off the request/response cycle
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
+- [AI](ai.md) — calling an LLM from your own app code
 - [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
 - [Testing](testing.md) — writing tests against a Zeython application
 

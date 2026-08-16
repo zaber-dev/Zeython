@@ -175,3 +175,54 @@ async def test_creating_hook_runs_before_validation(database: Database) -> None:
     async with session_scope(database):
         post = await SlugPost.create(title="Hello World")
         assert post.slug == "hello-world"
+
+
+# -- paginate() -------------------------------------------------------------------
+
+
+async def test_paginate_returns_the_requested_page_and_metadata(database: Database) -> None:
+    async with session_scope(database):
+        for i in range(25):
+            await Article.create(title=f"Article {i}")
+
+    async with session_scope(database):
+        page = await Article.paginate(page=1, per_page=10)
+        assert len(page.items) == 10
+        assert page.page == 1
+        assert page.per_page == 10
+        assert page.total == 25
+        assert page.total_pages == 3
+        assert page.has_next is True
+        assert page.has_prev is False
+
+
+async def test_paginate_last_page_has_the_remainder_and_no_next(database: Database) -> None:
+    async with session_scope(database):
+        for i in range(25):
+            await Article.create(title=f"Article {i}")
+
+    async with session_scope(database):
+        page = await Article.paginate(page=3, per_page=10)
+        assert len(page.items) == 5
+        assert page.has_next is False
+        assert page.has_prev is True
+
+
+async def test_paginate_excludes_soft_deleted_rows_from_items_and_total(database: Database) -> None:
+    async with session_scope(database):
+        first = await Article.create(title="Keep")
+        second = await Article.create(title="Delete me")
+        await second.delete()
+
+    async with session_scope(database):
+        page = await Article.paginate(page=1, per_page=10)
+        assert page.total == 1
+        assert [item.id for item in page.items] == [first.id]
+
+
+async def test_paginate_rejects_a_non_positive_page_or_per_page(database: Database) -> None:
+    async with session_scope(database):
+        with pytest.raises(ValueError):
+            await Article.paginate(page=0)
+        with pytest.raises(ValueError):
+            await Article.paginate(per_page=0)
