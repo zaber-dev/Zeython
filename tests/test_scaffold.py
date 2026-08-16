@@ -44,6 +44,12 @@ def test_new_project_creates_the_full_directory_layout(tmp_path: Path) -> None:
         "app/Middleware/__init__.py",
         "app/Jobs/__init__.py",
         "app/Providers/__init__.py",
+        "app/Console/Commands/__init__.py",
+        "database/__init__.py",
+        "database/factories/__init__.py",
+        "database/factories/user_factory.py",
+        "database/seeders/__init__.py",
+        "database/seeders/database_seeder.py",
         "routes/web.py",
         "migrations/env.py",
     ):
@@ -188,3 +194,36 @@ def test_make_job_appends_job_suffix(project: Path) -> None:
     path = scaffold.make_job("SendInvoice", project)
     assert path == project / "app" / "Jobs" / "send_invoice_job.py"
     assert "class SendInvoiceJob(Job):" in path.read_text()
+
+
+def test_make_command_appends_command_suffix(project: Path) -> None:
+    path = scaffold.make_command("PruneOldSessions", project)
+    assert path == project / "app" / "Console" / "Commands" / "prune_old_sessions_command.py"
+    assert "class PruneOldSessionsCommand(Command):" in path.read_text()
+    assert "zeython command prune-old-sessions" in path.read_text()
+
+
+def test_make_factory_appends_factory_suffix(project: Path) -> None:
+    path = scaffold.make_factory("Comment", project)
+    assert path == project / "database" / "factories" / "comment_factory.py"
+    content = path.read_text()
+    assert "class CommentFactory(Factory[Comment]):" in content
+    assert "from app.Models.comment import Comment" in content
+
+
+def test_make_factory_does_not_double_the_suffix(project: Path) -> None:
+    path = scaffold.make_factory("CommentFactory", project)
+    assert path == project / "database" / "factories" / "comment_factory.py"
+    assert "class CommentFactory(Factory[Comment]):" in path.read_text()
+
+
+def test_make_seeder_appends_seeder_suffix(project: Path) -> None:
+    path = scaffold.make_seeder("Comment", project)
+    assert path == project / "database" / "seeders" / "comment_seeder.py"
+    assert "class CommentSeeder(Seeder):" in path.read_text()
+
+
+def test_make_seeder_does_not_double_the_suffix(project: Path) -> None:
+    path = scaffold.make_seeder("CommentSeeder", project)
+    assert path == project / "database" / "seeders" / "comment_seeder.py"
+    assert "class CommentSeeder(Seeder):" in path.read_text()

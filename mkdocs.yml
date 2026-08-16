@@ -13,6 +13,7 @@ nav:
   - Console Commands: console-commands.md
   - OpenAPI & API Docs: openapi.md
   - Database & Migrations: database.md
+  - Factories & Seeders: database-seeding.md
   - Relationships: relationships.md
   - Validation: validation.md
   - Model Events: model-events.md

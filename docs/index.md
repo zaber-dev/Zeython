@@ -30,6 +30,7 @@ not a template you copy and diverge from.
 - [Console Commands](console-commands.md) — writing your own `zeython command <name>` CLI commands
 - [OpenAPI & API Docs](openapi.md) — generated spec + Swagger UI at `/docs`, from your actual routes
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
+- [Factories & Seeders](database-seeding.md) — generating model instances for tests, seeding demo/reference data
 - [Relationships](relationships.md) — defining and safely loading relationships in async code
 - [Validation](validation.md) — declarative model validation rules
 - [Model Events](model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
