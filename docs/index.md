@@ -47,6 +47,8 @@ not a template you copy and diverge from.
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
 - [AI](ai.md) — calling an LLM from your own app code
 - [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
+- [Health Check](health-check.md) — `/up`, for load balancers and container orchestrators
+- [Docker](docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
 - [Testing](testing.md) — writing tests against a Zeython application
 
 ## Contributing

@@ -19,7 +19,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app", "routes"]
+packages = ["app", "database", "routes"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

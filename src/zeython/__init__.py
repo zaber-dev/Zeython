@@ -36,6 +36,7 @@ from zeython.exceptions import (
     ValidationException,
 )
 from zeython.hashing import hash_password, verify_password
+from zeython.health import HealthCheckServiceProvider
 from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.providers import (
@@ -148,6 +149,7 @@ __all__ = [
     "ApiAuthServiceProvider",
     "hash_password",
     "verify_password",
+    "HealthCheckServiceProvider",
     "HTTPException",
     "BadRequestException",
     "UnauthorizedException",
