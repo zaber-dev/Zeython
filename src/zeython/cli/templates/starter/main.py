@@ -6,6 +6,7 @@ from zeython import (
     CacheServiceProvider,
     DatabaseServiceProvider,
     MailServiceProvider,
+    OpenApiServiceProvider,
     QueueServiceProvider,
     RateLimitServiceProvider,
     RouteServiceProvider,
@@ -29,6 +30,9 @@ app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)
 app.register(PostPolicyServiceProvider(app))
 app.register(RouteServiceProvider(app, modules=("routes.web",)))
+# Live at /docs (Swagger UI) and /openapi.json -- see docs/openapi.md.
+# OPENAPI_ENABLED=false in .env turns both off, e.g. in production.
+app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 
 if __name__ == "__main__":
     app.run()

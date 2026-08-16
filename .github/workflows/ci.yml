@@ -100,3 +100,11 @@ jobs:
           test "$API_ME_STATUS" = "200"
           NO_TOKEN_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/me)
           test "$NO_TOKEN_STATUS" = "401"
+          curl -sf http://127.0.0.1:8000/openapi.json | python3 -c "
+import json, sys
+spec = json.load(sys.stdin)
+assert spec['info']['title'] == 'CI Smoke Test'
+assert '/posts' in spec['paths']
+assert spec['paths']['/posts']['get']['summary'] == 'List posts'
+"
+          curl -sf http://127.0.0.1:8000/docs | grep -q "swagger-ui"
