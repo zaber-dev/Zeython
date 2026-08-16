@@ -36,6 +36,7 @@ not a template you copy and diverge from.
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
 - [Background Jobs](queues.md) — dispatching work off the request/response cycle
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
+- [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
 - [Testing](testing.md) — writing tests against a Zeython application
 
 ## Contributing

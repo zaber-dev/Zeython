@@ -31,6 +31,10 @@ scaffolding on every project. Zeython does that assembly once:
   predictable places (`app/Controllers`, `app/Models`, `routes/`).
 - **A real CLI** — `zeython new`, `zeython serve`, `zeython make:*`,
   `zeython db:*` cover project creation, code generation, and migrations.
+- **AI-agent ready** — an MCP server (`zeython mcp`) gives coding agents
+  direct tools to inspect a project's actual routes and database schema, and
+  to search documentation bundled with the exact installed framework
+  version, instead of guessing. See [docs/ai-agents.md](docs/ai-agents.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   and a pytest suite; it is not scaffolding wrapped around unfinished features.
 
@@ -130,6 +134,7 @@ my_blog/
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
+- [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents
 - [docs/testing.md](docs/testing.md)
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/

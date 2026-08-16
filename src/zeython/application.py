@@ -77,6 +77,11 @@ class Application:
         self._providers.append(instance)
         return self
 
+    @property
+    def providers(self) -> list[ServiceProvider]:
+        """Service providers registered so far, in registration order."""
+        return list(self._providers)
+
     def add_middleware(self, middleware_class: Callable[..., Any], **options: Any) -> None:
         self._middleware.append(Middleware(middleware_class, **options))
 

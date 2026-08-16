@@ -17,6 +17,7 @@
 | `RateLimiter` | `zeython.rate_limit` | In-memory sliding-window rate limiting: `throttle()` per-route guard, opt-in blanket middleware, applied to auth by default (see [Rate Limiting](rate-limiting.md)). |
 | `Queue` | `zeython.queue` | Background jobs: `Job` + `dispatch()`, `InMemoryQueue` (background task, no lifespan wiring needed) by default, `SyncQueue` for tests (see [Background Jobs](queues.md)). |
 | `Mailer` | `zeython.mail` | Outbound email: `LogMailer` by default (zero setup), `SmtpMailer` opt-in. A job's `handle()` can declare `mailer: Mailer` and get it autowired (see [Mail](mail.md)). |
+| MCP server | `zeython.mcp` | Read-only project introspection for AI coding agents (`zeython mcp`): real registered routes, real mapped models, app info, and search over the bundled docs — an opt-in `mcp` extra, not imported by the framework core (see [AI Agents](ai-agents.md)). |
 
 ## Logging
 
