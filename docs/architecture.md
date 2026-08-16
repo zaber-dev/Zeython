@@ -12,6 +12,7 @@
 | `Config` | `zeython.config` | Layered `.env` + process-environment configuration with dot-path access (`config.get("database.url")`). |
 | `Views` | `zeython.views` | Jinja2 rendering by convention from `resources/views/`, bound via `ViewServiceProvider` (see [Views](views.md)). |
 | `CorsServiceProvider` | `zeython.providers` | Opt-in, `.env`-configured CORS support wrapping Starlette's `CORSMiddleware`. |
+| `AuthServiceProvider` | `zeython.auth` | Session-based auth: signed-cookie sessions, password hashing, `login`/`logout`/`current_user`/`require_auth` (see [Authentication](authentication.md)). |
 
 ## Boot lifecycle
 

@@ -13,6 +13,7 @@ nav:
   - Database & Migrations: database.md
   - Validation: validation.md
   - Views: views.md
+  - Authentication: authentication.md
   - Testing: testing.md
 theme:
   name: material
