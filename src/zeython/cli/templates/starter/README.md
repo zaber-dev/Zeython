@@ -6,11 +6,14 @@ A [Zeython](https://github.com/zaber-dev/Zeython) application.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e .
+pip install -e ".[dev]"
 cp .env.example .env
 
 zeython serve
 ```
+
+`[dev]` pulls in pytest and friends for `tests/` below; drop it (`pip
+install -e .`) for a production install that doesn't need them.
 
 Visit http://127.0.0.1:8000
 
