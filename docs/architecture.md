@@ -13,6 +13,7 @@
 | `Views` | `zeython.views` | Jinja2 rendering by convention from `resources/views/`, bound via `ViewServiceProvider` (see [Views](views.md)). |
 | `CorsServiceProvider` | `zeython.providers` | Opt-in, `.env`-configured CORS support wrapping Starlette's `CORSMiddleware`. |
 | `AuthServiceProvider` | `zeython.auth` | Session-based auth: signed-cookie sessions, password hashing, `login`/`logout`/`current_user`/`require_auth` (see [Authentication](authentication.md)). |
+| `Gate` | `zeython.authorization` | Named authorization abilities: `gate.define(...)`, `authorize(request, ability, ...)` (403 on a failed check, 401 if not logged in at all) (see [Authorization](authorization.md)). |
 | `Storage` | `zeython.storage` | Backend-agnostic file storage (`LocalStorage` by default, `S3Storage` opt-in) with `store_upload()` for safe, validated uploads (see [File Storage](storage.md)). |
 | `RateLimiter` | `zeython.rate_limit` | In-memory sliding-window rate limiting: `throttle()` per-route guard, opt-in blanket middleware, applied to auth by default (see [Rate Limiting](rate-limiting.md)). |
 | `Cache` | `zeython.cache` | An in-memory TTL cache: `get`/`put`/`forget`/`has`/`flush`, plus `remember()` for get-or-compute (see [Caching](caching.md)). |

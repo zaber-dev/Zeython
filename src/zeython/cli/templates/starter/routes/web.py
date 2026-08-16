@@ -20,7 +20,7 @@ async def welcome(request):
 
 
 app.router.resource("/users", UserController, only=("index", "show"))
-app.router.resource("/posts", PostController, only=("index", "show", "store"))
+app.router.resource("/posts", PostController, only=("index", "show", "store", "destroy"))
 
 auth = AuthController()
 app.post("/register", name="auth.register")(auth.register)
