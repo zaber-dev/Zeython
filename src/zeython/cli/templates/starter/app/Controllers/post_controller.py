@@ -1,7 +1,8 @@
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 
 from zeython import Cache, Controller, NotFoundException
 from zeython.auth import require_auth
+from zeython.authorization import authorize
 
 from app.Models.post import Post
 
@@ -45,3 +46,22 @@ class PostController(Controller):
         await cache.forget(_INDEX_CACHE_KEY)
 
         return JSONResponse(post.to_dict(include=("author",)), status_code=201)
+
+    async def destroy(self, request):
+        post = await Post.find(int(request.path_params["id"]))
+        if post is None:
+            raise NotFoundException("Post not found")
+
+        # See docs/authorization.md and app/Providers/post_policy_service_provider.py
+        # -- only the post's own author may delete it.
+        await authorize(request, "delete-post", post)
+        await post.delete()
+
+        cache: Cache = request.app.state.container.make(Cache)
+        await cache.forget(_INDEX_CACHE_KEY)
+
+        # A 204 response must have an empty body -- JSONResponse(None, ...)
+        # would still serialize a "null" body, which a real HTTP server
+        # rejects (Content-Length mismatch) even though it looks fine
+        # against the in-process test client. Response() has no body.
+        return Response(status_code=204)
