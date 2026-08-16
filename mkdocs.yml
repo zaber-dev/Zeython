@@ -11,6 +11,8 @@ nav:
   - Architecture: architecture.md
   - CLI Reference: cli.md
   - Database & Migrations: database.md
+  - Validation: validation.md
+  - Views: views.md
   - Testing: testing.md
 theme:
   name: material
