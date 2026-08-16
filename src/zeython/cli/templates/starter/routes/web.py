@@ -4,6 +4,7 @@ from main import app
 from zeython.views import render
 
 from app.Controllers.auth_controller import AuthController
+from app.Controllers.post_controller import PostController
 from app.Controllers.upload_controller import UploadController
 from app.Controllers.user_controller import UserController
 
@@ -19,6 +20,7 @@ async def welcome(request):
 
 
 app.router.resource("/users", UserController, only=("index", "show"))
+app.router.resource("/posts", PostController, only=("index", "show", "store"))
 
 auth = AuthController()
 app.post("/register", name="auth.register")(auth.register)

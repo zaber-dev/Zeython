@@ -40,6 +40,12 @@ All of these require an active database session — present automatically inside
 a request, or via `async with database.session():` elsewhere (see
 [Architecture](architecture.md#request-scoped-database-sessions)).
 
+`find`/`all`/`find_by`/`first_where` also accept `include=("relationship_name",)`
+to eager-load relationships — required reading before you define your first
+`relationship()`, since touching one without eager-loading crashes async
+code differently than you'd expect from sync SQLAlchemy. See
+[Relationships](relationships.md).
+
 ## Migrations
 
 ```bash

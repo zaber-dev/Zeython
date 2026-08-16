@@ -38,6 +38,14 @@ dependency injection container, a service-provider boot lifecycle, and a
 - Models go in `app/Models/`, subclass `zeython.Model`, and get registered in
   `app/Models/__init__.py` (so Alembic autogenerate can see them). Use
   `zeython make model <Name>` rather than hand-rolling this.
+- Relationships are plain SQLAlchemy `relationship()` — no framework wrapper
+  needed to define one. Loading is where it matters: NEVER touch a
+  relationship attribute you didn't fetch with `include=("name",)` (on
+  `find`/`all`/`find_by`/`first_where`) — it raises `MissingGreenlet` in
+  async code, not a normal lazy load. Same rule for `to_dict()`: pass
+  `include=` only for relationships you eager-loaded, or it raises a clear
+  `RuntimeError` telling you so (better than `MissingGreenlet`, still an
+  error). See `docs/relationships.md`.
 - Validate on the model, not in the controller: set `__rules__` on the model
   (`docs/validation.md`) instead of hand-checking `request.json()` fields —
   `create()`/`save()`/`update()` already raise `ValidationException` (a 422
