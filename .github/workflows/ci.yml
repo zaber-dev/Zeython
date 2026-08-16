@@ -70,3 +70,15 @@ jobs:
           test "$UPLOAD_STATUS" = "201"
           UPLOAD_URL=$(python3 -c "import json; print(json.load(open('/tmp/upload.json'))['url'])")
           curl -sf "http://127.0.0.1:8000$UPLOAD_URL" | grep -q "upload me"
+          POST_JSON=$(curl -s -b /tmp/cookies.txt -X POST http://127.0.0.1:8000/posts \
+            -H 'Content-Type: application/json' -d '{"title":"t","body":"b"}')
+          POST_ID=$(python3 -c "import json; print(json.loads('''$POST_JSON''')['id'])")
+          curl -s -c /tmp/cookies2.txt -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
+            -d '{"name":"Bea","email":"bea@example.com","password":"hunter2"}' -o /dev/null
+          STRANGER_DELETE_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies2.txt \
+            -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
+          test "$STRANGER_DELETE_STATUS" = "403"
+          OWNER_DELETE=$(curl -s -o /tmp/delete.out -w '%{http_code}' -b /tmp/cookies.txt \
+            -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
+          test "$OWNER_DELETE" = "204"
+          test ! -s /tmp/delete.out  # a 204 must have an empty body

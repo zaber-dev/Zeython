@@ -11,6 +11,7 @@ from zeython.auth import (
     logout,
     require_auth,
 )
+from zeython.authorization import AuthorizationServiceProvider, Gate, authorize
 from zeython.cache import Cache, CacheServiceProvider, InMemoryCache
 from zeython.config import Config
 from zeython.container import Container
@@ -119,6 +120,9 @@ __all__ = [
     "logout",
     "current_user",
     "require_auth",
+    "Gate",
+    "authorize",
+    "AuthorizationServiceProvider",
     "hash_password",
     "verify_password",
     "HTTPException",

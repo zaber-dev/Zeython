@@ -131,6 +131,7 @@ my_blog/
 - [docs/views.md](docs/views.md)
 - [docs/frontend.md](docs/frontend.md) — Tailwind out of the box (dev), moving to a compiled build
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
+- [docs/authorization.md](docs/authorization.md) — named abilities (`Gate`), `authorize()` route guards
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
 - [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
