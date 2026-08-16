@@ -31,6 +31,7 @@ not a template you copy and diverge from.
 - [Validation](validation.md) — declarative model validation rules
 - [Views](views.md) — server-rendered HTML with Jinja2
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
+- [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Testing](testing.md) — writing tests against a Zeython application
 
 ## Contributing

@@ -10,3 +10,5 @@ venv/
 *.egg-info/
 dist/
 build/
+/storage/app/*
+!/storage/app/.gitkeep

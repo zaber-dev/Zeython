@@ -14,6 +14,7 @@ nav:
   - Validation: validation.md
   - Views: views.md
   - Authentication: authentication.md
+  - File Storage: storage.md
   - Testing: testing.md
 theme:
   name: material

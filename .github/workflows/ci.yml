@@ -42,7 +42,7 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --upgrade pip
       - run: pip install -e .
-      - name: Generate a project and verify it boots
+      - name: Generate a project and run its test suite
         run: |
           zeython new "CI Smoke Test" --path /tmp/ci-smoke-test
           cd /tmp/ci-smoke-test
@@ -51,3 +51,22 @@ jobs:
           python -m alembic revision --autogenerate -m "initial"
           python -m alembic upgrade head
           pytest -v
+      - name: Boot the real server and exercise it over HTTP
+        run: |
+          cd /tmp/ci-smoke-test
+          zeython serve --port 8000 --no-reload &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8000/ && break || sleep 0.5; done
+          curl -sf http://127.0.0.1:8000/ | grep -q "CI Smoke Test"
+          curl -sf http://127.0.0.1:8000/welcome | grep -q "Rendered by Jinja2"
+          REGISTER_STATUS=$(curl -s -o /tmp/register.json -w '%{http_code}' -c /tmp/cookies.txt \
+            -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
+            -d '{"name":"Ada","email":"ada@example.com","password":"hunter2"}')
+          test "$REGISTER_STATUS" = "201"
+          ME_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies.txt http://127.0.0.1:8000/me)
+          test "$ME_STATUS" = "200"
+          echo "upload me" > /tmp/upload.png
+          UPLOAD_STATUS=$(curl -s -o /tmp/upload.json -w '%{http_code}' -b /tmp/cookies.txt \
+            -F "file=@/tmp/upload.png" http://127.0.0.1:8000/uploads)
+          test "$UPLOAD_STATUS" = "201"
+          UPLOAD_URL=$(python3 -c "import json; print(json.load(open('/tmp/upload.json'))['url'])")
+          curl -sf "http://127.0.0.1:8000$UPLOAD_URL" | grep -q "upload me"
