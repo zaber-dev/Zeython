@@ -15,6 +15,19 @@
 | `AuthServiceProvider` | `zeython.auth` | Session-based auth: signed-cookie sessions, password hashing, `login`/`logout`/`current_user`/`require_auth` (see [Authentication](authentication.md)). |
 | `Storage` | `zeython.storage` | Backend-agnostic file storage (`LocalStorage` by default, `S3Storage` opt-in) with `store_upload()` for safe, validated uploads (see [File Storage](storage.md)). |
 | `RateLimiter` | `zeython.rate_limit` | In-memory sliding-window rate limiting: `throttle()` per-route guard, opt-in blanket middleware, applied to auth by default (see [Rate Limiting](rate-limiting.md)). |
+| `Queue` | `zeython.queue` | Background jobs: `Job` + `dispatch()`, `InMemoryQueue` (background task, no lifespan wiring needed) by default, `SyncQueue` for tests (see [Background Jobs](queues.md)). |
+
+## Logging
+
+`Application()` calls `logging.basicConfig()` for you — `APP_DEBUG=true` →
+root level `DEBUG`, otherwise `INFO` — and quiets a handful of noisy
+third-party loggers (`aiosqlite`, `sqlalchemy.engine`, `asyncio`) to
+`WARNING` so they don't drown out your own app's logs. This is skipped
+entirely if the root logger already has a handler when `Application()` runs
+(you called `logging.basicConfig()` yourself, or your deployment platform
+did) — it never overrides an existing setup. Without this, INFO-level logs
+(including background job failures — see [Background Jobs](queues.md)) are
+silently dropped, since uvicorn only configures its own logger namespaces.
 
 ## Boot lifecycle
 

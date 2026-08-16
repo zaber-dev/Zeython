@@ -65,6 +65,14 @@ dependency injection container, a service-provider boot lifecycle, and a
   oracle. The generated `AuthController` already does this for
   login/register; carry the same pattern to any auth-adjacent endpoint you
   add. See `docs/rate-limiting.md`.
+- Anything that shouldn't block the response (sending an email, calling a
+  slow third-party API, generating a report) is a `Job` in `app/Jobs/`,
+  dispatched with `await dispatch(request, SomeJob(...))` from
+  `zeython.queue` — not awaited inline in the handler. `zeython make job
+  <Name>` scaffolds one. Remember the default queue is process-local (a job
+  pushed but not yet run is lost on crash/restart) — that's fine for a
+  welcome email, not for anything you'd be upset to silently lose. See
+  `docs/queues.md`.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in

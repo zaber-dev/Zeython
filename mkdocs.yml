@@ -16,6 +16,7 @@ nav:
   - Authentication: authentication.md
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
+  - Background Jobs: queues.md
   - Testing: testing.md
 theme:
   name: material

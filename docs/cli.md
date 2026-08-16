@@ -22,6 +22,7 @@ zeython make model Post              # app/Models/post.py, wired into app/Models
 zeython make controller Post         # app/Controllers/post_controller.py (PostController)
 zeython make middleware RequestLogger  # app/Middleware/request_logger.py
 zeython make provider Payment        # app/Providers/payment_service_provider.py
+zeython make job SendWelcomeEmail    # app/Jobs/send_welcome_email_job.py
 ```
 
 ## Database migrations (Alembic)

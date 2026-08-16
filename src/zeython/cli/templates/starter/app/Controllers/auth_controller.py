@@ -4,8 +4,10 @@ from zeython import AuthManager, Controller, UnauthorizedException, ValidationEx
 from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
+from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
 
+from app.Jobs.send_welcome_email_job import SendWelcomeEmailJob
 from app.Models.user import User
 
 
@@ -32,6 +34,10 @@ class AuthController(Controller):
         user = User(**data)
         user.set_password(password)
         await user.save()
+
+        # Runs in the background (see docs/queues.md) so the response doesn't
+        # wait on whatever sending an email actually involves.
+        await dispatch(request, SendWelcomeEmailJob(to_email=user.email, name=user.name))
 
         auth_login(request, user)
         return JSONResponse(user.to_dict(), status_code=201)

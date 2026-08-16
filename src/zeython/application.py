@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,33 @@ from zeython.exceptions import default_exception_handlers
 from zeython.providers import ServiceProvider
 from zeython.routing import Endpoint, Router
 
+#: Third-party loggers that are useful at DEBUG for their own maintainers but
+#: are just noise for an application developer with APP_DEBUG=true — quieted
+#: unless you explicitly turn one back up yourself.
+_QUIET_LOGGERS = ("aiosqlite", "sqlalchemy.engine", "asyncio")
+
+
+def _configure_default_logging(config: Config) -> None:
+    """A sane logging default, so job failures/retries and app logs are visible.
+
+    Without this, Python's root logger has no handler and INFO-level logs
+    (including ``zeython.queue``'s own failure/retry logging) are silently
+    dropped -- uvicorn only configures its own logger namespaces, not yours.
+
+    Entirely skipped if the root logger already has a handler -- you called
+    ``logging.basicConfig()`` yourself, your deployment platform did, or a
+    previous ``Application()`` in this process already ran this -- so it
+    never overrides an existing setup, including the quieting below.
+    """
+    if logging.root.handlers:
+        return
+
+    level = logging.DEBUG if config.debug else logging.INFO
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+
+    for name in _QUIET_LOGGERS:
+        logging.getLogger(name).setLevel(logging.WARNING)
+
 
 class Application:
     """The central object: owns the container, config, router, and providers.
@@ -28,6 +56,7 @@ class Application:
     def __init__(self, config: Config | None = None, *, base_path: str | Path | None = None) -> None:
         self.base_path = Path(base_path) if base_path is not None else Path.cwd()
         self.config = config or Config.load(self.base_path)
+        _configure_default_logging(self.config)
         self.container = Container()
         self.container.instance(Config, self.config)
         self.container.instance(Container, self.container)
