@@ -4,6 +4,7 @@ from zeython import AuthManager, Controller, UnauthorizedException, ValidationEx
 from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
+from zeython.rate_limit import client_ip, throttle
 
 from app.Models.user import User
 
@@ -13,9 +14,15 @@ class AuthController(Controller):
 
     Session-based: a successful register/login sets a signed cookie (see
     AuthServiceProvider in main.py); logout clears it. See docs/authentication.md.
+
+    Login and register are throttled per client IP (see docs/rate-limiting.md)
+    -- without this, an attacker can try passwords against /login as fast as
+    the network allows.
     """
 
     async def register(self, request):
+        await throttle(request, key=f"register:{client_ip(request)}", limit=5, window=3600)
+
         data = await request.json()
         password = data.pop("password", None)
         if not password:
@@ -30,6 +37,8 @@ class AuthController(Controller):
         return JSONResponse(user.to_dict(), status_code=201)
 
     async def login(self, request):
+        await throttle(request, key=f"login:{client_ip(request)}", limit=5, window=60)
+
         data = await request.json()
         manager: AuthManager = request.app.state.container.make(AuthManager)
         user = await manager.attempt(data.get("email", ""), data.get("password", ""))

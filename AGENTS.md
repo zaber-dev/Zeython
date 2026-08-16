@@ -58,6 +58,13 @@ dependency injection container, a service-provider boot lifecycle, and a
   key from becoming a path-traversal or overwrite vector. Pass
   `allowed_extensions`/`max_size` explicitly; don't accept arbitrary files
   at an unbounded size. See `docs/storage.md`.
+- Any endpoint that checks a credential or secret (login, password reset,
+  token verification, invite-code redemption) must call
+  `await throttle(request, limit=..., window=...)` from `zeython.rate_limit`
+  before doing the check — an unthrottled credential check is a brute-force
+  oracle. The generated `AuthController` already does this for
+  login/register; carry the same pattern to any auth-adjacent endpoint you
+  add. See `docs/rate-limiting.md`.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
