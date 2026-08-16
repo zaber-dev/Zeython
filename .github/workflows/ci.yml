@@ -52,6 +52,8 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --upgrade pip
       - run: pip install -e .
+      - name: Build a local zeython wheel (not on a real index yet, for the Docker step below)
+        run: pip wheel . --no-deps -w /tmp/zeython-wheel
       - name: Generate a project and run its test suite
         run: |
           zeython new "CI Smoke Test" --path /tmp/ci-smoke-test
@@ -106,8 +108,10 @@ jobs:
           curl -sf http://127.0.0.1:8000/up | grep -q '"status":"ok"'
       - name: Build and boot the generated project's Docker image
         run: |
+          mkdir -p /tmp/ci-smoke-test/_ci_wheels
+          cp /tmp/zeython-wheel/*.whl /tmp/ci-smoke-test/_ci_wheels/
           cd /tmp/ci-smoke-test
-          docker build -t ci-smoke-test:latest .
+          docker build --build-arg PIP_FIND_LINKS=_ci_wheels -t ci-smoke-test:latest .
           docker run -d --name ci-smoke-test --env-file .env -p 8001:8000 ci-smoke-test:latest
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:8001/up && break || sleep 1; done
           curl -sf http://127.0.0.1:8001/up | grep -q '"status":"ok"'
