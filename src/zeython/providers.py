@@ -56,3 +56,45 @@ class RouteServiceProvider(ServiceProvider):
 
         for module_name in self.modules:
             importlib.import_module(module_name)
+
+
+class ViewServiceProvider(ServiceProvider):
+    """Binds a :class:`~zeython.views.Views` instance for server-rendered HTML.
+
+    Looks for templates in ``resources/views`` under the app's base path by
+    default; override with ``VIEWS_PATH`` in ``.env`` or the ``views.path``
+    config key.
+    """
+
+    def register(self) -> None:
+        from zeython.views import Views
+
+        directory = self.config.get("views.path", str(self.app.base_path / "resources" / "views"))
+        views = Views(directory)
+        self.container.singleton(Views, lambda: views)
+
+
+class CorsServiceProvider(ServiceProvider):
+    """Opt-in CORS support, configured via ``.env``.
+
+    - ``CORS_ORIGINS`` — comma-separated list of allowed origins (default: none)
+    - ``CORS_ALLOW_CREDENTIALS`` — default ``false``
+    - ``CORS_ALLOW_METHODS`` — comma-separated, default ``*``
+    - ``CORS_ALLOW_HEADERS`` — comma-separated, default ``*``
+    """
+
+    def boot(self) -> None:
+        from starlette.middleware.cors import CORSMiddleware
+
+        origins_raw = self.config.get("cors.origins", "")
+        origins = [origin.strip() for origin in str(origins_raw).split(",") if origin.strip()]
+        methods = [m.strip() for m in str(self.config.get("cors.allow_methods", "*")).split(",") if m.strip()]
+        headers = [h.strip() for h in str(self.config.get("cors.allow_headers", "*")).split(",") if h.strip()]
+
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=bool(self.config.get("cors.allow_credentials", False)),
+            allow_methods=methods,
+            allow_headers=headers,
+        )

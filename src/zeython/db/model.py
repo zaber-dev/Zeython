@@ -9,6 +9,8 @@ from sqlalchemy import Boolean, DateTime, Integer, inspect, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 from zeython.db.session import Base, current_session
+from zeython.exceptions import ValidationException
+from zeython.validation import Rule
 
 
 def _utcnow() -> datetime:
@@ -37,13 +39,30 @@ class Model(Base):
     #: Fields hidden from ``to_dict``/``to_json`` output, e.g. password hashes.
     __hidden__: ClassVar[tuple[str, ...]] = ()
 
+    #: Declarative validation rules, e.g. ``{"email": [required(), email()]}``.
+    #: Checked by ``save()`` (and therefore ``create()``/``update()``); a
+    #: failing rule raises :class:`~zeython.exceptions.ValidationException`.
+    __rules__: ClassVar[dict[str, list[Rule]]] = {}
+
+    def validate(self) -> dict[str, list[str]]:
+        """Run ``__rules__`` against the current field values. Does not raise."""
+        errors: dict[str, list[str]] = {}
+        for field, rules in self.__rules__.items():
+            value = getattr(self, field, None)
+            for rule in rules:
+                if not rule(value):
+                    errors.setdefault(field, []).append(rule.message)
+        return errors
+
+    def validate_or_raise(self) -> None:
+        errors = self.validate()
+        if errors:
+            raise ValidationException(errors)
+
     @classmethod
     async def create(cls, **attributes: Any) -> Self:
-        session = current_session()
         instance = cls(**attributes)
-        session.add(instance)
-        await session.flush()
-        return instance
+        return await instance.save()
 
     @classmethod
     async def find(cls, id_: Any, *, include_deleted: bool = False) -> Self | None:
@@ -80,6 +99,7 @@ class Model(Base):
         return results[0] if results else None
 
     async def save(self) -> Self:
+        self.validate_or_raise()
         session = current_session()
         session.add(self)
         await session.flush()

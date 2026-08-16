@@ -1,7 +1,7 @@
 from starlette.responses import JSONResponse
 
 from app.Models.user import User
-from zeython import Controller, NotFoundException, ValidationException
+from zeython import Controller, NotFoundException
 
 
 class UserController(Controller):
@@ -19,7 +19,7 @@ class UserController(Controller):
 
     async def store(self, request):
         data = await request.json()
-        if not data.get("email"):
-            raise ValidationException({"email": ["Email is required."]})
+        # User.__rules__ (see app/Models/user.py) validates this automatically;
+        # a bad payload raises ValidationException -> 422 JSON error response.
         user = await User.create(**data)
         return JSONResponse(user.to_dict(), status_code=201)

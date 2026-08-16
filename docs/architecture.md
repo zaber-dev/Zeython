@@ -8,8 +8,10 @@
 | `Container` | `zeython.container` | A type-hint-driven dependency injection container: `bind`, `singleton`, `instance`, `make`, and `call` (autowired function invocation). |
 | `ServiceProvider` | `zeython.providers` | The seam where cross-cutting concerns register bindings (`register()`) and wire themselves up (`boot()`). |
 | `Router` | `zeython.routing` | Decorator-based routing (`@app.get(...)`), route groups (`include`), and RESTful `resource()` registration — compiles to Starlette `Route`/`Mount` objects. |
-| `Model` | `zeython.db.Model` | An async Active-Record base class: `create`, `find`, `all`, `find_by`, `save`, `update`, `delete` (soft by default), `to_dict`. |
+| `Model` | `zeython.db.Model` | An async Active-Record base class: `create`, `find`, `all`, `find_by`, `save`, `update`, `delete` (soft by default), `to_dict`, plus declarative validation via `__rules__` (see [Validation](validation.md)). |
 | `Config` | `zeython.config` | Layered `.env` + process-environment configuration with dot-path access (`config.get("database.url")`). |
+| `Views` | `zeython.views` | Jinja2 rendering by convention from `resources/views/`, bound via `ViewServiceProvider` (see [Views](views.md)). |
+| `CorsServiceProvider` | `zeython.providers` | Opt-in, `.env`-configured CORS support wrapping Starlette's `CORSMiddleware`. |
 
 ## Boot lifecycle
 
