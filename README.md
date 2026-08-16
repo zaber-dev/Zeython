@@ -127,6 +127,7 @@ my_blog/
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
+- [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
 - [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents

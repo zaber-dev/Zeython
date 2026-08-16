@@ -10,6 +10,7 @@ from zeython.auth import (
     logout,
     require_auth,
 )
+from zeython.cache import Cache, CacheServiceProvider, InMemoryCache
 from zeython.config import Config
 from zeython.container import Container
 from zeython.db import Database, Model
@@ -78,6 +79,9 @@ __all__ = [
     "CorsServiceProvider",
     "Views",
     "render",
+    "Cache",
+    "InMemoryCache",
+    "CacheServiceProvider",
     "Storage",
     "LocalStorage",
     "S3Storage",

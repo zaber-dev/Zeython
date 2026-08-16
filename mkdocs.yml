@@ -17,6 +17,7 @@ nav:
   - Authentication: authentication.md
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
+  - Caching: caching.md
   - Background Jobs: queues.md
   - Mail: mail.md
   - AI Agents: ai-agents.md

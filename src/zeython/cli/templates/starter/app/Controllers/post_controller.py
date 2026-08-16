@@ -1,13 +1,16 @@
 from starlette.responses import JSONResponse
 
-from zeython import Controller, NotFoundException
+from zeython import Cache, Controller, NotFoundException
 from zeython.auth import require_auth
 
 from app.Models.post import Post
 
+_INDEX_CACHE_KEY = "posts:index"
+
 
 class PostController(Controller):
-    """Demonstrates relationship loading (see docs/relationships.md).
+    """Demonstrates relationship loading (see docs/relationships.md) and
+    caching a read path (see docs/caching.md).
 
     Posts are always fetched with `include=("author",)`: touching
     `post.author` without eager-loading it raises `MissingGreenlet` in an
@@ -16,8 +19,13 @@ class PostController(Controller):
     """
 
     async def index(self, request):
-        posts = await Post.all(include=("author",))
-        return JSONResponse([post.to_dict(include=("author",)) for post in posts])
+        cache: Cache = request.app.state.container.make(Cache)
+
+        async def fetch():
+            posts = await Post.all(include=("author",))
+            return [post.to_dict(include=("author",)) for post in posts]
+
+        return JSONResponse(await cache.remember(_INDEX_CACHE_KEY, 30, fetch))
 
     async def show(self, request):
         post = await Post.find(int(request.path_params["id"]), include=("author",))
@@ -32,4 +40,8 @@ class PostController(Controller):
         # loaded in memory, so to_dict(include=("author",)) works immediately
         # without a second query.
         post = await Post.create(title=data.get("title"), body=data.get("body"), author=user)
+
+        cache: Cache = request.app.state.container.make(Cache)
+        await cache.forget(_INDEX_CACHE_KEY)
+
         return JSONResponse(post.to_dict(include=("author",)), status_code=201)
