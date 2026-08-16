@@ -4,9 +4,8 @@ per-route ``throttle()`` guard, and an opt-in blanket middleware.
 The in-memory backend is process-local by design — correct for a single
 worker, and a real (if common) limitation once you run multiple processes
 or machines, where each would count independently. That's a documented
-trade-off, not an oversight: swap in a shared backend (Redis, etc.) by
-implementing :class:`RateLimiter` yourself and binding it in place of
-:class:`InMemoryRateLimiter` when you actually need distributed limits.
+trade-off, not an oversight: :class:`RedisRateLimiter` is the opt-in,
+shared alternative for when you need distributed limits.
 """
 
 from __future__ import annotations
@@ -71,6 +70,51 @@ class InMemoryRateLimiter(RateLimiter):
             return RateLimitResult(allowed=True, remaining=max(limit - len(bucket), 0), retry_after=0.0)
 
 
+class RedisRateLimiter(RateLimiter):
+    """A Redis-backed :class:`RateLimiter`, shared across every process/machine
+    pointed at the same Redis — the limitation :class:`InMemoryRateLimiter`'s
+    docstring names. Requires the ``redis`` extra (``pip install zeython[redis]``).
+
+    Fixed-window (``INCR`` + ``EXPIRE``), not sliding-window-log like
+    ``InMemoryRateLimiter`` — the standard, well-known Redis rate-limiting
+    pattern, and its standard trade-off: a client can get up to ``2x limit``
+    requests through across a window boundary (e.g. a burst just before the
+    window resets, then another just after). Accept that, or implement a
+    sliding-window version yourself if you need the tighter guarantee.
+
+    All keys are namespaced under ``prefix`` (default ``"zeython:ratelimit:"``)
+    — safe to point at a Redis instance shared with other subsystems.
+    """
+
+    def __init__(self, url: str, *, prefix: str = "zeython:ratelimit:") -> None:
+        try:
+            from redis.asyncio import Redis
+        except ImportError as exc:
+            raise ImportError(
+                "RedisRateLimiter requires the redis package. Install it with: pip install zeython[redis]"
+            ) from exc
+
+        self._client = Redis.from_url(url)
+        self._prefix = prefix
+
+    async def hit(self, key: str, *, limit: int, window: float) -> RateLimitResult:
+        redis_key = f"{self._prefix}{key}"
+        count = await self._client.incr(redis_key)
+        if count == 1:
+            # Only the request that starts a new window sets its expiry --
+            # a crash between INCR and EXPIRE could in principle leave a key
+            # with no expiry (a well-known, generally-accepted risk of the
+            # two-call INCR+EXPIRE pattern); a stray un-expiring key just
+            # means that one key's window never resets, not a security hole.
+            await self._client.expire(redis_key, max(int(window), 1))
+
+        if count > limit:
+            ttl = await self._client.ttl(redis_key)
+            return RateLimitResult(allowed=False, remaining=0, retry_after=float(max(ttl, 0)))
+
+        return RateLimitResult(allowed=True, remaining=max(limit - count, 0), retry_after=0.0)
+
+
 def client_ip(request: Request) -> str:
     """The connecting client's IP, or ``"unknown"`` if the ASGI server didn't report one."""
     return request.client.host if request.client else "unknown"
@@ -132,7 +176,8 @@ class RateLimitMiddleware:
 
 
 class RateLimitServiceProvider(ServiceProvider):
-    """Binds a :class:`RateLimiter` into the container.
+    """Binds a :class:`RateLimiter` into the container. :class:`InMemoryRateLimiter`
+    (process-local) by default.
 
     The limiter is always available for :func:`throttle` calls in your own
     handlers. The blanket, all-routes middleware is opt-in via ``.env``:
@@ -140,6 +185,11 @@ class RateLimitServiceProvider(ServiceProvider):
     - ``RATE_LIMIT_ENABLED`` — default ``false``
     - ``RATE_LIMIT_MAX_REQUESTS`` — default ``60``
     - ``RATE_LIMIT_WINDOW_SECONDS`` — default ``60``
+
+    For a shared, distributed limiter, bind :class:`RedisRateLimiter`
+    instead of registering this provider::
+
+        app.container.singleton(RateLimiter, lambda: RedisRateLimiter(config.get("redis.url")))
     """
 
     def register(self) -> None:
@@ -162,6 +212,7 @@ class RateLimitServiceProvider(ServiceProvider):
 __all__ = [
     "RateLimiter",
     "InMemoryRateLimiter",
+    "RedisRateLimiter",
     "RateLimitResult",
     "throttle",
     "client_ip",
