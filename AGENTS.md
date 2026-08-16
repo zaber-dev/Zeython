@@ -38,6 +38,13 @@ dependency injection container, a service-provider boot lifecycle, and a
 - Models go in `app/Models/`, subclass `zeython.Model`, and get registered in
   `app/Models/__init__.py` (so Alembic autogenerate can see them). Use
   `zeython make model <Name>` rather than hand-rolling this.
+- Validate on the model, not in the controller: set `__rules__` on the model
+  (`docs/validation.md`) instead of hand-checking `request.json()` fields —
+  `create()`/`save()`/`update()` already raise `ValidationException` (a 422
+  JSON response) for you.
+- Server-rendered HTML goes through `zeython.views.render(request, name,
+  context)`, reading from `resources/views/` — register `ViewServiceProvider`
+  in `main.py` first (`docs/views.md`). Don't hand-roll Jinja2 environments.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
   are plain `async def method(self, request) -> Response`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
