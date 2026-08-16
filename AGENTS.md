@@ -93,6 +93,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `handle()` can declare typed params (e.g. `handle(self, mailer: Mailer)`)
   and get them autowired from the container, same as anywhere else. See
   `docs/queues.md`.
+- For a read path worth caching, use `zeython.Cache` (bound in the
+  container) rather than hand-rolling a module-level dict: `await
+  cache.remember(key, ttl, callback)` covers the common
+  check-then-compute-then-store pattern in one call. Remember to
+  `cache.forget(key)` wherever the underlying data changes — a cache with
+  no invalidation path just serves stale data forever. See
+  `docs/caching.md`.
 - Send email via `zeython.Mailer`/`Message` (`docs/mail.md`), never
   `smtplib` directly in a handler — and send it from a `Job`
   (`await dispatch(request, ...)`), not inline in the request. `MAIL_DRIVER`

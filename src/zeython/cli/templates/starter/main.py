@@ -1,6 +1,7 @@
 from zeython import (
     Application,
     AuthServiceProvider,
+    CacheServiceProvider,
     DatabaseServiceProvider,
     MailServiceProvider,
     QueueServiceProvider,
@@ -16,6 +17,7 @@ app = Application()
 app.register(DatabaseServiceProvider)
 app.register(ViewServiceProvider)
 app.register(StorageServiceProvider)
+app.register(CacheServiceProvider)
 app.register(RateLimitServiceProvider)
 app.register(MailServiceProvider)
 app.register(QueueServiceProvider)
