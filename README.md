@@ -31,6 +31,9 @@ scaffolding on every project. Zeython does that assembly once:
   predictable places (`app/Controllers`, `app/Models`, `routes/`).
 - **A real CLI** — `zeython new`, `zeython serve`, `zeython make:*`,
   `zeython db:*` cover project creation, code generation, and migrations.
+- **Live API docs, from your actual routes** — a generated OpenAPI spec and
+  Swagger UI at `/docs`, built by reading what's really registered, not a
+  separately maintained spec file. See [docs/openapi.md](docs/openapi.md).
 - **AI-agent ready** — an MCP server (`zeython mcp`) gives coding agents
   direct tools to inspect a project's actual routes and database schema, and
   to search documentation bundled with the exact installed framework
@@ -129,6 +132,7 @@ my_blog/
 - [docs/getting-started.md](docs/getting-started.md)
 - [docs/architecture.md](docs/architecture.md) — container, providers, router, ORM
 - [docs/cli.md](docs/cli.md) — full CLI reference
+- [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
 - [docs/database.md](docs/database.md) — models and migrations
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
 - [docs/validation.md](docs/validation.md) — declarative model validation

@@ -137,7 +137,12 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   defaults to `log` (writes to logs, doesn't actually send), which is
   correct for local dev — don't switch it to `smtp` without the user asking.
 - Controllers go in `app/Controllers/`, subclass `zeython.Controller`. Methods
-  are plain `async def method(self, request) -> Response`.
+  are plain `async def method(self, request) -> Response`. Every route
+  already appears at `/docs` (Swagger UI) with a generic response; add
+  `@describe(summary=..., tags=[...], request_body=..., responses=...)`
+  from `zeython.openapi` to a handler when you want a real one instead of
+  the placeholder -- `model_schema(SomeModel)` builds the schema fragment
+  from the model's actual columns. See `docs/openapi.md`.
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
   `main.py`. Function routes use `@app.get(...)`; CRUD resources use
   `app.router.resource("/path", SomeController)`.

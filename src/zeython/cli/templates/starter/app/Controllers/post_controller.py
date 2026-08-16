@@ -3,10 +3,12 @@ from starlette.responses import JSONResponse, Response
 from zeython import Cache, Controller, NotFoundException
 from zeython.auth import require_auth
 from zeython.authorization import authorize
+from zeython.openapi import describe, model_schema
 
 from app.Models.post import Post
 
 _INDEX_CACHE_KEY = "posts:index"
+_POST_SCHEMA = model_schema(Post)
 
 
 class PostController(Controller):
@@ -19,6 +21,13 @@ class PostController(Controller):
     SQLAlchemy -- eager-loading is what makes it safe.
     """
 
+    @describe(
+        summary="List posts",
+        tags=["posts"],
+        responses={200: {"description": "The post list", "content": {
+            "application/json": {"schema": {"type": "array", "items": _POST_SCHEMA}},
+        }}},
+    )
     async def index(self, request):
         cache: Cache = request.app.state.container.make(Cache)
 
@@ -34,6 +43,14 @@ class PostController(Controller):
             raise NotFoundException("Post not found")
         return JSONResponse(post.to_dict(include=("author",)))
 
+    @describe(
+        summary="Create a post",
+        tags=["posts"],
+        request_body={"type": "object", "properties": {"title": {"type": "string"}, "body": {"type": "string"}}},
+        responses={201: {"description": "The created post", "content": {
+            "application/json": {"schema": _POST_SCHEMA},
+        }}},
+    )
     async def store(self, request):
         user = await require_auth(request)
         data = await request.json()
