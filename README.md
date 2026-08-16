@@ -116,13 +116,19 @@ my_blog/
 ├── app/
 │   ├── Controllers/      # request handlers
 │   ├── Models/           # async Active Record models
-│   └── Middleware/       # ASGI middleware
+│   ├── Middleware/       # ASGI middleware
+│   └── Console/Commands/ # custom `zeython command <name>` CLI commands
+├── database/
+│   ├── factories/        # model factories for tests/seeding
+│   └── seeders/          # `zeython db seed`
 ├── routes/
 │   └── web.py            # route definitions
 ├── migrations/            # Alembic migrations
 ├── tests/
 ├── main.py                # application entry point
 ├── alembic.ini
+├── Dockerfile
+├── docker-compose.yml
 └── .env.example
 ```
 
@@ -152,6 +158,8 @@ my_blog/
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
 - [docs/ai.md](docs/ai.md) — calling an LLM from your own app code
 - [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents
+- [docs/health-check.md](docs/health-check.md) — `/up`, for load balancers and container orchestrators
+- [docs/docker.md](docs/docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
 - [docs/testing.md](docs/testing.md)
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/

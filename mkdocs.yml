@@ -30,6 +30,8 @@ nav:
   - Mail: mail.md
   - AI: ai.md
   - AI Agents: ai-agents.md
+  - Health Check: health-check.md
+  - Docker: docker.md
   - Testing: testing.md
 theme:
   name: material

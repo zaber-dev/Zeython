@@ -103,3 +103,13 @@ jobs:
           curl -sf http://127.0.0.1:8000/openapi.json -o /tmp/openapi.json
           python3 -c "import json; spec = json.load(open('/tmp/openapi.json')); assert spec['info']['title'] == 'CI Smoke Test'; assert '/posts' in spec['paths']; assert spec['paths']['/posts']['get']['summary'] == 'List posts'"
           curl -sf http://127.0.0.1:8000/docs | grep -q "swagger-ui"
+          curl -sf http://127.0.0.1:8000/up | grep -q '"status":"ok"'
+      - name: Build and boot the generated project's Docker image
+        run: |
+          cd /tmp/ci-smoke-test
+          docker build -t ci-smoke-test:latest .
+          docker run -d --name ci-smoke-test --env-file .env -p 8001:8000 ci-smoke-test:latest
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8001/up && break || sleep 1; done
+          curl -sf http://127.0.0.1:8001/up | grep -q '"status":"ok"'
+          docker logs ci-smoke-test
+          docker stop ci-smoke-test

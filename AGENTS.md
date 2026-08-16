@@ -160,6 +160,9 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
   `main.py`. Function routes use `@app.get(...)`; CRUD resources use
   `app.router.resource("/path", SomeController)`.
+- A generated project already exposes `/up` (`HealthCheckServiceProvider`,
+  registered in `main.py` by default) for load balancers/container
+  orchestrators -- don't add a second one. See `docs/health-check.md`.
 - Database access inside a request handler never needs a session parameter —
   `Model.create/find/all/...` pull the request-scoped session automatically.
   Outside a request (scripts, one-off tasks), wrap the code in
