@@ -17,6 +17,7 @@ nav:
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
   - Background Jobs: queues.md
+  - Mail: mail.md
   - Testing: testing.md
 theme:
   name: material
