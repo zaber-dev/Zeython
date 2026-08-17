@@ -42,7 +42,8 @@ app.post("/uploads", name="uploads.store")(UploadController().store)
 @app.websocket("/ws/chat", name="chat")
 async def chat(websocket: WebSocket) -> None:
     hub: WebSocketHub = websocket.app.state.container.make(WebSocketHub)
-    await hub.connect(websocket)
+    if not await hub.connect(websocket):
+        return  # Origin not in WEBSOCKET_ALLOWED_ORIGINS -- already closed.
     try:
         while True:
             message = await websocket.receive_text()
