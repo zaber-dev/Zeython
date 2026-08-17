@@ -13,6 +13,7 @@ from zeython import (
     RouteServiceProvider,
     StorageServiceProvider,
     ViewServiceProvider,
+    WebSocketHubServiceProvider,
 )
 
 from app.Models.user import User
@@ -27,6 +28,7 @@ app.register(CacheServiceProvider)
 app.register(RateLimitServiceProvider)
 app.register(MailServiceProvider)
 app.register(QueueServiceProvider)
+app.register(WebSocketHubServiceProvider)
 app.register(AuthServiceProvider(app, user_model=User))
 app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)

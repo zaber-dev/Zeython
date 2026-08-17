@@ -27,6 +27,7 @@
 | `Factory` | `zeython.database.factory` | Model factories for tests and seeding: `make()`/`create()`/`create_many()`, sequence-based uniqueness, no bundled fake-data dependency (see [Factories & Seeders](database-seeding.md)). |
 | `Seeder` | `zeython.database.seeder` | The `database/seeders/` extension point: `run()` inserts seed data (typically via a `Factory`), `self.call(...)` composes seeders, run with `zeython db seed` (see [Factories & Seeders](database-seeding.md)). |
 | `HealthCheckServiceProvider` | `zeython.health` | Registers `/up`: `200`/`503` with a real database connectivity check when `Database` is bound -- what a load balancer or Kubernetes probe expects (see [Health Check](health-check.md)). |
+| `WebSocketHub` | `zeython.websockets` | Real-time handlers via `@app.websocket(...)`, built on Starlette's ASGI-native WebSocket support; `WebSocketHub` tracks connections and broadcasts to them, process-local by default (see [WebSockets](websockets.md)). |
 
 ## Logging
 

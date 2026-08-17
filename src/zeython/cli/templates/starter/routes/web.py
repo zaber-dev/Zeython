@@ -2,6 +2,7 @@ from starlette.responses import JSONResponse
 
 from main import app
 from zeython.views import render
+from zeython.websockets import WebSocket, WebSocketDisconnect, WebSocketHub
 
 from app.Controllers.auth_controller import AuthController
 from app.Controllers.post_controller import PostController
@@ -33,3 +34,20 @@ app.post("/api/token", name="auth.token")(auth.token)
 app.get("/api/me", name="auth.api_me")(auth.api_me)
 
 app.post("/uploads", name="uploads.store")(UploadController().store)
+
+
+# A minimal broadcast chat room -- see docs/websockets.md. Connect with a
+# WebSocket client at ws://localhost:8000/ws/chat; every message a client
+# sends is relayed to every *other* connected client.
+@app.websocket("/ws/chat", name="chat")
+async def chat(websocket: WebSocket) -> None:
+    hub: WebSocketHub = websocket.app.state.container.make(WebSocketHub)
+    await hub.connect(websocket)
+    try:
+        while True:
+            message = await websocket.receive_text()
+            await hub.broadcast(message, exclude=websocket)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        hub.disconnect(websocket)

@@ -160,6 +160,15 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
 - Routes are wired in `routes/web.py`, imported via `RouteServiceProvider` in
   `main.py`. Function routes use `@app.get(...)`; CRUD resources use
   `app.router.resource("/path", SomeController)`.
+- Real-time (chat, live updates, "someone else is editing this") is
+  `@app.websocket(path)` in `routes/web.py`, not polling. Handlers receive
+  a `WebSocket`, not a `Request` -- `await websocket.receive_text()`/
+  `.send_text()`, catch `WebSocketDisconnect`. To reach more than the
+  sender, use `WebSocketHub` (bound by default): `hub.connect(websocket)`
+  on accept, `hub.broadcast(message, exclude=websocket)`, and always
+  `hub.disconnect(websocket)` in a `finally` block. Test with
+  `zeython.testing.websocket_client()` (plain `def test_...`, not
+  `async def` -- it's sync). See `docs/websockets.md`.
 - A generated project already exposes `/up` (`HealthCheckServiceProvider`,
   registered in `main.py` by default) for load balancers/container
   orchestrators -- don't add a second one. See `docs/health-check.md`.
