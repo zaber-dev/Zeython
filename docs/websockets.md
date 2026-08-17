@@ -45,7 +45,8 @@ from zeython.websockets import WebSocket, WebSocketDisconnect, WebSocketHub
 @app.websocket("/ws/chat", name="chat")
 async def chat(websocket: WebSocket) -> None:
     hub: WebSocketHub = websocket.app.state.container.make(WebSocketHub)
-    await hub.connect(websocket)
+    if not await hub.connect(websocket):
+        return  # origin rejected -- already closed, see "Origin protection" below
     try:
         while True:
             message = await websocket.receive_text()
@@ -57,12 +58,16 @@ async def chat(websocket: WebSocket) -> None:
 ```
 
 `hub.connect(websocket)` accepts the handshake and starts tracking the
-connection; `hub.broadcast(message, exclude=websocket)` sends to everyone
-else currently connected (drop `exclude` to also echo back to the
-sender). Always `disconnect()` in a `finally` block -- a handler's loop
-can end via a normal disconnect, an exception, or the client just
-vanishing, and an untracked-but-still-in-the-set connection is a slow
-memory leak that only shows up under real traffic.
+connection, returning `True` -- or, if the origin check below rejects it,
+closes the connection without ever accepting it and returns `False`, in
+which case the handler must return immediately rather than call
+`receive_text()`/etc. on a connection that was never accepted.
+`hub.broadcast(message, exclude=websocket)` sends to everyone else
+currently connected (drop `exclude` to also echo back to the sender).
+Always `disconnect()` in a `finally` block -- a handler's loop can end via
+a normal disconnect, an exception, or the client just vanishing, and an
+untracked-but-still-in-the-set connection is a slow memory leak that only
+shows up under real traffic.
 
 `message` can be a string (`send_text`) or a `dict` (`send_json`) -- the
 hub picks the right one automatically. A send failing (a client that
@@ -82,6 +87,26 @@ app.register(WebSocketHubServiceProvider)
 
 Registered by default in a generated project, alongside a working
 `/ws/chat` demo in `routes/web.py`.
+
+### Origin protection
+
+A WebSocket handshake is a plain HTTP request, and a browser attaches
+cookies to it automatically -- even one initiated by a page on a
+completely different site. Without an origin check, any site can open a
+connection here using a logged-in visitor's session (cross-site WebSocket
+hijacking, the WebSocket analogue of [CSRF](csrf.md)). Set
+`WEBSOCKET_ALLOWED_ORIGINS` (comma-separated) once real browser clients
+are involved and you're not deliberately serving other origins too:
+
+```env
+WEBSOCKET_ALLOWED_ORIGINS=https://example.com,https://app.example.com
+```
+
+Unset by default -- every origin is accepted, matching every earlier
+release. A request with no `Origin` header at all (a native app, a
+server-to-server client, `curl`) is always allowed through regardless:
+browsers only send this header on a cross-origin request, so its absence
+isn't the thing this check exists to catch.
 
 ### `WebSocketHub` is process-local
 

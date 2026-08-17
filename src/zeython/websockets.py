@@ -10,6 +10,7 @@ window, a live dashboard, or any other push-to-many feature needs.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
@@ -27,18 +28,54 @@ class WebSocketHub:
     reaches whichever fraction of clients happen to be on the same worker
     -- back this with a pub/sub backend (Redis's ``PUBLISH``/``SUBSCRIBE``
     is the usual choice) once that matters. See docs/websockets.md.
+
+    A WebSocket handshake is a plain HTTP request that carries cookies
+    automatically -- without an origin check, any site can open a
+    connection here using a logged-in visitor's session (cross-site
+    WebSocket hijacking). Pass ``allowed_origins`` to guard against that;
+    left unset, every origin is accepted (matches every earlier release --
+    opt in once you actually serve browser clients over more than one
+    origin you don't control).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, allowed_origins: Iterable[str] | None = None) -> None:
         self._connections: set[WebSocket] = set()
+        self._allowed_origins = set(allowed_origins) if allowed_origins is not None else None
 
     def __len__(self) -> int:
         return len(self._connections)
 
-    async def connect(self, websocket: WebSocket) -> None:
-        """Accept the handshake and start tracking this connection."""
+    def _origin_allowed(self, websocket: WebSocket) -> bool:
+        if self._allowed_origins is None:
+            return True
+        origin = websocket.headers.get("origin")
+        if origin is None:
+            # No Origin header at all -- not a browser cross-site context
+            # (a native app, a server-to-server client, curl); browsers
+            # always send this header on a cross-origin request, so its
+            # absence isn't the thing this check exists to catch.
+            return True
+        return origin in self._allowed_origins
+
+    async def connect(self, websocket: WebSocket) -> bool:
+        """Accept the handshake and start tracking this connection.
+
+        Returns ``False`` (after closing the connection, without ever
+        accepting it) if ``allowed_origins`` is configured and this
+        handshake's ``Origin`` header doesn't match one of them. Check the
+        return value and bail out if it's ``False`` -- proceeding to
+        ``receive_text()``/etc. on a connection that was never accepted
+        raises::
+
+            if not await hub.connect(websocket):
+                return
+        """
+        if not self._origin_allowed(websocket):
+            await websocket.close(code=4403)
+            return False
         await websocket.accept()
         self._connections.add(websocket)
+        return True
 
     def disconnect(self, websocket: WebSocket) -> None:
         """Stop tracking a connection -- call this from a ``finally`` block
@@ -73,10 +110,20 @@ class WebSocketHub:
 
 
 class WebSocketHubServiceProvider(ServiceProvider):
-    """Binds a process-local :class:`WebSocketHub` into the container."""
+    """Binds a process-local :class:`WebSocketHub` into the container.
+
+    ``WEBSOCKET_ALLOWED_ORIGINS`` -- comma-separated, e.g.
+    ``https://example.com,https://app.example.com`` -- restricts handshakes
+    to those origins (see :class:`WebSocketHub`'s cross-site hijacking
+    note). Unset by default, matching every earlier release; set it once
+    real browser clients are involved and you're not deliberately serving
+    other origins too.
+    """
 
     def register(self) -> None:
-        self.container.singleton(WebSocketHub, WebSocketHub)
+        raw = self.config.get("websocket.allowed_origins", "")
+        allowed_origins = [origin.strip() for origin in str(raw).split(",") if origin.strip()] or None
+        self.container.singleton(WebSocketHub, lambda: WebSocketHub(allowed_origins=allowed_origins))
 
 
 __all__ = ["WebSocket", "WebSocketDisconnect", "WebSocketHub", "WebSocketHubServiceProvider"]
