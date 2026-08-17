@@ -108,6 +108,26 @@ server-to-server client, `curl`) is always allowed through regardless:
 browsers only send this header on a cross-origin request, so its absence
 isn't the thing this check exists to catch.
 
+### Connection limiting
+
+Nothing stops a single client from opening hundreds of connections --
+each one costs a slot in the hub's memory and a slot in the set every
+`broadcast()` iterates, so a runaway or malicious client degrades the
+service for everyone else. Set `WEBSOCKET_MAX_CONNECTIONS_PER_IP` to cap
+concurrent connections per client:
+
+```env
+WEBSOCKET_MAX_CONNECTIONS_PER_IP=5
+```
+
+Unset by default -- no limit, matching every earlier release. A
+connection past the cap is rejected the same way a bad `Origin` is:
+closed (code `4429`) without ever being accepted, and `hub.connect(...)`
+returns `False` -- the same `if not await hub.connect(websocket): return`
+check handles both cases. Freed the moment the client that was over the
+cap disconnects (`hub.disconnect(websocket)` in your handler's `finally`
+block), not on a timer.
+
 ### `WebSocketHub` is process-local
 
 Same trade-off as the default `Cache`/`Queue`/`RateLimiter`: a broadcast

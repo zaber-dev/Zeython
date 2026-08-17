@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from starlette.routing import WebSocketRoute
+from starlette.testclient import TestClient
 
 from zeython.application import Application
 from zeython.config import Config
@@ -208,5 +209,104 @@ def test_rejected_connection_is_never_tracked_by_the_hub(tmp_path: Path) -> None
         test_client.websocket_connect("/ws/chat", headers={"Origin": "https://evil.example"}),
     ):
         pass
+
+    assert len(hub) == 0
+
+
+# -- max_connections_per_ip: resource-exhaustion protection ----------------------------
+
+
+def _make_app_with_max_connections(tmp_path: Path, max_connections: int) -> Application:
+    (tmp_path / ".env").write_text(
+        f"APP_SECRET_KEY=test\nWEBSOCKET_MAX_CONNECTIONS_PER_IP={max_connections}\n"
+    )
+    app = Application(Config.load(tmp_path))
+    app.register(WebSocketHubServiceProvider)
+    _register_chat(app)
+    return app
+
+
+def test_default_hub_has_no_connection_limit(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+    app.register(WebSocketHubServiceProvider)
+    _register_chat(app)
+
+    test_client = websocket_client(app)
+    with (
+        test_client.websocket_connect("/ws/chat") as ws1,
+        test_client.websocket_connect("/ws/chat") as ws2,
+        test_client.websocket_connect("/ws/chat") as ws3,
+    ):
+        ws1.send_text("hi")
+        ws2.send_text("hi")
+        ws3.send_text("hi")
+
+
+def test_connections_within_the_cap_are_accepted(tmp_path: Path) -> None:
+    app = _make_app_with_max_connections(tmp_path, 2)
+
+    test_client = websocket_client(app)
+    with (
+        test_client.websocket_connect("/ws/chat") as ws1,
+        test_client.websocket_connect("/ws/chat") as ws2,
+    ):
+        ws1.send_text("hi")
+        ws2.send_text("hi")
+
+
+def test_a_connection_beyond_the_cap_is_rejected(tmp_path: Path) -> None:
+    app = _make_app_with_max_connections(tmp_path, 2)
+
+    test_client = websocket_client(app)
+    with (
+        test_client.websocket_connect("/ws/chat"),
+        test_client.websocket_connect("/ws/chat"),
+        pytest.raises(WebSocketDisconnect),
+        test_client.websocket_connect("/ws/chat"),
+    ):
+        pass
+
+
+def test_disconnecting_frees_a_slot_for_a_new_connection(tmp_path: Path) -> None:
+    app = _make_app_with_max_connections(tmp_path, 1)
+    test_client = websocket_client(app)
+
+    with test_client.websocket_connect("/ws/chat") as ws1:
+        ws1.send_text("hi")
+
+    # ws1's `with` block exited -- its disconnect() ran -- so this slot is free again.
+    with test_client.websocket_connect("/ws/chat") as ws2:
+        ws2.send_text("hi")
+
+
+def test_different_ips_are_tracked_separately(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\nWEBSOCKET_MAX_CONNECTIONS_PER_IP=1\n")
+    app = Application(Config.load(tmp_path))
+    app.register(WebSocketHubServiceProvider)
+    _register_chat(app)
+
+    client_a = TestClient(app.asgi, client=("1.2.3.4", 12345))
+    client_b = TestClient(app.asgi, client=("5.6.7.8", 12345))
+
+    # A different client IP has its own, independent budget.
+    with (
+        client_a.websocket_connect("/ws/chat") as ws_a,
+        client_b.websocket_connect("/ws/chat") as ws_b,
+    ):
+        ws_a.send_text("hi")
+        ws_b.send_text("hi")
+
+
+def test_connection_rejected_for_exceeding_the_cap_is_never_tracked_by_the_hub(
+    tmp_path: Path,
+) -> None:
+    app = _make_app_with_max_connections(tmp_path, 1)
+    hub = app.container.make(WebSocketHub)
+
+    test_client = websocket_client(app)
+    with test_client.websocket_connect("/ws/chat"):
+        with pytest.raises(WebSocketDisconnect), test_client.websocket_connect("/ws/chat"):
+            pass
+        assert len(hub) == 1  # only the first connection is tracked
 
     assert len(hub) == 0

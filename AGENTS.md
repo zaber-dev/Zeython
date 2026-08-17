@@ -185,6 +185,8 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `WEBSOCKET_ALLOWED_ORIGINS` once real browser clients are involved --
   unset, `connect()` accepts every origin (cross-site WebSocket hijacking
   is otherwise possible, the same threat CSRF protects HTTP routes from).
+  Set `WEBSOCKET_MAX_CONNECTIONS_PER_IP` too if the app is public --
+  unset, a single client can open unlimited connections against the hub.
   Test with `zeython.testing.websocket_client()` (plain `def test_...`,
   not `async def` -- it's sync). See `docs/websockets.md`.
 - A generated project already exposes `/up` (`HealthCheckServiceProvider`,
