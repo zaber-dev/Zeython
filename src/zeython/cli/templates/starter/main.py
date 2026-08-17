@@ -10,6 +10,7 @@ from zeython import (
     OpenApiServiceProvider,
     QueueServiceProvider,
     RateLimitServiceProvider,
+    RequestIdServiceProvider,
     RouteServiceProvider,
     StorageServiceProvider,
     ViewServiceProvider,
@@ -21,6 +22,9 @@ from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
 
 app = Application()
 app.register(HealthCheckServiceProvider)
+# Stamps every request/response with an X-Request-ID and threads it into
+# the logs -- see docs/observability.md.
+app.register(RequestIdServiceProvider)
 app.register(DatabaseServiceProvider)
 app.register(ViewServiceProvider)
 app.register(StorageServiceProvider)
