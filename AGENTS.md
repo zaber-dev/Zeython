@@ -202,6 +202,11 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
 - After changing a model's columns, generate and apply a migration:
   `zeython db revision -m "..."` then `zeython db migrate`. Never edit
   `database.db` directly or hand-edit an already-applied migration file.
+- `DATABASE_POOL_SIZE`/`DATABASE_MAX_OVERFLOW` tune the connection pool for
+  Postgres/MySQL in production -- also fine on the file-based SQLite URL
+  `zeython new` scaffolds, but leave them unset for `sqlite+aiosqlite:///:memory:`
+  specifically (its default pool doesn't accept either and raises
+  `TypeError` if you set them). See `docs/database.md#connection-pooling`.
 - Use `zeython.testing.client` for endpoint tests — it hits the ASGI app
   in-process (no real server, no port binding).
 
