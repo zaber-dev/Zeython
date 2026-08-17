@@ -29,12 +29,31 @@ class ServiceProvider:
 
 
 class DatabaseServiceProvider(ServiceProvider):
-    """Wires up the async :class:`~zeython.db.Database` and its request-scoped session."""
+    """Wires up the async :class:`~zeython.db.Database` and its request-scoped session.
+
+    ``DATABASE_POOL_SIZE``/``DATABASE_MAX_OVERFLOW`` are passed straight
+    through to SQLAlchemy's connection pool when set -- unset by default,
+    so nothing changes for an in-memory SQLite URL (``:memory:``), whose
+    default pool doesn't accept them at all. See
+    docs/database.md#connection-pooling.
+    """
 
     def register(self) -> None:
         from zeython.db.session import Database
 
-        database = Database(self.config.database_url, echo=self.config.get("database.echo", False))
+        engine_kwargs: dict[str, object] = {}
+        pool_size = self.config.get("database.pool_size")
+        if pool_size is not None:
+            engine_kwargs["pool_size"] = pool_size
+        max_overflow = self.config.get("database.max_overflow")
+        if max_overflow is not None:
+            engine_kwargs["max_overflow"] = max_overflow
+
+        database = Database(
+            self.config.database_url,
+            echo=self.config.get("database.echo", False),
+            **engine_kwargs,
+        )
         self.container.singleton(Database, lambda: database)
 
     def boot(self) -> None:

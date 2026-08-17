@@ -75,6 +75,36 @@ as `find`/`all`/`find_by`. `zeython new` wires it into the generated
 `GET /users` (`?page=`/`?per_page=`, defaulting to `1`/`20`) — see
 `app/Controllers/user_controller.py`.
 
+## Connection pooling
+
+`DatabaseServiceProvider` forwards `DATABASE_POOL_SIZE`/`DATABASE_MAX_OVERFLOW`
+straight through to SQLAlchemy's connection pool, unset by default:
+
+```env
+DATABASE_POOL_SIZE=10
+DATABASE_MAX_OVERFLOW=20
+```
+
+- `DATABASE_POOL_SIZE` — steady-state connections the pool keeps open.
+- `DATABASE_MAX_OVERFLOW` — extra connections allowed beyond that under
+  load, closed again once things quiet down.
+
+**Meaningful for PostgreSQL/MySQL, and for a file-based SQLite URL** (what
+`zeython new` scaffolds, `sqlite+aiosqlite:///./database.db`) — all three
+default to SQLAlchemy's `AsyncAdaptedQueuePool`, which both settings
+configure directly. The one exception is `sqlite+aiosqlite:///:memory:`
+(what the framework's own test suite uses): in-memory SQLite defaults to
+`StaticPool`, which doesn't accept either kwarg at all — passing them
+raises `TypeError` at engine-creation time. That's why both are unset by
+default rather than shipping a number that would break an in-memory setup;
+set them once you have an actual concurrency figure to size against (a
+reasonable start: your app server's worker count, or a little above it).
+
+Passed through via `**engine_kwargs` on `Database.__init__` — the same
+mechanism accepts any other keyword `create_async_engine()` understands,
+if you construct `Database` yourself instead of going through
+`DatabaseServiceProvider`.
+
 ## Migrations
 
 ```bash
