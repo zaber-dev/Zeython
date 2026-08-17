@@ -84,6 +84,7 @@ async def test_full_register_login_logout_flow(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/me-or-none")  # primes the CSRF cookie -- see docs/csrf.md
         response = await http.post("/register", json={"email": "ada@example.com", "password": "hunter2"})
         assert response.status_code == 201
         assert "password_hash" not in response.json()
@@ -107,6 +108,7 @@ async def test_login_rejects_wrong_password(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/me-or-none")  # primes the CSRF cookie -- see docs/csrf.md
         await http.post("/register", json={"email": "ada@example.com", "password": "hunter2"})
         await http.post("/logout")
 
@@ -124,6 +126,7 @@ async def test_login_rejects_unknown_user(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/me-or-none")  # primes the CSRF cookie -- see docs/csrf.md
         response = await http.post("/login", json={"email": "nobody@example.com", "password": "x"})
         assert response.status_code == 401
 

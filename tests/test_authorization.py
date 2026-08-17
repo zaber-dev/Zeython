@@ -120,6 +120,7 @@ async def test_authorize_allows_the_owner(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/")  # primes the CSRF cookie (404 is fine) -- see docs/csrf.md
         owner = (await http.post("/register", json={"email": "owner@example.com", "password": "hunter2"})).json()
         note = (await http.post("/notes", json={"body": "mine", "owner_id": owner["id"]})).json()
 
@@ -138,11 +139,13 @@ async def test_authorize_forbids_a_non_owner(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/")  # primes the CSRF cookie (404 is fine) -- see docs/csrf.md
         owner = (await http.post("/register", json={"email": "owner@example.com", "password": "hunter2"})).json()
         note = (await http.post("/notes", json={"body": "not yours", "owner_id": owner["id"]})).json()
 
     # A different logged-in user tries to delete someone else's note.
     async with client(app) as http:
+        await http.get("/")  # primes the CSRF cookie (404 is fine) -- see docs/csrf.md
         await http.post("/register", json={"email": "stranger@example.com", "password": "hunter2"})
         response = await http.delete(f"/notes/{note['id']}")
         assert response.status_code == 403
@@ -152,10 +155,12 @@ async def test_authorize_requires_login_first(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
     async with client(app) as http:
+        await http.get("/")  # primes the CSRF cookie (404 is fine) -- see docs/csrf.md
         owner = (await http.post("/register", json={"email": "owner@example.com", "password": "hunter2"})).json()
         note = (await http.post("/notes", json={"body": "mine", "owner_id": owner["id"]})).json()
 
     # A fresh, unauthenticated client (no cookie jar carried over).
     async with client(app) as http:
+        await http.get("/")  # primes the CSRF cookie (404 is fine) -- see docs/csrf.md
         response = await http.delete(f"/notes/{note['id']}")
         assert response.status_code == 401

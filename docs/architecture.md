@@ -12,7 +12,8 @@
 | `Config` | `zeython.config` | Layered `.env` + process-environment configuration with dot-path access (`config.get("database.url")`). |
 | `Views` | `zeython.views` | Jinja2 rendering by convention from `resources/views/`, bound via `ViewServiceProvider` (see [Views](views.md)). |
 | `CorsServiceProvider` | `zeython.providers` | Opt-in, `.env`-configured CORS support wrapping Starlette's `CORSMiddleware`. |
-| `AuthServiceProvider` | `zeython.auth` | Session-based auth: signed-cookie sessions, password hashing, `login`/`logout`/`current_user`/`require_auth` (see [Authentication](authentication.md)). |
+| `AuthServiceProvider` | `zeython.auth` | Session-based auth: signed-cookie sessions, password hashing, `login`/`logout`/`current_user`/`require_auth`, [CSRF protection](csrf.md) on by default (see [Authentication](authentication.md)). |
+| `CsrfMiddleware` | `zeython.csrf` | Double-submit-cookie CSRF protection; bundled with `AuthServiceProvider`, or usable standalone (see [CSRF Protection](csrf.md)). |
 | `ApiAuthServiceProvider` | `zeython.api_auth` | Stateless bearer-token auth for non-cookie clients: `TokenManager.issue`/`.verify`, `require_api_auth`, signed with `itsdangerous` (no new dependency, no token table) (see [API Authentication](api-authentication.md)). |
 | `Gate` | `zeython.authorization` | Named authorization abilities: `gate.define(...)`, `authorize(request, ability, ...)` (403 on a failed check, 401 if not logged in at all) (see [Authorization](authorization.md)). |
 | `OpenApiServiceProvider` | `zeython.openapi` | Generates an OpenAPI 3.0 document from the app's actually-registered routes and serves it plus a Swagger UI (`/openapi.json`, `/docs`); `@describe(...)` adds a real summary/tags/schema to a route (see [OpenAPI & API Docs](openapi.md)). |

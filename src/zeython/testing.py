@@ -9,6 +9,7 @@ import httpx
 from starlette.testclient import TestClient
 
 from zeython.application import Application
+from zeython.csrf import DEFAULT_COOKIE_NAME, DEFAULT_HEADER_NAME
 
 
 @asynccontextmanager
@@ -18,15 +19,33 @@ async def client(app: Application, *, base_url: str = "http://testserver") -> As
     Named ``client`` rather than ``test_client`` so pytest's ``test_*`` collection
     doesn't mistake this helper for a test function when imported into a test module.
 
+    Automatically attaches the CSRF header (see :mod:`zeython.csrf`) from
+    whatever ``csrf_token`` cookie this client is already holding -- the
+    same thing a real browser-based app does by reading the cookie in JS,
+    so a test doesn't need to plumb the token through by hand. This still
+    means the *first* unsafe request in a test needs a prior safe one (a
+    ``GET``) to actually receive that cookie -- there's nothing to attach
+    before that.
+
     Usage::
 
         async with client(app) as http:
-            response = await http.get("/users/1")
-            assert response.status_code == 200
+            await http.get("/")  # picks up the csrf_token cookie
+            response = await http.post("/posts", json={"title": "t"})
+            assert response.status_code == 201
     """
+
+    async def _attach_csrf_header(request: httpx.Request) -> None:
+        token = http_client.cookies.get(DEFAULT_COOKIE_NAME)
+        if token is not None:
+            request.headers.setdefault(DEFAULT_HEADER_NAME, token)
+
     transport = httpx.ASGITransport(app=app.asgi)
-    async with httpx.AsyncClient(transport=transport, base_url=base_url) as client:
-        yield client
+    http_client = httpx.AsyncClient(
+        transport=transport, base_url=base_url, event_hooks={"request": [_attach_csrf_header]}
+    )
+    async with http_client:
+        yield http_client
 
 
 def websocket_client(app: Application) -> TestClient:

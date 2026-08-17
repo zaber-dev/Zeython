@@ -20,6 +20,7 @@ nav:
   - Views: views.md
   - Frontend & CSS: frontend.md
   - Authentication: authentication.md
+  - CSRF Protection: csrf.md
   - API Authentication: api-authentication.md
   - Authorization: authorization.md
   - File Storage: storage.md
