@@ -172,10 +172,14 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   a `WebSocket`, not a `Request` -- `await websocket.receive_text()`/
   `.send_text()`, catch `WebSocketDisconnect`. To reach more than the
   sender, use `WebSocketHub` (bound by default): `hub.connect(websocket)`
-  on accept, `hub.broadcast(message, exclude=websocket)`, and always
-  `hub.disconnect(websocket)` in a `finally` block. Test with
-  `zeython.testing.websocket_client()` (plain `def test_...`, not
-  `async def` -- it's sync). See `docs/websockets.md`.
+  returns a bool -- `if not await hub.connect(websocket): return` before
+  doing anything else, then `hub.broadcast(message, exclude=websocket)`,
+  and always `hub.disconnect(websocket)` in a `finally` block. Set
+  `WEBSOCKET_ALLOWED_ORIGINS` once real browser clients are involved --
+  unset, `connect()` accepts every origin (cross-site WebSocket hijacking
+  is otherwise possible, the same threat CSRF protects HTTP routes from).
+  Test with `zeython.testing.websocket_client()` (plain `def test_...`,
+  not `async def` -- it's sync). See `docs/websockets.md`.
 - A generated project already exposes `/up` (`HealthCheckServiceProvider`,
   registered in `main.py` by default) for load balancers/container
   orchestrators -- don't add a second one. See `docs/health-check.md`.

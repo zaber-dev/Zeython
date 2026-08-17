@@ -8,6 +8,11 @@ makes it forgeable without protection: a malicious page can trigger a
 interaction beyond "visited a page" required. `CsrfMiddleware` closes that
 gap, and it's on by default the moment you register `AuthServiceProvider`.
 
+(This covers `POST`/`PUT`/`PATCH`/`DELETE` over HTTP specifically. A
+WebSocket handshake is *also* a plain HTTP request that carries cookies
+automatically -- see [WebSockets: Origin protection](websockets.md#origin-protection)
+for the equivalent guard there.)
+
 ## The double-submit-cookie pattern
 
 A random token is set as a *readable* (non-`HttpOnly`) cookie. Any unsafe
