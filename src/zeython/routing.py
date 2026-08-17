@@ -7,7 +7,7 @@ from typing import Any
 
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.routing import BaseRoute, Mount, Route
+from starlette.routing import BaseRoute, Mount, Route, WebSocketRoute
 
 Endpoint = Callable[..., Any]
 
@@ -62,6 +62,18 @@ class Router:
 
     def any(self, path: str, *, name: str | None = None) -> Callable[[Endpoint], Endpoint]:
         return self.route(path, _ALL_METHODS, name=name)
+
+    def websocket(self, path: str, *, name: str | None = None) -> Callable[[Endpoint], Endpoint]:
+        """Register a WebSocket handler: ``async def handler(websocket: WebSocket) -> None``.
+
+        See :mod:`zeython.websockets` and docs/websockets.md.
+        """
+
+        def decorator(endpoint: Endpoint) -> Endpoint:
+            self.routes.append(WebSocketRoute(self._full_path(path), endpoint, name=name or endpoint.__name__))
+            return endpoint
+
+        return decorator
 
     def include(self, router: Router, *, prefix: str = "") -> None:
         """Mount another router's routes under an optional additional prefix."""

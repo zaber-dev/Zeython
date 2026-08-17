@@ -34,6 +34,9 @@ scaffolding on every project. Zeython does that assembly once:
 - **Live API docs, from your actual routes** — a generated OpenAPI spec and
   Swagger UI at `/docs`, built by reading what's really registered, not a
   separately maintained spec file. See [docs/openapi.md](docs/openapi.md).
+- **Real-time out of the box** — `@app.websocket(...)` handlers and a
+  `WebSocketHub` broadcast registry, built on Starlette's native ASGI
+  WebSocket support — no separate server. See [docs/websockets.md](docs/websockets.md).
 - **AI-agent ready** — an MCP server (`zeython mcp`) gives coding agents
   direct tools to inspect a project's actual routes and database schema, and
   to search documentation bundled with the exact installed framework
@@ -155,6 +158,7 @@ my_blog/
 - [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [docs/redis.md](docs/redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
+- [docs/websockets.md](docs/websockets.md) — real-time handlers and the `WebSocketHub` broadcast registry
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
 - [docs/ai.md](docs/ai.md) — calling an LLM from your own app code
 - [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents

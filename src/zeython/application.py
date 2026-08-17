@@ -110,6 +110,9 @@ class Application:
     def delete(self, path: str, *, name: str | None = None) -> Callable[[Endpoint], Endpoint]:
         return self.router.delete(path, name=name)
 
+    def websocket(self, path: str, *, name: str | None = None) -> Callable[[Endpoint], Endpoint]:
+        return self.router.websocket(path, name=name)
+
     def include_router(self, router: Router, *, prefix: str = "") -> None:
         self.router.include(router, prefix=prefix)
 
