@@ -65,6 +65,7 @@ from zeython.rate_limit import (
     throttle,
 )
 from zeython.routing import Controller, Router
+from zeython.security_headers import SecurityHeadersMiddleware, SecurityHeadersServiceProvider
 from zeython.storage import (
     LocalStorage,
     S3Storage,
@@ -172,6 +173,8 @@ __all__ = [
     "ConflictException",
     "ValidationException",
     "TooManyRequestsException",
+    "SecurityHeadersMiddleware",
+    "SecurityHeadersServiceProvider",
     "Rule",
     "required",
     "email",

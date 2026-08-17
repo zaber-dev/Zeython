@@ -37,6 +37,12 @@ app.register(RouteServiceProvider(app, modules=("routes.web",)))
 # Live at /docs (Swagger UI) and /openapi.json -- see docs/openapi.md.
 # OPENAPI_ENABLED=false in .env turns both off, e.g. in production.
 app.register(OpenApiServiceProvider(app, title=app.config.app_name))
+# Opt-in CSP/X-Frame-Options/HSTS response headers -- not registered by
+# default since a wrong Content-Security-Policy breaks a legitimate app
+# silently. Uncomment (and `from zeython import SecurityHeadersServiceProvider`
+# above) once you've decided on your own policy, then set it via
+# SECURITY_HEADERS_CSP in .env. See docs/security-headers.md.
+# app.register(SecurityHeadersServiceProvider)
 
 if __name__ == "__main__":
     app.run()
