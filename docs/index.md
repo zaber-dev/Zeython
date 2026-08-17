@@ -44,6 +44,7 @@ not a template you copy and diverge from.
 - [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [Redis (Distributed)](redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
 - [Background Jobs](queues.md) — dispatching work off the request/response cycle
+- [WebSockets](websockets.md) — real-time handlers and the `WebSocketHub` broadcast registry
 - [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
 - [AI](ai.md) — calling an LLM from your own app code
 - [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents

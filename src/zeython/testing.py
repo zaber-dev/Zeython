@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import httpx
+from starlette.testclient import TestClient
 
 from zeython.application import Application
 
@@ -26,3 +27,20 @@ async def client(app: Application, *, base_url: str = "http://testserver") -> As
     transport = httpx.ASGITransport(app=app.asgi)
     async with httpx.AsyncClient(transport=transport, base_url=base_url) as client:
         yield client
+
+
+def websocket_client(app: Application) -> TestClient:
+    """A ``starlette.testclient.TestClient`` wired to the app's ASGI callable, for testing WebSocket routes.
+
+    Unlike :func:`client`, this is synchronous -- httpx has no WebSocket
+    support, and Starlette's own ``TestClient`` is what actually drives a
+    WebSocket handshake against an ASGI app in tests, no real socket
+    involved either way.
+
+    Usage::
+
+        with websocket_client(app).websocket_connect("/ws/chat") as ws:
+            ws.send_text("hi")
+            assert ws.receive_text() == "hi"
+    """
+    return TestClient(app.asgi)

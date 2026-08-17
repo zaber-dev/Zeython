@@ -47,3 +47,9 @@ async def test_post_creation():
 For anything beyond a one-off row, a `Factory` (`database/factories/`) is
 usually less repetitive than constructing models by hand in every test --
 see [Factories & Seeders](database-seeding.md).
+
+## Testing WebSocket routes
+
+`client()` (above) is httpx-based, and httpx has no WebSocket support --
+use `zeython.testing.websocket_client()` instead, and write those tests as
+plain `def`, not `async def`. See [WebSockets](websockets.md#testing).

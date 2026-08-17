@@ -106,6 +106,7 @@ jobs:
           python3 -c "import json; spec = json.load(open('/tmp/openapi.json')); assert spec['info']['title'] == 'CI Smoke Test'; assert '/posts' in spec['paths']; assert spec['paths']['/posts']['get']['summary'] == 'List posts'"
           curl -sf http://127.0.0.1:8000/docs | grep -q "swagger-ui"
           curl -sf http://127.0.0.1:8000/up | grep -q '"status":"ok"'
+          python3 -c $'import asyncio\nimport websockets\n\nasync def main():\n    async with websockets.connect("ws://127.0.0.1:8000/ws/chat") as alice, websockets.connect("ws://127.0.0.1:8000/ws/chat") as bob:\n        await alice.send("hello from alice")\n        received = await asyncio.wait_for(bob.recv(), timeout=5)\n        assert received == "hello from alice", received\n\nasyncio.run(main())'
       - name: Build and boot the generated project's Docker image
         run: |
           mkdir -p /tmp/ci-smoke-test/_ci_wheels

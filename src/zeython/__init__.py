@@ -74,6 +74,12 @@ from zeython.storage import (
 )
 from zeython.validation import Rule, email, matches, max_length, min_length, one_of, required
 from zeython.views import Views, render
+from zeython.websockets import (
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketHub,
+    WebSocketHubServiceProvider,
+)
 
 __version__ = "1.0.0"
 
@@ -150,6 +156,10 @@ __all__ = [
     "hash_password",
     "verify_password",
     "HealthCheckServiceProvider",
+    "WebSocket",
+    "WebSocketDisconnect",
+    "WebSocketHub",
+    "WebSocketHubServiceProvider",
     "HTTPException",
     "BadRequestException",
     "UnauthorizedException",
