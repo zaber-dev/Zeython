@@ -21,6 +21,7 @@ nav:
   - Frontend & CSS: frontend.md
   - Authentication: authentication.md
   - CSRF Protection: csrf.md
+  - Security Headers: security-headers.md
   - API Authentication: api-authentication.md
   - Authorization: authorization.md
   - File Storage: storage.md

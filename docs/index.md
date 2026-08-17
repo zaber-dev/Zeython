@@ -38,6 +38,7 @@ not a template you copy and diverge from.
 - [Frontend & CSS](frontend.md) — Tailwind out of the box (dev), moving to a compiled build
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [CSRF Protection](csrf.md) — the double-submit-cookie check that comes with session auth automatically
+- [Security Headers](security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
 - [API Authentication](api-authentication.md) — bearer tokens for clients that can't use cookies
 - [Authorization](authorization.md) — named abilities (`Gate`), `authorize()` route guards
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends

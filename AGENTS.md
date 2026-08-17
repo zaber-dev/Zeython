@@ -85,6 +85,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   client (read the cookie, send the header) instead; in tests,
   `zeython.testing.client()` already does this automatically once the
   client has made one prior safe (`GET`) request.
+- `SecurityHeadersServiceProvider` (`docs/security-headers.md`) adds
+  `X-Frame-Options`/`X-Content-Type-Options`/`Referrer-Policy`/CSP/HSTS
+  response headers -- unlike CSRF, it is **not** registered by default
+  (a wrong `Content-Security-Policy` breaks a legitimate app silently, so
+  this framework won't guess one for you). Register it explicitly once
+  you've decided on a policy; don't assume a generated project already
+  sends these headers.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach
