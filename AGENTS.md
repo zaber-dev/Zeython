@@ -190,6 +190,11 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
 - A generated project already exposes `/up` (`HealthCheckServiceProvider`,
   registered in `main.py` by default) for load balancers/container
   orchestrators -- don't add a second one. See `docs/health-check.md`.
+- Every request already gets a correlation ID (`RequestIdServiceProvider`,
+  registered by default): `X-Request-ID` on the response, and
+  `request_id()` (`zeython.request_id`) inside a handler or any log line
+  formatted with `%(request_id)s`. Don't hand-roll a second ID scheme --
+  reuse this one. See `docs/observability.md`.
 - Database access inside a request handler never needs a session parameter —
   `Model.create/find/all/...` pull the request-scoped session automatically.
   Outside a request (scripts, one-off tasks), wrap the code in
