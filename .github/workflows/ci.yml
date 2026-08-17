@@ -76,22 +76,28 @@ jobs:
           test "$REGISTER_STATUS" = "201"
           ME_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies.txt http://127.0.0.1:8000/me)
           test "$ME_STATUS" = "200"
+          # A session cookie now exists, so every further unsafe request on
+          # it needs the matching CSRF header too -- see docs/csrf.md.
+          CSRF_TOKEN=$(grep csrf_token /tmp/cookies.txt | awk '{print $NF}')
+          test -n "$CSRF_TOKEN"
           echo "upload me" > /tmp/upload.png
           UPLOAD_STATUS=$(curl -s -o /tmp/upload.json -w '%{http_code}' -b /tmp/cookies.txt \
-            -F "file=@/tmp/upload.png" http://127.0.0.1:8000/uploads)
+            -H "X-CSRF-Token: $CSRF_TOKEN" -F "file=@/tmp/upload.png" http://127.0.0.1:8000/uploads)
           test "$UPLOAD_STATUS" = "201"
           UPLOAD_URL=$(python3 -c "import json; print(json.load(open('/tmp/upload.json'))['url'])")
           curl -sf "http://127.0.0.1:8000$UPLOAD_URL" | grep -q "upload me"
-          POST_JSON=$(curl -s -b /tmp/cookies.txt -X POST http://127.0.0.1:8000/posts \
+          POST_JSON=$(curl -s -b /tmp/cookies.txt -H "X-CSRF-Token: $CSRF_TOKEN" -X POST http://127.0.0.1:8000/posts \
             -H 'Content-Type: application/json' -d '{"title":"t","body":"b"}')
           POST_ID=$(python3 -c "import json; print(json.loads('''$POST_JSON''')['id'])")
           curl -s -c /tmp/cookies2.txt -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
             -d '{"name":"Bea","email":"bea@example.com","password":"hunter2"}' -o /dev/null
+          CSRF_TOKEN2=$(grep csrf_token /tmp/cookies2.txt | awk '{print $NF}')
+          test -n "$CSRF_TOKEN2"
           STRANGER_DELETE_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies2.txt \
-            -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
+            -H "X-CSRF-Token: $CSRF_TOKEN2" -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
           test "$STRANGER_DELETE_STATUS" = "403"
           OWNER_DELETE=$(curl -s -o /tmp/delete.out -w '%{http_code}' -b /tmp/cookies.txt \
-            -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
+            -H "X-CSRF-Token: $CSRF_TOKEN" -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
           test "$OWNER_DELETE" = "204"
           test ! -s /tmp/delete.out  # a 204 must have an empty body
           TOKEN_JSON=$(curl -s -X POST http://127.0.0.1:8000/api/token -H 'Content-Type: application/json' \

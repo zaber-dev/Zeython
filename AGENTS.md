@@ -78,6 +78,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   (returns `None`). Never hand-roll password hashing — use
   `zeython.hash_password`/`verify_password` (PBKDF2-HMAC-SHA256), and never
   log or serialize a password/hash field — put it in the model's `__hidden__`.
+- `AuthServiceProvider` turns on CSRF protection automatically (`docs/csrf.md`)
+  — every `POST`/`PUT`/`PATCH`/`DELETE` against a session-authenticated
+  route needs the `X-CSRF-Token` header matching the `csrf_token` cookie.
+  Don't turn `CSRF_ENABLED` off to make a request "just work" — fix the
+  client (read the cookie, send the header) instead; in tests,
+  `zeython.testing.client()` already does this automatically once the
+  client has made one prior safe (`GET`) request.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach

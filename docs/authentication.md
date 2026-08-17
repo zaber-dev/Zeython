@@ -2,7 +2,9 @@
 
 Zeython ships session-based authentication: a signed cookie (Starlette's
 `SessionMiddleware`, keyed off `APP_SECRET_KEY`) holding the logged-in user's
-ID, password hashing with no C-extension dependency, and a small set of
+ID, [CSRF protection](csrf.md) that comes with it automatically (cookie
+auth without it is forgeable from any other site the user's browser has
+open), password hashing with no C-extension dependency, and a small set of
 functions to check/require a logged-in user in a handler.
 
 This is deliberately scoped to cookie sessions for a server-rendered or
@@ -112,6 +114,9 @@ async def home(self, request):
 | `SESSION_COOKIE_NAME` | `zeython_session` | Cookie name. |
 | `SESSION_MAX_AGE` | `1209600` (14 days) | Cookie lifetime in seconds. |
 | `SESSION_HTTPS_ONLY` | `false` | Set `true` once you're serving over HTTPS. |
+| `CSRF_ENABLED` | `true` | See [CSRF Protection](csrf.md). |
+| `CSRF_COOKIE_NAME` | `csrf_token` | |
+| `CSRF_HEADER_NAME` | `X-CSRF-Token` | |
 
 ## Password hashing
 

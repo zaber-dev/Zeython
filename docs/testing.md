@@ -27,6 +27,30 @@ tooling it'll never use. Run the suite with:
 pytest
 ```
 
+## Testing routes protected by CSRF
+
+If the app under test registers `AuthServiceProvider`, unsafe requests
+(`POST`/`PUT`/`PATCH`/`DELETE`) against a session-authenticated route need
+a valid CSRF token -- see [CSRF Protection](csrf.md). `client()` handles
+this for you automatically, reading the token from its own cookie jar and
+attaching it as a header, the same way a real browser-based client reading
+`document.cookie` would. The one thing it can't do for you: the *first*
+unsafe request in a test still needs a prior safe (`GET`) request to
+actually receive that cookie in the first place.
+
+```python
+async def test_create_post():
+    async with client(app) as http:
+        await http.post("/register", json={"email": "ada@example.com", "password": "hunter2"})
+        # a session cookie now exists; a fresh csrf_token cookie came back
+        # with that response too, and this next call picks it up automatically
+        response = await http.post("/posts", json={"title": "Hello"})
+        assert response.status_code == 201
+```
+
+(`/register` itself needed no priming here: a brand new client has no
+session cookie yet, and CSRF is only enforced once one exists.)
+
 ## Testing models directly
 
 For unit tests that don't need HTTP, open a session yourself:
