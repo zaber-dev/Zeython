@@ -103,3 +103,39 @@ nested paths like `"comments.author"`. For anything beyond that — complex
 joins, nested eager loading, custom query shapes — drop down to SQLAlchemy
 directly with `select()` and `.options()`; `Model` subclasses `Base`, so
 raw SQLAlchemy queries work on them exactly as documented upstream.
+
+## Detecting N+1s automatically
+
+`include=` prevents the crash (`MissingGreenlet`), but forgetting it
+entirely — hand-rolling a loop that touches a relationship's foreign key
+and fetches the related row one at a time instead — doesn't crash, it just
+runs one query per row: fine with 3 rows, a real production slowdown with
+3,000. `N1QueryDetectionServiceProvider` catches this in development
+before it ships:
+
+```python
+# main.py
+from zeython import Application, N1QueryDetectionServiceProvider
+
+app = Application()
+app.register(DatabaseServiceProvider)             # must run first -- binds Database
+app.register(N1QueryDetectionServiceProvider(app))
+```
+
+Not registered by default, but its `boot()` is a no-op unless `APP_DEBUG`
+is true, so it's safe to always register — no per-query overhead and no
+query text logged from real production traffic. It hooks SQLAlchemy's
+`before_cursor_execute` event and counts statement *shapes* (bound
+parameters aside — `SELECT ... WHERE id = ?` run once per row in a loop is
+one shape, run many times) per request; more than `N1_QUERY_THRESHOLD`
+(default `10`) of the same shape in one request logs a warning naming the
+route and the query:
+
+```
+WARNING zeython.n_plus_one: Possible N+1 query on /posts: the same statement
+ran 47 times in one request. Eager-load the relationship instead
+(include=(...), see docs/relationships.md). Query: SELECT posts.author_id, ...
+```
+
+The fix is the same one this whole page is about — eager-load with
+`include=(...)` instead of touching the relationship inside a loop.

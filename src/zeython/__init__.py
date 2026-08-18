@@ -41,6 +41,7 @@ from zeython.hashing import hash_password, verify_password
 from zeython.health import HealthCheckServiceProvider
 from zeython.logging import JsonFormatter
 from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
+from zeython.n_plus_one import N1QueryDetectionMiddleware, N1QueryDetectionServiceProvider
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.providers import (
     CorsServiceProvider,
@@ -142,6 +143,8 @@ __all__ = [
     "LogMailer",
     "SmtpMailer",
     "MailServiceProvider",
+    "N1QueryDetectionMiddleware",
+    "N1QueryDetectionServiceProvider",
     "describe",
     "model_schema",
     "generate_openapi",
