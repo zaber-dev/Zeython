@@ -215,6 +215,68 @@ def test_make_job_creates_the_file(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     assert (tmp_path / "app" / "Jobs" / "send_welcome_email_job.py").is_file()
 
 
+def test_make_policy_creates_the_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(cli_app, ["make", "policy", "Post"])
+
+    assert result.exit_code == 0
+    path = tmp_path / "app" / "Policies" / "post_policy.py"
+    assert path.is_file()
+    assert "class PostPolicy" in path.read_text()
+    assert "def update(self, user, post)" in path.read_text()
+
+
+# -- routes / about ----------------------------------------------------------------------
+
+
+def _project_with_a_route(tmp_path: Path) -> Path:
+    (tmp_path / ".env").write_text("APP_NAME=Routes Test\nAPP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application\n\n"
+        "app = Application()\n\n"
+        "@app.get('/hello', name='hello')\n"
+        "async def hello(request):\n"
+        "    from starlette.responses import JSONResponse\n"
+        "    return JSONResponse({'ok': True})\n"
+    )
+    return tmp_path
+
+
+def test_routes_lists_every_registered_route(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(_project_with_a_route(tmp_path))
+
+    result = runner.invoke(cli_app, ["routes"])
+
+    assert result.exit_code == 0
+    assert "/hello" in result.stdout
+    assert "GET" in result.stdout
+    assert "hello" in result.stdout
+
+
+def test_routes_reports_when_none_are_registered(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text("from zeython import Application\n\napp = Application()\n")
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(cli_app, ["routes"])
+
+    assert result.exit_code == 0
+    assert "No routes registered" in result.stdout
+
+
+def test_about_reports_app_name_and_zeython_version(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(_project_with_a_route(tmp_path))
+
+    result = runner.invoke(cli_app, ["about"])
+
+    assert result.exit_code == 0
+    assert "Routes Test" in result.stdout
+    import zeython
+
+    assert zeython.__version__ in result.stdout
+
+
 # -- db migrate / revision / downgrade (the alembic subprocess wrapper) -----------------
 
 

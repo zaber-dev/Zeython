@@ -83,7 +83,9 @@ A closure per ability works until a resource accumulates several of them
 (`view-post`, `update-post`, `delete-post`, `create-post`...) and a provider's
 `boot()` turns into a wall of `gate.define(...)` calls. A **Policy** groups
 them: a plain class, one method per ability, registered once against the
-model it authorizes:
+model it authorizes. `zeython make policy Post` scaffolds one (with
+`view`/`create`/`update`/`delete` stubs) in `app/Policies/` -- see [CLI
+Reference](cli.md#code-generators):
 
 ```python
 class PostPolicy:
