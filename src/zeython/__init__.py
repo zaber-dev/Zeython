@@ -24,7 +24,7 @@ from zeython.console import Command
 from zeython.container import Container
 from zeython.csrf import CsrfMiddleware, csrf_token
 from zeython.database import Factory, Seeder
-from zeython.db import Database, Model, Page
+from zeython.db import Database, Model, Page, transaction
 from zeython.error_monitoring import ErrorMonitoringServiceProvider, init_sentry, report_exception
 from zeython.exceptions import (
     BadRequestException,
@@ -103,6 +103,7 @@ __all__ = [
     "Database",
     "Model",
     "Page",
+    "transaction",
     "Factory",
     "Seeder",
     "Router",
