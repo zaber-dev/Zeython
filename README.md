@@ -142,6 +142,7 @@ my_blog/
 - [docs/architecture.md](docs/architecture.md) — container, providers, router, ORM
 - [docs/cli.md](docs/cli.md) — full CLI reference
 - [docs/console-commands.md](docs/console-commands.md) — writing your own `zeython command <name>` CLI commands
+- [docs/plugins.md](docs/plugins.md) — pip-installable packages that register their own service providers, no per-package wiring
 - [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
 - [docs/api-standards.md](docs/api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
 - [docs/database.md](docs/database.md) — models and migrations
