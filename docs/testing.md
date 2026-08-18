@@ -51,6 +51,34 @@ async def test_create_post():
 (`/register` itself needed no priming here: a brand new client has no
 session cookie yet, and CSRF is only enforced once one exists.)
 
+## Logging a test client in directly
+
+Most tests that need an authenticated request aren't testing the login
+flow itself — going through a real `POST /login` every time is
+boilerplate. `login_as()` sets the same signed session cookie a real
+login would, directly:
+
+```python
+from zeython.testing import client, login_as
+
+async def test_only_the_owner_can_delete_their_post():
+    user = await User.create(email="ada@example.com", ...)
+
+    async with client(app) as http:
+        login_as(http, app, user)
+        response = await http.delete(f"/posts/{post.id}")
+
+    assert response.status_code == 204
+```
+
+Requires `AuthServiceProvider` to be registered (same requirement
+`login()` itself has) — the cookie it builds is accepted by
+`require_auth()`/`current_user()` exactly the way a real login's would be,
+since it's built with the same secret key, cookie name, and encoding
+Starlette's `SessionMiddleware` uses internally. Still test the real
+login endpoint itself somewhere, of course — `login_as()` is for
+everything *downstream* of being logged in.
+
 ## Testing models directly
 
 For unit tests that don't need HTTP, open a session yourself:
@@ -71,6 +99,39 @@ async def test_post_creation():
 For anything beyond a one-off row, a `Factory` (`database/factories/`) is
 usually less repetitive than constructing models by hand in every test --
 see [Factories & Seeders](database-seeding.md).
+
+## Rolling back writes between tests
+
+A fresh `sqlite+aiosqlite:///:memory:` database per test (the pattern
+above, and what `zeython new` scaffolds by default) already gives each
+test a clean slate for free — nothing to roll back, because nothing from
+a previous test could still be there. That stops being free once tests
+run against a real Postgres/MySQL database instead (a staging DB, a
+Postgres service container in CI): recreating the schema before every
+single test gets slow fast. `transactional_session()` is the usual fix —
+open one session for the whole test, and roll it back unconditionally
+at the end instead of creating fresh tables:
+
+```python
+import pytest_asyncio
+from zeython.testing import transactional_session
+
+@pytest_asyncio.fixture
+async def db_session(database):
+    async with transactional_session(database):
+        yield
+
+async def test_creating_a_post(db_session):
+    post = await Post.create(title="Hello")
+    assert post.id is not None
+    # rolled back automatically once the test (and the fixture) exits --
+    # the next test's queries never see this row
+```
+
+Writes made through the Active Record API are visible to any query made
+later in the same test (it's a real session, not a mock), but never
+committed — the schema itself still needs to exist already (via
+migrations against that database, run once, not per test).
 
 ## Testing WebSocket routes
 
