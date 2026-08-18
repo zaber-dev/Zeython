@@ -6,6 +6,7 @@ themselves in isolation.
 """
 
 import json
+from http import HTTPStatus
 from pathlib import Path
 
 from zeython.application import Application
@@ -202,7 +203,7 @@ async def test_api_problem_json_includes_errors_extension_for_validation(tmp_pat
         response = await http.get("/invalid")
 
     body = response.json()
-    assert body["title"] == "Unprocessable Entity"
+    assert body["title"] == HTTPStatus(422).phrase
     assert body["errors"] == {"email": ["is required"]}
 
 
