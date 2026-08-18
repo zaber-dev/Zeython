@@ -141,6 +141,52 @@ def make_seeder(name: str = typer.Argument(..., help="Seeder name, e.g. User or 
     typer.secho(f"Created {path}", fg=typer.colors.GREEN)
 
 
+@make_app.command("policy")
+def make_policy(name: str = typer.Argument(..., help="Model name, e.g. Post or PostPolicy")) -> None:
+    """Generate a new authorization policy in app/Policies/."""
+    path = scaffold.make_policy(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
+@app.command()
+def routes() -> None:
+    """List every HTTP route registered in the current project."""
+    # zeython.mcp.introspect has no dependency on the `mcp` extra itself
+    # (only zeython.mcp.server does, for the MCP protocol layer) -- reusing
+    # it here means route listing reflects exactly what the MCP server's
+    # list_routes tool would report, from one implementation.
+    from zeython.mcp import introspect
+
+    application = introspect.load_app(Path.cwd())
+    discovered = introspect.describe_routes(application)
+    if not discovered:
+        typer.echo("No routes registered.")
+        return
+
+    for route in discovered:
+        methods = route["methods"] or "WS"
+        name = f"  ({route['name']})" if route["name"] else ""
+        typer.echo(f"  {methods:<20} {route['path']}{name}")
+
+
+@app.command()
+def about() -> None:
+    """Show basic info about the current project: app name, environment, debug flag,
+    installed Zeython version, and registered service providers."""
+    from zeython.mcp import introspect
+
+    application = introspect.load_app(Path.cwd())
+    info = introspect.describe_app(application)
+
+    typer.echo(f"  App name ........ {info['app_name']}")
+    typer.echo(f"  Environment ...... {info['environment']}")
+    typer.echo(f"  Debug ............ {info['debug']}")
+    typer.echo(f"  Zeython version .. {info['zeython_version']}")
+    typer.echo("  Providers:")
+    for provider_name in info["providers"]:
+        typer.echo(f"    - {provider_name}")
+
+
 @app.command(name="commands")
 def list_commands() -> None:
     """List custom commands defined in app/Console/Commands/."""
