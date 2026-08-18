@@ -83,6 +83,35 @@ def current_session() -> AsyncSession:
     return session
 
 
+@asynccontextmanager
+async def transaction() -> AsyncIterator[AsyncSession]:
+    """A ``SAVEPOINT``-scoped nested transaction within the current session
+    -- for a chunk of work that should roll back independently of the rest
+    of the request if it fails, without undoing writes made earlier in the
+    same request or ending it. Requires an active session (see
+    :func:`current_session`)::
+
+        async with transaction():
+            await from_account.save()
+            await to_account.save()
+        # a failure inside the block rolls back only these two writes --
+        # anything saved before entering it, or after it exits normally,
+        # is unaffected.
+
+    Rolling back an *entire* request already happens for free and needs
+    no extra API: an exception that propagates out of a request handler
+    unwinds past ``DatabaseSessionMiddleware`` and rolls back the whole
+    session (see :meth:`Database.session`) -- Starlette re-raises the
+    original exception to outer ASGI middleware even after one of your own
+    exception handlers already sent a response for it. ``transaction()``
+    is for the narrower case where you catch the failure yourself and keep
+    the request going, but still don't want its partial writes kept.
+    """
+    session = current_session()
+    async with session.begin_nested():
+        yield session
+
+
 class DatabaseSessionMiddleware:
     """Pure ASGI middleware that opens one DB session per HTTP request."""
 

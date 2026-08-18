@@ -96,6 +96,10 @@ async with database.session():
     user = await User.create(name="Ada", email="ada@example.com")
 ```
 
+The whole session commits/rolls back around the request; `transaction()`
+scopes a `SAVEPOINT` inside it, for a chunk of work that should roll back
+on its own without ending the request — see [Transactions](database.md#transactions).
+
 ## Routing and controllers
 
 ```python
