@@ -81,6 +81,12 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # files yet (and `from zeython import LocalizationServiceProvider` above).
 # See docs/localization.md.
 # app.register(LocalizationServiceProvider)
+# Generates list/create/edit/delete pages for the given models -- not
+# registered by default since `guard` (who's allowed in, beyond just being
+# logged in) has no safe default to guess. Uncomment, pick a real guard,
+# and add `from zeython import AdminServiceProvider` and
+# `from app.Models.post import Post` above. See docs/admin.md.
+# app.register(AdminServiceProvider(app, models=[Post], guard=lambda user: user.is_admin))
 
 if __name__ == "__main__":
     app.run()

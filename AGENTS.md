@@ -123,6 +123,14 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   in a template with no `request` needed, since `Translator` reads the
   current locale from a contextvar rather than a request object. See
   `docs/localization.md`.
+- `AdminServiceProvider` (`zeython.admin`, not registered by default)
+  generates list/create/edit/delete pages for registered models from
+  their own columns. `guard` is a **required** constructor argument
+  (`AdminServiceProvider(app, models=[...], guard=lambda user: user.is_admin)`)
+  -- there is deliberately no default that lets any logged-in user
+  through. No relationship pickers (a foreign key is a plain number
+  input), no search/filtering -- it's an internal CRUD tool, not a
+  Django-admin clone. See `docs/admin.md`.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach

@@ -27,6 +27,7 @@ nav:
   - Security Headers: security-headers.md
   - API Authentication: api-authentication.md
   - Authorization: authorization.md
+  - Admin Panel: admin.md
   - File Storage: storage.md
   - Rate Limiting: rate-limiting.md
   - Caching: caching.md
