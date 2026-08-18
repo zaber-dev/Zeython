@@ -12,6 +12,9 @@ Open an issue with:
 - A minimal reproduction (a few lines against `zeython`, or `zeython new` + a diff).
 - The Zeython version (`python -c "import zeython; print(zeython.__version__)"`) and Python version.
 
+**Found a security vulnerability instead?** Don't open a public issue for
+it — see `SECURITY.md` for how to report it privately.
+
 ## Proposing features
 
 Open an issue describing the problem before the implementation. Framework-level
