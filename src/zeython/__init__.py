@@ -17,7 +17,7 @@ from zeython.auth import (
     logout,
     require_auth,
 )
-from zeython.authorization import AuthorizationServiceProvider, Gate, authorize
+from zeython.authorization import AuthorizationServiceProvider, Gate, HasRoles, authorize
 from zeython.cache import Cache, CacheServiceProvider, InMemoryCache, RedisCache
 from zeython.config import Config
 from zeython.console import Command
@@ -153,6 +153,7 @@ __all__ = [
     "CsrfMiddleware",
     "csrf_token",
     "Gate",
+    "HasRoles",
     "authorize",
     "AuthorizationServiceProvider",
     "TokenManager",

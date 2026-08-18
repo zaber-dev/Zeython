@@ -103,8 +103,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   (`gate.define("delete-post", lambda user, post: post.author_id ==
   user.id)`, typically in a provider's `boot()`) and call `await
   authorize(request, "delete-post", post)` at the top of the handler --
-  never hand-roll the ownership `if` check inline. See
-  `docs/authorization.md`.
+  never hand-roll the ownership `if` check inline. Once a resource
+  accumulates several abilities, group them in a Policy class instead
+  (`gate.policy(Post, PostPolicy)`) rather than one `gate.define(...)` per
+  ability; `gate.before(...)` covers a cross-cutting bypass ("an admin can
+  do anything"); `Gate.role(...)`/`Gate.permission(...)` plus the
+  `HasRoles` mixin cover role-/permission-gated abilities without
+  hand-rolling `"admin" in user.roles` checks. See `docs/authorization.md`.
 - File uploads always go through `zeython.storage.store_upload()`, never
   `open(f"uploads/{upload.filename}", "wb")` or similar — the client's
   filename is untrusted input, and `store_upload()` is what keeps a stored
