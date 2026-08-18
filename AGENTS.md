@@ -254,6 +254,14 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `zeython new` scaffolds, but leave them unset for `sqlite+aiosqlite:///:memory:`
   specifically (its default pool doesn't accept either and raises
   `TypeError` if you set them). See `docs/database.md#connection-pooling`.
+- A read-heavy path that can tolerate replication lag (a report, a
+  dashboard) belongs in `async with database.read_replica():`, not
+  `database.session()` -- set `DATABASE_READ_URL` to actually point it at
+  a replica; unset, it transparently falls back to the primary, so the
+  code doesn't need to change either way. It's read-only in practice
+  because a real replica is configured read-only at the database level,
+  not because Zeython checks -- don't add a Python-side write guard on
+  top of it. See `docs/database.md#read-replicas`.
 - Use `zeython.testing.client` for endpoint tests — it hits the ASGI app
   in-process (no real server, no port binding).
 
