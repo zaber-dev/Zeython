@@ -1,5 +1,6 @@
 """Zeython: an async-first, batteries-included MVC framework for Python."""
 
+from zeython.admin import AdminServiceProvider
 from zeython.ai import AI, AIResponse, AIServiceProvider, AnthropicAI, EchoAI
 from zeython.api_auth import (
     ApiAuthServiceProvider,
@@ -101,6 +102,7 @@ from zeython.websockets import (
 __version__ = "2.0.0a1"
 
 __all__ = [
+    "AdminServiceProvider",
     "AI",
     "AIResponse",
     "AnthropicAI",

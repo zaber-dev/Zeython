@@ -158,6 +158,7 @@ my_blog/
 - [docs/security-headers.md](docs/security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
 - [docs/api-authentication.md](docs/api-authentication.md) — bearer tokens for clients that can't use cookies
 - [docs/authorization.md](docs/authorization.md) — named abilities (`Gate`), `authorize()` route guards
+- [docs/admin.md](docs/admin.md) — auto-generated CRUD UI for registered models
 - [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
 - [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
 - [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute

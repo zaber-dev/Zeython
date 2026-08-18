@@ -44,6 +44,7 @@ not a template you copy and diverge from.
 - [Security Headers](security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
 - [API Authentication](api-authentication.md) — bearer tokens for clients that can't use cookies
 - [Authorization](authorization.md) — named abilities (`Gate`), `authorize()` route guards
+- [Admin Panel](admin.md) — auto-generated CRUD UI for registered models
 - [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
 - [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
 - [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
