@@ -18,6 +18,46 @@ from zeython.cli.main import app as cli_app
 
 runner = CliRunner()
 
+#: Captured once, before any test in this file starts calling load_app()
+#: (via `queue work`/`db migrate`/`db seed`/`schedule run`/`schedule list`)
+#: and accumulating sys.path entries -- see _isolate_loader_global_state.
+_PRISTINE_SYS_PATH = list(sys.path)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_loader_global_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    # cli.loader._import_main() caches the "main" module by name and
+    # reloads it (from its *original* file path) on a second call rather
+    # than re-importing -- across many different tmp_path projects in this
+    # file, a later test's load_app() would otherwise silently re-execute
+    # an *earlier* test's main.py instead of its own. Same root cause as
+    # test_cli_loader.py's identical fixture; masked here until a test's
+    # main.py/schedule.py content actually differed enough to expose it.
+    import zeython.cli.loader as loader_module
+
+    monkeypatch.setattr(loader_module, "_current_project_root", None)
+    monkeypatch.delitem(sys.modules, "main", raising=False)
+    # "schedule" isn't one of sync_project_modules()'s tracked packages
+    # (only "app"/"database" are) -- it's imported by plain module name via
+    # ScheduleServiceProvider, same caching risk as "main" itself.
+    monkeypatch.delitem(sys.modules, "schedule", raising=False)
+    monkeypatch.setattr(sys, "path", list(_PRISTINE_SYS_PATH))
+
+
+def _simulate_a_fresh_process() -> None:
+    # `zeython schedule run` is always a brand-new OS process in real usage
+    # (cron, or a `while true; zeython schedule run; sleep 60` sidecar loop)
+    # -- sys.modules is empty every time. Two runner.invoke() calls within
+    # one test share a process/sys.modules that a real double-invocation
+    # never would, so tests exercising "two separate invocations" reset the
+    # same state _isolate_loader_global_state resets between tests, but
+    # mid-test, between the two invoke() calls.
+    import zeython.cli.loader as loader_module
+
+    loader_module._current_project_root = None
+    sys.modules.pop("main", None)
+    sys.modules.pop("schedule", None)
+
 
 def _fake_subprocess_run(calls: list[list[str]]):
     def fake_run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess:
@@ -298,6 +338,178 @@ def test_queue_work_runs_the_worker_for_a_redis_queue(tmp_path: Path, monkeypatc
     assert calls == [True]
     assert "Working queue 'default'" in result.stdout
     assert "Stopped." in result.stdout
+
+
+# -- schedule run / schedule list ----------------------------------------------------------
+
+
+def _project_with_schedule(tmp_path: Path, schedule_body: str) -> Path:
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application, ScheduleServiceProvider\n\n"
+        "app = Application()\n"
+        "app.register(ScheduleServiceProvider(app))\n"
+    )
+    (tmp_path / "schedule.py").write_text(schedule_body)
+    return tmp_path
+
+
+def test_schedule_list_reports_no_tasks_when_none_are_registered(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(_project_with_schedule(tmp_path, "from main import app  # no events registered\n"))
+
+    result = runner.invoke(cli_app, ["schedule", "list"])
+
+    assert result.exit_code == 0
+    assert "No scheduled tasks registered" in result.stdout
+
+
+def test_schedule_list_shows_each_registered_events_cron_expression(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(
+        _project_with_schedule(
+            tmp_path,
+            "from main import app\n"
+            "from zeython import Schedule\n\n"
+            "schedule = app.container.make(Schedule)\n\n"
+            "async def send_report() -> None:\n"
+            "    pass\n\n"
+            "schedule.call(send_report).daily_at('09:00')\n",
+        )
+    )
+
+    result = runner.invoke(cli_app, ["schedule", "list"])
+
+    assert result.exit_code == 0
+    assert "send_report" in result.stdout
+    assert "0 9 * * *" in result.stdout
+
+
+def test_schedule_run_runs_a_due_task_and_reports_it(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    marker = tmp_path / "ran.txt"
+    monkeypatch.chdir(
+        _project_with_schedule(
+            tmp_path,
+            "from pathlib import Path\n"
+            "from main import app\n"
+            "from zeython import Schedule\n\n"
+            "schedule = app.container.make(Schedule)\n\n"
+            "async def write_marker() -> None:\n"
+            f"    Path({str(marker)!r}).write_text('ran')\n\n"
+            "schedule.call(write_marker).every_minute()\n",
+        )
+    )
+
+    result = runner.invoke(cli_app, ["schedule", "run"])
+
+    assert result.exit_code == 0
+    assert "Ran 1 due event(s): write_marker" in result.stdout
+    assert marker.read_text() == "ran"
+
+
+def test_schedule_run_reports_nothing_when_no_task_is_due(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(
+        _project_with_schedule(
+            tmp_path,
+            "from main import app\n"
+            "from zeython import Schedule\n\n"
+            "schedule = app.container.make(Schedule)\n\n"
+            "async def never_runs() -> None:\n"
+            "    pass\n\n"
+            # Impossible day-of-month -- never due.
+            "schedule.call(never_runs).cron('0 0 31 2 *')\n",
+        )
+    )
+
+    result = runner.invoke(cli_app, ["schedule", "run"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == ""
+
+
+def test_schedule_run_without_overlapping_needs_a_shared_rate_limiter_to_do_anything(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Regression/documentation test for a real finding from E2E testing:
+    # `zeython schedule run` is a fresh process on every invocation (that's
+    # the whole design -- cron/a sidecar loop shell out to it repeatedly),
+    # so without_overlapping()'s default InMemoryRateLimiter -- whose lock
+    # lives in that one process's memory -- can never see a lock set by an
+    # *earlier* invocation. Confirms the counter increments on every call.
+    counter = tmp_path / "counter.txt"
+    monkeypatch.chdir(
+        _project_with_schedule(
+            tmp_path,
+            "from pathlib import Path\n"
+            "from main import app\n"
+            "from zeython import Schedule\n\n"
+            "schedule = app.container.make(Schedule)\n\n"
+            "async def bump() -> None:\n"
+            f"    counter = Path({str(counter)!r})\n"
+            "    n = int(counter.read_text()) if counter.exists() else 0\n"
+            "    counter.write_text(str(n + 1))\n\n"
+            "schedule.call(bump, name='bump').every_minute().without_overlapping(for_seconds=3600)\n",
+        )
+    )
+
+    runner.invoke(cli_app, ["schedule", "run"])
+    _simulate_a_fresh_process()
+    runner.invoke(cli_app, ["schedule", "run"])
+
+    assert counter.read_text() == "2"  # not "1" -- without_overlapping() had no effect
+
+
+def test_schedule_run_without_overlapping_works_across_invocations_with_redis(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The fix for the above: bind RedisRateLimiter (a real shared backend,
+    # not process memory) and without_overlapping() actually blocks the
+    # second invocation's run.
+    pytest.importorskip("redis")
+    import os
+
+    redis_url = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
+    counter = tmp_path / "counter.txt"
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application, RateLimiter, RedisRateLimiter, ScheduleServiceProvider\n\n"
+        "app = Application()\n"
+        f"app.container.singleton(RateLimiter, lambda: RedisRateLimiter({redis_url!r}, prefix='zeython-test:sched-lock:'))\n"
+        "app.register(ScheduleServiceProvider(app))\n"
+    )
+    (tmp_path / "schedule.py").write_text(
+        "from pathlib import Path\n"
+        "from main import app\n"
+        "from zeython import Schedule\n\n"
+        "schedule = app.container.make(Schedule)\n\n"
+        "async def bump() -> None:\n"
+        f"    counter = Path({str(counter)!r})\n"
+        "    n = int(counter.read_text()) if counter.exists() else 0\n"
+        "    counter.write_text(str(n + 1))\n\n"
+        "schedule.call(bump, name='bump').every_minute().without_overlapping(for_seconds=3600)\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    from redis.asyncio import Redis
+
+    async def _clear_lock() -> None:
+        client = Redis.from_url(redis_url)
+        await client.delete("zeython-test:sched-lock:zeython:schedule:lock:bump")
+        await client.aclose()
+
+    import asyncio as _asyncio
+
+    _asyncio.run(_clear_lock())
+
+    runner.invoke(cli_app, ["schedule", "run"])
+    _simulate_a_fresh_process()
+    runner.invoke(cli_app, ["schedule", "run"])
+
+    assert counter.read_text() == "1"  # the second invocation was blocked by the shared lock
+
+    _asyncio.run(_clear_lock())
 
 
 # -- main() -------------------------------------------------------------------------------

@@ -29,6 +29,7 @@ nav:
   - Caching: caching.md
   - Redis (Distributed): redis.md
   - Background Jobs: queues.md
+  - Scheduling: scheduling.md
   - WebSockets: websockets.md
   - Mail: mail.md
   - AI: ai.md

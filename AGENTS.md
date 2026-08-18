@@ -134,6 +134,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   typed params (e.g. `handle(self, mailer: Mailer)`) and get them
   autowired from the container, same as anywhere else. See
   `docs/queues.md`.
+- A recurring task (nightly cleanup, a weekly digest) belongs in
+  `schedule.py` at the project root -- `schedule.call(fn).daily_at("07:00")`
+  (or `.hourly()`/`.cron("*/15 * * * *")`/etc.), run via `zeython schedule
+  run` -- not a bare `cron` entry calling `zeython command <name>`
+  directly, which would leave the schedule itself outside version control.
+  Requires `app.register(ScheduleServiceProvider(app))` in `main.py` (not
+  registered by default). See `docs/scheduling.md`.
 - For a read path worth caching, use `zeython.Cache` (bound in the
   container) rather than hand-rolling a module-level dict: `await
   cache.remember(key, ttl, callback)` covers the common
