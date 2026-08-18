@@ -160,6 +160,7 @@ my_blog/
 - [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
 - [docs/redis.md](docs/redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
 - [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
+- [docs/scheduling.md](docs/scheduling.md) — recurring tasks defined in code, one cron entry total
 - [docs/websockets.md](docs/websockets.md) — real-time handlers and the `WebSocketHub` broadcast registry
 - [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
 - [docs/ai.md](docs/ai.md) — calling an LLM from your own app code

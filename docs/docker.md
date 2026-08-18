@@ -57,6 +57,14 @@ alongside `redis` and `app`. Jobs a durable queue is meant to protect
 (payment capture, anything a crash shouldn't drop) don't get that
 protection if nothing is actually running the worker.
 
+## Scheduled tasks
+
+A container has no host crontab to point `zeython schedule run` at (see
+[Scheduling](scheduling.md)). `docker-compose.yml` includes a commented-out
+`scheduler` service -- a sidecar loop container that runs `zeython
+schedule run` once a minute, forever, the container equivalent of a single
+cron entry. Uncomment it once `schedule.py` actually defines something.
+
 ## Persisting data
 
 `docker-compose.yml` mounts `./storage` (uploaded files -- see
