@@ -263,7 +263,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   not because Zeython checks -- don't add a Python-side write guard on
   top of it. See `docs/database.md#read-replicas`.
 - Use `zeython.testing.client` for endpoint tests — it hits the ASGI app
-  in-process (no real server, no port binding).
+  in-process (no real server, no port binding). A test needing an
+  authenticated request but not testing login itself should use
+  `login_as(http, app, user)` rather than a real `POST /login` every
+  time. Against a real Postgres/MySQL test database (not the default
+  `:memory:` SQLite, which is already isolated per test for free),
+  `transactional_session(database)` rolls a whole test's writes back
+  instead of recreating the schema per test. See `docs/testing.md`.
 
 ## Common pitfalls specific to this framework
 
