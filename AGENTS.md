@@ -114,6 +114,15 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   contributes automatically, no per-package `app.register(...)` line. A
   plugin whose import/`register()`/`boot()` fails is left to raise, not
   caught and skipped. See `docs/plugins.md`.
+- `LocalizationServiceProvider` (`zeython.localization`, not registered by
+  default) loads flat-JSON translation files from `resources/lang/{locale}.json`
+  and resolves a locale per request (`?lang=`, then `Accept-Language`,
+  then `LOCALE_DEFAULT`) via `LocaleMiddleware`. `t(request, key, **params)`
+  translates from a controller; a `t` Jinja global (registered
+  automatically if `ViewServiceProvider` is also registered) does the same
+  in a template with no `request` needed, since `Translator` reads the
+  current locale from a contextvar rather than a request object. See
+  `docs/localization.md`.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach

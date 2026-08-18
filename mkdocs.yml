@@ -21,6 +21,7 @@ nav:
   - Model Events: model-events.md
   - Views: views.md
   - Frontend & CSS: frontend.md
+  - Localization: localization.md
   - Authentication: authentication.md
   - CSRF Protection: csrf.md
   - Security Headers: security-headers.md
