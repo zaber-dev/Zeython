@@ -57,3 +57,13 @@ zeython db seed --class UserSeeder      # runs a specific seeder instead
 ```
 
 See [Factories & Seeders](database-seeding.md).
+
+## Queue worker
+
+```bash
+zeython queue work                     # process jobs from a durable queue (QUEUE_DRIVER=redis)
+```
+
+Only meaningful with `QUEUE_DRIVER=redis` — the default in-memory queue
+already runs its own worker inside your app's process, so there's nothing
+for a separate process to pull from. See [Background Jobs](queues.md#queue_driverredis-a-durable-queue).

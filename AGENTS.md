@@ -124,9 +124,15 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `zeython.queue` — not awaited inline in the handler. `zeython make job
   <Name>` scaffolds one. Remember the default queue is process-local (a job
   pushed but not yet run is lost on crash/restart) — that's fine for a
-  welcome email, not for anything you'd be upset to silently lose. A job's
-  `handle()` can declare typed params (e.g. `handle(self, mailer: Mailer)`)
-  and get them autowired from the container, same as anywhere else. See
+  welcome email, not for anything you'd be upset to silently lose
+  (payment capture, anything a crash shouldn't drop). For that, set
+  `QUEUE_DRIVER=redis` and run `zeython queue work` as its own process --
+  `RedisQueue` requires the job to be a `@dataclass` with JSON-safe
+  constructor fields (it has to serialize the job to survive a process
+  boundary), retries with backoff, and moves an exhausted job to a
+  failed-jobs list instead of dropping it. A job's `handle()` can declare
+  typed params (e.g. `handle(self, mailer: Mailer)`) and get them
+  autowired from the container, same as anywhere else. See
   `docs/queues.md`.
 - For a read path worth caching, use `zeython.Cache` (bound in the
   container) rather than hand-rolling a module-level dict: `await

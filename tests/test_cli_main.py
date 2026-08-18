@@ -253,6 +253,53 @@ def test_db_migrate_exit_code_matches_the_alembic_subprocesss_returncode(
     assert result.exit_code == 3
 
 
+# -- queue work ---------------------------------------------------------------------------
+
+
+def _minimal_project(tmp_path: Path, *, extra_env: str = "") -> Path:
+    (tmp_path / ".env").write_text(f"APP_SECRET_KEY=test\n{extra_env}")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application, QueueServiceProvider\n\n"
+        "app = Application()\n"
+        "app.register(QueueServiceProvider)\n"
+    )
+    return tmp_path
+
+
+def test_queue_work_rejects_the_default_in_memory_driver(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(_minimal_project(tmp_path))
+
+    result = runner.invoke(cli_app, ["queue", "work"])
+
+    assert result.exit_code == 1
+    assert "QUEUE_DRIVER=redis" in result.stdout
+
+
+def test_queue_work_runs_the_worker_for_a_redis_queue(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("redis")
+    import os
+
+    redis_url = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
+    monkeypatch.chdir(_minimal_project(tmp_path, extra_env=f"QUEUE_DRIVER=redis\nREDIS_URL={redis_url}\n"))
+
+    from zeython.queue import RedisQueue
+
+    calls = []
+
+    async def fake_run_worker(self, **kwargs):  # noqa: ANN001, ANN003
+        calls.append(True)
+        raise KeyboardInterrupt  # simulates Ctrl+C stopping the worker
+
+    monkeypatch.setattr(RedisQueue, "run_worker", fake_run_worker)
+
+    result = runner.invoke(cli_app, ["queue", "work"])
+
+    assert result.exit_code == 0
+    assert calls == [True]
+    assert "Working queue 'default'" in result.stdout
+    assert "Stopped." in result.stdout
+
+
 # -- main() -------------------------------------------------------------------------------
 
 
