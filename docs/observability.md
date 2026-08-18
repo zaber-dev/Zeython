@@ -1,4 +1,6 @@
-# Observability: Request/Correlation IDs
+# Observability
+
+## Request/Correlation IDs
 
 A production server handles many requests concurrently; its log stream is
 every one of them interleaved. Without something tying a group of log
@@ -8,7 +10,7 @@ and hoping nothing else logged in that same window. `RequestIdMiddleware`
 gives every request a correlation ID and threads it through both the
 response and the logs.
 
-## What it does
+### What it does
 
 - Reads the caller's own `X-Request-ID` request header, if it sent one —
   so a request can be traced end-to-end across multiple services that all
@@ -20,7 +22,7 @@ response and the logs.
   `request_id()` — and to every log line, via `%(request_id)s` in a
   formatter.
 
-## Setup
+### Setup
 
 ```python
 # main.py
@@ -39,7 +41,7 @@ Configurable via `.env`:
 
 - `REQUEST_ID_HEADER` — default `X-Request-ID`.
 
-## Reading it in a handler
+### Reading it in a handler
 
 ```python
 from zeython.request_id import request_id
@@ -49,7 +51,7 @@ async def whoami(request):
     return {"request_id": request_id()}
 ```
 
-## In your own logging
+### In your own logging
 
 Registering `RequestIdServiceProvider` also installs a `logging.Filter`
 on the root logger, so every `LogRecord` gets a `request_id` attribute —
@@ -77,7 +79,7 @@ class RequestIdFormatter(logging.Formatter):
 logger.info("processing order %s", order.id)  # record.request_id is set automatically
 ```
 
-## Using the middleware directly
+### Using the middleware directly
 
 ```python
 from zeython.request_id import RequestIdMiddleware
@@ -85,7 +87,7 @@ from zeython.request_id import RequestIdMiddleware
 app.add_middleware(RequestIdMiddleware, header_name="X-Correlation-ID")
 ```
 
-## Verifying it
+### Verifying it
 
 ```bash
 curl -sI http://localhost:8000/up | grep -i x-request-id
@@ -94,3 +96,71 @@ curl -sI http://localhost:8000/up -H "X-Request-ID: my-own-id" | grep -i x-reque
 
 The second call gets back exactly `my-own-id` — the middleware never
 overwrites a caller-supplied value.
+
+## Structured (JSON) logging
+
+The framework's default log line (`Application.__init__` calls this if
+nothing else configured `logging` first) is a human-readable text line:
+
+```
+2026-08-17 10:22:03 INFO     app.controllers.posts [3f2a9e1c-...]: created post 42
+```
+
+Fine to read in a terminal, painful for a log shipper (Datadog, ELK/Logstash,
+CloudWatch Logs Insights, Splunk) that wants structured fields to filter and
+query on rather than a regex over free text. `LOG_FORMAT=json` switches the
+same default handler to one JSON object per line instead:
+
+```
+{"timestamp": "2026-08-17 10:22:03,041", "level": "INFO", "logger": "app.controllers.posts", "message": "created post 42", "request_id": "3f2a9e1c-..."}
+```
+
+### Setup
+
+```bash
+# .env
+LOG_FORMAT=json
+```
+
+Nothing else changes — same loggers, same levels, same `RequestIdServiceProvider`
+integration (`request_id` is present whenever that provider is registered,
+`"-"` outside a request, same as the text format). Only takes effect
+through the framework's own default logging setup: like the text format,
+it's skipped entirely if the root logger already has a handler (you called
+`logging.basicConfig()` yourself, or your deployment platform did).
+
+### Fields
+
+Every line carries `timestamp`, `level`, `logger`, `message`, and
+`request_id` (when `RequestIdServiceProvider` is registered). A record with
+exception info (`logger.exception(...)`, or `exc_info=True`) additionally
+gets `exception` — the formatted traceback as a single string. Anything
+passed via `extra=` is included as its own top-level field:
+
+```python
+logger.info("order placed", extra={"order_id": order.id, "total": order.total})
+```
+
+```
+{"timestamp": "...", "level": "INFO", "logger": "app.jobs", "message": "order placed", "order_id": 42, "total": 19.99}
+```
+
+A field that isn't natively JSON-serializable (a `Decimal`, a `datetime`, a
+dataclass) degrades to its `str()` rather than raising and losing the whole
+log line.
+
+### Using it directly
+
+`zeython.logging.JsonFormatter` is a plain `logging.Formatter` — attach it
+to your own handler if you need something LOG_FORMAT=json's all-or-nothing
+default doesn't cover (a second handler with a different format, non-default
+log setup):
+
+```python
+import logging
+from zeython import JsonFormatter
+
+handler = logging.StreamHandler()
+handler.setFormatter(JsonFormatter())
+logging.getLogger("app.audit").addHandler(handler)
+```

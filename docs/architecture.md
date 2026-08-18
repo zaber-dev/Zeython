@@ -31,6 +31,7 @@
 | `Seeder` | `zeython.database.seeder` | The `database/seeders/` extension point: `run()` inserts seed data (typically via a `Factory`), `self.call(...)` composes seeders, run with `zeython db seed` (see [Factories & Seeders](database-seeding.md)). |
 | `HealthCheckServiceProvider` | `zeython.health` | Registers `/up`: `200`/`503` with a real database connectivity check when `Database` is bound -- what a load balancer or Kubernetes probe expects (see [Health Check](health-check.md)). |
 | `RequestIdServiceProvider` | `zeython.request_id` | Stamps every request/response with a correlation ID (`X-Request-ID`, honoring one the caller already sent) and threads it into the logging context via `request_id()` and `%(request_id)s`; registered by default (see [Observability](observability.md)). |
+| `JsonFormatter` | `zeython.logging` | One JSON object per log line instead of the default text line -- `LOG_FORMAT=json` (see [Observability](observability.md)). |
 | `WebSocketHub` | `zeython.websockets` | Real-time handlers via `@app.websocket(...)`, built on Starlette's ASGI-native WebSocket support; `WebSocketHub` tracks connections and broadcasts to them, process-local by default (see [WebSockets](websockets.md)). |
 
 ## Logging
