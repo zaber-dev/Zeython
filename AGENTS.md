@@ -215,6 +215,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `request_id()` (`zeython.request_id`) inside a handler or any log line
   formatted with `%(request_id)s`. Don't hand-roll a second ID scheme --
   reuse this one. See `docs/observability.md`.
+- `LOG_FORMAT=json` switches the framework's default logging setup to one
+  JSON object per line (`zeython.JsonFormatter`) instead of the plain text
+  line -- for a log shipper that parses structured fields (Datadog, ELK,
+  CloudWatch Logs Insights, Splunk). Same loggers/levels/`request_id`
+  either way; only takes effect through the framework's own default setup
+  (skipped if `logging.basicConfig()` was already called, same as the text
+  format). See `docs/observability.md`.
 - Database access inside a request handler never needs a session parameter —
   `Model.create/find/all/...` pull the request-scoped session automatically.
   Outside a request (scripts, one-off tasks), wrap the code in
