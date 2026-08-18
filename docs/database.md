@@ -151,6 +151,47 @@ default rather than shipping a number that would break an in-memory setup;
 set them once you have an actual concurrency figure to size against (a
 reasonable start: your app server's worker count, or a little above it).
 
+## Read replicas
+
+A second `DATABASE_READ_URL` routes read-heavy work to a replica instead
+of the primary — a report, a dashboard, an analytics query, anything
+that can tolerate a little replication lag and that you'd rather not have
+competing with write traffic for the primary's connections:
+
+```env
+DATABASE_URL=postgresql+asyncpg://user:pass@primary/app
+DATABASE_READ_URL=postgresql+asyncpg://user:pass@replica/app
+```
+
+```python
+async def monthly_report(self, request):
+    async with database.read_replica():
+        orders = await Order.all()
+    return JSONResponse(build_report(orders))
+```
+
+`read_replica()` opens a session against the replica exactly the way
+`database.session()` opens one against the primary — same
+`current_session()` underneath, so `Model.find/all/find_by/...` all work
+inside the block unchanged. Not registered as the request's default
+session — reach for it explicitly, only for the read path you actually
+want off the primary; everything else in the request still uses the
+regular session.
+
+**Read-only in practice, not by any check this framework adds.** A real
+replica is normally configured read-only at the database level itself
+(Postgres's `default_transaction_read_only`, a MySQL replica user with no
+write grants) — a write attempted inside `read_replica()` fails with a
+real database error there, the same as it would against any other client
+connected to that replica. There's also no `commit()` on exit, since a
+replica session exists for reads.
+
+**Optional** — no `DATABASE_READ_URL` set, `read_replica()` transparently
+falls back to opening a session against the primary. Code written against
+it works the same whether or not a replica is actually configured, so
+it's safe to write `async with database.read_replica():` around a report
+query in an app that doesn't have one yet.
+
 Passed through via `**engine_kwargs` on `Database.__init__` — the same
 mechanism accepts any other keyword `create_async_engine()` understands,
 if you construct `Database` yourself instead of going through

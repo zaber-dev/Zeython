@@ -36,6 +36,10 @@ class DatabaseServiceProvider(ServiceProvider):
     so nothing changes for an in-memory SQLite URL (``:memory:``), whose
     default pool doesn't accept them at all. See
     docs/database.md#connection-pooling.
+
+    ``DATABASE_READ_URL``, if set, binds a read replica --
+    ``database.read_replica()`` opens a session against it instead of the
+    primary. See docs/database.md#read-replicas.
     """
 
     def register(self) -> None:
@@ -51,6 +55,7 @@ class DatabaseServiceProvider(ServiceProvider):
 
         database = Database(
             self.config.database_url,
+            read_url=self.config.get("database.read_url"),
             echo=self.config.get("database.echo", False),
             **engine_kwargs,
         )

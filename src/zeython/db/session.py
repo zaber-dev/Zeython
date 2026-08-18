@@ -32,12 +32,26 @@ _current_session: contextvars.ContextVar[AsyncSession | None] = contextvars.Cont
 
 
 class Database:
-    """Owns the async engine and session factory for a Zeython application."""
+    """Owns the async engine and session factory for a Zeython application.
 
-    def __init__(self, url: str, *, echo: bool = False, **engine_kwargs: object) -> None:
+    ``read_url``, if given, points at a read replica: :meth:`read_replica`
+    opens a session against it instead of the primary. Optional -- with no
+    ``read_url``, :meth:`read_replica` just falls back to the primary, so
+    code written against it works unchanged whether or not a replica is
+    configured. See docs/database.md#read-replicas.
+    """
+
+    def __init__(self, url: str, *, read_url: str | None = None, echo: bool = False, **engine_kwargs: object) -> None:
         self.url = url
         self.engine: AsyncEngine = create_async_engine(url, echo=echo, **engine_kwargs)
         self.session_factory = async_sessionmaker(self.engine, expire_on_commit=False)
+
+        self.read_url = read_url
+        self.read_engine: AsyncEngine | None = None
+        self.read_session_factory: async_sessionmaker[AsyncSession] | None = None
+        if read_url is not None:
+            self.read_engine = create_async_engine(read_url, echo=echo, **engine_kwargs)
+            self.read_session_factory = async_sessionmaker(self.read_engine, expire_on_commit=False)
 
     async def create_all(self) -> None:
         """Create all tables known to :class:`Base`. Intended for tests/dev; use migrations in production."""
@@ -50,6 +64,8 @@ class Database:
 
     async def dispose(self) -> None:
         await self.engine.dispose()
+        if self.read_engine is not None:
+            await self.read_engine.dispose()
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
@@ -62,6 +78,30 @@ class Database:
         except Exception:
             await session.rollback()
             raise
+        finally:
+            await session.close()
+            _current_session.reset(token)
+
+    @asynccontextmanager
+    async def read_replica(self) -> AsyncIterator[AsyncSession]:
+        """Open a session against the read replica (or the primary, if no
+        ``read_url`` was configured) -- for a read-heavy path that can
+        tolerate replication lag (a report, a dashboard, an analytics
+        query), not a substitute for :meth:`session` in general.
+
+        Read-only in practice, not by any framework-enforced check: a real
+        replica is normally configured read-only at the database level
+        (Postgres's ``default_transaction_read_only``, a MySQL replica
+        user with no write grants), so a write attempted here fails with a
+        clear database error rather than being silently accepted -- Zeython
+        doesn't duplicate that check in Python. There's also no commit: a
+        replica session is for reads, so nothing here needs to be flushed.
+        """
+        factory = self.read_session_factory or self.session_factory
+        session = factory()
+        token = _current_session.set(session)
+        try:
+            yield session
         finally:
             await session.close()
             _current_session.reset(token)
