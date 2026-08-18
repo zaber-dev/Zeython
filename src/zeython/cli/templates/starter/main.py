@@ -58,6 +58,12 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # `from zeython import ErrorMonitoringServiceProvider` above). See
 # docs/error-monitoring.md.
 # app.register(ErrorMonitoringServiceProvider(app))
+# Dev-only warning when a request fires the same query shape suspiciously
+# many times -- catches a forgotten include=(...) before it ships. Its
+# own boot() is a no-op unless APP_DEBUG is true, so it's safe to always
+# register (and `from zeython import N1QueryDetectionServiceProvider`
+# above). See docs/relationships.md#detecting-n1s-automatically.
+# app.register(N1QueryDetectionServiceProvider(app))
 
 if __name__ == "__main__":
     app.run()

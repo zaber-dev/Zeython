@@ -56,6 +56,12 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `include=` only for relationships you eager-loaded, or it raises a clear
   `RuntimeError` telling you so (better than `MissingGreenlet`, still an
   error). See `docs/relationships.md`.
+- Register `N1QueryDetectionServiceProvider` (`zeython.n_plus_one`) in dev
+  to catch a forgotten `include=` before it ships -- it warns
+  (`APP_DEBUG`-only, safe to always register) when a request fires the
+  same query shape suspiciously many times, the sign of fetching a
+  relationship one row at a time instead of eager-loading it. See
+  `docs/relationships.md#detecting-n1s-automatically`.
 - Validate on the model, not in the controller: set `__rules__` on the model
   (`docs/validation.md`) instead of hand-checking `request.json()` fields —
   `create()`/`save()`/`update()` already raise `ValidationException` (a 422
