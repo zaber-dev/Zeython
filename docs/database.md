@@ -46,6 +46,57 @@ to eager-load relationships — required reading before you define your first
 code differently than you'd expect from sync SQLAlchemy. See
 [Relationships](relationships.md).
 
+## Transactions
+
+Every request already runs inside one implicit transaction: `DatabaseSessionMiddleware`
+opens a session at the start of the request and commits it at the end, or
+rolls it back if an unhandled exception reaches the end of the request --
+even one your own exception handler already turned into a response.
+Starlette re-raises the original exception to outer ASGI middleware after
+handling it, specifically so this kind of outer cleanup still runs. Nothing
+extra is needed for "undo everything this request did if it fails":
+
+```python
+async def transfer(self, request):
+    await from_account.update(balance=from_account.balance - amount)
+    await to_account.update(balance=to_account.balance + amount)
+    if something_goes_wrong:
+        raise ConflictException("Transfer failed")
+        # both updates above are rolled back -- the whole request's
+        # writes are, whenever an exception ends it
+```
+
+`transaction()` is for a narrower case: isolating *part* of a request so a
+failure there doesn't undo everything else, without ending the request:
+
+```python
+from zeython import transaction
+
+async def checkout(self, request):
+    order = await Order.create(user_id=user.id, status="pending")
+
+    try:
+        async with transaction():
+            await reserve_inventory(order)   # several writes
+            await charge_payment(order)      # might raise
+    except PaymentFailedException:
+        await order.update(status="payment_failed")
+        return JSONResponse({"error": "Payment failed"}, status_code=402)
+
+    await order.update(status="confirmed")
+    return JSONResponse(order.to_dict())
+```
+
+If `reserve_inventory`/`charge_payment` raise, only their writes roll back
+(a `SAVEPOINT` under the hood) -- `order`'s initial creation isn't touched,
+and the handler keeps running to record the failure and respond normally,
+rather than the whole request dying with a 500. `transaction()` blocks
+nest: an inner one rolling back doesn't affect an outer one still in
+progress.
+
+Requires an active session, same as the rest of the Active Record API --
+raises the same `RuntimeError` as calling `Model.create()` outside one.
+
 ## Pagination
 
 `all()` loads every matching row — fine for a small table, not for a

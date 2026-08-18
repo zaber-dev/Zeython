@@ -233,6 +233,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   `Model.create/find/all/...` pull the request-scoped session automatically.
   Outside a request (scripts, one-off tasks), wrap the code in
   `async with database.session():` — see docs/architecture.md.
+- Letting an exception propagate out of a request handler already rolls
+  back every write the request made -- no extra API needed for "undo
+  everything if this request fails." `async with transaction():`
+  (`zeython.transaction`) is for the narrower case of isolating *part* of
+  a handler (a `SAVEPOINT`) so catching a failure there and continuing the
+  request doesn't also keep that part's writes. See
+  `docs/database.md#transactions`.
 - After changing a model's columns, generate and apply a migration:
   `zeython db revision -m "..."` then `zeython db migrate`. Never edit
   `database.db` directly or hand-edit an already-applied migration file.
