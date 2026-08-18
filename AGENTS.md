@@ -98,6 +98,15 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   this framework won't guess one for you). Register it explicitly once
   you've decided on a policy; don't assume a generated project already
   sends these headers.
+- `GzipServiceProvider`/`ETagServiceProvider` (`zeython.gzip`/`zeython.etag`,
+  neither registered by default) add response compression and
+  conditional-GET support (`ETag`/`If-None-Match` → `304`) respectively.
+  `ETagServiceProvider` buffers the whole response body to hash it --
+  don't run it in front of a file-download endpoint, use
+  `zeython.storage` for those. `API_PROBLEM_JSON=true` switches every
+  error response to RFC 7807's `application/problem+json` shape instead
+  of the default `{"error": ..., "status": ...}` -- a single global
+  switch, not a per-route choice. See `docs/api-standards.md`.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach

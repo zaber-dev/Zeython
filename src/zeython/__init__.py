@@ -26,6 +26,7 @@ from zeython.csrf import CsrfMiddleware, csrf_token
 from zeython.database import Factory, Seeder
 from zeython.db import Database, Model, Page, transaction
 from zeython.error_monitoring import ErrorMonitoringServiceProvider, init_sentry, report_exception
+from zeython.etag import ETagMiddleware, ETagServiceProvider
 from zeython.exceptions import (
     BadRequestException,
     ConflictException,
@@ -37,6 +38,7 @@ from zeython.exceptions import (
     UnauthorizedException,
     ValidationException,
 )
+from zeython.gzip import GzipServiceProvider
 from zeython.hashing import hash_password, verify_password
 from zeython.health import HealthCheckServiceProvider
 from zeython.logging import JsonFormatter
@@ -173,6 +175,9 @@ __all__ = [
     "ErrorMonitoringServiceProvider",
     "init_sentry",
     "report_exception",
+    "GzipServiceProvider",
+    "ETagMiddleware",
+    "ETagServiceProvider",
     "WebSocket",
     "WebSocketDisconnect",
     "WebSocketHub",
