@@ -47,6 +47,11 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # above) once you've decided on your own policy, then set it via
 # SECURITY_HEADERS_CSP in .env. See docs/security-headers.md.
 # app.register(SecurityHeadersServiceProvider)
+# Recurring tasks defined in code, run via `zeython schedule run` -- not
+# registered by default since there's no schedule.py until you create one
+# (and `from zeython import ScheduleServiceProvider` above). See
+# docs/scheduling.md.
+# app.register(ScheduleServiceProvider(app))
 
 if __name__ == "__main__":
     app.run()

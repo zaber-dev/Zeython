@@ -20,9 +20,11 @@ app = typer.Typer(
 make_app = typer.Typer(help="Generate application building blocks.", no_args_is_help=True)
 db_app = typer.Typer(help="Database migration and seeding commands.", no_args_is_help=True)
 queue_app = typer.Typer(help="Background job queue commands.", no_args_is_help=True)
+schedule_app = typer.Typer(help="Scheduled/recurring task commands.", no_args_is_help=True)
 app.add_typer(make_app, name="make")
 app.add_typer(db_app, name="db")
 app.add_typer(queue_app, name="queue")
+app.add_typer(schedule_app, name="schedule")
 
 
 @app.command()
@@ -271,6 +273,44 @@ def queue_work() -> None:
         asyncio.run(queue.run_worker())
     except KeyboardInterrupt:
         typer.echo("Stopped.")
+
+
+@schedule_app.command("run")
+def schedule_run() -> None:
+    """Run every scheduled task that's due this minute.
+
+    Meant to be invoked once a minute, by a single cron entry (or sidecar
+    loop container) -- not run continuously itself. See docs/scheduling.md.
+    """
+    from zeython.schedule import Schedule
+
+    project_root = Path.cwd()
+    application = load_app(project_root)
+    schedule = application.container.make(Schedule)
+
+    due = asyncio.run(schedule.run_due())
+    if due:
+        typer.secho(f"Ran {len(due)} due event(s): {', '.join(event.name for event in due)}", fg=typer.colors.GREEN)
+
+
+@schedule_app.command("list")
+def schedule_list() -> None:
+    """List every registered scheduled task and its cron expression."""
+    from zeython.schedule import Schedule
+
+    project_root = Path.cwd()
+    application = load_app(project_root)
+    schedule = application.container.make(Schedule)
+
+    if len(schedule) == 0:
+        typer.echo(
+            "No scheduled tasks registered. Define one in schedule.py and register "
+            "ScheduleServiceProvider in main.py -- see docs/scheduling.md."
+        )
+        return
+
+    for event in schedule:
+        typer.echo(f"  {event.name:<30}  {event.cron_expression}")
 
 
 def main() -> None:

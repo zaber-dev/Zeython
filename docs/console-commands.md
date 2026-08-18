@@ -79,15 +79,14 @@ class SendReportCommand(Command):
 
 ## Scheduling
 
-Zeython doesn't ship a task scheduler — there's no in-process cron. Point
-your platform's real scheduler at the command instead:
-
-```cron
-# crontab -e
-0 3 * * * cd /path/to/project && /path/to/.venv/bin/zeython command prune-old-posts >> /var/log/prune.log 2>&1
-```
+Pointing a bare `cron` entry straight at `zeython command <name>` works,
+but the schedule itself then lives outside the app entirely — on a server
+somewhere, not in version control, not reviewed with the code it runs. For
+recurring tasks defined in code instead (Laravel's `Schedule`, in Python),
+see [Scheduling](scheduling.md) — `schedule.py`, `zeython schedule run`,
+one cron entry total, however many tasks you actually schedule.
 
 A generated project includes a working example: `app/Console/Commands/prune_old_posts.py`
 hard-deletes posts that were soft-deleted more than 30 days ago. Run it by
-hand with `zeython command prune-old-posts`, or drop it in cron as shown
-above for a real deployment.
+hand with `zeython command prune-old-posts`, or wire it into `schedule.py`
+for real recurring use.

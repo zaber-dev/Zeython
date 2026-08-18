@@ -45,5 +45,15 @@ services:
   #   volumes:
   #     - ./storage:/app/storage
 
+  # Uncomment if schedule.py defines any recurring tasks -- a container has
+  # no host crontab to point `zeython schedule run` at, so this sidecar
+  # loop is the equivalent: runs it once a minute, forever. See
+  # docs/scheduling.md.
+  # scheduler:
+  #   build: .
+  #   command: sh -c "while true; do zeython schedule run; sleep 60; done"
+  #   env_file:
+  #     - .env
+
 # volumes:
 #   postgres_data:
