@@ -195,6 +195,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 See [AGENTS.md](AGENTS.md) for framework conventions written for agentic coding
 tools (Claude Code, Cursor, Copilot Workspace, etc.) working in a Zeython codebase.
 
+## Security
+
+Found a vulnerability? Please don't open a public issue for it — see
+[SECURITY.md](SECURITY.md) for how to report it privately.
+
 ## License
 
 GNU General Public License v3.0. See [LICENSE](LICENSE).
