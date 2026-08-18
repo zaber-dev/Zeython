@@ -36,6 +36,7 @@ nav:
   - AI Agents: ai-agents.md
   - Health Check: health-check.md
   - Observability: observability.md
+  - Error Monitoring: error-monitoring.md
   - Docker: docker.md
   - Testing: testing.md
 theme:

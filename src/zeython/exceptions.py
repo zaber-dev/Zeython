@@ -7,6 +7,9 @@ from typing import Any
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from zeython.error_monitoring import report_exception
+from zeython.request_id import request_id
+
 
 class HTTPException(Exception):
     """Base class for exceptions that should be rendered as HTTP responses."""
@@ -72,6 +75,19 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    # A genuine bug, not an expected control-flow exception (those are
+    # HTTPException subclasses, handled separately above and never reach
+    # here) -- reported to Sentry if zeython.error_monitoring is
+    # configured, a no-op otherwise. getattr-guarded: a real Starlette
+    # Request always has .url/.method, but this handler is also called
+    # directly in tests against minimal request doubles.
+    report_exception(
+        exc,
+        request_id=request_id(),
+        path=getattr(getattr(request, "url", None), "path", None),
+        method=getattr(request, "method", None),
+    )
+
     debug = getattr(request.app.state, "debug", False)
     payload: dict[str, Any] = {"error": "Internal Server Error", "status": 500}
     if debug:

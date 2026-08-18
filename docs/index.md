@@ -52,7 +52,8 @@ not a template you copy and diverge from.
 - [AI](ai.md) — calling an LLM from your own app code
 - [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
 - [Health Check](health-check.md) — `/up`, for load balancers and container orchestrators
-- [Observability](observability.md) — `X-Request-ID` correlation IDs, threaded into your logs
+- [Observability](observability.md) — `X-Request-ID` correlation IDs and `LOG_FORMAT=json` structured logging
+- [Error Monitoring](error-monitoring.md) — reporting unhandled exceptions, failed jobs, and raising scheduled tasks to Sentry
 - [Docker](docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
 - [Testing](testing.md) — writing tests against a Zeython application
 

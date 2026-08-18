@@ -25,6 +25,7 @@ from zeython.container import Container
 from zeython.csrf import CsrfMiddleware, csrf_token
 from zeython.database import Factory, Seeder
 from zeython.db import Database, Model, Page
+from zeython.error_monitoring import ErrorMonitoringServiceProvider, init_sentry, report_exception
 from zeython.exceptions import (
     BadRequestException,
     ConflictException,
@@ -165,6 +166,9 @@ __all__ = [
     "verify_password",
     "HealthCheckServiceProvider",
     "JsonFormatter",
+    "ErrorMonitoringServiceProvider",
+    "init_sentry",
+    "report_exception",
     "WebSocket",
     "WebSocketDisconnect",
     "WebSocketHub",

@@ -52,6 +52,12 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # (and `from zeython import ScheduleServiceProvider` above). See
 # docs/scheduling.md.
 # app.register(ScheduleServiceProvider(app))
+# Reports unhandled exceptions/exhausted job retries/raising scheduled
+# tasks to Sentry -- not registered by default since there's no SENTRY_DSN
+# until you have a Sentry project (and `pip install zeython[sentry]` plus
+# `from zeython import ErrorMonitoringServiceProvider` above). See
+# docs/error-monitoring.md.
+# app.register(ErrorMonitoringServiceProvider(app))
 
 if __name__ == "__main__":
     app.run()
