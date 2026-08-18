@@ -89,6 +89,18 @@ is logged. There's no dead-letter queue or alerting built in — that's
 usually deployment-specific (log aggregation, an error tracker); wire your
 job's `handle()` to report however you already do that.
 
+## Delaying a job
+
+```python
+await dispatch(request, SendReminderEmailJob(...), delay=3600)  # in an hour
+```
+
+Works the same on every driver — `InMemoryQueue` schedules it via a
+background task; `RedisQueue` scores it into a delayed set and picks it up
+once the wait elapses (see below). `SyncQueue` ignores `delay` entirely and
+runs the job immediately — it exists for tests/local dev, where "immediate"
+is the whole point.
+
 ## `QUEUE_DRIVER=sync` for tests and local dev
 
 ```env
@@ -106,14 +118,85 @@ effects (or failures) immediately rather than reasoning about timing.
 yet run is lost if the process crashes or restarts — fine for non-critical
 background work (a welcome email, warming a cache), a real limitation for
 anything you'd be upset to silently lose (payment capture, anything that
-must survive a crash). For that, implement `Queue` against a durable
-backend (a database table, Redis, SQS) and bind it in place of the default:
+must survive a crash). `RedisQueue` is the durable, opt-in alternative —
+see below.
+
+## `QUEUE_DRIVER=redis`: a durable queue
+
+```env
+QUEUE_DRIVER=redis
+REDIS_URL=redis://localhost:6379/0
+```
+
+```bash
+pip install zeython[redis]
+```
+
+A job pushed to `RedisQueue` survives a crash or restart of whatever
+process pushed it — it lives in Redis until a **separate worker process**
+picks it up and runs it:
+
+```bash
+zeython queue work
+```
+
+This is the real architectural difference from `InMemoryQueue`: jobs no
+longer run inside your web server's own process. Run `zeython queue work`
+as its own long-lived process (a second container/systemd unit/Procfile
+line) alongside `zeython serve` — scale the two independently, and a web
+server restart/deploy no longer drops in-flight jobs.
+
+### Jobs must be `@dataclass`
+
+`InMemoryQueue` never serializes a job — its constructor can hold anything,
+even an open file or a live object. `RedisQueue` has to cross a process
+boundary, so it JSON-encodes a job via `dataclasses.asdict()` and
+reconstructs it on the worker side from the job's fully-qualified class
+path. Every constructor field must be JSON-safe
+(`str`/`int`/`float`/`bool`/`None`/`list`/`dict`) — pass a `user_id`, not a
+`User` instance. A non-dataclass `Job` raises `TypeError` on `push()`,
+immediately, not silently at run time on the worker.
+
+One consequence: a job's own instance state (a counter it increments in
+`handle()`, say) does **not** carry over between retries — the worker
+reconstructs a fresh instance from the stored payload on every attempt.
+Track cross-attempt state externally (a database row, a Redis key) if a
+job's retry logic needs it.
+
+### Retries and backoff
+
+Same `max_attempts` as `InMemoryQueue`, but a failed attempt is retried
+with capped exponential backoff (2s, 4s, 8s, ... up to 60s between
+attempts) instead of immediately — a transient failure (a downstream API
+having a bad minute) gets a real chance to clear before the next attempt,
+rather than three attempts in the same second.
+
+### Failed jobs
+
+A job that exhausts `max_attempts` isn't dropped — it's moved to a
+**failed-jobs list**, inspectable from code:
 
 ```python
-from zeython import Queue
+from zeython.queue import RedisQueue
 
-app.container.singleton(Queue, lambda: MyDurableQueue(...))
+queue: RedisQueue = app.container.make(Queue)
+for entry in await queue.failed_jobs():
+    print(entry["job_class"], entry["error"], entry["failed_at"])
 ```
+
+Each entry keeps the job's class path, its original payload, the final
+exception (`repr()`), and a `failed_at` timestamp — everything needed to
+re-drive it by hand (`job_cls(**entry["payload"])`, re-`push()`) once
+whatever caused it to fail is fixed.
+
+### Multiple queues
+
+`QUEUE_NAME` (default `default`) picks which named queue
+`QueueServiceProvider` binds — everything is namespaced under
+`zeython:queue:<name>:` in Redis. Run a dedicated `zeython queue work`
+process per queue name (each pointed at its own `.env`/`QUEUE_NAME`) for a
+priority lane — emails on one, report generation on another — so a slow
+queue never starves a fast one.
 
 ## Logging
 

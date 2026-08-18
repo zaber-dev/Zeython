@@ -50,6 +50,13 @@ the matching database driver (`asyncpg` for Postgres) to `pyproject.toml`'s
 dependencies and set `DATABASE_URL`/point `RedisCache`/`RedisRateLimiter`
 at the `redis` service in `main.py`.
 
+Switching `QUEUE_DRIVER=redis` (see [Background Jobs](queues.md)) also
+needs a `queue-worker` service -- also commented out in
+`docker-compose.yml` -- running `zeython queue work` as its own container
+alongside `redis` and `app`. Jobs a durable queue is meant to protect
+(payment capture, anything a crash shouldn't drop) don't get that
+protection if nothing is actually running the worker.
+
 ## Persisting data
 
 `docker-compose.yml` mounts `./storage` (uploaded files -- see

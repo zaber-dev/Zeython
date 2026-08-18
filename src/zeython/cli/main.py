@@ -19,8 +19,10 @@ app = typer.Typer(
 )
 make_app = typer.Typer(help="Generate application building blocks.", no_args_is_help=True)
 db_app = typer.Typer(help="Database migration and seeding commands.", no_args_is_help=True)
+queue_app = typer.Typer(help="Background job queue commands.", no_args_is_help=True)
 app.add_typer(make_app, name="make")
 app.add_typer(db_app, name="db")
+app.add_typer(queue_app, name="queue")
 
 
 @app.command()
@@ -239,6 +241,36 @@ def db_seed(
 
     asyncio.run(_seed())
     typer.secho(f"Seeded using {seeder_class}.", fg=typer.colors.GREEN)
+
+
+@queue_app.command("work")
+def queue_work() -> None:
+    """Run a worker that processes jobs from a durable queue (QUEUE_DRIVER=redis).
+
+    The default in-memory queue already runs its own background worker
+    inside your app's own process -- this command is for RedisQueue, whose
+    whole point is a separate, restartable process. See docs/queues.md.
+    """
+    from zeython.queue import Queue, RedisQueue
+
+    project_root = Path.cwd()
+    application = load_app(project_root)
+    queue = application.container.make(Queue)
+
+    if not isinstance(queue, RedisQueue):
+        typer.secho(
+            "zeython queue work requires QUEUE_DRIVER=redis in .env -- the default in-memory "
+            "queue already runs its own background worker inside your app process, and has "
+            "nothing for a separate worker process to pull from. See docs/queues.md.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+
+    typer.secho(f"Working queue '{queue.queue_name}'... (Ctrl+C to stop)", fg=typer.colors.GREEN)
+    try:
+        asyncio.run(queue.run_worker())
+    except KeyboardInterrupt:
+        typer.echo("Stopped.")
 
 
 def main() -> None:
