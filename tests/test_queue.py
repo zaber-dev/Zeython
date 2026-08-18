@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from starlette.responses import JSONResponse
 
+import zeython.queue as queue_module
 from zeython.application import Application
 from zeython.config import Config
 from zeython.container import Container
@@ -82,6 +83,23 @@ async def test_failed_job_is_retried_up_to_max_attempts() -> None:
     await queue.join()
 
     assert attempts == [1, 2, 3]
+    await queue.close()
+
+
+async def test_exhausted_job_reports_to_error_monitoring_exactly_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    reported: list[BaseException] = []
+    monkeypatch.setattr(queue_module, "report_exception", lambda exc, **tags: reported.append(exc))
+
+    queue = InMemoryQueue()
+    attempts: list[int] = []
+
+    await queue.push(AlwaysFailsJob(attempts_log=attempts, max_attempts=3))
+    await queue.join()
+
+    # Not once per retry (3 failed attempts) -- only the final one, since a
+    # transient failure a retry then fixes isn't worth an alert.
+    assert len(reported) == 1
+    assert isinstance(reported[0], RuntimeError)
     await queue.close()
 
 

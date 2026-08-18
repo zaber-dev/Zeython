@@ -280,6 +280,25 @@ async def test_run_due_continues_past_a_raising_event() -> None:
     assert len(due) == 2  # both were due -- boom's exception didn't stop fine from running
 
 
+async def test_run_due_reports_a_raising_event_to_error_monitoring(monkeypatch: pytest.MonkeyPatch) -> None:
+    import zeython.schedule as schedule_module
+
+    reported: list[BaseException] = []
+    monkeypatch.setattr(schedule_module, "report_exception", lambda exc, **tags: reported.append(exc))
+
+    schedule = Schedule()
+
+    async def boom() -> None:
+        raise RuntimeError("scheduled task blew up")
+
+    schedule.call(boom, name="boom").every_minute()
+
+    await schedule.run_due()
+
+    assert len(reported) == 1
+    assert str(reported[0]) == "scheduled task blew up"
+
+
 def test_iterating_a_schedule_yields_its_events() -> None:
     schedule = Schedule()
 
