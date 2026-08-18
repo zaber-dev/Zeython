@@ -26,7 +26,10 @@ zeython make job SendWelcomeEmail    # app/Jobs/send_welcome_email_job.py
 zeython make command PruneOldPosts   # app/Console/Commands/prune_old_posts_command.py
 zeython make factory Post            # database/factories/post_factory.py
 zeython make seeder User             # database/seeders/user_seeder.py
+zeython make policy Post             # app/Policies/post_policy.py (PostPolicy)
 ```
+
+See [Authorization](authorization.md#policies) for registering a generated policy with `Gate.policy(...)`.
 
 ## Custom commands
 
@@ -76,3 +79,16 @@ zeython schedule list                  # list every registered task and its cron
 ```
 
 See [Scheduling](scheduling.md).
+
+## Project introspection
+
+```bash
+zeython routes                         # list every registered HTTP route: method(s), path, name
+zeython about                          # app name, environment, debug flag, Zeython version, providers
+```
+
+Both read your project the same way `zeython serve` does (they import
+`main.py`), so what they report is exactly what's actually wired up --
+not something separately maintained that can drift from it. An AI coding
+agent working in your project gets the same information through
+`zeython mcp`'s `list_routes`/`app_info` tools -- see [AI Agents](ai-agents.md).

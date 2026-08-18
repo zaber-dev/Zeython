@@ -148,6 +148,26 @@ class {class_name}(Seeder):
         ...
 '''
 
+POLICY_TEMPLATE = '''class {class_name}:
+    """Authorization policy for {model_class_name}.
+
+    Register it against the model in a service provider's ``boot()``:
+    ``gate.policy({model_class_name}, {class_name})``. See docs/authorization.md.
+    """
+
+    def view(self, user, {model_var}) -> bool:
+        return True
+
+    def create(self, user) -> bool:
+        return True
+
+    def update(self, user, {model_var}) -> bool:
+        return False
+
+    def delete(self, user, {model_var}) -> bool:
+        return False
+'''
+
 
 def _write_new_file(path: Path, content: str) -> None:
     if path.exists():
@@ -244,4 +264,19 @@ def make_seeder(name: str, cwd: Path) -> Path:
     slug = to_snake_case(name)
     path = cwd / "database" / "seeders" / f"{slug}.py"
     _write_new_file(path, SEEDER_TEMPLATE.format(class_name=class_name))
+    return path
+
+
+def make_policy(name: str, cwd: Path) -> Path:
+    if not name.endswith("Policy"):
+        name = f"{name}Policy"
+    class_name = to_pascal_case(name)
+    model_class_name = class_name.removesuffix("Policy")
+    model_var = to_snake_case(model_class_name)
+    slug = to_snake_case(name)
+    path = cwd / "app" / "Policies" / f"{slug}.py"
+    _write_new_file(
+        path,
+        POLICY_TEMPLATE.format(class_name=class_name, model_class_name=model_class_name, model_var=model_var),
+    )
     return path
