@@ -70,6 +70,11 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # docs/api-standards.md.
 # app.register(GzipServiceProvider)
 # app.register(ETagServiceProvider)
+# Registers every third-party provider a `pip install`ed plugin package
+# declares under the "zeython.plugins" entry point -- not registered by
+# default since a fresh project has no plugins installed yet (and
+# `from zeython import PluginServiceProvider` above). See docs/plugins.md.
+# app.register(PluginServiceProvider)
 
 if __name__ == "__main__":
     app.run()

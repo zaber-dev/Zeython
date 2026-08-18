@@ -45,6 +45,7 @@ from zeython.logging import JsonFormatter
 from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
 from zeython.n_plus_one import N1QueryDetectionMiddleware, N1QueryDetectionServiceProvider
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
+from zeython.plugins import PluginServiceProvider, discover_plugins
 from zeython.providers import (
     CorsServiceProvider,
     DatabaseServiceProvider,
@@ -151,6 +152,8 @@ __all__ = [
     "model_schema",
     "generate_openapi",
     "OpenApiServiceProvider",
+    "discover_plugins",
+    "PluginServiceProvider",
     "Authenticatable",
     "AuthManager",
     "AuthServiceProvider",

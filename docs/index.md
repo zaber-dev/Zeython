@@ -28,6 +28,7 @@ not a template you copy and diverge from.
 - [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
 - [CLI Reference](cli.md) — every `zeython` command
 - [Console Commands](console-commands.md) — writing your own `zeython command <name>` CLI commands
+- [Plugins](plugins.md) — pip-installable packages that register their own service providers, no per-package wiring
 - [OpenAPI & API Docs](openapi.md) — generated spec + Swagger UI at `/docs`, from your actual routes
 - [API Standards](api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
