@@ -131,6 +131,16 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   through. No relationship pickers (a foreign key is a plain number
   input), no search/filtering -- it's an internal CRUD tool, not a
   Django-admin clone. See `docs/admin.md`.
+- `TenancyServiceProvider` (`zeython.tenancy`, not registered by default)
+  gives row-level multi-tenancy: a model opts in by declaring a
+  `tenant_id` column (no mixin) and `Model.find`/`all`/`find_by`/`paginate`
+  scope to `current_tenant_id()` automatically -- including `find()` by
+  ID, so a request can't read another tenant's row by guessing its ID.
+  `resolver` is a **required** constructor argument, same reasoning as
+  `AdminServiceProvider`'s `guard` -- how a request maps to a tenant is
+  entirely app-specific, and a wrong guess here is a cross-tenant data
+  leak. `as_tenant(tenant_id)` scopes a block outside a request (a job, a
+  script). See `docs/multi-tenancy.md`.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach

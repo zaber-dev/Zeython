@@ -46,6 +46,10 @@ to eager-load relationships — required reading before you define your first
 code differently than you'd expect from sync SQLAlchemy. See
 [Relationships](relationships.md).
 
+A model that declares a `tenant_id` column gets every one of these
+methods scoped to the current tenant automatically — see
+[Multi-Tenancy](multi-tenancy.md).
+
 ## Transactions
 
 Every request already runs inside one implicit transaction: `DatabaseSessionMiddleware`

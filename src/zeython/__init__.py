@@ -90,6 +90,7 @@ from zeython.storage import (
     StoredFile,
     store_upload,
 )
+from zeython.tenancy import TenancyServiceProvider, TenantMiddleware, as_tenant, current_tenant_id
 from zeython.validation import Rule, email, matches, max_length, min_length, one_of, required
 from zeython.views import Views, render
 from zeython.websockets import (
@@ -216,6 +217,10 @@ __all__ = [
     "RequestIdMiddleware",
     "RequestIdServiceProvider",
     "request_id",
+    "TenancyServiceProvider",
+    "TenantMiddleware",
+    "as_tenant",
+    "current_tenant_id",
     "Rule",
     "required",
     "email",
