@@ -40,6 +40,7 @@ nav:
   - Error Monitoring: error-monitoring.md
   - Docker: docker.md
   - Testing: testing.md
+  - Production Checklist: production-checklist.md
 theme:
   name: material
   logo: assets/logo.svg
