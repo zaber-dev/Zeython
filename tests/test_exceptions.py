@@ -153,6 +153,120 @@ async def test_http_exception_handler_sends_custom_headers(tmp_path: Path) -> No
         assert response.headers["Retry-After"] == "5"
 
 
+# -- API_PROBLEM_JSON=true (RFC 7807) --------------------------------------------------
+
+
+async def test_default_error_format_is_unchanged_without_api_problem_json(tmp_path: Path) -> None:
+    app = Application(Config.load(tmp_path))
+
+    @app.get("/boom")
+    async def boom(request):
+        raise NotFoundException("gone")
+
+    async with client(app) as http:
+        response = await http.get("/boom")
+        assert response.headers["content-type"] == "application/json"
+        assert response.json() == {"error": "gone", "status": 404}
+
+
+async def test_api_problem_json_renders_rfc7807_shape(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("API_PROBLEM_JSON=true\n")
+    app = Application(Config.load(tmp_path))
+
+    @app.get("/boom")
+    async def boom(request):
+        raise NotFoundException("gone")
+
+    async with client(app) as http:
+        response = await http.get("/boom")
+
+    assert response.status_code == 404
+    assert response.headers["content-type"] == "application/problem+json"
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Not Found",
+        "status": 404,
+        "detail": "gone",
+    }
+
+
+async def test_api_problem_json_includes_errors_extension_for_validation(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("API_PROBLEM_JSON=true\n")
+    app = Application(Config.load(tmp_path))
+
+    @app.get("/invalid")
+    async def invalid(request):
+        raise ValidationException({"email": ["is required"]})
+
+    async with client(app) as http:
+        response = await http.get("/invalid")
+
+    body = response.json()
+    assert body["title"] == "Unprocessable Entity"
+    assert body["errors"] == {"email": ["is required"]}
+
+
+async def test_api_problem_json_preserves_custom_headers(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("API_PROBLEM_JSON=true\n")
+    app = Application(Config.load(tmp_path))
+
+    @app.get("/throttled")
+    async def throttled(request):
+        raise TooManyRequestsException(headers={"Retry-After": "5"})
+
+    async with client(app) as http:
+        response = await http.get("/throttled")
+
+    assert response.headers["Retry-After"] == "5"
+
+
+async def test_api_problem_json_for_unhandled_exception_called_directly(tmp_path: Path) -> None:
+    class _FakeState:
+        debug = False
+        config = Config.load(tmp_path, env_file=".env-problem-json")
+
+    class _FakeApp:
+        state = _FakeState()
+
+    class _FakeRequest:
+        app = _FakeApp()
+
+    (tmp_path / ".env-problem-json").write_text("API_PROBLEM_JSON=true\n")
+    _FakeState.config = Config.load(tmp_path, env_file=".env-problem-json")
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    assert response.status_code == 500
+    assert response.headers["content-type"] == "application/problem+json"
+    body = json.loads(response.body)
+    assert body == {
+        "type": "about:blank",
+        "title": "Internal Server Error",
+        "status": 500,
+        "detail": "An unexpected error occurred.",
+    }
+
+
+async def test_api_problem_json_includes_exception_detail_in_debug(tmp_path: Path) -> None:
+    class _FakeState:
+        debug = True
+        config = Config.load(tmp_path, env_file=".env-problem-json-debug")
+
+    class _FakeApp:
+        state = _FakeState()
+
+    class _FakeRequest:
+        app = _FakeApp()
+
+    (tmp_path / ".env-problem-json-debug").write_text("API_PROBLEM_JSON=true\n")
+    _FakeState.config = Config.load(tmp_path, env_file=".env-problem-json-debug")
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    body = json.loads(response.body)
+    assert body["exception"] == "ValueError: boom"
+
+
 # -- unhandled_exception_handler -----------------------------------------------------------
 #
 # Not exercisable end-to-end through zeython.testing.client(): httpx's

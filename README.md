@@ -138,6 +138,7 @@ my_blog/
 - [docs/cli.md](docs/cli.md) — full CLI reference
 - [docs/console-commands.md](docs/console-commands.md) — writing your own `zeython command <name>` CLI commands
 - [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
+- [docs/api-standards.md](docs/api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
 - [docs/database.md](docs/database.md) — models and migrations
 - [docs/database-seeding.md](docs/database-seeding.md) — model factories and seeders
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code

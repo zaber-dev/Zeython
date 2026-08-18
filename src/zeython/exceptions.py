@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from typing import Any
 
 from starlette.requests import Request
@@ -67,10 +68,55 @@ class TooManyRequestsException(HTTPException):
     default_detail = "Too many requests. Please try again later."
 
 
+def _wants_problem_json(request: Request | None) -> bool:
+    """Whether ``API_PROBLEM_JSON=true`` is set -- checked per-request
+    (rather than once at startup) because ``http_exception_handler`` is
+    also called directly, request-less, in tests. See docs/api-standards.md.
+    """
+    if request is None:
+        return False
+    config = getattr(getattr(request, "app", None), "state", None)
+    config = getattr(config, "config", None) if config is not None else None
+    return bool(config.get("api.problem_json", False)) if config is not None else False
+
+
+def _problem_response(
+    status_code: int,
+    detail: str,
+    *,
+    errors: dict[str, list[str]] | None = None,
+    exception: str | None = None,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
+    """RFC 7807 (``application/problem+json``) shaped error body -- ``type``
+    is ``"about:blank"`` (RFC 7807's own fallback for "no more specific
+    problem type than the HTTP status code itself"), since this framework
+    doesn't maintain a registry of per-error-type URIs. ``errors``/``exception``
+    are nonstandard extension members, same field names/shapes the
+    framework's default error format already uses -- RFC 7807 explicitly
+    permits extending the problem object this way.
+    """
+    payload: dict[str, Any] = {
+        "type": "about:blank",
+        "title": HTTPStatus(status_code).phrase,
+        "status": status_code,
+        "detail": detail,
+    }
+    if errors:
+        payload["errors"] = errors
+    if exception:
+        payload["exception"] = exception
+    return JSONResponse(payload, status_code=status_code, headers=headers, media_type="application/problem+json")
+
+
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    errors = exc.errors if isinstance(exc, ValidationException) and exc.errors else None
+    if _wants_problem_json(request):
+        return _problem_response(exc.status_code, exc.detail, errors=errors, headers=exc.headers)
+
     payload: dict[str, Any] = {"error": exc.detail, "status": exc.status_code}
-    if isinstance(exc, ValidationException) and exc.errors:
-        payload["errors"] = exc.errors
+    if errors:
+        payload["errors"] = errors
     return JSONResponse(payload, status_code=exc.status_code, headers=exc.headers)
 
 
@@ -88,7 +134,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
         method=getattr(request, "method", None),
     )
 
-    debug = getattr(request.app.state, "debug", False)
+    state = getattr(getattr(request, "app", None), "state", None)
+    debug = getattr(state, "debug", False) if state is not None else False
+
+    if _wants_problem_json(request):
+        exception_detail = f"{type(exc).__name__}: {exc}" if debug else None
+        return _problem_response(500, "An unexpected error occurred.", exception=exception_detail)
+
     payload: dict[str, Any] = {"error": "Internal Server Error", "status": 500}
     if debug:
         payload["exception"] = f"{type(exc).__name__}: {exc}"

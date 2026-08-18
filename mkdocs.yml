@@ -12,6 +12,7 @@ nav:
   - CLI Reference: cli.md
   - Console Commands: console-commands.md
   - OpenAPI & API Docs: openapi.md
+  - API Standards: api-standards.md
   - Database & Migrations: database.md
   - Factories & Seeders: database-seeding.md
   - Relationships: relationships.md

@@ -64,6 +64,12 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # register (and `from zeython import N1QueryDetectionServiceProvider`
 # above). See docs/relationships.md#detecting-n1s-automatically.
 # app.register(N1QueryDetectionServiceProvider(app))
+# Response compression and conditional-GET (ETag/If-None-Match -> 304)
+# support -- neither registered by default (and `from zeython import
+# GzipServiceProvider, ETagServiceProvider` above). See
+# docs/api-standards.md.
+# app.register(GzipServiceProvider)
+# app.register(ETagServiceProvider)
 
 if __name__ == "__main__":
     app.run()
