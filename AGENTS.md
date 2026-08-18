@@ -107,6 +107,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   error response to RFC 7807's `application/problem+json` shape instead
   of the default `{"error": ..., "status": ...}` -- a single global
   switch, not a per-route choice. See `docs/api-standards.md`.
+- `PluginServiceProvider` (`zeython.plugins`, not registered by default)
+  discovers and registers every third-party `ServiceProvider` a
+  `pip install`ed package declares under the `zeython.plugins` entry-point
+  group -- register it once and every plugin package currently installed
+  contributes automatically, no per-package `app.register(...)` line. A
+  plugin whose import/`register()`/`boot()` fails is left to raise, not
+  caught and skipped. See `docs/plugins.md`.
 - Cookie sessions (`require_auth`, `docs/authentication.md`) and bearer
   tokens (`require_api_auth`, `docs/api-authentication.md`) are two
   separate auth paths -- never mix them in one handler, and don't reach
