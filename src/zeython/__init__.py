@@ -38,6 +38,7 @@ from zeython.exceptions import (
 )
 from zeython.hashing import hash_password, verify_password
 from zeython.health import HealthCheckServiceProvider
+from zeython.logging import JsonFormatter
 from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMailer
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.providers import (
@@ -163,6 +164,7 @@ __all__ = [
     "hash_password",
     "verify_password",
     "HealthCheckServiceProvider",
+    "JsonFormatter",
     "WebSocket",
     "WebSocketDisconnect",
     "WebSocketHub",

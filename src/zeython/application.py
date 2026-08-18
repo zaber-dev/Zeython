@@ -15,6 +15,7 @@ from starlette.responses import Response
 from zeython.config import Config
 from zeython.container import Container
 from zeython.exceptions import default_exception_handlers
+from zeython.logging import JsonFormatter
 from zeython.providers import ServiceProvider
 from zeython.routing import Endpoint, Router
 
@@ -35,12 +36,23 @@ def _configure_default_logging(config: Config) -> None:
     ``logging.basicConfig()`` yourself, your deployment platform did, or a
     previous ``Application()`` in this process already ran this -- so it
     never overrides an existing setup, including the quieting below.
+
+    ``LOG_FORMAT=json`` switches the default handler's formatter to
+    :class:`~zeython.logging.JsonFormatter` -- one JSON object per line,
+    for a log shipper that parses structured fields instead of grepping
+    text (see docs/observability.md). Default ``LOG_FORMAT`` (anything
+    else, including unset) keeps the existing plain-text line.
     """
     if logging.root.handlers:
         return
 
     level = logging.DEBUG if config.debug else logging.INFO
-    logging.basicConfig(level=level, format="%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+    if config.get("log.format", "text") == "json":
+        handler = logging.StreamHandler()
+        handler.setFormatter(JsonFormatter())
+        logging.basicConfig(level=level, handlers=[handler])
+    else:
+        logging.basicConfig(level=level, format="%(asctime)s %(levelname)-8s %(name)s: %(message)s")
 
     for name in _QUIET_LOGGERS:
         logging.getLogger(name).setLevel(logging.WARNING)
