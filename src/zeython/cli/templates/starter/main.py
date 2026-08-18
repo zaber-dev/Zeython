@@ -75,6 +75,12 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # default since a fresh project has no plugins installed yet (and
 # `from zeython import PluginServiceProvider` above). See docs/plugins.md.
 # app.register(PluginServiceProvider)
+# Translation strings from resources/lang/{locale}.json, and per-request
+# locale resolution (?lang=, then Accept-Language, then LOCALE_DEFAULT) --
+# not registered by default since a fresh project has no translation
+# files yet (and `from zeython import LocalizationServiceProvider` above).
+# See docs/localization.md.
+# app.register(LocalizationServiceProvider)
 
 if __name__ == "__main__":
     app.run()

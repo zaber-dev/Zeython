@@ -152,6 +152,7 @@ my_blog/
 - [docs/model-events.md](docs/model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
 - [docs/views.md](docs/views.md)
 - [docs/frontend.md](docs/frontend.md) — Tailwind out of the box (dev), moving to a compiled build
+- [docs/localization.md](docs/localization.md) — translation strings, per-request locale resolution
 - [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
 - [docs/csrf.md](docs/csrf.md) — the double-submit-cookie check that comes with session auth automatically
 - [docs/security-headers.md](docs/security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers

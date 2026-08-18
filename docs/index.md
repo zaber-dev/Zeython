@@ -38,6 +38,7 @@ not a template you copy and diverge from.
 - [Model Events](model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
 - [Views](views.md) — server-rendered HTML with Jinja2
 - [Frontend & CSS](frontend.md) — Tailwind out of the box (dev), moving to a compiled build
+- [Localization](localization.md) — translation strings, per-request locale resolution
 - [Authentication](authentication.md) — session-based login, password hashing, route guards
 - [CSRF Protection](csrf.md) — the double-submit-cookie check that comes with session auth automatically
 - [Security Headers](security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
