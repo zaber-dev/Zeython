@@ -9,16 +9,21 @@ That also means: a job pushed but not yet run is lost if the process
 crashes or restarts. Fine for non-critical background work (a welcome
 email, warming a cache); a real limitation for anything you'd be upset to
 silently lose (payment capture, anything that must survive a crash).
-Implement ``Queue`` against a durable backend (a database table, Redis, SQS)
-for that — the same trade-off as ``RateLimiter`` and ``Storage``.
+:class:`RedisQueue` is the durable, opt-in alternative — the same
+trade-off as ``RateLimiter`` and ``Cache``, see docs/queues.md.
 """
 
 from __future__ import annotations
 
 import asyncio
 import contextlib
+import dataclasses
+import importlib
+import json
 import logging
+import time
 from abc import ABC, abstractmethod
+from typing import Any
 
 from starlette.requests import Request
 
@@ -76,7 +81,8 @@ class Queue(ABC):
             await job.handle()
 
     @abstractmethod
-    async def push(self, job: Job) -> None: ...
+    async def push(self, job: Job, *, delay: float = 0.0) -> None:
+        """Queue ``job`` to run -- immediately, or after ``delay`` seconds."""
 
 
 class InMemoryQueue(Queue):
@@ -87,15 +93,28 @@ class InMemoryQueue(Queue):
     ``job.max_attempts`` times, with each failure logged; :meth:`close` is
     available for a clean shutdown (mainly useful in tests, to avoid
     "task was destroyed but it is pending" warnings at interpreter exit).
+    ``delay`` schedules a job to be enqueued after a wait rather than
+    immediately, via a tracked background task -- also cleaned up by
+    :meth:`close`.
     """
 
     def __init__(self, *, container: Container | None = None) -> None:
         super().__init__(container=container)
         self._queue: asyncio.Queue[Job] = asyncio.Queue()
         self._worker_task: asyncio.Task[None] | None = None
+        self._delayed_tasks: set[asyncio.Task[None]] = set()
 
-    async def push(self, job: Job) -> None:
+    async def push(self, job: Job, *, delay: float = 0.0) -> None:
         self._ensure_worker()
+        if delay > 0:
+            task = asyncio.create_task(self._put_after_delay(job, delay))
+            self._delayed_tasks.add(task)
+            task.add_done_callback(self._delayed_tasks.discard)
+        else:
+            await self._queue.put(job)
+
+    async def _put_after_delay(self, job: Job, delay: float) -> None:
+        await asyncio.sleep(delay)
         await self._queue.put(job)
 
     async def join(self) -> None:
@@ -103,7 +122,14 @@ class InMemoryQueue(Queue):
         await self._queue.join()
 
     async def close(self) -> None:
-        """Cancel the background worker task, if one is running."""
+        """Cancel the background worker task and any pending delayed pushes."""
+        for task in list(self._delayed_tasks):
+            task.cancel()
+        for task in list(self._delayed_tasks):
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
+        self._delayed_tasks.clear()
+
         if self._worker_task is not None:
             self._worker_task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
@@ -139,38 +165,221 @@ class SyncQueue(Queue):
 
     Meant for tests and local dev: failures raise straight through `push()`
     instead of being caught and logged, so you see them immediately rather
-    than digging through logs.
+    than digging through logs. ``delay`` is ignored -- a synchronous,
+    immediate-execution queue has nothing to schedule against.
     """
 
-    async def push(self, job: Job) -> None:
+    async def push(self, job: Job, *, delay: float = 0.0) -> None:
         await self._invoke(job)
 
 
-async def dispatch(request: Request, job: Job) -> None:
+def _serialize_job(job: Job) -> str:
+    if not dataclasses.is_dataclass(job):
+        raise TypeError(
+            f"{type(job).__name__} must be a @dataclass to use with RedisQueue -- a durable queue has "
+            "to serialize a job to survive a process restart, and dataclasses.asdict() is how it does "
+            "that. Every constructor field must be JSON-safe (str/int/float/bool/None/list/dict)."
+        )
+    return json.dumps(
+        {
+            "job_class": f"{type(job).__module__}.{type(job).__qualname__}",
+            "payload": dataclasses.asdict(job),
+            "attempts": 0,
+            "max_attempts": job.max_attempts,
+        }
+    )
+
+
+def _deserialize_job(raw: str) -> tuple[Job, dict[str, Any]]:
+    data = json.loads(raw)
+    module_name, _, class_name = data["job_class"].rpartition(".")
+    module = importlib.import_module(module_name)
+    job_cls = getattr(module, class_name)
+    job = job_cls(**data["payload"])
+    job.max_attempts = data["max_attempts"]
+    return job, data
+
+
+class RedisQueue(Queue):
+    """A Redis-backed durable queue: a job pushed here survives a crash or
+    restart of the process that pushed it, and is processed by a separate
+    worker process (``zeython queue work``) rather than a background task
+    inside the web server. Requires the ``redis`` extra
+    (``pip install zeython[redis]``).
+
+    Jobs must be ``@dataclass`` subclasses of :class:`Job` -- see
+    :func:`_serialize_job`. Failed attempts are retried with capped
+    exponential backoff (2, 4, 8, ... up to 60 seconds between attempts);
+    a job that exhausts ``max_attempts`` is moved to a **failed-jobs list**
+    instead of being dropped, so nothing that couldn't be processed is
+    silently lost -- see :meth:`failed_jobs`.
+
+    All keys are namespaced under ``prefix`` + ``queue_name`` (default
+    ``"zeython:queue:default:"``) — safe to point at a Redis instance
+    shared with other subsystems (cache, rate limiting, sessions).
+    """
+
+    def __init__(
+        self,
+        url: str,
+        *,
+        container: Container | None = None,
+        queue_name: str = "default",
+        prefix: str = "zeython:queue:",
+    ) -> None:
+        try:
+            from redis.asyncio import Redis
+        except ImportError as exc:
+            raise ImportError(
+                "RedisQueue requires the redis package. Install it with: pip install zeython[redis]"
+            ) from exc
+
+        super().__init__(container=container)
+        self._client = Redis.from_url(url)
+        self.queue_name = queue_name
+        self._base = f"{prefix}{queue_name}:"
+
+    @property
+    def _pending_key(self) -> str:
+        return f"{self._base}pending"
+
+    @property
+    def _delayed_key(self) -> str:
+        return f"{self._base}delayed"
+
+    @property
+    def _failed_key(self) -> str:
+        return f"{self._base}failed"
+
+    async def push(self, job: Job, *, delay: float = 0.0) -> None:
+        raw = _serialize_job(job)
+        if delay > 0:
+            await self._client.zadd(self._delayed_key, {raw: time.time() + delay})
+        else:
+            await self._client.lpush(self._pending_key, raw)
+
+    async def failed_jobs(self) -> list[dict[str, Any]]:
+        """Every job that exhausted its retries, most recently failed first."""
+        raw_entries = await self._client.lrange(self._failed_key, 0, -1)
+        return [json.loads(entry) for entry in raw_entries]
+
+    async def close(self) -> None:
+        await self._client.aclose()
+
+    async def run_worker(
+        self, *, poll_interval: float = 1.0, shutdown: asyncio.Event | None = None
+    ) -> None:
+        """Block, processing jobs from this queue until ``shutdown`` is set
+        (or forever, if none is given) -- what ``zeython queue work`` runs.
+
+        Reclaims any delayed/retry jobs whose wait has elapsed on every
+        poll, then blocks (up to ``poll_interval`` seconds) for the next
+        ready job via Redis's own ``BRPOP`` rather than busy-polling.
+        """
+        while shutdown is None or not shutdown.is_set():
+            await self._reclaim_delayed()
+            result = await self._client.brpop([self._pending_key], timeout=poll_interval)
+            if result is None:
+                continue
+            _, raw = result
+            await self._process(raw.decode() if isinstance(raw, bytes) else raw)
+
+    async def _reclaim_delayed(self) -> None:
+        now = time.time()
+        # zrangebyscore()'s stub return type covers a withscores=True variant
+        # we never use; without it, every element is always bytes|str.
+        ready: list[bytes | str] = await self._client.zrangebyscore(
+            self._delayed_key, "-inf", now
+        )  # type: ignore[assignment]
+        for raw in ready:
+            # ZREM's return value disambiguates concurrent workers racing
+            # the same ready entry -- only the one that actually removed it
+            # (return value 1) re-enqueues it, so it's processed exactly once.
+            removed = await self._client.zrem(self._delayed_key, raw)
+            if removed:
+                await self._client.lpush(self._pending_key, raw)
+
+    async def _process(self, raw: str) -> None:
+        job, data = _deserialize_job(raw)
+        try:
+            await self._invoke(job)
+        except Exception as exc:
+            data["attempts"] += 1
+            job_class = data["job_class"]
+            if data["attempts"] < data["max_attempts"]:
+                backoff = min(2**data["attempts"], 60)
+                logger.exception(
+                    "Job %s failed (attempt %d/%d), retrying in %ds",
+                    job_class,
+                    data["attempts"],
+                    data["max_attempts"],
+                    backoff,
+                )
+                await self._client.zadd(self._delayed_key, {json.dumps(data): time.time() + backoff})
+            else:
+                logger.error(
+                    "Job %s exhausted %d attempt(s); moved to the failed-jobs list: %s",
+                    job_class,
+                    data["max_attempts"],
+                    exc,
+                )
+                data["error"] = repr(exc)
+                data["failed_at"] = time.time()
+                await self._client.lpush(self._failed_key, json.dumps(data))
+
+
+async def dispatch(request: Request, job: Job, *, delay: float = 0.0) -> None:
     """Queue ``job`` to run in the background rather than blocking this request.
 
     Uses whichever ``Queue`` is bound in the container — :class:`InMemoryQueue`
-    by default, :class:`SyncQueue` if ``QUEUE_DRIVER=sync`` (see
-    :class:`QueueServiceProvider`). Outside of a request, push directly to a
-    resolved queue instead: ``await app.container.make(Queue).push(job)``.
+    by default, :class:`SyncQueue` if ``QUEUE_DRIVER=sync``, :class:`RedisQueue`
+    if ``QUEUE_DRIVER=redis`` (see :class:`QueueServiceProvider`). Pass
+    ``delay`` to run the job after a wait instead of as soon as a worker is
+    free. Outside of a request, push directly to a resolved queue instead:
+    ``await app.container.make(Queue).push(job)``.
     """
     queue: Queue = request.app.state.container.make(Queue)
-    await queue.push(job)
+    await queue.push(job, delay=delay)
 
 
 class QueueServiceProvider(ServiceProvider):
     """Binds a :class:`Queue` into the container.
 
-    ``.env``: ``QUEUE_DRIVER`` — ``memory`` (default, background task) or
-    ``sync`` (run jobs immediately in-line; useful for tests/local dev).
+    ``.env``: ``QUEUE_DRIVER`` —
+
+    - ``memory`` (default) — :class:`InMemoryQueue`, a background task in
+      this process. Jobs are lost on crash/restart.
+    - ``sync`` — :class:`SyncQueue`, runs jobs immediately in-line; useful
+      for tests/local dev.
+    - ``redis`` — :class:`RedisQueue`, durable, processed by a separate
+      ``zeython queue work`` process. Requires ``REDIS_URL`` and the
+      ``redis`` extra. ``QUEUE_NAME`` picks the queue (default ``default``)
+      -- useful if you want a dedicated worker/priority lane for, say,
+      emails vs. report generation.
     """
 
     def register(self) -> None:
         driver = self.config.get("queue.driver", "memory")
-        queue: Queue = (
-            SyncQueue(container=self.container) if driver == "sync" else InMemoryQueue(container=self.container)
-        )
+        queue: Queue
+        if driver == "redis":
+            queue = RedisQueue(
+                self.config.get("redis.url"),
+                container=self.container,
+                queue_name=self.config.get("queue.name", "default"),
+            )
+        elif driver == "sync":
+            queue = SyncQueue(container=self.container)
+        else:
+            queue = InMemoryQueue(container=self.container)
         self.container.singleton(Queue, lambda: queue)
 
 
-__all__ = ["Job", "Queue", "InMemoryQueue", "SyncQueue", "dispatch", "QueueServiceProvider"]
+__all__ = [
+    "Job",
+    "Queue",
+    "InMemoryQueue",
+    "SyncQueue",
+    "RedisQueue",
+    "dispatch",
+    "QueueServiceProvider",
+]

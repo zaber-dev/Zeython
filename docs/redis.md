@@ -1,4 +1,4 @@
-# Redis (Distributed Cache & Rate Limiting)
+# Redis (Distributed Cache, Rate Limiting & Queue)
 
 `InMemoryCache` and `InMemoryRateLimiter` are process-local by design —
 correct and fast for a single worker, and a real limitation once you run
@@ -7,6 +7,8 @@ and count independently, so a value written by one worker is invisible to
 another, and an effective rate limit multiplies by worker count. `RedisCache`
 and `RedisRateLimiter` are the opt-in, shared alternative — same
 interfaces, backed by a Redis instance every worker points at.
+`RedisQueue` is the same idea for background jobs, with its own page —
+see [Background Jobs](queues.md#queue_driverredis-a-durable-queue).
 
 ## Setup
 
@@ -55,15 +57,13 @@ need the tighter guarantee `InMemoryRateLimiter` provides.
 Also namespaced under a prefix (default `"zeython:ratelimit:"`), same
 reasoning as `RedisCache`.
 
-## What isn't here: a Redis-backed Queue
+## RedisQueue
 
-`zeython.queue.Job` instances are deliberately never serialized — the
-docs for `InMemoryQueue` are explicit that this is what lets a job's
-constructor take anything, not just JSON-safe values. A Redis-backed queue
-needs jobs to survive crossing a network boundary, which means picking a
-serialization format and changing what a `Job` is allowed to hold — a
-real design decision, not a drop-in swap the way `Cache`/`RateLimiter`
-are. If you need a durable, distributed queue today, reach for a
-purpose-built one (Celery, RQ, Dramatiq) rather than a half-fit Redis
-`Queue` implementation; `Queue` stays an interface you can implement
-against whichever one you pick.
+Unlike `RedisCache`/`RedisRateLimiter`, this **is** a drop-in swap —
+register `QueueServiceProvider` with `QUEUE_DRIVER=redis` in `.env` rather
+than binding it by hand, since a durable queue also needs a separate
+`zeython queue work` worker process, not just a different backend object.
+See [Background Jobs](queues.md#queue_driverredis-a-durable-queue) for the
+full picture: retries with backoff, the failed-jobs list, and why
+`RedisQueue` requires jobs to be `@dataclass` (it has to serialize a job to
+survive crossing a process boundary — `InMemoryQueue` never does).

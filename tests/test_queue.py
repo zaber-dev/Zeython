@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -114,6 +115,40 @@ async def test_close_is_idempotent() -> None:
     await queue.close()  # must not raise
 
 
+async def test_delayed_push_does_not_run_immediately() -> None:
+    queue = InMemoryQueue()
+    log: list[str] = []
+
+    await queue.push(RecordingJob(log=log, value="delayed"), delay=0.2)
+    await asyncio.sleep(0.05)
+
+    assert log == []  # not yet -- the delay hasn't elapsed
+    await queue.close()
+
+
+async def test_delayed_push_runs_after_the_delay() -> None:
+    queue = InMemoryQueue()
+    log: list[str] = []
+
+    await queue.push(RecordingJob(log=log, value="delayed"), delay=0.1)
+    await asyncio.sleep(0.25)
+    await queue.join()
+
+    assert log == ["delayed"]
+    await queue.close()
+
+
+async def test_close_cancels_pending_delayed_pushes() -> None:
+    queue = InMemoryQueue()
+    log: list[str] = []
+
+    await queue.push(RecordingJob(log=log, value="never runs"), delay=10)
+    await queue.close()
+    await asyncio.sleep(0.05)
+
+    assert log == []  # the delayed push was cancelled, not just the worker
+
+
 # -- SyncQueue ------------------------------------------------------------------------
 
 
@@ -131,6 +166,15 @@ async def test_sync_queue_propagates_exceptions() -> None:
 
     with pytest.raises(RuntimeError, match="always fails"):
         await queue.push(AlwaysFailsJob(attempts_log=[]))
+
+
+async def test_sync_queue_ignores_delay_and_runs_immediately() -> None:
+    queue = SyncQueue()
+    log: list[str] = []
+
+    await queue.push(RecordingJob(log=log, value="immediate"), delay=10)
+
+    assert log == ["immediate"]
 
 
 # -- dispatch() + QueueServiceProvider -------------------------------------------------
@@ -159,6 +203,26 @@ async def test_dispatch_runs_job_in_background(tmp_path: Path) -> None:
     queue = app.container.make(Queue)
     await queue.join()
     assert log == ["welcome email"]
+
+
+async def test_dispatch_with_a_delay_defers_the_job(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+    log: list[str] = []
+
+    @app.post("/register")
+    async def register(request):
+        await dispatch(request, RecordingJob(log=log, value="reminder"), delay=0.1)
+        return JSONResponse({"ok": True}, status_code=201)
+
+    async with client(app) as http:
+        await http.post("/register")
+
+    assert log == []  # not yet -- delay hasn't elapsed
+
+    await asyncio.sleep(0.25)
+    queue = app.container.make(Queue)
+    await queue.join()
+    assert log == ["reminder"]
 
 
 async def test_sync_driver_runs_dispatched_jobs_immediately(tmp_path: Path) -> None:

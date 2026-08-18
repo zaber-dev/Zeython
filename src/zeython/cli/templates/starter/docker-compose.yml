@@ -26,12 +26,24 @@ services:
   #   ports:
   #     - "5432:5432"
 
-  # Uncomment for RedisCache/RedisRateLimiter instead of the in-memory
-  # defaults -- see docs/redis.md. Requires `pip install zeython[redis]`.
+  # Uncomment for RedisCache/RedisRateLimiter/RedisQueue instead of the
+  # in-memory defaults -- see docs/redis.md. Requires
+  # `pip install zeython[redis]`.
   # redis:
   #   image: redis:7-alpine
   #   ports:
   #     - "6379:6379"
+
+  # Uncomment alongside `redis` above and QUEUE_DRIVER=redis in .env -- a
+  # durable queue's jobs are processed by a separate, restartable process,
+  # not inside `app`. See docs/queues.md.
+  # queue-worker:
+  #   build: .
+  #   command: zeython queue work
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./storage:/app/storage
 
 # volumes:
 #   postgres_data:
