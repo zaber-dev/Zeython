@@ -28,6 +28,7 @@ from typing import Any
 from starlette.requests import Request
 
 from zeython.container import Container
+from zeython.error_monitoring import report_exception
 from zeython.providers import ServiceProvider
 
 logger = logging.getLogger("zeython.queue")
@@ -153,10 +154,15 @@ class InMemoryQueue(Queue):
             try:
                 await self._invoke(job)
                 return
-            except Exception:
+            except Exception as exc:
                 logger.exception(
                     "Job %s failed (attempt %d/%d)", type(job).__name__, attempt, job.max_attempts
                 )
+                if attempt == job.max_attempts:
+                    # Only the final, exhausted attempt is reported -- a
+                    # transient failure that a retry then fixes isn't
+                    # something worth an alert.
+                    report_exception(exc, job=type(job).__name__)
         logger.error("Job %s exhausted %d attempt(s); giving up", type(job).__name__, job.max_attempts)
 
 
@@ -323,6 +329,7 @@ class RedisQueue(Queue):
                     data["max_attempts"],
                     exc,
                 )
+                report_exception(exc, job=job_class)
                 data["error"] = repr(exc)
                 data["failed_at"] = time.time()
                 await self._client.lpush(self._failed_key, json.dumps(data))

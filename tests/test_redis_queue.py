@@ -211,6 +211,20 @@ async def test_failed_jobs_is_empty_by_default(queue: RedisQueue) -> None:
     assert await queue.failed_jobs() == []
 
 
+async def test_exhausted_job_reports_to_error_monitoring(queue: RedisQueue, monkeypatch: pytest.MonkeyPatch) -> None:
+    import zeython.queue as queue_module
+
+    reported: list[BaseException] = []
+    monkeypatch.setattr(queue_module, "report_exception", lambda exc, **tags: reported.append(exc))
+
+    await queue.push(RedisAlwaysFailsJob(max_attempts=1))
+
+    await _run_worker_until(queue, lambda: queue._client.llen(queue._failed_key))
+
+    assert len(reported) == 1
+    assert "this job always fails" in str(reported[0])
+
+
 # -- QueueServiceProvider ---------------------------------------------------------------
 
 

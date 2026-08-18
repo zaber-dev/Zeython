@@ -222,6 +222,13 @@ framework version. See [docs/ai-agents.md](docs/ai-agents.md).
   either way; only takes effect through the framework's own default setup
   (skipped if `logging.basicConfig()` was already called, same as the text
   format). See `docs/observability.md`.
+- Register `ErrorMonitoringServiceProvider` (`zeython.error_monitoring`,
+  requires `pip install zeython[sentry]` and `SENTRY_DSN`) to get
+  unhandled request exceptions, exhausted job retries, and raising
+  scheduled tasks reported to Sentry automatically -- not just logged.
+  `report_exception(exc, **tags)` is always safe to call yourself even
+  without it configured (a no-op then), for an exception you catch and
+  handle but still want visible. See `docs/error-monitoring.md`.
 - Database access inside a request handler never needs a session parameter —
   `Model.create/find/all/...` pull the request-scoped session automatically.
   Outside a request (scripts, one-off tasks), wrap the code in

@@ -19,6 +19,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from zeython.container import Container
+from zeython.error_monitoring import report_exception
 from zeython.providers import ServiceProvider
 
 if TYPE_CHECKING:
@@ -216,8 +217,11 @@ class Schedule:
         for event in due:
             try:
                 await event.run()
-            except Exception:
+            except Exception as exc:
                 logger.exception("Scheduled event %s raised", event.name)
+                # No retry concept for a scheduled task -- every failure
+                # here is already final, unlike a queued job's retries.
+                report_exception(exc, scheduled_event=event.name)
         return due
 
 
