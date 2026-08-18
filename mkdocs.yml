@@ -15,6 +15,7 @@ nav:
   - OpenAPI & API Docs: openapi.md
   - API Standards: api-standards.md
   - Database & Migrations: database.md
+  - Multi-Tenancy: multi-tenancy.md
   - Factories & Seeders: database-seeding.md
   - Relationships: relationships.md
   - Validation: validation.md

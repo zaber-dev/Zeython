@@ -87,6 +87,13 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # and add `from zeython import AdminServiceProvider` and
 # `from app.Models.post import Post` above. See docs/admin.md.
 # app.register(AdminServiceProvider(app, models=[Post], guard=lambda user: user.is_admin))
+# Row-level multi-tenancy: a model opts in by declaring a `tenant_id`
+# column (no mixin needed) and its queries scope to whatever `resolver`
+# returns for the request automatically. Not registered by default since
+# `resolver` (how a request maps to a tenant) has no safe default to
+# guess. Uncomment, pick a real resolver, and add
+# `from zeython import TenancyServiceProvider` above. See docs/multi-tenancy.md.
+# app.register(TenancyServiceProvider(app, resolver=lambda request: request.headers.get("X-Tenant-ID")))
 
 if __name__ == "__main__":
     app.run()

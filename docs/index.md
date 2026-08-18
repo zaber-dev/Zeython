@@ -32,6 +32,7 @@ not a template you copy and diverge from.
 - [OpenAPI & API Docs](openapi.md) — generated spec + Swagger UI at `/docs`, from your actual routes
 - [API Standards](api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
+- [Multi-Tenancy](multi-tenancy.md) — row-level tenant isolation, opt-in per model
 - [Factories & Seeders](database-seeding.md) — generating model instances for tests, seeding demo/reference data
 - [Relationships](relationships.md) — defining and safely loading relationships in async code
 - [Validation](validation.md) — declarative model validation rules

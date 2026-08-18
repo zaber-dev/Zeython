@@ -140,9 +140,30 @@ class Model(Base):
         return stmt
 
     @classmethod
+    def _base_select(cls) -> Any:
+        """The starting ``select(cls)`` every query method below builds on.
+
+        A model that declares a ``tenant_id`` column (see
+        :mod:`zeython.tenancy`) gets every read -- ``find``, ``all``,
+        ``find_by``, ``paginate`` -- scoped to
+        :func:`~zeython.tenancy.current_tenant_id` automatically, with no
+        mixin or per-query opt-in needed. A model with no such column is
+        completely unaffected -- this is a plain ``select(cls)``, same as
+        every query method built directly here before.
+        """
+        stmt = select(cls)
+        if hasattr(cls, "tenant_id"):
+            from zeython.tenancy import current_tenant_id
+
+            tenant_id = current_tenant_id()
+            if tenant_id is not None:
+                stmt = stmt.where(cls.tenant_id == tenant_id)  # type: ignore[misc,has-type]
+        return stmt
+
+    @classmethod
     async def find(cls, id_: Any, *, include_deleted: bool = False, include: Iterable[str] = ()) -> Self | None:
         session = current_session()
-        stmt = select(cls).where(cls.id == id_)
+        stmt = cls._base_select().where(cls.id == id_)
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
         stmt = cls._with_includes(stmt, include)
@@ -152,7 +173,7 @@ class Model(Base):
     @classmethod
     async def all(cls, *, include_deleted: bool = False, include: Iterable[str] = ()) -> list[Self]:
         session = current_session()
-        stmt = select(cls)
+        stmt = cls._base_select()
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
         stmt = cls._with_includes(stmt, include)
@@ -181,7 +202,7 @@ class Model(Base):
             raise ValueError("per_page must be >= 1")
 
         session = current_session()
-        stmt = select(cls)
+        stmt = cls._base_select()
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
 
@@ -199,7 +220,7 @@ class Model(Base):
         cls, *, include_deleted: bool = False, include: Iterable[str] = (), **filters: Any
     ) -> list[Self]:
         session = current_session()
-        stmt = select(cls)
+        stmt = cls._base_select()
         if not include_deleted:
             stmt = stmt.where(cls.is_deleted.is_(False))
         for field, value in filters.items():
@@ -217,6 +238,10 @@ class Model(Base):
 
     async def save(self) -> Self:
         is_new = self.id is None
+        if is_new and hasattr(self, "tenant_id") and self.tenant_id is None:  # type: ignore[has-type]
+            from zeython.tenancy import current_tenant_id
+
+            self.tenant_id = current_tenant_id()  # type: ignore[attr-defined]
         await self.saving()
         await (self.creating() if is_new else self.updating())
 

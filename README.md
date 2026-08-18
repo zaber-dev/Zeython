@@ -146,6 +146,7 @@ my_blog/
 - [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
 - [docs/api-standards.md](docs/api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
 - [docs/database.md](docs/database.md) — models and migrations
+- [docs/multi-tenancy.md](docs/multi-tenancy.md) — row-level tenant isolation, opt-in per model
 - [docs/database-seeding.md](docs/database-seeding.md) — model factories and seeders
 - [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
 - [docs/validation.md](docs/validation.md) — declarative model validation
