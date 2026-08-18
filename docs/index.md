@@ -61,6 +61,7 @@ not a template you copy and diverge from.
 - [Error Monitoring](error-monitoring.md) — reporting unhandled exceptions, failed jobs, and raising scheduled tasks to Sentry
 - [Docker](docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
 - [Testing](testing.md) — writing tests against a Zeython application
+- [Benchmarks](benchmarks.md) — Zeython vs. raw Starlette vs. FastAPI, methodology and caveats included
 - [Production Checklist](production-checklist.md) — the one-page index of what to check before a first deploy
 
 ## Contributing

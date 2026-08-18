@@ -44,6 +44,7 @@ nav:
   - Error Monitoring: error-monitoring.md
   - Docker: docker.md
   - Testing: testing.md
+  - Benchmarks: benchmarks.md
   - Production Checklist: production-checklist.md
 theme:
   name: material

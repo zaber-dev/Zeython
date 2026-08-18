@@ -175,6 +175,7 @@ my_blog/
 - [docs/error-monitoring.md](docs/error-monitoring.md) — reporting unhandled exceptions, failed jobs, and raising scheduled tasks to Sentry
 - [docs/docker.md](docs/docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
 - [docs/testing.md](docs/testing.md)
+- [docs/benchmarks.md](docs/benchmarks.md) — Zeython vs. raw Starlette vs. FastAPI, methodology and caveats included
 - [docs/production-checklist.md](docs/production-checklist.md) — the one-page index of what to check before a first deploy
 
 Full rendered docs: https://zaber-dev.github.io/Zeython/
