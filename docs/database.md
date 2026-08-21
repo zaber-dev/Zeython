@@ -130,6 +130,24 @@ as `find`/`all`/`find_by`. `zeython new` wires it into the generated
 `GET /users` (`?page=`/`?per_page=`, defaulting to `1`/`20`) — see
 `app/Controllers/user_controller.py`.
 
+`page.to_dict()` serializes a whole page in one call — items (via each
+item's own `to_dict()`, for `Model` instances) plus the metadata above:
+
+```python
+return JSONResponse(page.to_dict())
+# {"items": [...], "page": 1, "per_page": 20, "total": 57,
+#  "total_pages": 3, "has_next": true, "has_prev": false}
+```
+
+Pass the current request to also get `next_url`/`prev_url` — the same
+URL with only the `page` query param changed (every other query param
+carries over), `None` when there is no next/previous page:
+
+```python
+return JSONResponse(page.to_dict(request=request))
+# adds "next_url": "http://.../users?page=2", "prev_url": null
+```
+
 ## Connection pooling
 
 `DatabaseServiceProvider` forwards `DATABASE_POOL_SIZE`/`DATABASE_MAX_OVERFLOW`
