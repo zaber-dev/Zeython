@@ -62,12 +62,42 @@ at all *is* that signal; `updating()`/`updated()` fire on every subsequent
 save. If a hook genuinely needs both cases in one method, use `saving()`/
 `saved()`, which fire on every save regardless.
 
+## Observers
+
+A model's own hooks are one implementation per class — fine for behavior
+that belongs to the model itself (deriving a slug, normalizing an email).
+For a cross-cutting concern that doesn't belong on the model, or that
+several independent things want to react to (search-index sync, cache
+invalidation, audit logging), register an `Observer` instead:
+
+```python
+from zeython import Observer
+
+class PostSearchIndexObserver(Observer):
+    async def created(self, model: Post) -> None:
+        await search_index.add(model.id, model.title)
+
+    async def updated(self, model: Post) -> None:
+        await search_index.update(model.id, model.title)
+
+    async def deleted(self, model: Post) -> None:
+        await search_index.remove(model.id)
+
+Post.observe(PostSearchIndexObserver)
+```
+
+`observe()` accepts a class (instantiated with no arguments) or an
+already-constructed instance — typically called once, e.g. in a service
+provider's `boot()`. An observer has the same eight hooks as a model
+(`saving`/`saved`/`creating`/`created`/`updating`/`updated`/`deleting`/
+`deleted`), each taking the model instance as its argument; override only
+the ones you need. Several observers can watch the same model, and each
+model class's observers are independent of every other model's. Observers
+fire after the model's own same-named hook, in the order shown above.
+
 ## What this isn't
 
-There's no separate `Observer` class or event-listener registry — a hook is
-just a method you override on the model itself, the same way Django's
-`save()` override or a plain Python method works. That's a deliberate
-scope limit: if you need several models to share the same reaction to
-"created" (e.g., every model logs to an audit table), write a small mixin
-class with the hook and have your models inherit from it — no framework
-machinery required.
+An observer doesn't replace a model's own hooks — it's for reactions that
+don't belong on the model, not a place to move logic that does. If a hook
+is really about the model's own data (deriving a field, normalizing input
+before validation), keep it a method on the model, not an observer.

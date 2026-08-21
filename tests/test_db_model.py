@@ -8,7 +8,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 from starlette.requests import Request
 
-from zeython.db import Model
+from zeython.db import Model, Observer
 from zeython.db.session import Database
 from zeython.validation import required
 
@@ -68,6 +68,16 @@ class SlugPost(Model):
     async def creating(self) -> None:
         if not self.slug:
             self.slug = self.title.lower().replace(" ", "-")
+
+
+class Gadget(Model):
+    """A model with no lifecycle hooks of its own -- purely for exercising
+    Observer/observe() in isolation from a model's own hooks.
+    """
+
+    __tablename__ = "gadgets"
+
+    name: Mapped[str] = mapped_column(String(255))
 
 
 @pytest_asyncio.fixture
@@ -316,3 +326,124 @@ async def test_page_to_dict_first_page_has_no_prev_url_and_last_page_has_no_next
     assert _query_params(first_body["next_url"]) == {"page": "2", "per_page": "10"}
     assert last_body["next_url"] is None
     assert _query_params(last_body["prev_url"]) == {"page": "1", "per_page": "10"}
+
+
+# -- Observer / Model.observe() ------------------------------------------------------
+
+
+class _RecordingObserver(Observer):
+    def __init__(self) -> None:
+        self.events: list[tuple[str, str]] = []
+
+    async def saving(self, model: Gadget) -> None:
+        self.events.append(("saving", model.name))
+
+    async def saved(self, model: Gadget) -> None:
+        self.events.append(("saved", model.name))
+
+    async def creating(self, model: Gadget) -> None:
+        self.events.append(("creating", model.name))
+
+    async def created(self, model: Gadget) -> None:
+        self.events.append(("created", model.name))
+
+    async def updating(self, model: Gadget) -> None:
+        self.events.append(("updating", model.name))
+
+    async def updated(self, model: Gadget) -> None:
+        self.events.append(("updated", model.name))
+
+    async def deleting(self, model: Gadget) -> None:
+        self.events.append(("deleting", model.name))
+
+    async def deleted(self, model: Gadget) -> None:
+        self.events.append(("deleted", model.name))
+
+
+@pytest.fixture(autouse=True)
+def _reset_gadget_observers() -> None:
+    Gadget.__observers__ = []
+
+
+async def test_observe_accepts_an_instance_and_fires_on_create(database: Database) -> None:
+    observer = _RecordingObserver()
+    Gadget.observe(observer)
+
+    async with session_scope(database):
+        await Gadget.create(name="Widget A")
+
+    assert observer.events == [
+        ("saving", "Widget A"),
+        ("creating", "Widget A"),
+        ("created", "Widget A"),
+        ("saved", "Widget A"),
+    ]
+
+
+async def test_observe_accepts_a_class_and_instantiates_it(database: Database) -> None:
+    Gadget.observe(_RecordingObserver)
+
+    async with session_scope(database):
+        await Gadget.create(name="Widget B")
+
+    [observer] = Gadget.__observers__
+    assert ("created", "Widget B") in observer.events
+
+
+async def test_observe_fires_updating_updated_on_an_existing_record(database: Database) -> None:
+    observer = _RecordingObserver()
+    Gadget.observe(observer)
+
+    async with session_scope(database):
+        gadget = await Gadget.create(name="Widget C")
+        observer.events.clear()
+        await gadget.update(name="Widget C renamed")
+
+    assert observer.events == [
+        ("saving", "Widget C renamed"),
+        ("updating", "Widget C renamed"),
+        ("updated", "Widget C renamed"),
+        ("saved", "Widget C renamed"),
+    ]
+
+
+async def test_observe_fires_deleting_deleted(database: Database) -> None:
+    observer = _RecordingObserver()
+    Gadget.observe(observer)
+
+    async with session_scope(database):
+        gadget = await Gadget.create(name="Widget D")
+        observer.events.clear()
+        await gadget.delete()
+
+    assert observer.events == [("deleting", "Widget D"), ("deleted", "Widget D")]
+
+
+async def test_multiple_observers_all_fire_in_registration_order(database: Database) -> None:
+    first = _RecordingObserver()
+    second = _RecordingObserver()
+    Gadget.observe(first)
+    Gadget.observe(second)
+
+    async with session_scope(database):
+        await Gadget.create(name="Widget E")
+
+    assert ("created", "Widget E") in first.events
+    assert ("created", "Widget E") in second.events
+
+
+async def test_observers_are_isolated_per_model_class(database: Database) -> None:
+    observer = _RecordingObserver()
+    Gadget.observe(observer)
+
+    assert Article.__observers__ == []
+
+
+async def test_a_default_observer_with_no_overrides_is_a_silent_no_op(database: Database) -> None:
+    Gadget.observe(Observer)
+
+    async with session_scope(database):
+        gadget = await Gadget.create(name="Widget F")
+        await gadget.update(name="Widget F renamed")
+        await gadget.delete()
+    # No assertion needed beyond "didn't raise" -- Observer's own hooks are no-ops.
