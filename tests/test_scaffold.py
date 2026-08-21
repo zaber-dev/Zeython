@@ -55,6 +55,7 @@ def test_new_project_creates_the_full_directory_layout(tmp_path: Path) -> None:
         "database/seeders/database_seeder.py",
         "routes/web.py",
         "migrations/env.py",
+        "tests/conftest.py",
     ):
         assert (destination / expected).is_file(), f"missing {expected}"
 
@@ -230,3 +231,29 @@ def test_make_seeder_does_not_double_the_suffix(project: Path) -> None:
     path = scaffold.make_seeder("CommentSeeder", project)
     assert path == project / "database" / "seeders" / "comment_seeder.py"
     assert "class CommentSeeder(Seeder):" in path.read_text()
+
+
+def test_new_project_migrations_env_enables_sqlite_batch_mode(tmp_path: Path) -> None:
+    # Without render_as_batch=True, Alembic can only emit a bare ALTER TABLE,
+    # which SQLite rejects for anything beyond adding a plain column (no
+    # constraint changes) -- e.g. `alembic revision --autogenerate` after
+    # adding a ForeignKey to an existing model raises "No support for ALTER
+    # of constraints in SQLite dialect" the first time a generated project
+    # runs a real migration. Batch mode is a no-op on Postgres/MySQL.
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    env_py = (destination / "migrations" / "env.py").read_text()
+    assert env_py.count("render_as_batch=True") == 2
+
+
+def test_new_project_conftest_isolates_tests_from_the_dev_database(tmp_path: Path) -> None:
+    # Without this, `pytest` shares the same DATABASE_URL as `zeython serve`
+    # (a persistent file, not :memory:) -- a test registering a user with an
+    # email already used against the running dev server fails on a UNIQUE
+    # constraint that has nothing to do with the test itself.
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    conftest = (destination / "tests" / "conftest.py").read_text()
+    assert "sqlite+aiosqlite:///:memory:" in conftest

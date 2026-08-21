@@ -211,4 +211,15 @@ zeython db migrate
 `zeython new` scaffolds a working Alembic setup (`alembic.ini`, `migrations/env.py`)
 pointed at your `DATABASE_URL` and your `app.Models` metadata, so
 `--autogenerate` works out of the box against SQLite, PostgreSQL (`pip install
-zeython[postgres]`), or MySQL (`pip install zeython[mysql]`).
+zeython[postgres]`), or MySQL (`pip install zeython[mysql]`). `migrations/env.py`
+also enables Alembic's `render_as_batch` mode, needed for SQLite specifically:
+SQLite can add a new column but can't otherwise `ALTER` a constraint in place,
+so a migration adding a `ForeignKey` (or any other constraint change) to an
+existing table would fail without it. Harmless no-op on Postgres/MySQL.
+
+Adding a `NOT NULL` column to a table that already has rows hits a real SQL
+constraint on every database, not a Zeython limitation: the existing rows
+need *some* value for that column. Give the generated migration a default —
+`sa.Column('author_id', sa.Integer(), nullable=False, server_default='1')` —
+so the backfill has something to write, or make the column nullable if the
+data genuinely doesn't apply to old rows.

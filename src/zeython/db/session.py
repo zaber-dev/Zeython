@@ -13,6 +13,7 @@ import contextvars
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -21,9 +22,26 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
+# Alembic's SQLite "batch mode" (recreate-the-table, the only way SQLite can
+# alter a constraint) needs every constraint to have a deterministic name --
+# an unnamed foreign key or check constraint can't be dropped and re-added
+# during a table rebuild. Without this, a migration as ordinary as adding a
+# ForeignKey column to an existing SQLite table raises ``ValueError:
+# Constraint must have a name``. This is the naming scheme Alembic's own
+# docs recommend for exactly this reason.
+_NAMING_CONVENTION = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
+
 
 class Base(DeclarativeBase):
     """Declarative base shared by every Zeython model."""
+
+    metadata = MetaData(naming_convention=_NAMING_CONVENTION)
 
 
 _current_session: contextvars.ContextVar[AsyncSession | None] = contextvars.ContextVar(

@@ -10,6 +10,14 @@ nav:
       - Overview: index.md
       - Getting Started: getting-started.md
       - Architecture: architecture.md
+  - Tutorial:
+      - Overview: tutorial.md
+      - "1. Setup": tutorial-1-setup.md
+      - "2. Models": tutorial-2-models.md
+      - "3. Controllers & Routes": tutorial-3-controllers.md
+      - "4. Relationships": tutorial-4-relationships.md
+      - "5. Authentication & Authorization": tutorial-5-auth.md
+      - "6. Testing": tutorial-6-testing.md
   - The Basics:
       - Database & Migrations: database.md
       - Relationships: relationships.md
