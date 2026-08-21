@@ -6,46 +6,52 @@ repo_url: https://github.com/zaber-dev/Zeython
 site_author: Md Mahedi Zaman Zaber
 edit_uri: edit/main/docs/
 nav:
-  - Overview: index.md
-  - Getting Started: getting-started.md
-  - Architecture: architecture.md
-  - CLI Reference: cli.md
-  - Console Commands: console-commands.md
-  - Plugins: plugins.md
-  - OpenAPI & API Docs: openapi.md
-  - API Standards: api-standards.md
-  - Database & Migrations: database.md
-  - Multi-Tenancy: multi-tenancy.md
-  - Factories & Seeders: database-seeding.md
-  - Relationships: relationships.md
-  - Validation: validation.md
-  - Model Events: model-events.md
-  - Views: views.md
-  - Frontend & CSS: frontend.md
-  - Localization: localization.md
-  - Authentication: authentication.md
-  - CSRF Protection: csrf.md
-  - Security Headers: security-headers.md
-  - API Authentication: api-authentication.md
-  - Authorization: authorization.md
-  - Admin Panel: admin.md
-  - File Storage: storage.md
-  - Rate Limiting: rate-limiting.md
-  - Caching: caching.md
-  - Redis (Distributed): redis.md
-  - Background Jobs: queues.md
-  - Scheduling: scheduling.md
-  - WebSockets: websockets.md
-  - Mail: mail.md
-  - AI: ai.md
-  - AI Agents: ai-agents.md
-  - Health Check: health-check.md
-  - Observability: observability.md
-  - Error Monitoring: error-monitoring.md
-  - Docker: docker.md
+  - Getting Started:
+      - Overview: index.md
+      - Getting Started: getting-started.md
+      - Architecture: architecture.md
+  - The Basics:
+      - Database & Migrations: database.md
+      - Relationships: relationships.md
+      - Validation: validation.md
+      - Model Events: model-events.md
+      - Factories & Seeders: database-seeding.md
+      - Views: views.md
+      - Frontend & CSS: frontend.md
+  - Security:
+      - Authentication: authentication.md
+      - CSRF Protection: csrf.md
+      - Authorization: authorization.md
+      - API Authentication: api-authentication.md
+      - Security Headers: security-headers.md
+      - Rate Limiting: rate-limiting.md
+      - Multi-Tenancy: multi-tenancy.md
+  - Building APIs:
+      - OpenAPI & API Docs: openapi.md
+      - API Standards: api-standards.md
+  - Digging Deeper:
+      - CLI Reference: cli.md
+      - Console Commands: console-commands.md
+      - Plugins: plugins.md
+      - Localization: localization.md
+      - Background Jobs: queues.md
+      - Scheduling: scheduling.md
+      - WebSockets: websockets.md
+      - Mail: mail.md
+      - Caching: caching.md
+      - Redis (Distributed): redis.md
+      - File Storage: storage.md
+      - Admin Panel: admin.md
+      - AI: ai.md
+      - AI Agents: ai-agents.md
   - Testing: testing.md
-  - Benchmarks: benchmarks.md
-  - Production Checklist: production-checklist.md
+  - Deployment & Operations:
+      - Health Check: health-check.md
+      - Observability: observability.md
+      - Error Monitoring: error-monitoring.md
+      - Docker: docker.md
+      - Production Checklist: production-checklist.md
+      - Benchmarks: benchmarks.md
 theme:
   name: material
   logo: assets/logo.svg

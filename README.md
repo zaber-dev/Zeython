@@ -137,48 +137,61 @@ my_blog/
 
 ## Documentation
 
-- [docs/index.md](docs/index.md) — overview
-- [docs/getting-started.md](docs/getting-started.md)
-- [docs/architecture.md](docs/architecture.md) — container, providers, router, ORM
-- [docs/cli.md](docs/cli.md) — full CLI reference
-- [docs/console-commands.md](docs/console-commands.md) — writing your own `zeython command <name>` CLI commands
-- [docs/plugins.md](docs/plugins.md) — pip-installable packages that register their own service providers, no per-package wiring
-- [docs/openapi.md](docs/openapi.md) — generated OpenAPI spec + Swagger UI at `/docs`
-- [docs/api-standards.md](docs/api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
-- [docs/database.md](docs/database.md) — models and migrations
-- [docs/multi-tenancy.md](docs/multi-tenancy.md) — row-level tenant isolation, opt-in per model
-- [docs/database-seeding.md](docs/database-seeding.md) — model factories and seeders
-- [docs/relationships.md](docs/relationships.md) — defining and safely loading relationships in async code
-- [docs/validation.md](docs/validation.md) — declarative model validation
-- [docs/model-events.md](docs/model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
-- [docs/views.md](docs/views.md)
-- [docs/frontend.md](docs/frontend.md) — Tailwind out of the box (dev), moving to a compiled build
-- [docs/localization.md](docs/localization.md) — translation strings, per-request locale resolution
-- [docs/authentication.md](docs/authentication.md) — session auth, password hashing, route guards
-- [docs/csrf.md](docs/csrf.md) — the double-submit-cookie check that comes with session auth automatically
-- [docs/security-headers.md](docs/security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
-- [docs/api-authentication.md](docs/api-authentication.md) — bearer tokens for clients that can't use cookies
-- [docs/authorization.md](docs/authorization.md) — named abilities (`Gate`), `authorize()` route guards
-- [docs/admin.md](docs/admin.md) — auto-generated CRUD UI for registered models
-- [docs/storage.md](docs/storage.md) — validated uploads, local/S3 storage
-- [docs/rate-limiting.md](docs/rate-limiting.md) — throttling routes, auth-endpoint defaults
-- [docs/caching.md](docs/caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
-- [docs/redis.md](docs/redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
-- [docs/queues.md](docs/queues.md) — background jobs, dispatching work off the request cycle
-- [docs/scheduling.md](docs/scheduling.md) — recurring tasks defined in code, one cron entry total
-- [docs/websockets.md](docs/websockets.md) — real-time handlers and the `WebSocketHub` broadcast registry
-- [docs/mail.md](docs/mail.md) — sending email, log-only by default, SMTP when ready
-- [docs/ai.md](docs/ai.md) — calling an LLM from your own app code
-- [docs/ai-agents.md](docs/ai-agents.md) — the MCP server for AI coding agents
-- [docs/health-check.md](docs/health-check.md) — `/up`, for load balancers and container orchestrators
-- [docs/observability.md](docs/observability.md) — `X-Request-ID` correlation IDs and `LOG_FORMAT=json` structured logging
-- [docs/error-monitoring.md](docs/error-monitoring.md) — reporting unhandled exceptions, failed jobs, and raising scheduled tasks to Sentry
-- [docs/docker.md](docs/docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
-- [docs/testing.md](docs/testing.md)
-- [docs/benchmarks.md](docs/benchmarks.md) — Zeython vs. raw Starlette vs. FastAPI, methodology and caveats included
-- [docs/production-checklist.md](docs/production-checklist.md) — the one-page index of what to check before a first deploy
+Full rendered docs (searchable, better navigation): https://zaber-dev.github.io/Zeython/
 
-Full rendered docs: https://zaber-dev.github.io/Zeython/
+**Getting Started**
+[Overview](docs/index.md) ·
+[Getting Started](docs/getting-started.md) ·
+[Architecture](docs/architecture.md)
+
+**The Basics**
+[Database & Migrations](docs/database.md) ·
+[Relationships](docs/relationships.md) ·
+[Validation](docs/validation.md) ·
+[Model Events](docs/model-events.md) ·
+[Factories & Seeders](docs/database-seeding.md) ·
+[Views](docs/views.md) ·
+[Frontend & CSS](docs/frontend.md)
+
+**Security**
+[Authentication](docs/authentication.md) ·
+[CSRF Protection](docs/csrf.md) ·
+[Authorization](docs/authorization.md) ·
+[API Authentication](docs/api-authentication.md) ·
+[Security Headers](docs/security-headers.md) ·
+[Rate Limiting](docs/rate-limiting.md) ·
+[Multi-Tenancy](docs/multi-tenancy.md)
+
+**Building APIs**
+[OpenAPI & API Docs](docs/openapi.md) ·
+[API Standards](docs/api-standards.md)
+
+**Digging Deeper**
+[CLI Reference](docs/cli.md) ·
+[Console Commands](docs/console-commands.md) ·
+[Plugins](docs/plugins.md) ·
+[Localization](docs/localization.md) ·
+[Background Jobs](docs/queues.md) ·
+[Scheduling](docs/scheduling.md) ·
+[WebSockets](docs/websockets.md) ·
+[Mail](docs/mail.md) ·
+[Caching](docs/caching.md) ·
+[Redis (Distributed)](docs/redis.md) ·
+[File Storage](docs/storage.md) ·
+[Admin Panel](docs/admin.md) ·
+[AI](docs/ai.md) ·
+[AI Agents](docs/ai-agents.md)
+
+**Testing**
+[Testing](docs/testing.md)
+
+**Deployment & Operations**
+[Health Check](docs/health-check.md) ·
+[Observability](docs/observability.md) ·
+[Error Monitoring](docs/error-monitoring.md) ·
+[Docker](docs/docker.md) ·
+[Production Checklist](docs/production-checklist.md) ·
+[Benchmarks](docs/benchmarks.md)
 
 ## Framework development
 
