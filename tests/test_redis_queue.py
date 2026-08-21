@@ -8,6 +8,18 @@ can survive a process restart -- unlike InMemoryQueue's tests, a job's
 so these tests observe side effects through Redis itself (a job's handle()
 writes a marker key), the same way a real, separate worker process would
 have to signal completion back to anything watching.
+
+The run_worker() tests below have been observed to hang indefinitely in
+some sandboxed environments -- run_worker()'s own asyncio task + BRPOP
+loop and task.cancel() both check out fine in isolation (a bare asyncio
+script pushing a job, running the worker, and cancelling it completes in
+well under a second), but combined with this file's autouse
+`_require_redis` fixture's own throwaway connect/ping/close cycle
+immediately before the test body, something in that specific
+combination occasionally never wakes the event loop back up. Root cause
+not fully isolated; pyproject.toml's global pytest-timeout config (60s,
+thread method) is the backstop so this fails loudly instead of eating
+unbounded CI minutes if it recurs.
 """
 
 import asyncio
