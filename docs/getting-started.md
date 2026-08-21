@@ -59,14 +59,20 @@ curl http://127.0.0.1:8000/users
 — the response is `{"items": [...], "page": 1, "total": 1, ...}`, not a
 bare array.
 
-If you get a database error, run the initial migration first:
+If you get a database error, generate and apply the initial migration first
+(a fresh scaffold ships with the `User` model but no migration file yet —
+`revision` autogenerates one from your models, `migrate` applies it):
 
 ```bash
+zeython db revision -m "create users table"
 zeython db migrate
 ```
 
 ## Next steps
 
+- Follow the [Tutorial](tutorial.md) to build a real, tested, multi-model
+  app from this same starting point — the fastest way to actually learn
+  the framework.
 - Read [Architecture](architecture.md) to understand the container, service providers, and router.
 - Read [Database & Migrations](database.md) to add your own models.
 - Read [CLI Reference](cli.md) for the full list of `zeython make:*` generators.

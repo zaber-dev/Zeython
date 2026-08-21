@@ -139,6 +139,10 @@ Full rendered docs (searchable, better navigation): https://zaber-dev.github.io/
 [Getting Started](docs/getting-started.md) ·
 [Architecture](docs/architecture.md)
 
+**Tutorial**
+[Build TaskFlow](docs/tutorial.md) — a guided, six-part walkthrough from an
+empty scaffold to a tested, authenticated API
+
 **The Basics**
 [Database & Migrations](docs/database.md) ·
 [Relationships](docs/relationships.md) ·
