@@ -1,10 +1,12 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from urllib.parse import parse_qsl, urlsplit
 
 import pytest
 import pytest_asyncio
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
+from starlette.requests import Request
 
 from zeython.db import Model
 from zeython.db.session import Database
@@ -226,3 +228,91 @@ async def test_paginate_rejects_a_non_positive_page_or_per_page(database: Databa
             await Article.paginate(page=0)
         with pytest.raises(ValueError):
             await Article.paginate(per_page=0)
+
+
+# -- Page.to_dict() -----------------------------------------------------------------
+
+
+def _request(query_string: bytes = b"") -> Request:
+    return Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/articles",
+            "query_string": query_string,
+            "headers": [],
+            "scheme": "http",
+            "server": ("testserver", 80),
+        }
+    )
+
+
+async def test_page_to_dict_serializes_items_and_metadata(database: Database) -> None:
+    async with session_scope(database):
+        for i in range(25):
+            await Article.create(title=f"Article {i}")
+
+    async with session_scope(database):
+        page = await Article.paginate(page=1, per_page=10)
+        body = page.to_dict()
+
+    assert body["page"] == 1
+    assert body["per_page"] == 10
+    assert body["total"] == 25
+    assert body["total_pages"] == 3
+    assert body["has_next"] is True
+    assert body["has_prev"] is False
+    assert len(body["items"]) == 10
+    assert body["items"][0] == page.items[0].to_dict()
+    assert "next_url" not in body
+    assert "prev_url" not in body
+
+
+async def test_page_to_dict_without_request_omits_urls(database: Database) -> None:
+    async with session_scope(database):
+        await Article.create(title="Only one")
+
+    async with session_scope(database):
+        page = await Article.paginate(page=1, per_page=10)
+        body = page.to_dict()
+
+    assert "next_url" not in body
+    assert "prev_url" not in body
+
+
+def _query_params(url: str) -> dict[str, str]:
+    return dict(parse_qsl(urlsplit(url).query))
+
+
+async def test_page_to_dict_with_request_builds_next_and_prev_urls_preserving_other_params(
+    database: Database,
+) -> None:
+    async with session_scope(database):
+        for i in range(25):
+            await Article.create(title=f"Article {i}")
+
+    async with session_scope(database):
+        page = await Article.paginate(page=2, per_page=10)
+        body = page.to_dict(request=_request(b"page=2&per_page=10&sort=title"))
+
+    assert _query_params(body["next_url"]) == {"page": "3", "per_page": "10", "sort": "title"}
+    assert _query_params(body["prev_url"]) == {"page": "1", "per_page": "10", "sort": "title"}
+
+
+async def test_page_to_dict_first_page_has_no_prev_url_and_last_page_has_no_next_url(
+    database: Database,
+) -> None:
+    async with session_scope(database):
+        for i in range(15):
+            await Article.create(title=f"Article {i}")
+
+    async with session_scope(database):
+        first = await Article.paginate(page=1, per_page=10)
+        first_body = first.to_dict(request=_request(b"page=1&per_page=10"))
+        last = await Article.paginate(page=2, per_page=10)
+        last_body = last.to_dict(request=_request(b"page=2&per_page=10"))
+
+    assert first_body["prev_url"] is None
+    assert _query_params(first_body["next_url"]) == {"page": "2", "per_page": "10"}
+    assert last_body["next_url"] is None
+    assert _query_params(last_body["prev_url"]) == {"page": "1", "per_page": "10"}

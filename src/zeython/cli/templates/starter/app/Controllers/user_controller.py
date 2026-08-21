@@ -13,17 +13,7 @@ class UserController(Controller):
         page = int(request.query_params.get("page", 1))
         per_page = int(request.query_params.get("per_page", 20))
         result = await User.paginate(page=page, per_page=per_page)
-        return JSONResponse(
-            {
-                "items": [user.to_dict() for user in result.items],
-                "page": result.page,
-                "per_page": result.per_page,
-                "total": result.total,
-                "total_pages": result.total_pages,
-                "has_next": result.has_next,
-                "has_prev": result.has_prev,
-            }
-        )
+        return JSONResponse(result.to_dict(request=request))
 
     async def show(self, request):
         user = await User.find(int(request.path_params["id"]))
