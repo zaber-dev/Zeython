@@ -45,8 +45,10 @@ scaffolding on every project. Zeython does that assembly once:
 
 ## Quick start
 
+Not yet on PyPI — install straight from GitHub:
+
 ```bash
-pip install zeython
+pip install git+https://github.com/zaber-dev/Zeython.git
 zeython new "My Blog"
 cd my_blog
 pip install -e .
@@ -132,7 +134,8 @@ my_blog/
 
 ## Documentation
 
-Full rendered docs (searchable, better navigation): https://zaber-dev.github.io/Zeython/
+Landing page: https://zaber-dev.github.io/Zeython/
+Full rendered docs (searchable, better navigation, generated API reference): https://zaber-dev.github.io/Zeython/docs/
 
 **Getting Started**
 [Overview](docs/index.md) ·
