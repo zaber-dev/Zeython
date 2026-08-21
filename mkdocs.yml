@@ -74,15 +74,24 @@ theme:
   name: material
   logo: assets/logo.svg
   favicon: assets/favicon.svg
+  font:
+    text: Inter
+    code: JetBrains Mono
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
-    - navigation.expand
     - navigation.top
+    - navigation.footer
     - navigation.instant
-    - toc.integrate
+    - navigation.instant.progress
+    - navigation.tracking
+    - toc.follow
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
+    - content.action.edit
   palette:
     - scheme: default
       primary: blue
