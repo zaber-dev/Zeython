@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import traceback
 from http import HTTPStatus
 from typing import Any
 
@@ -80,12 +81,21 @@ def _wants_problem_json(request: Request | None) -> bool:
     return bool(config.get("api.problem_json", False)) if config is not None else False
 
 
+def _format_traceback(exc: BaseException) -> list[str]:
+    """One string per frame, newline-terminated -- ``traceback.format_exception``'s
+    native shape, easier for a client to render line-by-line than one giant
+    string with embedded newlines.
+    """
+    return traceback.format_exception(type(exc), exc, exc.__traceback__)
+
+
 def _problem_response(
     status_code: int,
     detail: str,
     *,
     errors: dict[str, list[str]] | None = None,
     exception: str | None = None,
+    exc_traceback: list[str] | None = None,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     """RFC 7807 (``application/problem+json``) shaped error body -- ``type``
@@ -106,6 +116,8 @@ def _problem_response(
         payload["errors"] = errors
     if exception:
         payload["exception"] = exception
+    if exc_traceback:
+        payload["traceback"] = exc_traceback
     return JSONResponse(payload, status_code=status_code, headers=headers, media_type="application/problem+json")
 
 
@@ -139,11 +151,15 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
     if _wants_problem_json(request):
         exception_detail = f"{type(exc).__name__}: {exc}" if debug else None
-        return _problem_response(500, "An unexpected error occurred.", exception=exception_detail)
+        exc_traceback = _format_traceback(exc) if debug else None
+        return _problem_response(
+            500, "An unexpected error occurred.", exception=exception_detail, exc_traceback=exc_traceback
+        )
 
     payload: dict[str, Any] = {"error": "Internal Server Error", "status": 500}
     if debug:
         payload["exception"] = f"{type(exc).__name__}: {exc}"
+        payload["traceback"] = _format_traceback(exc)
     return JSONResponse(payload, status_code=500)
 
 
