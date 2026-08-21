@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeython — an async-first, batteries-included MVC framework for Python</title>
+<meta name="description" content="Zeython is an async-first, batteries-included MVC framework for Python: a DI container, an Active-Record-style async ORM, auth &amp; authorization, queues, WebSockets, and a Laravel-style CLI, built on Starlette and SQLAlchemy 2.0.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://zaber-dev.github.io/Zeython/">
+<meta property="og:title" content="Zeython — an async-first, batteries-included MVC framework for Python">
+<meta property="og:description" content="A dependency injection container, a service-provider boot lifecycle, an Active-Record-style async ORM, and a Laravel-style CLI, built on Starlette and SQLAlchemy 2.0.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zaber-dev.github.io/Zeython/">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2a6df4;
+    --blue-light: #5b8cff;
+    --indigo: #4f5bd5;
+    --bg: #ffffff;
+    --bg-alt: #f5f7fb;
+    --surface: #ffffff;
+    --border: #e3e8f0;
+    --text: #1a1f2b;
+    --text-dim: #545c6e;
+    --text-faint: #7b8496;
+    --code-bg: #10121b;
+    --code-text: #e6e9f2;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 8px 24px rgba(16, 24, 40, .06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0d14;
+    --bg-alt: #10131c;
+    --surface: #141826;
+    --border: #232838;
+    --text: #eef1f8;
+    --text-dim: #b7bed0;
+    --text-faint: #8991a6;
+    --code-bg: #0a0c13;
+    --code-text: #e6e9f2;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0d14;
+      --bg-alt: #10131c;
+      --surface: #141826;
+      --border: #232838;
+      --text: #eef1f8;
+      --text-dim: #b7bed0;
+      --text-faint: #8991a6;
+      --code-bg: #0a0c13;
+      --code-text: #e6e9f2;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  code, pre, .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; text-decoration: none; }
+  .brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a { text-decoration: none; color: var(--text-dim); font-size: 14.5px; font-weight: 500; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; color: var(--text-dim);
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--text-faint); }
+  .navbar-hide-mobile { display: flex; }
+  @media (max-width: 760px) { .navbar-hide-mobile { display: none !important; } }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 9px; font-weight: 600; font-size: 14.5px;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--indigo)); color: #fff; box-shadow: var(--shadow); }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { border-color: var(--text-faint); }
+
+  /* Hero */
+  header.hero { padding: 96px 0 72px; text-align: center; position: relative; overflow: hidden; }
+  header.hero::before {
+    content: ""; position: absolute; inset: -20% -10% auto -10%; height: 480px;
+    background: radial-gradient(60% 60% at 50% 0%, color-mix(in srgb, var(--blue) 16%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 999px; font-size: 13px; color: var(--text-dim); font-weight: 500;
+    margin-bottom: 28px;
+  }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #2fbf71; box-shadow: 0 0 0 3px color-mix(in srgb, #2fbf71 25%, transparent); }
+  h1.headline { font-size: clamp(34px, 5.4vw, 58px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 20px; line-height: 1.08; }
+  h1.headline .grad { background: linear-gradient(135deg, var(--blue), var(--indigo)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .subhead { max-width: 640px; margin: 0 auto 40px; font-size: 19px; color: var(--text-dim); }
+  .hero-ctas { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+  .install {
+    max-width: 560px; margin: 0 auto; text-align: left;
+    background: var(--code-bg); color: var(--code-text); border-radius: 12px;
+    box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--border);
+  }
+  .install-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .install-bar span { font-size: 12px; color: #8b93ab; font-weight: 500; }
+  .copy-btn { background: transparent; border: none; color: #8b93ab; cursor: pointer; font-size: 12px; font-family: inherit; padding: 4px 8px; border-radius: 6px; }
+  .copy-btn:hover { color: #fff; background: rgba(255,255,255,.08); }
+  .install pre { margin: 0; padding: 16px 18px; font-size: 14px; overflow-x: auto; }
+  .install .c1 { color: #6b7a99; } .install .c2 { color: #7ee787; }
+
+  section { padding: 72px 0; }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
+  .kicker { text-transform: uppercase; letter-spacing: .08em; font-size: 12.5px; font-weight: 700; color: var(--blue); margin-bottom: 10px; }
+  h2.section-title { font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; letter-spacing: -0.015em; margin: 0 0 14px; }
+  .section-desc { color: var(--text-dim); font-size: 16.5px; }
+
+  /* Feature grid */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: color-mix(in srgb, var(--blue) 40%, var(--border)); transform: translateY(-2px); }
+  .card .ico {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 18%, transparent), color-mix(in srgb, var(--indigo) 18%, transparent));
+    color: var(--blue); margin-bottom: 16px;
+  }
+  .card h3 { font-size: 16.5px; margin: 0 0 8px; font-weight: 700; }
+  .card p { margin: 0; color: var(--text-dim); font-size: 14.5px; }
+  .card a.card-link { text-decoration: none; color: inherit; }
+
+  /* Code showcase */
+  .showcase { background: var(--bg-alt); }
+  .showcase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+  @media (max-width: 860px) { .showcase-grid { grid-template-columns: 1fr; } }
+  .code-card {
+    background: var(--code-bg); color: var(--code-text); border-radius: 14px; overflow: hidden;
+    box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column;
+  }
+  .code-card .file-tab { padding: 10px 16px; font-size: 12.5px; color: #8b93ab; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .code-card pre { margin: 0; padding: 18px; font-size: 13.3px; overflow-x: auto; flex: 1; }
+  .kw { color: #ff7b9c; } .fn { color: #7dd3fc; } .str { color: #7ee787; } .cm { color: #6b7a99; } .cls { color: #f6c177; }
+
+  /* Checklist band */
+  .band { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .checklist { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 28px; }
+  @media (max-width: 900px) { .checklist { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .checklist { grid-template-columns: 1fr; } }
+  .check-item { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--text-dim); }
+  .check-item svg { flex: none; color: #2fbf71; }
+
+  /* CLI band */
+  .cli-band { text-align: center; }
+  .cli-band pre {
+    text-align: left; max-width: 760px; margin: 0 auto; background: var(--code-bg); color: var(--code-text);
+    border-radius: 14px; padding: 22px 26px; box-shadow: var(--shadow); overflow-x: auto; font-size: 14px;
+    border: 1px solid var(--border);
+  }
+  .cli-band .cm { color: #6b7a99; }
+
+  /* Trust / badges */
+  .badges { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .badges img { height: 20px; }
+
+  /* Final CTA */
+  .final-cta { text-align: center; }
+  .final-cta .panel {
+    background: linear-gradient(135deg, var(--blue), var(--indigo));
+    border-radius: 20px; padding: 56px 32px; color: #fff;
+  }
+  .final-cta h2 { font-size: clamp(24px, 3.2vw, 32px); margin: 0 0 12px; font-weight: 800; }
+  .final-cta p { color: rgba(255,255,255,.88); margin: 0 0 28px; font-size: 16px; }
+  .final-cta .btn-ghost { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+  .final-cta .btn-ghost:hover { background: rgba(255,255,255,.2); }
+  .final-cta .btn-primary { background: #fff; color: var(--blue); box-shadow: none; }
+  .final-cta .btn-primary:hover { filter: none; background: #f2f5ff; }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 0; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .footer-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .footer-brand img { width: 22px; height: 22px; border-radius: 6px; }
+  .footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+  .footer-links a { text-decoration: none; color: var(--text-dim); font-size: 14px; }
+  .footer-links a:hover { color: var(--text); }
+  .footer-fine { color: var(--text-faint); font-size: 13px; margin-top: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <img src="assets/logo.svg" alt="">
+      Zeython
+    </a>
+    <div class="nav-links navbar-hide-mobile">
+      <a href="#features">Features</a>
+      <a href="#code">Code</a>
+      <a href="#everything">What's included</a>
+      <a href="docs/">Docs</a>
+      <a href="docs/tutorial/">Tutorial</a>
+    </div>
+    <div class="nav-cta">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg id="theme-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </button>
+      <a class="icon-btn navbar-hide-mobile" href="https://github.com/zaber-dev/Zeython" aria-label="GitHub" title="GitHub">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+      <a class="btn btn-primary navbar-hide-mobile" href="docs/getting-started/">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Zeython 2.0 — stable release</span>
+    <h1 class="headline">The <span class="grad">async-first</span>,<br>batteries-included MVC framework for Python</h1>
+    <p class="subhead">
+      A dependency injection container, a service-provider boot lifecycle, an
+      Active-Record-style async ORM, and a Laravel-style CLI — built on
+      <a href="https://www.starlette.io/" target="_blank" rel="noopener">Starlette</a> and
+      <a href="https://docs.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy 2.0</a>.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="docs/getting-started/">Get Started →</a>
+      <a class="btn btn-ghost" href="docs/">Read the Docs</a>
+      <a class="btn btn-ghost" href="https://github.com/zaber-dev/Zeython">View on GitHub</a>
+    </div>
+    <div class="install">
+      <div class="install-bar">
+        <span>terminal</span>
+        <button class="copy-btn" id="copy-install" data-copy="pip install git+https://github.com/zaber-dev/Zeython.git
+zeython new &quot;My App&quot;
+cd my_app && pip install -e . && zeython serve">Copy</button>
+      </div>
+      <pre><span class="c1">$</span> pip install git+https://github.com/zaber-dev/Zeython.git
+<span class="c1">$</span> zeython new <span class="c2">"My App"</span>
+<span class="c1">$</span> cd my_app <span class="c1">&amp;&amp;</span> pip install -e . <span class="c1">&amp;&amp;</span> zeython serve</pre>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Why Zeython</div>
+      <h2 class="section-title">Assembled once, so you don't hand-roll it per project</h2>
+      <p class="section-desc">Python has excellent web libraries. It has very few opinionated, batteries-included frameworks in the Django/Laravel/Rails sense — Zeython is that assembly, done once.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+        <h3>Async all the way down</h3>
+        <p>Request handling, the ORM, and migrations — no bolted-on <code>asyncio.run</code> calls anywhere in the stack.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg></div>
+        <h3>Request-scoped DB sessions</h3>
+        <p>Managed via <code>contextvars</code>, not a session shared globally or hand-rolled per call.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg></div>
+        <h3>Convention over configuration</h3>
+        <p>Controllers, models, and routes live in predictable places: <code>app/Controllers</code>, <code>app/Models</code>, <code>routes/</code>.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg></div>
+        <h3>A real CLI</h3>
+        <p><code>zeython new</code>, <code>serve</code>, <code>make:*</code>, <code>db:*</code> cover project creation, code generation, and migrations.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
+        <h3>Live API docs from real routes</h3>
+        <p>A generated OpenAPI spec and Swagger UI at <code>/docs</code>, built by reading what's actually registered.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+        <h3>Real-time out of the box</h3>
+        <p><code>@app.websocket(...)</code> handlers and a <code>WebSocketHub</code> broadcast registry — no separate server.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+        <h3>AI-agent ready</h3>
+        <p>An MCP server (<code>zeython mcp</code>) gives coding agents tools to inspect real routes, schema, and docs.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle></svg></div>
+        <h3>Small, typed, tested core</h3>
+        <p>Full type hints and a real pytest suite — not scaffolding wrapped around unfinished features.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"></path></svg></div>
+        <h3>AI-capable apps</h3>
+        <p><code>zeython.ai</code> binds an LLM client in the container, zero-config by default, one line to go live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase" id="code">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">A taste of it</div>
+      <h2 class="section-title">A model, a controller, and a route</h2>
+      <p class="section-desc">That's a working JSON API — validation, error handling, and serialization included.</p>
+    </div>
+    <div class="showcase-grid">
+      <div class="code-card">
+        <div class="file-tab">app/Models/post.py</div>
+        <pre><span class="kw">from</span> sqlalchemy <span class="kw">import</span> String, Text
+<span class="kw">from</span> sqlalchemy.orm <span class="kw">import</span> Mapped, mapped_column
+<span class="kw">from</span> zeython <span class="kw">import</span> Model
+
+<span class="kw">class</span> <span class="cls">Post</span>(Model):
+    __tablename__ = <span class="str">"posts"</span>
+    title: Mapped[<span class="cls">str</span>] = mapped_column(String(<span class="fn">255</span>))
+    body: Mapped[<span class="cls">str</span>] = mapped_column(Text)</pre>
+      </div>
+      <div class="code-card">
+        <div class="file-tab">app/Controllers/post_controller.py</div>
+        <pre><span class="kw">from</span> starlette.responses <span class="kw">import</span> JSONResponse
+<span class="kw">from</span> zeython <span class="kw">import</span> Controller, NotFoundException
+<span class="kw">from</span> app.Models.post <span class="kw">import</span> Post
+
+<span class="kw">class</span> <span class="cls">PostController</span>(Controller):
+    <span class="kw">async def</span> <span class="fn">index</span>(self, request):
+        <span class="kw">return</span> JSONResponse([p.to_dict() <span class="kw">for</span> p <span class="kw">in</span> <span class="kw">await</span> Post.all()])
+
+    <span class="kw">async def</span> <span class="fn">store</span>(self, request):
+        data = <span class="kw">await</span> request.json()
+        post = <span class="kw">await</span> Post.create(**data)
+        <span class="kw">return</span> JSONResponse(post.to_dict(), status_code=<span class="fn">201</span>)</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="everything">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Batteries included</div>
+      <h2 class="section-title">Everything a production app needs, already wired</h2>
+      <p class="section-desc">Not a hello-world demo — auth, security, background work, and observability, all shipped and tested.</p>
+    </div>
+    <div class="checklist">
+      <div class="check-item">✓ &nbsp;Session &amp; API token auth</div>
+      <div class="check-item">✓ &nbsp;RBAC-style authorization</div>
+      <div class="check-item">✓ &nbsp;CSRF protection</div>
+      <div class="check-item">✓ &nbsp;Security response headers</div>
+      <div class="check-item">✓ &nbsp;Rate limiting (incl. Redis)</div>
+      <div class="check-item">✓ &nbsp;Multi-tenancy</div>
+      <div class="check-item">✓ &nbsp;Background job queues</div>
+      <div class="check-item">✓ &nbsp;Cron-like scheduler</div>
+      <div class="check-item">✓ &nbsp;WebSockets &amp; broadcast hub</div>
+      <div class="check-item">✓ &nbsp;Mail (SMTP + log driver)</div>
+      <div class="check-item">✓ &nbsp;Caching (in-memory + Redis)</div>
+      <div class="check-item">✓ &nbsp;File storage (local + S3)</div>
+      <div class="check-item">✓ &nbsp;OpenAPI &amp; Swagger UI</div>
+      <div class="check-item">✓ &nbsp;Admin panel (auto CRUD)</div>
+      <div class="check-item">✓ &nbsp;Localization / i18n</div>
+      <div class="check-item">✓ &nbsp;Structured logging + Sentry</div>
+      <div class="check-item">✓ &nbsp;Factories &amp; seeders</div>
+      <div class="check-item">✓ &nbsp;N+1 query detection</div>
+      <div class="check-item">✓ &nbsp;Health checks + Docker</div>
+      <div class="check-item">✓ &nbsp;Plugin registry</div>
+    </div>
+  </div>
+</section>
+
+<section class="cli-band">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Laravel-style CLI</div>
+      <h2 class="section-title">Code generation for the whole stack</h2>
+      <p class="section-desc">One command per concept — models, controllers, jobs, policies, middleware, migrations.</p>
+    </div>
+    <pre><span class="cm"># scaffold a model, controller, and migration</span>
+zeython make model Post
+zeython make controller Post
+zeython db revision -m "add posts table"
+zeython db migrate
+
+<span class="cm"># jobs, policies, middleware, seeders — same pattern</span>
+zeython make job SendWelcomeEmail
+zeython make policy PostPolicy
+zeython route:list</pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="badges">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
+      <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python 3.11+">
+      <img src="https://github.com/zaber-dev/Zeython/actions/workflows/ci.yml/badge.svg" alt="CI status">
+      <img src="https://img.shields.io/github/stars/zaber-dev/Zeython?style=flat&color=2a6df4" alt="GitHub stars">
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <div class="panel">
+      <h2>Ready to build something real?</h2>
+      <p>Scaffold a project, wire a route, and be serving requests in under a minute.</p>
+      <div class="hero-ctas" style="margin-bottom:0;">
+        <a class="btn btn-primary" href="docs/getting-started/">Get Started →</a>
+        <a class="btn btn-ghost" href="docs/tutorial/">Follow the Tutorial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <a class="footer-brand" href="#top"><img src="assets/logo.svg" alt="">Zeython</a>
+      <div class="footer-links">
+        <a href="docs/">Documentation</a>
+        <a href="docs/reference/">API Reference</a>
+        <a href="https://github.com/zaber-dev/Zeython">GitHub</a>
+        <a href="https://github.com/zaber-dev/Zeython/blob/main/CONTRIBUTING.md">Contributing</a>
+        <a href="https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/zaber-dev/Zeython/blob/main/CHANGELOG.md">Changelog</a>
+      </div>
+    </div>
+    <div class="footer-fine">Created by Md Mahedi Zaman Zaber · Released under the MIT License</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var toggle = document.getElementById('theme-toggle');
+  var stored = null;
+  try { stored = localStorage.getItem('zeython-theme'); } catch (e) {}
+  if (stored === 'light' || stored === 'dark') root.setAttribute('data-theme', stored);
+
+  toggle.addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var effectiveDark = current ? current === 'dark' : prefersDark;
+    var next = effectiveDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('zeython-theme', next); } catch (e) {}
+  });
+
+  var copyBtn = document.getElementById('copy-install');
+  copyBtn.addEventListener('click', function () {
+    var text = copyBtn.getAttribute('data-copy');
+    var done = function () {
+      var original = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(function () { copyBtn.textContent = original; }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+    } else {
+      done();
+    }
+  });
+})();
+</script>
+</body>
+</html>

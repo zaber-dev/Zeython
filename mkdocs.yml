@@ -1,6 +1,7 @@
 site_name: Zeython Docs
 site_description: Zeython — an async-first, batteries-included MVC framework for Python
-site_url: https://zaber-dev.github.io/Zeython/
+site_url: https://zaber-dev.github.io/Zeython/docs/
+site_dir: site/docs
 repo_name: zaber-dev/Zeython
 repo_url: https://github.com/zaber-dev/Zeython
 site_author: Md Mahedi Zaman Zaber
@@ -98,6 +99,7 @@ markdown_extensions:
   - toc:
       permalink: true
 extra:
+  homepage: https://zaber-dev.github.io/Zeython/
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/zaber-dev/Zeython
