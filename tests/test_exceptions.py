@@ -266,6 +266,28 @@ async def test_api_problem_json_includes_exception_detail_in_debug(tmp_path: Pat
 
     body = json.loads(response.body)
     assert body["exception"] == "ValueError: boom"
+    assert body["traceback"] == ["ValueError: boom\n"]
+
+
+async def test_api_problem_json_omits_traceback_when_not_debug(tmp_path: Path) -> None:
+    class _FakeState:
+        debug = False
+        config = Config.load(tmp_path, env_file=".env-problem-json-no-debug")
+
+    class _FakeApp:
+        state = _FakeState()
+
+    class _FakeRequest:
+        app = _FakeApp()
+
+    (tmp_path / ".env-problem-json-no-debug").write_text("API_PROBLEM_JSON=true\n")
+    _FakeState.config = Config.load(tmp_path, env_file=".env-problem-json-no-debug")
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    body = json.loads(response.body)
+    assert "traceback" not in body
+    assert "exception" not in body
 
 
 # -- unhandled_exception_handler -----------------------------------------------------------
@@ -309,6 +331,7 @@ async def test_unhandled_exception_handler_called_directly_defaults_to_no_debug_
     response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
     assert response.status_code == 500
     assert b"exception" not in response.body
+    assert b"traceback" not in response.body
 
 
 async def test_unhandled_exception_handler_called_directly_includes_exception_detail_in_debug() -> None:
@@ -323,4 +346,31 @@ async def test_unhandled_exception_handler_called_directly_includes_exception_de
 
     response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
     assert response.status_code == 500
-    assert json.loads(response.body)["exception"] == "ValueError: boom"
+    body = json.loads(response.body)
+    assert body["exception"] == "ValueError: boom"
+    assert body["traceback"] == ["ValueError: boom\n"]
+
+
+async def test_unhandled_exception_handler_traceback_includes_real_frames_in_debug() -> None:
+    class _FakeState:
+        debug = True
+
+    class _FakeApp:
+        state = _FakeState()
+
+    class _FakeRequest:
+        app = _FakeApp()
+
+    def _raise() -> None:
+        raise ValueError("boom")
+
+    try:
+        _raise()
+    except ValueError as exc:
+        response = await unhandled_exception_handler(_FakeRequest(), exc)
+
+    body = json.loads(response.body)
+    full_traceback = "".join(body["traceback"])
+    assert "Traceback (most recent call last):" in full_traceback
+    assert "_raise" in full_traceback
+    assert "ValueError: boom" in full_traceback

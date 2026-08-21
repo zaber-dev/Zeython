@@ -109,8 +109,8 @@ object this way:
 }
 ```
 
-`APP_DEBUG=true` still adds an `exception` extension member to a 500's
-body, the same as the default format does.
+`APP_DEBUG=true` still adds `exception` and `traceback` extension members
+to a 500's body, the same as the default format does.
 
 This is a single global switch, not a per-route choice — pick one error
 format for the whole API. Off by default, since it changes the shape of
