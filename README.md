@@ -139,8 +139,8 @@ my_blog/
 
 ## Documentation
 
-Landing page: https://zaber-dev.github.io/Zeython/
-Full rendered docs (searchable, better navigation, generated API reference): https://zaber-dev.github.io/Zeython/docs/
+Landing page: https://zeython.zaber.dev/
+Full rendered docs (searchable, better navigation, generated API reference): https://zeython.zaber.dev/docs/
 
 **Getting Started**
 [Overview](docs/index.md) ·

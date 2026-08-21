@@ -62,8 +62,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://zaber-dev.github.io/Zeython/"
-Documentation = "https://zaber-dev.github.io/Zeython/docs/"
+Homepage = "https://zeython.zaber.dev/"
+Documentation = "https://zeython.zaber.dev/docs/"
 Repository = "https://github.com/zaber-dev/Zeython"
 Issues = "https://github.com/zaber-dev/Zeython/issues"
 Changelog = "https://github.com/zaber-dev/Zeython/blob/main/CHANGELOG.md"
