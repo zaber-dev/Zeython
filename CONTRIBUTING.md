@@ -29,6 +29,7 @@ git clone https://github.com/zaber-dev/Zeython.git
 cd Zeython
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
+pre-commit install  # optional -- runs ruff (and mypy) before each commit
 ```
 
 Repository layout:
@@ -70,7 +71,7 @@ docs/                     # mkdocs source
 ## License
 
 By contributing, you agree your contributions are licensed under the project's
-GNU General Public License v3.0.
+MIT License.
 
 ## Questions
 

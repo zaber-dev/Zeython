@@ -100,7 +100,7 @@ from zeython.websockets import (
     WebSocketHubServiceProvider,
 )
 
-__version__ = "2.0.0a1"
+__version__ = "2.0.0"
 
 __all__ = [
     "AdminServiceProvider",
