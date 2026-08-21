@@ -7,6 +7,7 @@ the other `make *` generators, the `db migrate/revision/downgrade` alembic
 wrapper, and `main()`.
 """
 
+import asyncio
 import subprocess
 import sys
 from pathlib import Path
@@ -14,7 +15,10 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+from zeython.cli.loader import load_app
+from zeython.cli.main import _discover_models
 from zeython.cli.main import app as cli_app
+from zeython.db.session import Database
 
 runner = CliRunner()
 
@@ -572,6 +576,129 @@ def test_schedule_run_without_overlapping_works_across_invocations_with_redis(
     assert counter.read_text() == "1"  # the second invocation was blocked by the shared lock
 
     _asyncio.run(_clear_lock())
+
+
+# -- tinker ---------------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def tinker_project(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    # Module-scoped, same reasoning as test_seeder.py's seed_project: Model.metadata
+    # is process-global, so a per-test fixture redefining the same table would collide.
+    destination = tmp_path_factory.mktemp("tinker_test_app")
+    (destination / "app" / "Models").mkdir(parents=True)
+    for pkg_init in [
+        destination / "app" / "__init__.py",
+        destination / "app" / "Models" / "__init__.py",
+    ]:
+        pkg_init.touch()
+
+    db_path = destination / "database.db"
+    (destination / ".env").write_text(
+        f"APP_NAME=Tinker Test App\nAPP_SECRET_KEY=test-secret\nDATABASE_URL=sqlite+aiosqlite:///{db_path}\n"
+    )
+    (destination / "main.py").write_text(
+        "from zeython import Application, DatabaseServiceProvider\n\n"
+        "from app.Models.gadget import Gadget  # noqa: F401 -- registers the table for create_all()\n\n"
+        "app = Application()\n"
+        "app.register(DatabaseServiceProvider)\n"
+    )
+    (destination / "app" / "Models" / "gadget.py").write_text(
+        "from sqlalchemy import String\n"
+        "from sqlalchemy.orm import Mapped, mapped_column\n\n"
+        "from zeython import Model, required\n\n\n"
+        "class Gadget(Model):\n"
+        "    __tablename__ = 'tinker_gadgets'\n"
+        "    __rules__ = {'name': [required()]}\n\n"
+        "    name: Mapped[str] = mapped_column(String(255))\n"
+    )
+
+    async def _run() -> None:
+        application = load_app(destination)
+        database = application.container.make(Database)
+        await database.create_all()
+        await database.dispose()
+
+    asyncio.run(_run())
+
+    return destination
+
+
+def test_discover_models_finds_model_subclasses_keyed_by_class_name(tinker_project: Path) -> None:
+    models = _discover_models(tinker_project)
+    assert set(models) == {"Gadget"}
+
+
+def test_discover_models_returns_empty_dict_when_no_models_dir(tmp_path: Path) -> None:
+    assert _discover_models(tmp_path) == {}
+
+
+def _pretend_tinker_project_already_loaded(tinker_project: Path) -> None:
+    # tinker_project is module-scoped -- its own setup already called
+    # load_app() once, registering app.Models.gadget's table on the
+    # process-global Base.metadata. _isolate_loader_global_state (autouse,
+    # for the *other* tests in this file that really do want a fresh
+    # sys.path/sys.modules per differently-rooted tmp_path project) resets
+    # loader_module._current_project_root to None before every test in this
+    # file, though -- undone here so sync_project_modules() sees "same
+    # project, do nothing" the way it's designed to, instead of purging and
+    # re-importing app.Models.gadget, which would redefine the same table
+    # on the same MetaData a second time and raise InvalidRequestError.
+    import zeython.cli.loader as loader_module
+
+    loader_module._current_project_root = str(tinker_project)
+
+
+def test_tinker_binds_models_and_creates_a_row_that_persists(
+    tinker_project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tinker_project)
+    _pretend_tinker_project_already_loaded(tinker_project)
+
+    script = (
+        'g = run(Gadget.create(name="Widget A"))\n'
+        'print("CREATED_ID", g.id)\n'
+        'print("ALL_COUNT", len(run(Gadget.all())))\n'
+    )
+    result = runner.invoke(cli_app, ["tinker"], input=script)
+
+    assert result.exit_code == 0
+    assert "CREATED_ID 1" in result.output
+    assert "ALL_COUNT 1" in result.output
+
+    _pretend_tinker_project_already_loaded(tinker_project)
+    result2 = runner.invoke(cli_app, ["tinker"], input='print("COUNT", len(run(Gadget.all())))\n')
+    assert "COUNT 1" in result2.output  # committed by the first invocation, visible to a second call
+
+
+def test_tinker_rolls_back_a_failing_run_and_stays_usable(
+    tinker_project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tinker_project)
+    _pretend_tinker_project_already_loaded(tinker_project)
+
+    script = (
+        "try:\n"
+        '    run(Gadget.create(name=""))\n'
+        "except Exception as e:\n"
+        '    print("GOT_ERROR", type(e).__name__)\n'
+        "\n"
+        'print("STILL_WORKS", len(run(Gadget.all())))\n'
+    )
+    result = runner.invoke(cli_app, ["tinker"], input=script)
+
+    assert result.exit_code == 0
+    assert "GOT_ERROR ValidationException" in result.output
+    assert "STILL_WORKS 1" in result.output  # the earlier committed row, not a new (rolled-back) one
+
+
+def test_tinker_banner_lists_discovered_models(tinker_project: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tinker_project)
+    _pretend_tinker_project_already_loaded(tinker_project)
+
+    result = runner.invoke(cli_app, ["tinker"], input="")
+
+    assert "Gadget" in result.output
 
 
 # -- main() -------------------------------------------------------------------------------

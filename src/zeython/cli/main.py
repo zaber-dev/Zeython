@@ -170,6 +170,102 @@ def routes() -> None:
 
 
 @app.command()
+def tinker() -> None:
+    """Interactive REPL with the application, its models, and a database
+    session already loaded -- mirrors Laravel's `artisan tinker`.
+
+    Every Model subclass in app/Models/ is available by name. Wrap an
+    async call in `run(...)` to execute it, e.g. `run(Post.all())` or
+    `run(Post.create(title="Hi"))` -- each one commits immediately on
+    success (and rolls back on an exception), same as a real request.
+    """
+    import code
+    from typing import Any
+
+    from zeython.db import Database
+    from zeython.db.session import _current_session
+
+    project_root = Path.cwd()
+    application = load_app(project_root)
+    database = application.container.make(Database)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # A plain `async with database.session():` won't do here: it sets
+    # `_current_session` from *inside* the coroutine that `run_until_complete`
+    # wraps in a Task, and a Task's context is a private copy taken at
+    # creation time -- a set() inside one Task is invisible to the next.
+    # Setting it here instead, synchronously in this REPL's own (non-Task)
+    # context, means every subsequent run_until_complete() call copies a
+    # context that already has it, since each Task's copy is taken fresh
+    # from this frame at the moment it's created.
+    session = database.session_factory()
+    token = _current_session.set(session)
+
+    def run(coro: Any) -> Any:
+        """Run an async expression against this REPL's database session,
+        committing on success or rolling back on an exception."""
+        try:
+            result = loop.run_until_complete(coro)
+        except Exception:
+            loop.run_until_complete(session.rollback())
+            raise
+        loop.run_until_complete(session.commit())
+        return result
+
+    models = _discover_models(project_root)
+    namespace: dict[str, Any] = {
+        "app": application,
+        "container": application.container,
+        "config": application.config,
+        "run": run,
+        **models,
+    }
+
+    banner = f"Zeython tinker -- {project_root.name}\nWrap async calls in run(...), e.g. run(Post.all())."
+    if models:
+        banner += "\nModels: " + ", ".join(sorted(models))
+
+    try:
+        code.interact(banner=banner, local=namespace, exitmsg="")
+    finally:
+        _current_session.reset(token)
+        loop.run_until_complete(session.close())
+        loop.run_until_complete(database.dispose())
+        loop.close()
+
+
+def _discover_models(project_root: Path) -> dict[str, type]:
+    """Every :class:`~zeython.db.Model` subclass in ``app/Models/*.py``, keyed by class name."""
+    import importlib
+    import inspect
+
+    from zeython.db import Model
+
+    models_dir = project_root / "app" / "Models"
+    models: dict[str, type] = {}
+    if not models_dir.is_dir():
+        return models
+
+    root_str = str(project_root)
+    if root_str not in sys.path:
+        sys.path.insert(0, root_str)
+
+    for path in sorted(models_dir.glob("*.py")):
+        if path.stem == "__init__":
+            continue
+        module = importlib.import_module(f"app.Models.{path.stem}")
+        for name, obj in inspect.getmembers(module, inspect.isclass):
+            if obj is Model or not issubclass(obj, Model):
+                continue
+            if obj.__module__ != module.__name__:
+                continue  # e.g. `from zeython import Model` itself, not a real model
+            models[name] = obj
+    return models
+
+
+@app.command()
 def about() -> None:
     """Show basic info about the current project: app name, environment, debug flag,
     installed Zeython version, and registered service providers."""
