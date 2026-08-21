@@ -22,13 +22,16 @@ config.set_main_option("sqlalchemy.url", app_config.database_url)
 
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
+    # render_as_batch: SQLite can't ALTER a column or constraint in place, only
+    # add/drop whole tables -- batch mode works around that by recreating the
+    # table under the hood. Harmless on Postgres/MySQL, where it's a no-op.
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True, render_as_batch=True)
     with context.begin_transaction():
         context.run_migrations()
 
 
 def do_run_migrations(connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection, target_metadata=target_metadata, render_as_batch=True)
     with context.begin_transaction():
         context.run_migrations()
 

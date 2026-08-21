@@ -29,6 +29,12 @@ not a template you copy and diverge from.
 - [Getting Started](getting-started.md) — install the framework and scaffold your first project
 - [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
 
+### Tutorial
+
+- [Build TaskFlow](tutorial.md) — a guided, six-part tutorial that builds a
+  real multi-project task tracker from an empty scaffold to a tested,
+  authenticated API — the fastest way to actually learn the framework
+
 ### The Basics
 
 - [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
