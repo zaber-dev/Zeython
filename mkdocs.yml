@@ -60,6 +60,15 @@ nav:
       - Docker: docker.md
       - Production Checklist: production-checklist.md
       - Benchmarks: benchmarks.md
+  - API Reference:
+      - Overview: reference/index.md
+      - Core: reference/core.md
+      - Database: reference/database.md
+      - Security: reference/security.md
+      - HTTP & APIs: reference/http-api.md
+      - Jobs & Realtime: reference/jobs-realtime.md
+      - Operations: reference/operations.md
+      - Extensibility: reference/extensibility.md
 theme:
   name: material
   logo: assets/logo.svg
@@ -96,3 +105,16 @@ extra:
 plugins:
   - search
   - tags
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            separate_signature: true
+            show_signature_annotations: true
+            members_order: source
+            merge_init_into_class: true
+            docstring_section_style: table
+            show_if_no_docstring: false
