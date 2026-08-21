@@ -60,6 +60,30 @@ if errors:
     ...
 ```
 
+## Validating a plain dict
+
+`user.validate()` needs a `Model` instance -- not always what you have. A
+query-string filter, a webhook payload, config loaded from somewhere else:
+`zeython.validation.validate(data, rules)` runs the same rule sets against
+any dict:
+
+```python
+from zeython.validation import validate, required, email
+
+errors = validate(
+    {"email": "not-an-email"},
+    {"name": [required()], "email": [required(), email()]},
+)
+# {"name": ["This field is required."], "email": ["Must be a valid email address."]}
+
+if errors:
+    raise ValidationException(errors)
+```
+
+A missing key is treated as `None`, same as an unset field on a model
+instance. `Model.validate()` is this function applied to a model's own
+field values -- the two always agree on what the same rule set means.
+
 ## Custom rules
 
 A rule is just `Callable[[Any], bool]` wrapped with a message:
