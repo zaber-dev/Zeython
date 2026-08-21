@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+        # No ruff-format hook: CI only runs `ruff check`, not `ruff format
+        # --check`, so this repo has no enforced formatting style yet.
+        # Adding it here would let pre-commit silently reformat files in
+        # ways CI never verifies.
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy src/zeython
+        language: system
+        pass_filenames: false
+        types: [python]
