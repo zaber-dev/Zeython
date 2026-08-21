@@ -90,6 +90,10 @@ not a template you copy and diverge from.
 - [Production Checklist](production-checklist.md) — the one-page index of what to check before a first deploy
 - [Benchmarks](benchmarks.md) — Zeython vs. raw Starlette vs. FastAPI, methodology and caveats included
 
+### API Reference
+
+- [API Reference](reference/index.md) — generated from docstrings: every public class and function, grouped by area
+
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/zaber-dev/Zeython/blob/main/CONTRIBUTING.md)
