@@ -9,6 +9,7 @@ from typing import Any, ClassVar, Generic, Self, TypeVar
 
 from sqlalchemy import Boolean, DateTime, Integer, func, inspect, select
 from sqlalchemy.orm import Mapped, mapped_column, selectinload
+from starlette.requests import Request
 
 from zeython.db.session import Base, current_session
 from zeython.exceptions import ValidationException
@@ -44,6 +45,34 @@ class Page(Generic[T]):
     @property
     def has_prev(self) -> bool:
         return self.page > 1
+
+    def to_dict(self, *, request: Request | None = None) -> dict[str, Any]:
+        """Serialize this page: items (via ``.to_dict()`` for ``Model``
+        instances, as-is otherwise) plus pagination metadata.
+
+        Pass the current request to also get ``next_url``/``prev_url`` --
+        the same URL with only the ``page`` query param changed (every
+        other query param, e.g. ``per_page`` or a filter, carries over),
+        ``None`` when there is no next/previous page.
+        """
+        items = [item.to_dict() if isinstance(item, Model) else item for item in self.items]
+        result: dict[str, Any] = {
+            "items": items,
+            "page": self.page,
+            "per_page": self.per_page,
+            "total": self.total,
+            "total_pages": self.total_pages,
+            "has_next": self.has_next,
+            "has_prev": self.has_prev,
+        }
+        if request is not None:
+            result["next_url"] = (
+                str(request.url.include_query_params(page=self.page + 1)) if self.has_next else None
+            )
+            result["prev_url"] = (
+                str(request.url.include_query_params(page=self.page - 1)) if self.has_prev else None
+            )
+        return result
 
 
 class Model(Base):
