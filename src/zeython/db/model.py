@@ -76,6 +76,44 @@ class Page(Generic[T]):
         return result
 
 
+class Observer:
+    """Base class for model observers -- mirrors Laravel's ``Model::observe()``.
+
+    A model's own lifecycle hooks (``saving``/``saved``/...) live on the
+    model itself, one implementation per class. An observer is a separate
+    object registered against a model class with :meth:`Model.observe`,
+    for cross-cutting concerns that don't belong on the model (search-index
+    sync, cache invalidation, audit logging) and that several independent
+    observers might want to react to. Override any subset of these hooks;
+    the rest are no-ops. Called in the same order as the model's own hooks,
+    immediately after each one.
+    """
+
+    async def saving(self, model: Model) -> None:
+        """Runs before every save() -- both create and update."""
+
+    async def saved(self, model: Model) -> None:
+        """Runs after every successful save() -- both create and update."""
+
+    async def creating(self, model: Model) -> None:
+        """Runs before a new record's first save()."""
+
+    async def created(self, model: Model) -> None:
+        """Runs after a new record's first save()."""
+
+    async def updating(self, model: Model) -> None:
+        """Runs before saving changes to an existing record."""
+
+    async def updated(self, model: Model) -> None:
+        """Runs after saving changes to an existing record."""
+
+    async def deleting(self, model: Model) -> None:
+        """Runs before delete() -- soft or hard."""
+
+    async def deleted(self, model: Model) -> None:
+        """Runs after delete() -- soft or hard."""
+
+
 class Model(Base):
     """Base class for application models.
 
@@ -102,6 +140,28 @@ class Model(Base):
     #: Checked by ``save()`` (and therefore ``create()``/``update()``); a
     #: failing rule raises :class:`~zeython.exceptions.ValidationException`.
     __rules__: ClassVar[dict[str, list[Rule]]] = {}
+
+    #: Observers registered via :meth:`observe`. Re-initialized to a fresh,
+    #: empty list for every subclass by ``__init_subclass__`` below -- never
+    #: mutate this default directly, it isn't per-class on its own.
+    __observers__: ClassVar[list[Observer]] = []
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        cls.__observers__ = []
+
+    @classmethod
+    def observe(cls, observer: type[Observer] | Observer) -> None:
+        """Register an observer for this model class -- a class (instantiated
+        with no arguments) or an already-constructed instance. Typically
+        called once, e.g. in a service provider's ``boot()``.
+        """
+        instance = observer() if isinstance(observer, type) else observer
+        cls.__observers__.append(instance)
+
+    async def _notify(self, event: str) -> None:
+        for observer in type(self).__observers__:
+            await getattr(observer, event)(self)
 
     def validate(self) -> dict[str, list[str]]:
         """Run ``__rules__`` against the current field values. Does not raise.
@@ -274,7 +334,9 @@ class Model(Base):
 
             self.tenant_id = current_tenant_id()  # type: ignore[attr-defined]
         await self.saving()
+        await self._notify("saving")
         await (self.creating() if is_new else self.updating())
+        await self._notify("creating" if is_new else "updating")
 
         self.validate_or_raise()
         session = current_session()
@@ -282,7 +344,9 @@ class Model(Base):
         await session.flush()
 
         await (self.created() if is_new else self.updated())
+        await self._notify("created" if is_new else "updated")
         await self.saved()
+        await self._notify("saved")
         return self
 
     async def update(self, **attributes: Any) -> Self:
@@ -292,6 +356,7 @@ class Model(Base):
 
     async def delete(self, *, soft: bool = True) -> None:
         await self.deleting()
+        await self._notify("deleting")
         session = current_session()
         if soft:
             self.is_deleted = True
@@ -302,6 +367,7 @@ class Model(Base):
             await session.delete(self)
             await session.flush()
         await self.deleted()
+        await self._notify("deleted")
 
     async def restore(self) -> Self:
         self.is_deleted = False
