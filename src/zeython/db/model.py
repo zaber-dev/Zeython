@@ -14,6 +14,7 @@ from starlette.requests import Request
 from zeython.db.session import Base, current_session
 from zeython.exceptions import ValidationException
 from zeython.validation import Rule
+from zeython.validation import validate as validate_data
 
 
 def _utcnow() -> datetime:
@@ -103,14 +104,15 @@ class Model(Base):
     __rules__: ClassVar[dict[str, list[Rule]]] = {}
 
     def validate(self) -> dict[str, list[str]]:
-        """Run ``__rules__`` against the current field values. Does not raise."""
-        errors: dict[str, list[str]] = {}
-        for field, rules in self.__rules__.items():
-            value = getattr(self, field, None)
-            for rule in rules:
-                if not rule(value):
-                    errors.setdefault(field, []).append(rule.message)
-        return errors
+        """Run ``__rules__`` against the current field values. Does not raise.
+
+        A thin wrapper over :func:`zeython.validation.validate` applied to
+        this instance's own field values -- use that function directly to
+        run the same rule sets against a plain dict (a request payload, not
+        yet a model instance).
+        """
+        data = {field: getattr(self, field, None) for field in self.__rules__}
+        return validate_data(data, self.__rules__)
 
     def validate_or_raise(self) -> None:
         errors = self.validate()

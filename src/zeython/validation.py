@@ -57,4 +57,24 @@ def matches(pattern: str, message: str = "Invalid format.") -> Rule:
     return Rule(lambda value: value is None or bool(compiled.match(str(value))), message)
 
 
-__all__ = ["Rule", "required", "min_length", "max_length", "email", "one_of", "matches"]
+def validate(data: dict[str, Any], rules: dict[str, list[Rule]]) -> dict[str, list[str]]:
+    """Run declarative rules against a plain dict -- the same rule sets you'd
+    write for :attr:`zeython.db.Model.__rules__`, applied to a request
+    payload, query params, or any other dict that isn't (or isn't yet) a
+    model instance. Does not raise; raise ``ValidationException(errors)``
+    yourself if that's what you want when ``errors`` is non-empty.
+
+    ``Model.validate()`` is this function applied to a model instance's own
+    field values -- kept in sync with it deliberately, so a rule set means
+    the same thing whether it's checked against a model or a plain dict.
+    """
+    errors: dict[str, list[str]] = {}
+    for field, field_rules in rules.items():
+        value = data.get(field)
+        for rule in field_rules:
+            if not rule(value):
+                errors.setdefault(field, []).append(rule.message)
+    return errors
+
+
+__all__ = ["Rule", "required", "min_length", "max_length", "email", "one_of", "matches", "validate"]
