@@ -92,3 +92,26 @@ Both read your project the same way `zeython serve` does (they import
 not something separately maintained that can drift from it. An AI coding
 agent working in your project gets the same information through
 `zeython mcp`'s `list_routes`/`app_info` tools -- see [AI Agents](ai-agents.md).
+
+## Tinker (interactive REPL)
+
+```bash
+zeython tinker
+```
+
+Drops into a Python REPL with your app, container, config, and every
+`Model` subclass in `app/Models/` already imported by name -- mirrors
+Laravel's `artisan tinker`. Wrap an async call in `run(...)` to execute
+it; each one commits immediately on success (or rolls back on an
+exception), the same as a real request:
+
+```pycon
+>>> run(Post.all())
+[<Post id=1>, <Post id=2>]
+>>> post = run(Post.create(title="Hello", body="..."))
+>>> run(post.update(title="Hello, world"))
+>>> run(post.delete())
+```
+
+`app`/`container`/`config` are also in scope, for anything that needs
+them directly (`container.make(SomeService)`, `config.get("app.debug")`).
