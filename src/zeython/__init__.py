@@ -95,6 +95,7 @@ from zeython.tenancy import TenancyServiceProvider, TenantMiddleware, as_tenant,
 from zeython.validation import Rule, email, matches, max_length, min_length, one_of, required
 from zeython.views import Views, render
 from zeython.websockets import (
+    RedisWebSocketHub,
     WebSocket,
     WebSocketDisconnect,
     WebSocketHub,
@@ -204,6 +205,7 @@ __all__ = [
     "WebSocket",
     "WebSocketDisconnect",
     "WebSocketHub",
+    "RedisWebSocketHub",
     "WebSocketHubServiceProvider",
     "HTTPException",
     "BadRequestException",

@@ -130,16 +130,14 @@ block), not on a timer.
 
 ### `WebSocketHub` is process-local
 
-Same trade-off as the default `Cache`/`Queue`/`RateLimiter`: a broadcast
-only reaches clients connected to *this* process. Fine for a single
-worker; running more than one means each worker has its own, disjoint set
-of connections, so a broadcast only reaches whichever fraction of clients
-happen to be on the same worker as the sender. There's no bundled
-distributed hub -- wiring one up means picking a pub/sub backend (Redis's
-`PUBLISH`/`SUBSCRIBE` is the usual choice) and having every worker
-subscribe, forwarding what it receives to its own local connections; the
-shape doesn't change (`connect`/`disconnect`/`broadcast`), only where the
-fan-out happens.
+Same trade-off as the default `Cache`/`RateLimiter`: a broadcast only
+reaches clients connected to *this* process. Fine for a single worker;
+running more than one means each worker has its own, disjoint set of
+connections, so a broadcast only reaches whichever fraction of clients
+happen to be on the same worker as the sender. `RedisWebSocketHub` is the
+opt-in, distributed alternative -- same `connect`/`disconnect`/`broadcast`
+shape, backed by Redis `PUBLISH`/`SUBSCRIBE` so a broadcast reaches every
+worker's clients, not just the sender's. See [Redis](redis.md#rediswebsockethub).
 
 ## Testing
 
