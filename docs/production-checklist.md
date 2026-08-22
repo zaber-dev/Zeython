@@ -131,10 +131,12 @@ second replica, a new external API) that changes the answer.
 
 ## What this deliberately doesn't cover
 
-This checklist is about configuring and wiring up features the framework
-already ships -- it is not a substitute for your own judgment about your
-specific deployment: infrastructure choice, TLS termination, backup
-strategy, secrets management (a real secrets manager, not `.env` in
-production), and load testing are all yours to own. If a section above
-doesn't apply to your app (no background jobs, no public API), skip it --
-this is a checklist to consult, not a form to fill out completely.
+!!! note "This isn't a substitute for your own judgment"
+    This checklist is about configuring and wiring up features the
+    framework already ships -- it is not a substitute for your own
+    judgment about your specific deployment: infrastructure choice, TLS
+    termination, backup strategy, secrets management (a real secrets
+    manager, not `.env` in production), and load testing are all yours to
+    own. If a section above doesn't apply to your app (no background
+    jobs, no public API), skip it -- this is a checklist to consult, not
+    a form to fill out completely.
