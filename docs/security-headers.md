@@ -7,14 +7,16 @@ navigation, don't restrict which scripts/styles/assets a page is allowed to
 load. `SecurityHeadersMiddleware` adds them; `SecurityHeadersServiceProvider`
 wires it up from `.env`.
 
-**Not registered by default**, unlike [CSRF protection](csrf.md) or the
-[WebSocket Origin check](websockets.md#origin-protection). The headers with
-a real default here (`X-Frame-Options`, `X-Content-Type-Options`,
-`Referrer-Policy`) are safe to turn on for any app, but `Content-Security-Policy`
-genuinely isn't — a policy this framework picked for you would either be
-loose enough to be pointless, or break your own inline scripts, your own
-CDN-loaded assets, or the Swagger UI at `/docs`. Register the provider once
-you've decided what your own policy actually is.
+!!! warning "Not registered by default"
+    Unlike [CSRF protection](csrf.md) or the
+    [WebSocket Origin check](websockets.md#origin-protection). The headers
+    with a real default here (`X-Frame-Options`, `X-Content-Type-Options`,
+    `Referrer-Policy`) are safe to turn on for any app, but
+    `Content-Security-Policy` genuinely isn't — a policy this framework
+    picked for you would either be loose enough to be pointless, or break
+    your own inline scripts, your own CDN-loaded assets, or the Swagger UI
+    at `/docs`. Register the provider once you've decided what your own
+    policy actually is.
 
 ## Setup
 
@@ -46,11 +48,14 @@ Configurable via `.env`:
 - `SECURITY_HEADERS_HSTS` — default `false`. Sends
   `Strict-Transport-Security` once enabled, telling the browser to refuse
   plain HTTP for this host for `SECURITY_HEADERS_HSTS_MAX_AGE` seconds
-  going forward — including on a link the user typed themselves. Only turn
-  this on once every path to this app is actually served over HTTPS; there's
-  no clean way to undo it before the max-age expires for a client that's
-  already seen it.
+  going forward — including on a link the user typed themselves.
 - `SECURITY_HEADERS_HSTS_MAX_AGE` — default `31536000` (1 year).
+
+!!! danger "HSTS is hard to undo once a client has seen it"
+    Only turn this on once every path to this app is actually served over
+    HTTPS. There's no clean way to undo it before the max-age expires for
+    a client that's already seen the header — they'll refuse plain HTTP
+    to this host for the full duration, no matter what you change server-side.
 
 ## Using the middleware directly
 

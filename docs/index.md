@@ -22,77 +22,48 @@ not a template you copy and diverge from.
 - **A real CLI.** `zeython new`, `zeython serve`, `zeython make:*`, and
   `zeython db:*` cover the whole day-to-day loop.
 
-## Documentation
+## Where to start
 
-### Getting Started
+<div class="grid cards" markdown>
 
-- [Getting Started](getting-started.md) — install the framework and scaffold your first project
-- [Architecture](architecture.md) — how the container, providers, router, and ORM fit together
+-   :material-rocket-launch:{ .lg .middle } **Getting Started**
 
-### Tutorial
+    ---
 
-- [Build TaskFlow](tutorial.md) — a guided, six-part tutorial that builds a
-  real multi-project task tracker from an empty scaffold to a tested,
-  authenticated API — the fastest way to actually learn the framework
+    Install the framework and scaffold your first project in under a minute.
 
-### The Basics
+    [:octicons-arrow-right-24: Getting Started](getting-started.md)
 
-- [Database & Migrations](database.md) — the `Model` base class and Alembic workflow
-- [Relationships](relationships.md) — defining and safely loading relationships in async code
-- [Validation](validation.md) — declarative model validation rules
-- [Model Events](model-events.md) — `creating`/`created`/`updating`/`updated`/`deleting`/`deleted` hooks
-- [Factories & Seeders](database-seeding.md) — generating model instances for tests, seeding demo/reference data
-- [Views](views.md) — server-rendered HTML with Jinja2
-- [Frontend & CSS](frontend.md) — Tailwind out of the box (dev), moving to a compiled build
+-   :material-map:{ .lg .middle } **Build TaskFlow**
 
-### Security
+    ---
 
-- [Authentication](authentication.md) — session-based login, password hashing, route guards
-- [CSRF Protection](csrf.md) — the double-submit-cookie check that comes with session auth automatically
-- [Authorization](authorization.md) — named abilities (`Gate`), `authorize()` route guards
-- [API Authentication](api-authentication.md) — bearer tokens for clients that can't use cookies
-- [Security Headers](security-headers.md) — opt-in CSP/`X-Frame-Options`/HSTS response headers
-- [Rate Limiting](rate-limiting.md) — throttling routes, the auth-endpoint defaults
-- [Multi-Tenancy](multi-tenancy.md) — row-level tenant isolation, opt-in per model
+    A guided, six-part tutorial from an empty scaffold to a tested,
+    authenticated API — the fastest way to actually learn the framework.
 
-### Building APIs
+    [:octicons-arrow-right-24: Start the tutorial](tutorial.md)
 
-- [OpenAPI & API Docs](openapi.md) — generated spec + Swagger UI at `/docs`, from your actual routes
-- [API Standards](api-standards.md) — gzip compression, ETags/conditional GETs, RFC 7807 `problem+json` errors
+-   :material-sitemap:{ .lg .middle } **Architecture**
 
-### Digging Deeper
+    ---
 
-- [CLI Reference](cli.md) — every `zeython` command
-- [Console Commands](console-commands.md) — writing your own `zeython command <name>` CLI commands
-- [Plugins](plugins.md) — pip-installable packages that register their own service providers, no per-package wiring
-- [Localization](localization.md) — translation strings, per-request locale resolution
-- [Background Jobs](queues.md) — dispatching work off the request/response cycle
-- [Scheduling](scheduling.md) — recurring tasks defined in code, one cron entry total
-- [WebSockets](websockets.md) — real-time handlers and the `WebSocketHub` broadcast registry
-- [Mail](mail.md) — sending email, log-only by default, SMTP when you're ready
-- [Caching](caching.md) — an in-memory TTL cache, and `remember()` for get-or-compute
-- [Redis (Distributed)](redis.md) — `RedisCache`/`RedisRateLimiter` for multi-process/multi-machine deployments
-- [File Storage](storage.md) — validated uploads, local storage, S3-compatible backends
-- [Admin Panel](admin.md) — auto-generated CRUD UI for registered models
-- [AI](ai.md) — calling an LLM from your own app code
-- [AI Agents](ai-agents.md) — the MCP server: route/model introspection and docs search for AI coding agents
+    How the container, service providers, router, and async ORM fit
+    together.
 
-### Testing
+    [:octicons-arrow-right-24: Read Architecture](architecture.md)
 
-- [Testing](testing.md) — writing tests against a Zeython application
+-   :material-book-open-variant:{ .lg .middle } **API Reference**
 
-### Deployment & Operations
+    ---
 
-- [Health Check](health-check.md) — `/up`, for load balancers and container orchestrators
-- [Observability](observability.md) — `X-Request-ID` correlation IDs and `LOG_FORMAT=json` structured logging
-- [Error Monitoring](error-monitoring.md) — reporting unhandled exceptions, failed jobs, and raising scheduled tasks to Sentry
-- [Docker](docker.md) — the generated Dockerfile/docker-compose.yml, and how to use them
-- [Production Checklist](production-checklist.md) — the one-page index of what to check before a first deploy
-- [Benchmarks](benchmarks.md) — Zeython vs. raw Starlette vs. FastAPI, methodology and caveats included
+    Every public class and function, generated straight from docstrings.
 
-### API Reference
+    [:octicons-arrow-right-24: Browse the reference](reference/index.md)
 
-- [API Reference](reference/index.md) — generated from docstrings: every public class and function, grouped by area
+</div>
+
+Everything else — database, security, background jobs, deployment — is one
+click away in the navigation above.
 
 ## Contributing
 

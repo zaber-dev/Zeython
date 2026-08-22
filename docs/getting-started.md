@@ -59,14 +59,14 @@ curl http://127.0.0.1:8000/users
 — the response is `{"items": [...], "page": 1, "total": 1, ...}`, not a
 bare array.
 
-If you get a database error, generate and apply the initial migration first
-(a fresh scaffold ships with the `User` model but no migration file yet —
-`revision` autogenerates one from your models, `migrate` applies it):
+!!! tip "Getting a database error?"
+    A fresh scaffold ships with the `User` model but no migration file yet
+    — generate and apply the initial one first:
 
-```bash
-zeython db revision -m "create users table"
-zeython db migrate
-```
+    ```bash
+    zeython db revision -m "create users table"
+    zeython db migrate
+    ```
 
 ## Next steps
 
