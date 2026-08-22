@@ -14,14 +14,20 @@ import asyncio
 import mimetypes
 import re
 import secrets
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
+from itsdangerous import BadSignature, URLSafeTimedSerializer
 from starlette.datastructures import UploadFile
+from starlette.requests import Request
+from starlette.responses import Response
 
-from zeython.exceptions import ValidationException
+from zeython.exceptions import NotFoundException, ValidationException
 from zeython.providers import ServiceProvider
+
+_SIGNED_URL_SALT = "zeython-signed-url"
 
 
 @dataclass(frozen=True)
@@ -54,6 +60,13 @@ class Storage(ABC):
     def url(self, key: str) -> str:
         """A URL clients can use to fetch this key. Does not guarantee it resolves publicly."""
 
+    @abstractmethod
+    def temporary_url(self, key: str, *, expires_in: float = 3600) -> str:
+        """A signed URL that grants access to ``key`` for ``expires_in`` seconds, then stops
+        working -- for a private file (an invoice, a user upload) you don't want reachable
+        from :meth:`url` forever, without standing up your own auth check in front of it.
+        """
+
 
 class LocalStorage(Storage):
     """Stores files on the local filesystem, under ``root``.
@@ -63,10 +76,11 @@ class LocalStorage(Storage):
     storage directory.
     """
 
-    def __init__(self, root: str | Path, *, url_prefix: str = "/storage") -> None:
+    def __init__(self, root: str | Path, *, url_prefix: str = "/storage", secret_key: str | None = None) -> None:
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.url_prefix = url_prefix.rstrip("/") or "/storage"
+        self._secret_key = secret_key
 
     def _resolve(self, key: str) -> Path:
         path = (self.root / key).resolve()
@@ -91,6 +105,34 @@ class LocalStorage(Storage):
 
     def url(self, key: str) -> str:
         return f"{self.url_prefix}/{key}"
+
+    def _signer(self) -> URLSafeTimedSerializer:
+        if self._secret_key is None:
+            raise RuntimeError(
+                "LocalStorage.temporary_url() requires a secret_key -- pass one to "
+                "LocalStorage(...), or set APP_SECRET_KEY in .env if you're using "
+                "StorageServiceProvider."
+            )
+        return URLSafeTimedSerializer(self._secret_key, salt=_SIGNED_URL_SALT)
+
+    def temporary_url(self, key: str, *, expires_in: float = 3600) -> str:
+        token = self._signer().dumps({"key": key, "exp": time.time() + expires_in})
+        return f"{self.url_prefix}/signed/{token}"
+
+    def verify_temporary_url_token(self, token: str) -> str | None:
+        """The storage key ``token`` grants access to, or ``None`` if it's missing,
+        tampered with, or past its ``expires_in``. Used by the ``.../signed/{token}``
+        route :class:`StorageServiceProvider` registers -- not meant to be called
+        directly in application code.
+        """
+        try:
+            data = self._signer().loads(token)
+        except BadSignature:
+            return None
+        if not isinstance(data, dict) or data.get("exp", 0) < time.time():
+            return None
+        key = data.get("key")
+        return key if isinstance(key, str) else None
 
 
 class S3Storage(Storage):
@@ -154,6 +196,11 @@ class S3Storage(Storage):
 
     def url(self, key: str) -> str:
         return f"{self.public_base_url}/{key}"
+
+    def temporary_url(self, key: str, *, expires_in: float = 3600) -> str:
+        return self._client.generate_presigned_url(  # type: ignore[no-any-return]
+            "get_object", Params={"Bucket": self.bucket, "Key": key}, ExpiresIn=int(expires_in)
+        )
 
 
 _FILENAME_SAFE_RE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -221,6 +268,14 @@ class StorageServiceProvider(ServiceProvider):
       access during development (default: ``true``; turn off once you serve
       uploads from a CDN/reverse proxy in production)
 
+    Also registers the route :meth:`LocalStorage.temporary_url` links point
+    at (``<url_prefix>/signed/<token>``) — independent of
+    ``STORAGE_SERVE_LOCALLY``, since that's the point of a signed URL: a way
+    to hand out time-limited access to a specific file without making the
+    whole storage directory public. Requires ``APP_SECRET_KEY`` to be set
+    (only enforced the first time you actually call ``temporary_url()``, not
+    at boot).
+
     For S3, construct and bind an :class:`S3Storage` yourself instead of
     registering this provider::
 
@@ -230,12 +285,28 @@ class StorageServiceProvider(ServiceProvider):
     def register(self) -> None:
         root = self.config.get("storage.path", str(self.app.base_path / "storage" / "app"))
         url_prefix = self.config.get("storage.url_prefix", "/storage")
-        storage = LocalStorage(root, url_prefix=url_prefix)
+        secret_key = self.config.get("app.secret_key")
+        storage = LocalStorage(root, url_prefix=url_prefix, secret_key=secret_key)
         self.container.singleton(Storage, lambda: storage)
 
     def boot(self) -> None:
         storage = self.container.make(Storage)
-        if isinstance(storage, LocalStorage) and bool(self.config.get("storage.serve_locally", True)):
+        if not isinstance(storage, LocalStorage):
+            return
+
+        # Registered before the StaticFiles mount below so it wins the
+        # match for its exact prefix -- a Mount at the same url_prefix
+        # would otherwise swallow every sub-path, including this one.
+        @self.app.get(f"{storage.url_prefix}/signed/{{token}}", name="storage.signed")
+        async def _serve_signed_download(request: Request) -> Response:
+            key = storage.verify_temporary_url_token(request.path_params["token"])
+            if key is None or not await storage.exists(key):
+                raise NotFoundException("This link is invalid or has expired.")
+            data = await storage.get(key)
+            content_type = mimetypes.guess_type(key)[0] or "application/octet-stream"
+            return Response(data, media_type=content_type)
+
+        if bool(self.config.get("storage.serve_locally", True)):
             from starlette.staticfiles import StaticFiles
 
             self.app.router.mount(storage.url_prefix, StaticFiles(directory=str(storage.root)))
