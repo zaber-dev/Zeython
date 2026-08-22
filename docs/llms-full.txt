@@ -2424,6 +2424,16 @@ Content-Type: application/problem+json
 `APP_DEBUG=true` still adds `exception` and `traceback` extension members to a 500's body, the same as the default format does.
 
 This is a single global switch, not a per-route choice — pick one error format for the whole API. Off by default, since it changes the shape of every error response and would be a breaking change for anything already parsing the default `{"error": ..., "status": ...}` shape.
+
+## Debug mode: a browsable HTML error page
+
+`APP_DEBUG=true` doesn't just add `exception`/`traceback` to the JSON body above — a browser hitting a route that raises an unhandled exception gets a full Laravel/Django-style debug page instead: the exception, the request line, and every stack frame with a source-code snippet around the line that raised, most relevant frame first.
+
+Which response you get is decided per-request, by the `Accept` header, not by a global switch: a browser's default `Accept` lists `text/html`, so it gets the HTML page; an API/fetch client (Postman, `curl`, your own HTTP client) doesn't, so it still gets the plain JSON (or `problem+json`) shape above — a frontend's error-handling code never has to special-case an HTML body just because `APP_DEBUG` happens to be on. `API_PROBLEM_JSON=true` always wins over the HTML page, on the assumption that an app with it turned on is API-only.
+
+Only ever shown for a genuine unhandled exception (a bug), never for an `HTTPException` your own code raised deliberately (`NotFoundException`, `ValidationException`, ...) — those keep returning their normal JSON body regardless of `Accept`, since they're expected control flow, not a crash.
+
+Like every other debug-mode behavior, this leaks source code and file paths — see the [production checklist](https://zeython.zaber.dev/docs/production-checklist/index.md) for why `APP_DEBUG=false` is non-negotiable in production.
 # Digging Deeper
 
 # CLI Reference
@@ -3931,7 +3941,7 @@ Everything below is documented in its own page already -- this is the one-page i
 
 ## Configuration
 
-- **`APP_ENV=production`, `APP_DEBUG=false`.** Debug mode leaks stack traces and internals into error responses -- fine locally, a disclosure bug in production. `zeython new` scaffolds both as development-friendly defaults; flip them in your deployment's `.env` or environment variables, not in the repo.
+- **`APP_ENV=production`, `APP_DEBUG=false`.** Debug mode leaks stack traces and internals into error responses -- a browser hitting a broken page gets a full source-level debug page (see [API Standards](https://zeython.zaber.dev/docs/api-standards/index.md)), an API client gets the equivalent in the JSON body. Fine locally, a disclosure bug in production. `zeython new` scaffolds both as development-friendly defaults; flip them in your deployment's `.env` or environment variables, not in the repo.
 - **`APP_SECRET_KEY` is a real, unique secret**, not the value `zeython new` generated for local dev committed into version control. It signs the session cookie -- see [Authentication](https://zeython.zaber.dev/docs/authentication/index.md).
 - **`DATABASE_URL` points at a real database**, not the default SQLite file. SQLite is fine for a single-container demo; anything with more than one app replica needs Postgres/MySQL so writes are visible across processes. See [Database & Migrations](https://zeython.zaber.dev/docs/database/index.md).
 - **Migrations are applied**, not just written -- `alembic upgrade head` (the generated Docker image's `CMD` does this for you on a single-container deploy; see [Docker](https://zeython.zaber.dev/docs/docker/index.md)).

@@ -1544,6 +1544,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#debug-mode-a-browsable-html-error-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug mode: a browsable HTML error page
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2607,6 +2618,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#debug-mode-a-browsable-html-error-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug mode: a browsable HTML error page
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2725,6 +2747,27 @@ to a 500's body, the same as the default format does.</p>
 format for the whole API. Off by default, since it changes the shape of
 every error response and would be a breaking change for anything already
 parsing the default <code>{"error": ..., "status": ...}</code> shape.</p>
+<h2 id="debug-mode-a-browsable-html-error-page">Debug mode: a browsable HTML error page<a class="headerlink" href="#debug-mode-a-browsable-html-error-page" title="Permanent link">&para;</a></h2>
+<p><code>APP_DEBUG=true</code> doesn't just add <code>exception</code>/<code>traceback</code> to the JSON
+body above — a browser hitting a route that raises an unhandled exception
+gets a full Laravel/Django-style debug page instead: the exception, the
+request line, and every stack frame with a source-code snippet around the
+line that raised, most relevant frame first.</p>
+<p>Which response you get is decided per-request, by the <code>Accept</code> header, not
+by a global switch: a browser's default <code>Accept</code> lists <code>text/html</code>, so it
+gets the HTML page; an API/fetch client (Postman, <code>curl</code>, your own HTTP
+client) doesn't, so it still gets the plain JSON (or <code>problem+json</code>) shape
+above — a frontend's error-handling code never has to special-case an HTML
+body just because <code>APP_DEBUG</code> happens to be on. <code>API_PROBLEM_JSON=true</code>
+always wins over the HTML page, on the assumption that an app with it
+turned on is API-only.</p>
+<p>Only ever shown for a genuine unhandled exception (a bug), never for an
+<code>HTTPException</code> your own code raised deliberately (<code>NotFoundException</code>,
+<code>ValidationException</code>, ...) — those keep returning their normal JSON body
+regardless of <code>Accept</code>, since they're expected control flow, not a crash.</p>
+<p>Like every other debug-mode behavior, this leaks source code and file
+paths — see the <a href="../production-checklist/">production checklist</a> for why
+<code>APP_DEBUG=false</code> is non-negotiable in production.</p>
 
 
 

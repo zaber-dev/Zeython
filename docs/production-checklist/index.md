@@ -4,7 +4,7 @@ Everything below is documented in its own page already -- this is the one-page i
 
 ## Configuration
 
-- **`APP_ENV=production`, `APP_DEBUG=false`.** Debug mode leaks stack traces and internals into error responses -- fine locally, a disclosure bug in production. `zeython new` scaffolds both as development-friendly defaults; flip them in your deployment's `.env` or environment variables, not in the repo.
+- **`APP_ENV=production`, `APP_DEBUG=false`.** Debug mode leaks stack traces and internals into error responses -- a browser hitting a broken page gets a full source-level debug page (see [API Standards](https://zeython.zaber.dev/docs/api-standards/index.md)), an API client gets the equivalent in the JSON body. Fine locally, a disclosure bug in production. `zeython new` scaffolds both as development-friendly defaults; flip them in your deployment's `.env` or environment variables, not in the repo.
 - **`APP_SECRET_KEY` is a real, unique secret**, not the value `zeython new` generated for local dev committed into version control. It signs the session cookie -- see [Authentication](https://zeython.zaber.dev/docs/authentication/index.md).
 - **`DATABASE_URL` points at a real database**, not the default SQLite file. SQLite is fine for a single-container demo; anything with more than one app replica needs Postgres/MySQL so writes are visible across processes. See [Database & Migrations](https://zeython.zaber.dev/docs/database/index.md).
 - **Migrations are applied**, not just written -- `alembic upgrade head` (the generated Docker image's `CMD` does this for you on a single-container deploy; see [Docker](https://zeython.zaber.dev/docs/docker/index.md)).
