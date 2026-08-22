@@ -1,0 +1,35 @@
+/* A distinct display font for headings, contrasting with the Inter body
+   text Material's theme.font.text already sets -- Space Grotesk pairs well
+   with Inter and gives headings more character than reusing the body font
+   at a bigger size, the same way Laravel's and Django's docs sites use a
+   dedicated display face for headings. */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap");
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  font-family: "Space Grotesk", var(--md-text-font-family), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+}
+
+.md-typeset h2 {
+  font-weight: 600;
+}
+
+.md-typeset h3,
+.md-typeset h4 {
+  font-weight: 600;
+}
+
+/* The homepage/reference-index card titles are headings too -- keep them
+   in the same display face for a consistent hierarchy. */
+.md-typeset .grid.cards strong {
+  font-family: "Space Grotesk", var(--md-text-font-family), sans-serif;
+}
