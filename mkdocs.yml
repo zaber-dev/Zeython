@@ -224,4 +224,5 @@ plugins:
 extra_javascript:
   - assets/copy-markdown.js
 extra_css:
+  - assets/typography.css
   - assets/copy-markdown.css
