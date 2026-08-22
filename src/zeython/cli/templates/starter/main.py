@@ -11,6 +11,7 @@ from zeython import (
     QueueServiceProvider,
     RateLimitServiceProvider,
     RequestIdServiceProvider,
+    RequestProfilerServiceProvider,
     RouteServiceProvider,
     StorageServiceProvider,
     ViewServiceProvider,
@@ -27,6 +28,12 @@ app.register(HealthCheckServiceProvider)
 # the logs -- see docs/observability.md.
 app.register(RequestIdServiceProvider)
 app.register(DatabaseServiceProvider)
+# X-Debug-Duration-Ms/X-Debug-Query-Count/X-Debug-Query-Time-Ms on every
+# response, plus the queries a crashed request ran shown on its debug
+# page -- see docs/profiling.md. Its own boot() is a no-op unless
+# APP_DEBUG is true, same as RequestIdServiceProvider above: nothing to
+# get wrong by always registering it.
+app.register(RequestProfilerServiceProvider(app))
 app.register(ViewServiceProvider)
 app.register(StorageServiceProvider)
 app.register(CacheServiceProvider)

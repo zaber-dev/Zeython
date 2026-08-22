@@ -91,6 +91,33 @@ def _format_traceback(exc: BaseException) -> list[str]:
     return traceback.format_exception(type(exc), exc, exc.__traceback__)
 
 
+def _debug_queries() -> list[Any]:
+    """The current request's executed SQL queries (see
+    :mod:`zeython.profiler`), or ``[]`` if that provider isn't registered.
+
+    A lazy, in-function import rather than a module-level one: this module
+    is foundational (``zeython.db.model`` imports ``ValidationException``
+    from it), so importing ``zeython.profiler`` -- which imports
+    ``zeython.db.session``, which importing the ``zeython.db`` package
+    first triggers -- at module load time would be a real circular
+    import, not just an unnecessary dependency. By the time this actually
+    runs (inside a request), every module involved has already finished
+    loading, so the same import here is completely safe.
+    """
+    try:
+        from zeython.profiler import current_queries
+    except ImportError:
+        return []
+    return list(current_queries())
+
+
+def _debug_queries_for_json() -> list[dict[str, Any]] | None:
+    queries = _debug_queries()
+    if not queries:
+        return None
+    return [{"sql": " ".join(query.statement.split()), "duration_ms": query.duration_ms} for query in queries]
+
+
 def _wants_html(request: Request | None) -> bool:
     """Whether this looks like a browser navigating directly to a broken page,
     rather than an API/fetch client -- decides whether debug mode's
@@ -169,6 +196,19 @@ main { padding: 20px 32px 60px; }
 .frame-code .code { padding: 1px 14px; white-space: pre-wrap; word-break: break-all; }
 .frame-code .line.culprit { background: #3a1f24; }
 .frame-code .line.culprit .lineno { color: #ff8f8f; }
+.queries {
+  border: 1px solid #33383f; border-radius: 6px; margin-bottom: 20px; overflow: hidden;
+}
+.queries h2 {
+  margin: 0; padding: 10px 14px; background: #23272e; font-size: 13px;
+  font-weight: 600; color: #d5d8dc;
+}
+.query-row {
+  display: flex; gap: 14px; padding: 8px 14px; border-top: 1px solid #262a31;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px;
+}
+.query-time { flex: 0 0 70px; color: #7dd3fc; }
+.query-sql { color: #d5d8dc; white-space: pre-wrap; word-break: break-all; }
 footer {
   padding: 16px 32px; color: #6b7280; font-size: 12px;
   border-top: 1px solid #33383f;
@@ -185,6 +225,21 @@ def _render_debug_html(request: Request, exc: BaseException) -> str:
     frames = traceback.extract_tb(exc.__traceback__)
     method = getattr(request, "method", "")
     path = getattr(getattr(request, "url", None), "path", "")
+
+    queries = _debug_queries()
+    queries_section = ""
+    if queries:
+        rows = "".join(
+            f'<div class="query-row"><span class="query-time">{query.duration_ms:.2f} ms</span>'
+            f'<span class="query-sql">{html.escape(" ".join(query.statement.split()))}</span></div>'
+            for query in queries
+        )
+        total_ms = sum(query.duration_ms for query in queries)
+        label = "query" if len(queries) == 1 else "queries"
+        queries_section = f"""<section class="queries">
+  <h2>{len(queries)} {label} ({total_ms:.2f} ms total)</h2>
+  {rows}
+</section>"""
 
     frame_sections = []
     for i, frame in enumerate(reversed(frames)):
@@ -218,7 +273,7 @@ def _render_debug_html(request: Request, exc: BaseException) -> str:
   <p class="message">{html.escape(str(exc))}</p>
   <p class="request-line">{html.escape(method)} {html.escape(path)}</p>
 </header>
-<main>{"".join(frame_sections)}</main>
+<main>{queries_section}{"".join(frame_sections)}</main>
 <footer>This page is only shown because APP_DEBUG=true. Turn it off in production.</footer>
 </body>
 </html>"""
@@ -231,15 +286,16 @@ def _problem_response(
     errors: dict[str, list[str]] | None = None,
     exception: str | None = None,
     exc_traceback: list[str] | None = None,
+    queries: list[dict[str, Any]] | None = None,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     """RFC 7807 (``application/problem+json``) shaped error body -- ``type``
     is ``"about:blank"`` (RFC 7807's own fallback for "no more specific
     problem type than the HTTP status code itself"), since this framework
-    doesn't maintain a registry of per-error-type URIs. ``errors``/``exception``
-    are nonstandard extension members, same field names/shapes the
-    framework's default error format already uses -- RFC 7807 explicitly
-    permits extending the problem object this way.
+    doesn't maintain a registry of per-error-type URIs. ``errors``/``exception``/
+    ``queries`` are nonstandard extension members, same field names/shapes
+    the framework's default error format already uses -- RFC 7807
+    explicitly permits extending the problem object this way.
     """
     payload: dict[str, Any] = {
         "type": "about:blank",
@@ -253,6 +309,8 @@ def _problem_response(
         payload["exception"] = exception
     if exc_traceback:
         payload["traceback"] = exc_traceback
+    if queries:
+        payload["queries"] = queries
     return JSONResponse(payload, status_code=status_code, headers=headers, media_type="application/problem+json")
 
 
@@ -287,8 +345,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Respo
     if _wants_problem_json(request):
         exception_detail = f"{type(exc).__name__}: {exc}" if debug else None
         exc_traceback = _format_traceback(exc) if debug else None
+        queries = _debug_queries_for_json() if debug else None
         return _problem_response(
-            500, "An unexpected error occurred.", exception=exception_detail, exc_traceback=exc_traceback
+            500,
+            "An unexpected error occurred.",
+            exception=exception_detail,
+            exc_traceback=exc_traceback,
+            queries=queries,
         )
 
     # A browser hitting a broken page in development gets the full debug
@@ -302,6 +365,9 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Respo
     if debug:
         payload["exception"] = f"{type(exc).__name__}: {exc}"
         payload["traceback"] = _format_traceback(exc)
+        queries = _debug_queries_for_json()
+        if queries:
+            payload["queries"] = queries
     return JSONResponse(payload, status_code=500)
 
 

@@ -144,3 +144,45 @@ async def test_unhandled_exception_renders_html_debug_page_for_a_browser_request
     assert "ValueError" in response.text
     assert "kaboom" in response.text
     assert "GET /boom" in response.text
+
+
+async def test_debug_page_includes_queries_the_crashed_request_ran(tmp_path) -> None:
+    from sqlalchemy import String
+    from sqlalchemy.orm import Mapped, mapped_column
+
+    from zeython.db import Model
+    from zeython.db.session import Database
+    from zeython.profiler import RequestProfilerServiceProvider
+    from zeython.providers import DatabaseServiceProvider
+
+    class ProfiledThing(Model):
+        __tablename__ = "app_test_profiled_things"
+        name: Mapped[str] = mapped_column(String(100))
+
+    (tmp_path / ".env").write_text("APP_DEBUG=true\nDATABASE_URL=sqlite+aiosqlite:///:memory:\n")
+    app = _make_app(tmp_path)
+    app.register(DatabaseServiceProvider)
+    app.register(RequestProfilerServiceProvider(app))
+
+    database = app.container.make(Database)
+    async with database.engine.begin() as connection:
+        await connection.run_sync(Model.metadata.create_all)
+
+    @app.get("/boom")
+    async def boom(request):
+        async with database.session():
+            await ProfiledThing.create(name="a")
+        raise ValueError("kaboom after a query")
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        html_response = await http.get("/boom", headers={"accept": "text/html,application/xhtml+xml"})
+        json_response = await http.get("/boom", headers={"accept": "application/json"})
+
+    assert "quer" in html_response.text  # "1 query" or "N queries"
+    assert "INSERT" in html_response.text.upper()
+
+    body = json_response.json()
+    assert body["queries"]
+    assert any("INSERT" in q["sql"].upper() for q in body["queries"])
+    assert all("duration_ms" in q for q in body["queries"])

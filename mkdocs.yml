@@ -58,6 +58,7 @@ nav:
   - Deployment & Operations:
       - Health Check: health-check.md
       - Observability: observability.md
+      - Profiling: profiling.md
       - Error Monitoring: error-monitoring.md
       - Docker: docker.md
       - Production Checklist: production-checklist.md
@@ -210,6 +211,7 @@ plugins:
         Deployment & Operations:
           - health-check.md
           - observability.md
+          - profiling.md
           - error-monitoring.md
           - docker.md
           - production-checklist.md
