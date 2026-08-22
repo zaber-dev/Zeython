@@ -74,6 +74,28 @@ Zeython, not a specific app) -- copy the relevant sections into your
 project's own `AGENTS.md` if your agent doesn't already have access to the
 framework repository.
 
+## Feeding the docs site itself to an LLM
+
+The MCP server above is for an agent *working inside* a Zeython project.
+For pasting documentation into an LLM chat, or letting a web-browsing
+agent fetch it directly, the [docs site](https://zeython.zaber.dev/docs/)
+is itself structured for that:
+
+- Every page has a **"Copy page as Markdown"** button next to the
+  "Edit this page" pencil icon — copies that page's content as clean
+  Markdown (no nav chrome, no HTML), ready to paste into a chat.
+- The same content is served directly at `<page-url>index.md` for any
+  page — e.g. `/docs/csrf/index.md` — no button needed if you're fetching
+  it programmatically.
+- [`/docs/llms.txt`](https://zeython.zaber.dev/docs/llms.txt) lists every
+  page as a Markdown link, grouped by section — the emerging
+  [llms.txt](https://llmstxt.org/) convention for "here's what this site
+  has, and where to find it" in a shape an LLM can consume without
+  crawling HTML.
+- [`/docs/llms-full.txt`](https://zeython.zaber.dev/docs/llms-full.txt)
+  concatenates every page's Markdown into one file, for pasting the whole
+  framework's documentation into a single context window at once.
+
 ## Scope
 
 This is deliberately read-only introspection, not a way to run arbitrary

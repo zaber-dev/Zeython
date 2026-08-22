@@ -148,3 +148,80 @@ plugins:
             merge_init_into_class: true
             docstring_section_style: table
             show_if_no_docstring: false
+  - llmstxt:
+      full_output: llms-full.txt
+      markdown_description: >-
+        Zeython is an async-first, batteries-included MVC framework for
+        Python: a dependency injection container, an Active-Record-style
+        async ORM, session and API-token auth, RBAC authorization, queues,
+        WebSockets, and a Laravel-style CLI, built on Starlette and
+        SQLAlchemy 2.0.
+      sections:
+        Getting Started:
+          - index.md
+          - getting-started.md
+          - architecture.md
+        Tutorial:
+          - tutorial.md
+          - tutorial-1-setup.md
+          - tutorial-2-models.md
+          - tutorial-3-controllers.md
+          - tutorial-4-relationships.md
+          - tutorial-5-auth.md
+          - tutorial-6-testing.md
+        The Basics:
+          - database.md
+          - relationships.md
+          - validation.md
+          - model-events.md
+          - database-seeding.md
+          - views.md
+          - frontend.md
+        Security:
+          - authentication.md
+          - csrf.md
+          - authorization.md
+          - api-authentication.md
+          - security-headers.md
+          - rate-limiting.md
+          - multi-tenancy.md
+        Building APIs:
+          - openapi.md
+          - api-standards.md
+        Digging Deeper:
+          - cli.md
+          - console-commands.md
+          - plugins.md
+          - localization.md
+          - queues.md
+          - scheduling.md
+          - websockets.md
+          - mail.md
+          - caching.md
+          - redis.md
+          - storage.md
+          - admin.md
+          - ai.md
+          - ai-agents.md
+        Testing:
+          - testing.md
+        Deployment & Operations:
+          - health-check.md
+          - observability.md
+          - error-monitoring.md
+          - docker.md
+          - production-checklist.md
+          - benchmarks.md
+        API Reference:
+          - reference/index.md
+          - reference/core.md
+          - reference/database.md
+          - reference/security.md
+          - reference/http-api.md
+          - reference/jobs-realtime.md
+          - reference/operations.md
+          - reference/extensibility.md
+extra_javascript:
+  - assets/copy-markdown.js
+extra_css:
+  - assets/copy-markdown.css
