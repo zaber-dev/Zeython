@@ -1,8 +1,8 @@
 # Core
 
 The application bootstrap, DI container, config, routing, service
-providers, view rendering, and the framework's exception/validation
-primitives.
+providers, the application-level event dispatcher, view rendering, and
+the framework's exception/validation primitives.
 
 ::: zeython.application
 
@@ -11,6 +11,8 @@ primitives.
 ::: zeython.config
 
 ::: zeython.providers
+
+::: zeython.events
 
 ::: zeython.routing
 
