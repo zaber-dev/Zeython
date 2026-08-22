@@ -5,9 +5,11 @@ from zeython.api_auth import TokenManager, require_api_auth
 from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
+from zeython.events import emit
 from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
 
+from app.Events.user_registered import UserRegistered
 from app.Jobs.send_welcome_email_job import SendWelcomeEmailJob
 from app.Models.user import User
 
@@ -45,6 +47,11 @@ class AuthController(Controller):
         # Runs in the background (see docs/queues.md) so the response doesn't
         # wait on whatever sending an email actually involves.
         await dispatch(request, SendWelcomeEmailJob(to_email=user.email, name=user.name))
+
+        # A second, independent reaction to the signup -- see docs/events.md.
+        # Add more listeners in AppEventServiceProvider without touching this
+        # handler at all.
+        await emit(request, UserRegistered(user_id=user.id, email=user.email))
 
         auth_login(request, user)
         return JSONResponse(user.to_dict(), status_code=201)

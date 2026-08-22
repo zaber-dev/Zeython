@@ -18,6 +18,7 @@ from zeython import (
 )
 
 from app.Models.user import User
+from app.Providers.app_event_service_provider import AppEventServiceProvider
 from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
 
 app = Application()
@@ -33,6 +34,10 @@ app.register(RateLimitServiceProvider)
 app.register(MailServiceProvider)
 app.register(QueueServiceProvider)
 app.register(WebSocketHubServiceProvider)
+# Decoupled listeners reacting to app-defined events (UserRegistered, ...)
+# -- see docs/events.md. AppEventServiceProvider (app/Providers/) is where
+# this app's own listeners are registered.
+app.register(AppEventServiceProvider(app))
 app.register(AuthServiceProvider(app, user_model=User))
 app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)

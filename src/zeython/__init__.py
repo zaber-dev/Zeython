@@ -28,6 +28,7 @@ from zeython.database import Factory, Seeder
 from zeython.db import Database, Model, Observer, Page, transaction
 from zeython.error_monitoring import ErrorMonitoringServiceProvider, init_sentry, report_exception
 from zeython.etag import ETagMiddleware, ETagServiceProvider
+from zeython.events import EventDispatcher, EventServiceProvider, emit
 from zeython.exceptions import (
     BadRequestException,
     ConflictException,
@@ -197,6 +198,9 @@ __all__ = [
     "GzipServiceProvider",
     "ETagMiddleware",
     "ETagServiceProvider",
+    "EventDispatcher",
+    "emit",
+    "EventServiceProvider",
     "WebSocket",
     "WebSocketDisconnect",
     "WebSocketHub",
