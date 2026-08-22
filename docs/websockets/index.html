@@ -2866,16 +2866,14 @@ check handles both cases. Freed the moment the client that was over the
 cap disconnects (<code>hub.disconnect(websocket)</code> in your handler's <code>finally</code>
 block), not on a timer.</p>
 <h3 id="websockethub-is-process-local"><code>WebSocketHub</code> is process-local<a class="headerlink" href="#websockethub-is-process-local" title="Permanent link">&para;</a></h3>
-<p>Same trade-off as the default <code>Cache</code>/<code>Queue</code>/<code>RateLimiter</code>: a broadcast
-only reaches clients connected to <em>this</em> process. Fine for a single
-worker; running more than one means each worker has its own, disjoint set
-of connections, so a broadcast only reaches whichever fraction of clients
-happen to be on the same worker as the sender. There's no bundled
-distributed hub -- wiring one up means picking a pub/sub backend (Redis's
-<code>PUBLISH</code>/<code>SUBSCRIBE</code> is the usual choice) and having every worker
-subscribe, forwarding what it receives to its own local connections; the
-shape doesn't change (<code>connect</code>/<code>disconnect</code>/<code>broadcast</code>), only where the
-fan-out happens.</p>
+<p>Same trade-off as the default <code>Cache</code>/<code>RateLimiter</code>: a broadcast only
+reaches clients connected to <em>this</em> process. Fine for a single worker;
+running more than one means each worker has its own, disjoint set of
+connections, so a broadcast only reaches whichever fraction of clients
+happen to be on the same worker as the sender. <code>RedisWebSocketHub</code> is the
+opt-in, distributed alternative -- same <code>connect</code>/<code>disconnect</code>/<code>broadcast</code>
+shape, backed by Redis <code>PUBLISH</code>/<code>SUBSCRIBE</code> so a broadcast reaches every
+worker's clients, not just the sender's. See <a href="../redis/#rediswebsockethub">Redis</a>.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">websocket_client</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>

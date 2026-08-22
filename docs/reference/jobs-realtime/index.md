@@ -596,7 +596,7 @@ def cron_matches(expression: str, at: datetime) -> bool:
 
 Real-time WebSocket support, built directly on Starlette's ASGI-native WebSocket handling -- no separate server, no extra process.
 
-`Router.websocket(...)`/`Application.websocket(...)` registers a handler the same way `@app.get(...)` does for HTTP. :class:`WebSocketHub` is the process-local "broadcast to everyone connected" registry a chat window, a live dashboard, or any other push-to-many feature needs.
+`Router.websocket(...)`/`Application.websocket(...)` registers a handler the same way `@app.get(...)` does for HTTP. :class:`WebSocketHub` is the process-local "broadcast to everyone connected" registry a chat window, a live dashboard, or any other push-to-many feature needs; :class:`RedisWebSocketHub` is the same thing backed by Redis pub/sub, for a broadcast to reach every worker process, not just this one.
 
 ### WebSocketHub
 
@@ -745,6 +745,97 @@ async def broadcast(self, message: str | dict, *, exclude: WebSocket | None = No
         self._connections.discard(connection)
 ```
 
+### RedisWebSocketHub
+
+```python
+RedisWebSocketHub(
+    url: str,
+    *,
+    channel: str = "zeython:websockets:broadcast",
+    allowed_origins: Iterable[str] | None = None,
+    max_connections_per_ip: int | None = None,
+)
+```
+
+Bases: `WebSocketHub`
+
+A :class:`WebSocketHub` whose broadcasts reach every process, not just this one -- the distributed backend the base class's docstring names. Requires the `redis` extra (`pip install zeython[redis]`).
+
+Every process running a `RedisWebSocketHub` against the same Redis PUBLISHes each broadcast to a shared channel and SUBSCRIBEs to that same channel, relaying whatever it receives to its own locally connected clients -- so a message broadcast from any one worker reaches clients connected to every worker, this one included, with no special-casing needed (each published message is tagged with this instance's own id so it doesn't relay its own broadcast back to clients that already got it directly from :meth:`broadcast`).
+
+The listener starts automatically on this hub's first :meth:`connect` call -- there's no ASGI lifespan hook to start it any earlier, and nothing needs the listener running before the first connection exists anyway. Call :meth:`stop` to shut it down cleanly (mainly useful in tests; a real process just exits, taking the task with it).
+
+Doesn't attempt to reconnect if the Redis connection drops mid-stream -- the listener task logs the error and stops; broadcasts stop reaching other processes (and this process stops relaying theirs) until the process is restarted. The same accepted trade-off as the other Redis-backed classes here, none of which implement retry logic: simple and predictable beats a hand-rolled reconnect loop that becomes its own source of bugs.
+
+Source code in `src/zeython/websockets.py`
+
+```python
+def __init__(
+    self,
+    url: str,
+    *,
+    channel: str = "zeython:websockets:broadcast",
+    allowed_origins: Iterable[str] | None = None,
+    max_connections_per_ip: int | None = None,
+) -> None:
+    super().__init__(allowed_origins=allowed_origins, max_connections_per_ip=max_connections_per_ip)
+    try:
+        from redis.asyncio import Redis
+    except ImportError as exc:
+        raise ImportError(
+            "RedisWebSocketHub requires the redis package. Install it with: pip install zeython[redis]"
+        ) from exc
+
+    self._client = Redis.from_url(url)
+    self._channel = channel
+    self._instance_id = uuid.uuid4().hex
+    self._listener_task: asyncio.Task[None] | None = None
+```
+
+#### stop
+
+```python
+stop() -> None
+```
+
+Cancel the background listener task.
+
+Source code in `src/zeython/websockets.py`
+
+```python
+async def stop(self) -> None:
+    """Cancel the background listener task."""
+    if self._listener_task is not None:
+        self._listener_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await self._listener_task
+        self._listener_task = None
+```
+
+#### broadcast
+
+```python
+broadcast(
+    message: str | dict, *, exclude: WebSocket | None = None
+) -> None
+```
+
+Deliver to this process's own connections immediately (respecting `exclude`, which only ever refers to a connection on this process -- another process can't have the same object), then publish so every other process's listener relays it to theirs.
+
+Source code in `src/zeython/websockets.py`
+
+```python
+async def broadcast(self, message: str | dict, *, exclude: WebSocket | None = None) -> None:
+    """Deliver to this process's own connections immediately (respecting
+    ``exclude``, which only ever refers to a connection on this
+    process -- another process can't have the same object), then
+    publish so every other process's listener relays it to theirs.
+    """
+    await super().broadcast(message, exclude=exclude)
+    envelope = {"origin": self._instance_id, "payload": message}
+    await self._client.publish(self._channel, json.dumps(envelope))
+```
+
 ### WebSocketHubServiceProvider
 
 ```python
@@ -758,6 +849,14 @@ Binds a process-local :class:`WebSocketHub` into the container.
 `WEBSOCKET_ALLOWED_ORIGINS` -- comma-separated, e.g. `https://example.com,https://app.example.com` -- restricts handshakes to those origins (see :class:`WebSocketHub`'s cross-site hijacking note). Unset by default, matching every earlier release; set it once real browser clients are involved and you're not deliberately serving other origins too.
 
 `WEBSOCKET_MAX_CONNECTIONS_PER_IP` -- caps concurrent connections from a single client (see :class:`WebSocketHub`'s resource-exhaustion note). Unset by default, matching every earlier release.
+
+For a broadcast that reaches every worker process/machine, not just this one, bind :class:`RedisWebSocketHub` directly instead of registering this provider::
+
+```text
+app.container.singleton(WebSocketHub, lambda: RedisWebSocketHub(config.get("redis.url")))
+```
+
+See docs/redis.md.
 
 Source code in `src/zeython/providers.py`
 

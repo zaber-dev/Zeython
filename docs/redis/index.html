@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#redis-distributed-cache-rate-limiting-queue" class="md-skip">
+        <a href="#redis-distributed-cache-rate-limiting-queue-websockets" class="md-skip">
           Skip to content
         </a>
       
@@ -1924,6 +1924,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#rediswebsockethub" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RedisWebSocketHub
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2659,6 +2670,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#rediswebsockethub" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RedisWebSocketHub
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2684,28 +2706,32 @@
   
 
 
-<h1 id="redis-distributed-cache-rate-limiting-queue">Redis (Distributed Cache, Rate Limiting &amp; Queue)<a class="headerlink" href="#redis-distributed-cache-rate-limiting-queue" title="Permanent link">&para;</a></h1>
-<p><code>InMemoryCache</code> and <code>InMemoryRateLimiter</code> are process-local by design —
-correct and fast for a single worker, and a real limitation once you run
-more than one: multiple worker processes or multiple machines each cache
-and count independently, so a value written by one worker is invisible to
-another, and an effective rate limit multiplies by worker count. <code>RedisCache</code>
-and <code>RedisRateLimiter</code> are the opt-in, shared alternative — same
+<h1 id="redis-distributed-cache-rate-limiting-queue-websockets">Redis (Distributed Cache, Rate Limiting, Queue &amp; WebSockets)<a class="headerlink" href="#redis-distributed-cache-rate-limiting-queue-websockets" title="Permanent link">&para;</a></h1>
+<p><code>InMemoryCache</code>, <code>InMemoryRateLimiter</code>, and <code>WebSocketHub</code> are process-local
+by design — correct and fast for a single worker, and a real limitation
+once you run more than one: multiple worker processes or multiple machines
+each cache, count, and track connections independently, so a value written
+by one worker is invisible to another, an effective rate limit multiplies
+by worker count, and a WebSocket broadcast only reaches whichever fraction
+of clients happen to be on the same worker. <code>RedisCache</code>, <code>RedisRateLimiter</code>,
+and <code>RedisWebSocketHub</code> are the opt-in, shared alternative — same
 interfaces, backed by a Redis instance every worker points at.
 <code>RedisQueue</code> is the same idea for background jobs, with its own page —
 see <a href="../queues/#queue_driverredis-a-durable-queue">Background Jobs</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>redis<span class="o">]</span>
 </span></code></pre></div>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span><span class="p">,</span> <span class="n">RateLimiter</span><span class="p">,</span> <span class="n">RedisCache</span><span class="p">,</span> <span class="n">RedisRateLimiter</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span><span class="p">,</span> <span class="n">RateLimiter</span><span class="p">,</span> <span class="n">RedisCache</span><span class="p">,</span> <span class="n">RedisRateLimiter</span><span class="p">,</span> <span class="n">RedisWebSocketHub</span><span class="p">,</span> <span class="n">WebSocketHub</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Cache</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisCache</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">RateLimiter</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisRateLimiter</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">WebSocketHub</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisWebSocketHub</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
 </span></code></pre></div>
 <p>Bind them directly instead of registering <code>CacheServiceProvider</code>/
-<code>RateLimitServiceProvider</code> — those always bind the in-memory default.
-<code>config.get("redis.url")</code> reads <code>REDIS_URL</code> from <code>.env</code>
-(<code>redis://localhost:6379/0</code>, or your provider's connection string).</p>
+<code>RateLimitServiceProvider</code>/<code>WebSocketHubServiceProvider</code> — those always
+bind the in-memory/process-local default. <code>config.get("redis.url")</code> reads
+<code>REDIS_URL</code> from <code>.env</code> (<code>redis://localhost:6379/0</code>, or your provider's
+connection string).</p>
 <h2 id="rediscache">RedisCache<a class="headerlink" href="#rediscache" title="Permanent link">&para;</a></h2>
 <p>Same <code>get</code>/<code>put</code>/<code>forget</code>/<code>has</code>/<code>flush</code>/<code>remember</code> interface as
 <code>InMemoryCache</code>, with two real differences:</p>
@@ -2740,6 +2766,23 @@ See <a href="../queues/#queue_driverredis-a-durable-queue">Background Jobs</a> f
 full picture: retries with backoff, the failed-jobs list, and why
 <code>RedisQueue</code> requires jobs to be <code>@dataclass</code> (it has to serialize a job to
 survive crossing a process boundary — <code>InMemoryQueue</code> never does).</p>
+<h2 id="rediswebsockethub">RedisWebSocketHub<a class="headerlink" href="#rediswebsockethub" title="Permanent link">&para;</a></h2>
+<p>Same <code>connect</code>/<code>disconnect</code>/<code>broadcast</code> interface as <code>WebSocketHub</code>
+(everything in <a href="../websockets/">WebSockets</a> — origin checks, per-IP
+connection caps — still applies), but a <code>broadcast()</code> call reaches
+clients connected to <em>every</em> process pointed at the same Redis, not just
+this one. Each process PUBLISHes to a shared channel (default
+<code>"zeython:websockets:broadcast"</code>, override with <code>channel=</code>) and
+SUBSCRIBEs to that same channel, relaying whatever it receives to its own
+locally-connected clients — a message sent from a client on worker A
+reaches clients connected to worker B without either worker knowing the
+other exists.</p>
+<p>The listener starts automatically the first time this hub's <code>connect()</code>
+is called — there's no separate process to run, unlike <code>RedisQueue</code>. It
+doesn't reconnect automatically if the Redis connection drops mid-stream;
+the listener logs the error and stops, so broadcasts stop crossing
+processes until that one restarts, same trade-off as everything else on
+this page: simple and predictable over a hand-rolled reconnect loop.</p>
 
 
 
