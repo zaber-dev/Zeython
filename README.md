@@ -178,6 +178,7 @@ empty scaffold to a tested, authenticated API
 [Console Commands](docs/console-commands.md) ·
 [Plugins](docs/plugins.md) ·
 [Localization](docs/localization.md) ·
+[Events](docs/events.md) ·
 [Background Jobs](docs/queues.md) ·
 [Scheduling](docs/scheduling.md) ·
 [WebSockets](docs/websockets.md) ·
@@ -194,7 +195,9 @@ empty scaffold to a tested, authenticated API
 
 **Deployment & Operations**
 [Health Check](docs/health-check.md) ·
+[Maintenance Mode](docs/maintenance-mode.md) ·
 [Observability](docs/observability.md) ·
+[Profiling](docs/profiling.md) ·
 [Error Monitoring](docs/error-monitoring.md) ·
 [Docker](docs/docker.md) ·
 [Production Checklist](docs/production-checklist.md) ·

@@ -25,6 +25,9 @@ second replica, a new external API) that changes the answer.
 - [ ] **Migrations are applied**, not just written --
   `alembic upgrade head` (the generated Docker image's `CMD` does this
   for you on a single-container deploy; see [Docker](docker.md)).
+- [ ] **A risky migration or deploy goes through `zeython down`/`up`**,
+  not straight into production traffic against a half-migrated schema --
+  see [Maintenance Mode](maintenance-mode.md).
 
 ## Security
 

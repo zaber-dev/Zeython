@@ -71,6 +71,46 @@ def serve(
 
 
 @app.command()
+def down(
+    message: str = typer.Option("Be right back.", "--message", "-m", help="Message shown to visitors"),
+    retry: int | None = typer.Option(None, "--retry", help="Retry-After header, in seconds"),
+    allow: list[str] | None = typer.Option(None, "--allow", help="IP address to still allow through (repeatable)"),
+    secret: str | None = typer.Option(None, "--secret", help="Bypass token; auto-generated if omitted"),
+) -> None:
+    """Put the application into maintenance mode -- every request gets a 503
+    until `zeython up`. Requires MaintenanceModeServiceProvider to be
+    registered (see docs/maintenance-mode.md). Run from a project root."""
+    from zeython.config import Config
+    from zeython.maintenance import enable_maintenance_mode, maintenance_store_path
+
+    allowed_ips = list(allow or [])
+    config = Config.load(Path.cwd())
+    store_path = maintenance_store_path(Path.cwd(), config.get("maintenance.store_path"))
+    actual_secret = enable_maintenance_mode(
+        store_path, message=message, retry=retry, allowed_ips=allowed_ips, secret=secret
+    )
+
+    typer.secho("Application is now in maintenance mode.", fg=typer.colors.YELLOW)
+    typer.echo(f"  Bypass URL: /{actual_secret}  (visiting it once sets a cookie for this browser)")
+    if allowed_ips:
+        typer.echo(f"  Allowed IPs: {', '.join(allowed_ips)}")
+
+
+@app.command()
+def up() -> None:
+    """Bring the application out of maintenance mode."""
+    from zeython.config import Config
+    from zeython.maintenance import disable_maintenance_mode, maintenance_store_path
+
+    config = Config.load(Path.cwd())
+    store_path = maintenance_store_path(Path.cwd(), config.get("maintenance.store_path"))
+    if disable_maintenance_mode(store_path):
+        typer.secho("Application is now live.", fg=typer.colors.GREEN)
+    else:
+        typer.echo("Application was not in maintenance mode.")
+
+
+@app.command()
 def mcp() -> None:
     """Start the MCP server (stdio) for AI coding agents. Requires the `mcp` extra -- see docs/ai-agents.md."""
     try:
