@@ -40,6 +40,26 @@ await throttle(request, key=f"login:{client_ip(request)}", limit=5, window=60)
 await throttle(request, key=f"login:{email}", limit=5, window=60)  # per-account instead of per-IP
 ```
 
+## Response headers
+
+Every response a `throttle()` call or the blanket middleware actually
+limited — allowed or rejected — carries the standard headers GitHub's,
+Stripe's, and Laravel's APIs send, so well-behaved clients can back off
+before they get a 429 instead of learning the hard way:
+
+| Header | Meaning |
+|---|---|
+| `X-RateLimit-Limit` | The `limit` passed to `throttle()` (or `RATE_LIMIT_MAX_REQUESTS`). |
+| `X-RateLimit-Remaining` | Requests left in the current window. |
+| `X-RateLimit-Reset` | Unix timestamp when the window resets. |
+| `Retry-After` | 429 responses only — seconds to wait before retrying. |
+
+This is handled automatically by `RateLimitHeadersMiddleware`, which
+`RateLimitServiceProvider` registers unconditionally — it only ever
+touches a response that a rate limiter already ran against, so a route
+that never calls `throttle()` and isn't covered by the blanket middleware
+sees no `X-RateLimit-*` headers at all.
+
 ## Blanket limiting across the whole API
 
 Opt-in via `.env` — `RateLimitServiceProvider` is registered by every
@@ -60,12 +80,15 @@ rejected by either).
 `InMemoryRateLimiter` counts hits in memory. That's correct and fast for a
 single process, and a real limitation once you run multiple worker
 processes or machines — each counts independently, so the *effective* limit
-multiplies by worker count. For a distributed limit, implement `RateLimiter`
-against a shared store (Redis `INCR`+`EXPIRE` is the usual choice) and bind
-it in place of the default:
+multiplies by worker count. For a distributed limit shared across every
+process, bind `RedisRateLimiter` in place of the default (requires the
+`redis` extra: `pip install zeython[redis]`):
 
 ```python
-from zeython import RateLimiter
+from zeython.rate_limit import RateLimiter, RedisRateLimiter
 
-app.container.singleton(RateLimiter, lambda: MyRedisRateLimiter(redis_client))
+app.container.singleton(RateLimiter, lambda: RedisRateLimiter(config.get("redis.url")))
 ```
+
+Implement `RateLimiter` yourself instead if you need a different backend or
+algorithm — it's a one-method interface (`hit(key, *, limit, window)`).

@@ -27,8 +27,10 @@ from zeython.providers import ServiceProvider
 @dataclass(frozen=True)
 class RateLimitResult:
     allowed: bool
+    limit: int
     remaining: int
     retry_after: float  #: seconds until the next hit would be allowed; 0 if allowed
+    reset_after: float  #: seconds until the window resets, whether or not this hit was allowed
 
 
 class RateLimiter(ABC):
@@ -64,10 +66,19 @@ class InMemoryRateLimiter(RateLimiter):
 
             if len(bucket) >= limit:
                 retry_after = max(bucket[0] + window - now, 0.0)
-                return RateLimitResult(allowed=False, remaining=0, retry_after=retry_after)
+                return RateLimitResult(
+                    allowed=False, limit=limit, remaining=0, retry_after=retry_after, reset_after=retry_after
+                )
 
             bucket.append(now)
-            return RateLimitResult(allowed=True, remaining=max(limit - len(bucket), 0), retry_after=0.0)
+            reset_after = max(bucket[0] + window - now, 0.0)
+            return RateLimitResult(
+                allowed=True,
+                limit=limit,
+                remaining=max(limit - len(bucket), 0),
+                retry_after=0.0,
+                reset_after=reset_after,
+            )
 
 
 class RedisRateLimiter(RateLimiter):
@@ -108,16 +119,35 @@ class RedisRateLimiter(RateLimiter):
             # means that one key's window never resets, not a security hole.
             await self._client.expire(redis_key, max(int(window), 1))
 
-        if count > limit:
-            ttl = await self._client.ttl(redis_key)
-            return RateLimitResult(allowed=False, remaining=0, retry_after=float(max(ttl, 0)))
+        ttl = await self._client.ttl(redis_key)
+        reset_after = float(max(ttl, 0))
 
-        return RateLimitResult(allowed=True, remaining=max(limit - count, 0), retry_after=0.0)
+        if count > limit:
+            return RateLimitResult(
+                allowed=False, limit=limit, remaining=0, retry_after=reset_after, reset_after=reset_after
+            )
+
+        return RateLimitResult(
+            allowed=True, limit=limit, remaining=max(limit - count, 0), retry_after=0.0, reset_after=reset_after
+        )
 
 
 def client_ip(request: Request) -> str:
     """The connecting client's IP, or ``"unknown"`` if the ASGI server didn't report one."""
     return request.client.host if request.client else "unknown"
+
+
+def _rate_limit_headers(result: RateLimitResult) -> dict[str, str]:
+    """The standard ``X-RateLimit-*`` headers (as sent by GitHub's, Stripe's, and
+    Laravel's APIs) describing ``result``. ``X-RateLimit-Reset`` is a Unix
+    timestamp, matching those conventions, computed against wall-clock time
+    even though limiters may track elapsed time with a monotonic clock.
+    """
+    return {
+        "X-RateLimit-Limit": str(result.limit),
+        "X-RateLimit-Remaining": str(result.remaining),
+        "X-RateLimit-Reset": str(int(time.time() + result.reset_after)),
+    }
 
 
 async def throttle(request: Request, *, key: str | None = None, limit: int, window: float) -> None:
@@ -131,10 +161,19 @@ async def throttle(request: Request, *, key: str | None = None, limit: int, wind
 
         async def login(self, request):
             await throttle(request, limit=5, window=60)  # 5 attempts/minute per IP
+
+    Every response -- allowed or rejected -- carries the standard
+    ``X-RateLimit-Limit``/``X-RateLimit-Remaining``/``X-RateLimit-Reset``
+    headers, added by :class:`RateLimitHeadersMiddleware` (registered
+    automatically by :class:`RateLimitServiceProvider`).
     """
     limiter: RateLimiter = request.app.state.container.make(RateLimiter)
     effective_key = key or f"ip:{client_ip(request)}"
     result = await limiter.hit(effective_key, limit=limit, window=window)
+    # RateLimitHeadersMiddleware reads this to stamp X-RateLimit-* on
+    # whatever response eventually gets sent -- the normal one below, or
+    # (via the exception handler) the 429 raised just below.
+    request.state.rate_limit_result = result
 
     if not result.allowed:
         retry_after = int(result.retry_after) + 1
@@ -167,12 +206,50 @@ class RateLimitMiddleware:
             response = JSONResponse(
                 {"error": "Too many requests.", "status": 429},
                 status_code=429,
-                headers={"Retry-After": str(retry_after)},
+                headers={"Retry-After": str(retry_after), **_rate_limit_headers(result)},
             )
             await response(scope, receive, send)  # type: ignore[arg-type]
             return
 
+        scope.setdefault("state", {})["rate_limit_result"] = result
         await self.app(scope, receive, send)  # type: ignore[operator]
+
+
+class RateLimitHeadersMiddleware:
+    """Pure ASGI middleware that stamps the standard ``X-RateLimit-Limit``/
+    ``X-RateLimit-Remaining``/``X-RateLimit-Reset`` headers (as GitHub's,
+    Stripe's, and Laravel's APIs do) onto every response for which a rate
+    limiter actually ran -- whether that was a per-route :func:`throttle`
+    call or the blanket :class:`RateLimitMiddleware`.
+
+    Both of those store their :class:`RateLimitResult` on ``request.state``
+    (backed by ``scope["state"]``, read here directly since a plain ASGI
+    middleware has no ``Request`` of its own); a handler that never calls
+    either leaves no result to report, so no headers are added. Registered
+    automatically -- and unconditionally, since :func:`throttle` works
+    without the blanket middleware being enabled -- by
+    :class:`RateLimitServiceProvider`.
+    """
+
+    def __init__(self, app: object) -> None:
+        self.app = app
+
+    async def __call__(self, scope: dict, receive: object, send: object) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)  # type: ignore[operator]
+            return
+
+        async def send_with_headers(message: dict) -> None:
+            if message["type"] == "http.response.start":
+                result = scope.get("state", {}).get("rate_limit_result")
+                if result is not None:
+                    headers = list(message.get("headers", []))
+                    for name, value in _rate_limit_headers(result).items():
+                        headers.append((name.encode("latin-1"), value.encode("latin-1")))
+                    message = {**message, "headers": headers}
+            await send(message)  # type: ignore[operator]
+
+        await self.app(scope, receive, send_with_headers)  # type: ignore[operator]
 
 
 class RateLimitServiceProvider(ServiceProvider):
@@ -197,6 +274,11 @@ class RateLimitServiceProvider(ServiceProvider):
         self.container.singleton(RateLimiter, lambda: limiter)
 
     def boot(self) -> None:
+        # Unconditional: this only ever adds headers to a response that a
+        # throttle() call (or the blanket middleware below) already rate
+        # limited, so it's a no-op for apps that use neither.
+        self.app.add_middleware(RateLimitHeadersMiddleware)
+
         if not bool(self.config.get("rate_limit.enabled", False)):
             return
 
@@ -217,5 +299,6 @@ __all__ = [
     "throttle",
     "client_ip",
     "RateLimitMiddleware",
+    "RateLimitHeadersMiddleware",
     "RateLimitServiceProvider",
 ]
