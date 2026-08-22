@@ -9,20 +9,69 @@ describing the actual current signatures. When in doubt, trust this section
 It's organized the same way the framework itself is, roughly matching the
 "Digging Deeper" grouping in the nav:
 
-- **[Core](core.md)** -- `Application`, `Container`, `Config`, service
-  providers, `Router`/`Controller`, `Views`, exceptions, validation.
-- **[Database](database.md)** -- `Model`, `Database`, `Page`, transactions,
-  N+1 detection, factories & seeders.
-- **[Security](security.md)** -- session auth, API token auth, RBAC
-  authorization, CSRF, security headers, password hashing, multi-tenancy.
-- **[HTTP & APIs](http-api.md)** -- rate limiting, ETags, gzip, request IDs,
-  OpenAPI generation.
-- **[Jobs & Realtime](jobs-realtime.md)** -- queues, the scheduler,
-  WebSockets, mail.
-- **[Operations](operations.md)** -- health checks, logging, error
-  monitoring, caching, storage.
-- **[Extensibility](extensibility.md)** -- console commands, the plugin
-  registry, localization, the admin panel, AI integration.
+<div class="grid cards" markdown>
+
+-   :material-cube-outline:{ .lg .middle } **Core**
+
+    ---
+
+    `Application`, `Container`, `Config`, service providers,
+    `Router`/`Controller`, `Views`, exceptions, validation.
+
+    [:octicons-arrow-right-24: Reference](core.md)
+
+-   :material-database-outline:{ .lg .middle } **Database**
+
+    ---
+
+    `Model`, `Database`, `Page`, transactions, N+1 detection, factories
+    & seeders.
+
+    [:octicons-arrow-right-24: Reference](database.md)
+
+-   :material-shield-lock-outline:{ .lg .middle } **Security**
+
+    ---
+
+    Session auth, API token auth, RBAC authorization, CSRF, security
+    headers, password hashing, multi-tenancy.
+
+    [:octicons-arrow-right-24: Reference](security.md)
+
+-   :material-api:{ .lg .middle } **HTTP & APIs**
+
+    ---
+
+    Rate limiting, ETags, gzip, request IDs, OpenAPI generation.
+
+    [:octicons-arrow-right-24: Reference](http-api.md)
+
+-   :material-clock-fast:{ .lg .middle } **Jobs & Realtime**
+
+    ---
+
+    Queues, the scheduler, WebSockets, mail.
+
+    [:octicons-arrow-right-24: Reference](jobs-realtime.md)
+
+-   :material-server-outline:{ .lg .middle } **Operations**
+
+    ---
+
+    Health checks, logging, error monitoring, caching, storage.
+
+    [:octicons-arrow-right-24: Reference](operations.md)
+
+-   :material-puzzle-outline:{ .lg .middle } **Extensibility**
+
+    ---
+
+    Console commands, the plugin registry, localization, the admin
+    panel, AI integration.
+
+    [:octicons-arrow-right-24: Reference](extensibility.md)
+
+</div>
 
 Most of these classes and functions are also re-exported from the
 top-level `zeython` package, so `from zeython import Application` and
