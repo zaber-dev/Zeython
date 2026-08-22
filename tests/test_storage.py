@@ -61,6 +61,115 @@ def test_absolute_path_key_is_rejected(tmp_path: Path) -> None:
         storage._resolve("/etc/passwd")
 
 
+# -- LocalStorage.temporary_url ----------------------------------------------------
+
+
+def test_temporary_url_without_secret_key_raises_helpful_error(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path)
+    with pytest.raises(RuntimeError, match="requires a secret_key"):
+        storage.temporary_url("secret.pdf")
+
+
+def test_verify_temporary_url_token_round_trips(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path, secret_key="test-secret")
+    url = storage.temporary_url("secret.pdf", expires_in=3600)
+    token = url.rsplit("/", 1)[-1]
+
+    assert storage.verify_temporary_url_token(token) == "secret.pdf"
+
+
+def test_verify_temporary_url_token_rejects_expired_token(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path, secret_key="test-secret")
+    url = storage.temporary_url("secret.pdf", expires_in=-1)  # already expired
+    token = url.rsplit("/", 1)[-1]
+
+    assert storage.verify_temporary_url_token(token) is None
+
+
+def test_verify_temporary_url_token_rejects_tampered_token(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path, secret_key="test-secret")
+    url = storage.temporary_url("secret.pdf")
+    token = url.rsplit("/", 1)[-1]
+
+    assert storage.verify_temporary_url_token(token + "x") is None
+
+
+def test_verify_temporary_url_token_rejects_garbage(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path, secret_key="test-secret")
+    assert storage.verify_temporary_url_token("not-a-real-token") is None
+
+
+def test_different_secret_keys_do_not_cross_verify(tmp_path: Path) -> None:
+    signer = LocalStorage(tmp_path, secret_key="secret-a")
+    verifier = LocalStorage(tmp_path, secret_key="secret-b")
+    token = signer.temporary_url("secret.pdf").rsplit("/", 1)[-1]
+
+    assert verifier.verify_temporary_url_token(token) is None
+
+
+# -- Signed URL: full HTTP round-trip ------------------------------------------------
+
+
+async def test_signed_url_serves_the_file_over_http(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
+    app = Application(Config.load(tmp_path))
+    app.register(StorageServiceProvider)
+
+    storage: Storage = app.container.make(Storage)
+    await storage.put("private/report.txt", b"confidential contents")
+
+    async with client(app) as http:
+        url = storage.temporary_url("private/report.txt")  # type: ignore[union-attr]
+        response = await http.get(url)
+
+    assert response.status_code == 200
+    assert response.content == b"confidential contents"
+
+
+async def test_signed_url_rejects_expired_token_with_404(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
+    app = Application(Config.load(tmp_path))
+    app.register(StorageServiceProvider)
+
+    storage: Storage = app.container.make(Storage)
+    await storage.put("private/report.txt", b"confidential contents")
+
+    async with client(app) as http:
+        url = storage.temporary_url("private/report.txt", expires_in=-1)  # type: ignore[union-attr]
+        response = await http.get(url)
+
+    assert response.status_code == 404
+
+
+async def test_signed_url_rejects_unknown_token_with_404(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
+    app = Application(Config.load(tmp_path))
+    app.register(StorageServiceProvider)
+
+    async with client(app) as http:
+        response = await http.get("/storage/signed/not-a-real-token")
+
+    assert response.status_code == 404
+
+
+async def test_signed_url_route_is_not_shadowed_by_static_mount(tmp_path: Path) -> None:
+    """The plain StaticFiles mount at /storage/* must not intercept /storage/signed/*."""
+    (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
+    app = Application(Config.load(tmp_path))
+    app.register(StorageServiceProvider)
+
+    storage: Storage = app.container.make(Storage)
+    await storage.put("public.txt", b"public contents")
+
+    async with client(app) as http:
+        # The plain static route still works alongside the signed one.
+        plain = await http.get(storage.url("public.txt"))
+        signed = await http.get(storage.temporary_url("public.txt"))  # type: ignore[union-attr]
+
+    assert plain.status_code == 200
+    assert signed.status_code == 200
+
+
 # -- S3Storage (import guard only; no live AWS calls) -----------------------------
 
 
