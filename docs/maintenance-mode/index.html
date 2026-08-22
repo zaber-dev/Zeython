@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/openapi/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/maintenance-mode/">
       
       
-        <link rel="prev" href="../multi-tenancy/">
+        <link rel="prev" href="../health-check/">
       
       
-        <link rel="next" href="../api-standards/">
+        <link rel="next" href="../observability/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>OpenAPI & API Docs - Zeython Docs</title>
+        <title>Maintenance Mode - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#openapi-api-docs" class="md-skip">
+        <a href="#maintenance-mode" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OpenAPI & API Docs
+              Maintenance Mode
             
           </span>
         </div>
@@ -307,13 +307,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../openapi/" class="md-tabs__link">
           
   
   
@@ -368,10 +366,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../health-check/" class="md-tabs__link">
           
   
@@ -1366,31 +1366,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1408,7 +1403,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1423,37 +1418,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    OpenAPI & API Docs
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../openapi/" class="md-nav__link">
         
   
   
@@ -1469,92 +1437,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-this-is-and-what-it-deliberately-isnt" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What this is, and what it deliberately isn't
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#describing-a-route" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Describing a route
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#model_schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        model_schema()
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scope-limits" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scope limits
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2105,26 +1987,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -2142,7 +2029,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2185,10 +2072,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../maintenance-mode/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintenance Mode
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2204,6 +2118,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-the-site-yourself-while-its-down" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking the site yourself while it's down
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2694,17 +2672,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-this-is-and-what-it-deliberately-isnt" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What this is, and what it deliberately isn't
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2716,10 +2683,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#describing-a-route" class="md-nav__link">
+  <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Describing a route
+        Usage
       
     </span>
   </a>
@@ -2727,10 +2694,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#model_schema" class="md-nav__link">
+  <a href="#checking-the-site-yourself-while-its-down" class="md-nav__link">
     <span class="md-ellipsis">
       
-        model_schema()
+        Checking the site yourself while it's down
       
     </span>
   </a>
@@ -2738,21 +2705,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#scope" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scope-limits" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scope limits
+        Scope
       
     </span>
   </a>
@@ -2776,7 +2732,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/openapi.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/maintenance-mode.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2784,86 +2740,70 @@
   
 
 
-<h1 id="openapi-api-docs">OpenAPI &amp; API Docs<a class="headerlink" href="#openapi-api-docs" title="Permanent link">&para;</a></h1>
-<p><code>zeython.openapi</code> generates an OpenAPI 3.0 document from the routes
-actually registered on your app, and serves it alongside an interactive
-Swagger UI. <code>zeython new</code> wires this in by default — visit <code>/docs</code> on a
-running app.</p>
-<h2 id="what-this-is-and-what-it-deliberately-isnt">What this is, and what it deliberately isn't<a class="headerlink" href="#what-this-is-and-what-it-deliberately-isnt" title="Permanent link">&para;</a></h2>
-<p>This is <strong>not</strong> FastAPI-style automatic request/response validation from
-type hints. A Zeython handler takes a plain <code>request</code> and calls
-<code>request.json()</code> itself; a model validates via <code>__rules__</code>
-(see <a href="../validation/">Validation</a>), not a typed request model. Rearchitecting
-that to get automatic schema inference the way FastAPI does would be a much
-bigger, separate change — and would fight the framework's existing
-conventions rather than describe them.</p>
-<p>What this module actually does: read the routes registered on
-<code>app.router</code> (the same technique the <a href="../ai-agents/">AI Agents</a> MCP server's
-<code>list_routes</code> uses) and build an OpenAPI document from them. Every route
-appears, even with no annotation at all — with a generic "Successful
-response" 200. The optional <code>@describe(...)</code> decorator is how you give a
-route a real summary, tags, or request/response schema instead.</p>
+<h1 id="maintenance-mode">Maintenance Mode<a class="headerlink" href="#maintenance-mode" title="Permanent link">&para;</a></h1>
+<p>Take the whole app offline for a deploy or a risky migration without
+stopping the process -- <code>zeython down</code> writes a flag file
+(<code>storage/framework/down.json</code>); <code>zeython up</code> removes it. Mirrors
+Laravel's <code>artisan down</code>/<code>up</code> closely, including the bypass mechanism for
+checking the site yourself while it's "down" for everyone else.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>Registered by default in a generated project:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">OpenApiServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">app_name</span><span class="p">))</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">MaintenanceModeServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># ... every other app.register(...) call ...</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">MaintenanceModeServiceProvider</span><span class="p">)</span>  <span class="c1"># keep this last -- see below</span>
 </span></code></pre></div>
-<p>Visit <code>/docs</code> for the Swagger UI, <code>/openapi.json</code> for the raw spec.</p>
-<h2 id="describing-a-route">Describing a route<a class="headerlink" href="#describing-a-route" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.openapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">model_schema</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.post</span><span class="w"> </span><span class="kn">import</span> <span class="n">Post</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">_POST_SCHEMA</span> <span class="o">=</span> <span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">PostController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nd">@describe</span><span class="p">(</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">summary</span><span class="o">=</span><span class="s2">"List posts"</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"posts"</span><span class="p">],</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="mi">200</span><span class="p">:</span> <span class="p">{</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The post list"</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"application/json"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"array"</span><span class="p">,</span> <span class="s2">"items"</span><span class="p">:</span> <span class="n">_POST_SCHEMA</span><span class="p">}}},</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="p">}},</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">)</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
+<p>A generated project already has this registered, as the very last line in
+<code>main.py</code> -- deliberately last, because the most recently registered
+middleware wraps <strong>outermost</strong>, and maintenance mode needs to intercept a
+request before anything else runs, including opening a database session.
+That matters most exactly when this feature is useful: a migration in
+progress, a database that's briefly unreachable. If you add your own
+middleware-registering provider later, put it <em>above</em> this line, not
+below it.</p>
+<p>Its own <code>boot()</code> is a no-op unless the flag file exists, so it's safe to
+always register -- the same reasoning <code>RequestIdServiceProvider</code> relies
+on. With the app up, every request pays one <code>Path.exists()</code> call and
+nothing else changes.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>zeython<span class="w"> </span>down
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>zeython<span class="w"> </span>down<span class="w"> </span>--message<span class="w"> </span><span class="s2">"Deploying, back in 5 minutes"</span><span class="w"> </span>--retry<span class="w"> </span><span class="m">300</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>zeython<span class="w"> </span>down<span class="w"> </span>--allow<span class="w"> </span><span class="m">1</span>.2.3.4<span class="w"> </span>--allow<span class="w"> </span><span class="m">5</span>.6.7.8<span class="w">   </span><span class="c1"># these IPs see the app normally</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>zeython<span class="w"> </span>up
 </span></code></pre></div>
-<p><code>@describe</code> works on both function-based routes and <code>Controller</code> methods —
-it attaches to the underlying function, and Python's bound-method attribute
-lookup falls through to it automatically, so it survives being wrapped as
-<code>instance.index</code> inside <code>Router.resource()</code>.</p>
-<h2 id="model_schema"><code>model_schema()</code><a class="headerlink" href="#model_schema" title="Permanent link">&para;</a></h2>
-<p>A convenience for building the JSON Schema fragments <code>@describe</code> takes,
-from a model's actual mapped columns:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># {"type": "object", "properties": {"id": {"type": "integer"}, "title": {"type": "string"}, ...}, "required": [...]}</span>
+<p>While down, every other request gets:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>HTTP/1.1 503 Service Unavailable
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Retry-After: 300
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Content-Type: application/json
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>{"message": "Deploying, back in 5 minutes", "status": 503}
 </span></code></pre></div>
-<p>Automatically excludes <code>__hidden__</code> fields (<code>password_hash</code>, etc.) — the
-same fields <code>to_dict()</code> never serializes shouldn't show up as "here's the
-shape of this response" either. This is documentation, generated once when
-the module loads — nothing checks an actual response body against it at
-request time.</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>OPENAPI_ENABLED=true       # false to register the provider without exposing the routes
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>OPENAPI_JSON_PATH=/openapi.json
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>OPENAPI_DOCS_PATH=/docs
+<p><code>Retry-After</code> is only sent when <code>--retry</code> was given -- a client (or a
+load balancer/CDN in front of the app) that respects it backs off for
+that many seconds before trying again.</p>
+<p>The flag file is read fresh on every request, not cached in memory --
+<code>zeython up</code> takes effect on the very next request, no process restart
+needed either way.</p>
+<h2 id="checking-the-site-yourself-while-its-down">Checking the site yourself while it's down<a class="headerlink" href="#checking-the-site-yourself-while-its-down" title="Permanent link">&para;</a></h2>
+<p><code>zeython down</code> prints a bypass URL:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Application is now in maintenance mode.
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  Bypass URL: /Xt3k9f...  (visiting it once sets a cookie for this browser)
 </span></code></pre></div>
-<p>Set <code>OPENAPI_ENABLED=false</code> to keep <code>generate_openapi()</code> usable
-programmatically (e.g. to write <code>openapi.json</code> to a file as part of a
-build step) without exposing <code>/docs</code>/<code>/openapi.json</code> over HTTP — a
-reasonable choice in production if you don't want your API surface
-publicly browsable.</p>
-<p>Swagger UI loads from a CDN (<code>swagger-ui-dist</code>), same zero-setup approach
-as <a href="../frontend/">the Tailwind welcome page</a> — but unlike Tailwind's Play
-CDN, this is a static asset bundle, not something recompiled on every
-page load, so there's no dev-only caveat here.</p>
-<h2 id="scope-limits">Scope limits<a class="headerlink" href="#scope-limits" title="Permanent link">&para;</a></h2>
+<p>Visit it once in a browser and every subsequent request from that browser
+skips the 503 -- useful for smoke-testing a deploy against the real app
+before flipping it back up for everyone else. Pass <code>--secret</code> to choose
+your own bypass token instead of the generated one.</p>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
+<p>Only HTTP requests are affected -- a WebSocket connection isn't checked
+against maintenance mode. Only the process(es) that see the flag file are
+affected: on a multi-instance deployment where each instance has its own
+local filesystem, <code>zeython down</code> needs to run against each one (or the
+flag file needs to live on shared storage) -- the same file-based
+limitation Laravel's own <code>artisan down</code> has by default.</p>
 <ul>
-<li>Routes mounted via <code>Router.mount()</code>/<code>.include()</code> (<code>StaticFiles</code>, a nested
-  sub-router) aren't recursed into and don't appear in the spec — directly
-  registered routes only.</li>
-<li>Path parameters get a schema from a Starlette type converter if you used
-  one (<code>{id:int}</code> → <code>integer</code>); an untyped <code>{id}</code> defaults to <code>string</code>.</li>
-<li>There's no request-body <em>validation</em> here, only <em>documentation</em> — the
-  <code>request_body</code>/<code>responses</code> you pass to <code>@describe</code> describe what your
-  handler is supposed to do, and nothing enforces that it matches.</li>
+<li><code>MAINTENANCE_STORE_PATH</code> -- default <code>storage/framework/down.json</code>,
+  relative to the project root.</li>
 </ul>
 
 
@@ -2900,7 +2840,7 @@ page load, so there's no dev-only caveat here.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../multi-tenancy/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Multi-Tenancy">
+          <a href="../health-check/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Health Check">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2910,20 +2850,20 @@ page load, so there's no dev-only caveat here.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Multi-Tenancy
+                Health Check
               </div>
             </div>
           </a>
         
         
           
-          <a href="../api-standards/" class="md-footer__link md-footer__link--next" aria-label="Next: API Standards">
+          <a href="../observability/" class="md-footer__link md-footer__link--next" aria-label="Next: Observability">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                API Standards
+                Observability
               </div>
             </div>
             <div class="md-footer__button md-icon">

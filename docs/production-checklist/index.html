@@ -2075,6 +2075,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../maintenance-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintenance Mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../observability/" class="md-nav__link">
         
   
@@ -2825,6 +2853,9 @@ second replica, a new external API) that changes the answer.</p>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Migrations are applied</strong>, not just written --
   <code>alembic upgrade head</code> (the generated Docker image's <code>CMD</code> does this
   for you on a single-container deploy; see <a href="../docker/">Docker</a>).</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A risky migration or deploy goes through <code>zeython down</code>/<code>up</code></strong>,
+  not straight into production traffic against a half-migrated schema --
+  see <a href="../maintenance-mode/">Maintenance Mode</a>.</li>
 </ul>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <ul class="task-list">

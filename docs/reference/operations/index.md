@@ -1,6 +1,6 @@
 # Operations
 
-Health checks, structured logging, error monitoring (Sentry), caching, and file storage.
+Health checks, maintenance mode, structured logging, error monitoring (Sentry), caching, and file storage.
 
 ## health
 
@@ -30,6 +30,132 @@ def __init__(self, app: Application) -> None:
     self.app = app
     self.container = app.container
     self.config = app.config
+```
+
+## maintenance
+
+Maintenance mode: take the whole app offline for a deploy or a risky migration without stopping the process. `zeython down` writes a flag file this middleware checks on every request; `zeython up` removes it. Mirrors Laravel's `artisan down`/`up` closely, including the bypass-secret mechanism for checking the site while it's "down" for everyone else.
+
+### MaintenanceModeMiddleware
+
+```python
+MaintenanceModeMiddleware(app: Any, *, store_path: Path)
+```
+
+Pure ASGI middleware: while the flag file is present, every request gets a `503` -- except one from an allowed IP, or one carrying a valid bypass (a cookie set by visiting `/<secret>` once).
+
+Reads the flag file fresh on every request rather than caching its contents in memory: `zeython up` removing the file must take effect on the very next request, not after a process restart, and the read itself is cheap -- a single `Path.exists()` call is the entire cost once the app isn't down.
+
+Source code in `src/zeython/maintenance.py`
+
+```python
+def __init__(self, app: Any, *, store_path: Path) -> None:
+    self.app = app
+    self.store_path = store_path
+```
+
+### MaintenanceModeServiceProvider
+
+```python
+MaintenanceModeServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Registers :class:`MaintenanceModeMiddleware`.
+
+Safe to always register, the same reasoning :class:`~zeython.request_id.RequestIdServiceProvider` relies on: with no flag file present (the default), every request pays one `Path.exists()` call and nothing else changes. `zeython down` creates that file; `zeython up` removes it -- no process restart needed either way, since the middleware reads it fresh every time.
+
+Register this **last**, after every other provider that adds middleware (`DatabaseServiceProvider` included) -- the most recently registered middleware wraps outermost, and maintenance mode needs to intercept a request before anything else runs, including opening a database session. That matters most exactly when this feature is useful: a migration in progress, a database that's briefly down.
+
+- `MAINTENANCE_STORE_PATH` -- default `storage/framework/down.json`, relative to the project root.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### maintenance_store_path
+
+```python
+maintenance_store_path(
+    base_path: Path, configured: str | None
+) -> Path
+```
+
+Resolve the flag-file path, relative to `base_path` unless already absolute.
+
+Source code in `src/zeython/maintenance.py`
+
+```python
+def maintenance_store_path(base_path: Path, configured: str | None) -> Path:
+    """Resolve the flag-file path, relative to ``base_path`` unless already absolute."""
+    path = Path(configured or DEFAULT_STORE_PATH)
+    return path if path.is_absolute() else base_path / path
+```
+
+### enable_maintenance_mode
+
+```python
+enable_maintenance_mode(
+    store_path: Path,
+    *,
+    message: str | None = None,
+    retry: int | None = None,
+    allowed_ips: list[str] | None = None,
+    secret: str | None = None,
+) -> str
+```
+
+Write the maintenance flag file. Returns the bypass secret in effect (either the one passed in, or a freshly generated one).
+
+Source code in `src/zeython/maintenance.py`
+
+```python
+def enable_maintenance_mode(
+    store_path: Path,
+    *,
+    message: str | None = None,
+    retry: int | None = None,
+    allowed_ips: list[str] | None = None,
+    secret: str | None = None,
+) -> str:
+    """Write the maintenance flag file. Returns the bypass secret in effect
+    (either the one passed in, or a freshly generated one)."""
+    secret = secret or secrets.token_urlsafe(16)
+    payload: dict[str, Any] = {
+        "message": message or "Be right back.",
+        "retry": retry,
+        "allowed_ips": allowed_ips or [],
+        "secret": secret,
+        "since": time.time(),
+    }
+    store_path.parent.mkdir(parents=True, exist_ok=True)
+    store_path.write_text(json.dumps(payload))
+    return secret
+```
+
+### disable_maintenance_mode
+
+```python
+disable_maintenance_mode(store_path: Path) -> bool
+```
+
+Remove the maintenance flag file. Returns `False` if it wasn't there.
+
+Source code in `src/zeython/maintenance.py`
+
+```python
+def disable_maintenance_mode(store_path: Path) -> bool:
+    """Remove the maintenance flag file. Returns ``False`` if it wasn't there."""
+    if not store_path.exists():
+        return False
+    store_path.unlink()
+    return True
 ```
 
 ## logging

@@ -1700,6 +1700,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#maintenance-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tinker-interactive-repl" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2212,6 +2223,34 @@
     
   
     Health Check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maintenance-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintenance Mode
   
 
     
@@ -2809,6 +2848,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#maintenance-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tinker-interactive-repl" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2904,19 +2954,25 @@ for a separate process to pull from. See <a href="../queues/#queue_driverredis-a
 not something separately maintained that can drift from it. An AI coding
 agent working in your project gets the same information through
 <code>zeython mcp</code>'s <code>list_routes</code>/<code>app_info</code> tools -- see <a href="../ai-agents/">AI Agents</a>.</p>
+<h2 id="maintenance-mode">Maintenance mode<a class="headerlink" href="#maintenance-mode" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>zeython<span class="w"> </span>down<span class="w">                           </span><span class="c1"># every request gets a 503 until `zeython up`</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>zeython<span class="w"> </span>down<span class="w"> </span>--message<span class="w"> </span><span class="s2">"Deploying, back in 5"</span><span class="w"> </span>--retry<span class="w"> </span><span class="m">300</span><span class="w"> </span>--allow<span class="w"> </span><span class="m">1</span>.2.3.4
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>zeython<span class="w"> </span>up<span class="w">                             </span><span class="c1"># bring the app back</span>
+</span></code></pre></div>
+<p>See <a href="../maintenance-mode/">Maintenance Mode</a>.</p>
 <h2 id="tinker-interactive-repl">Tinker (interactive REPL)<a class="headerlink" href="#tinker-interactive-repl" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>zeython<span class="w"> </span>tinker
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>zeython<span class="w"> </span>tinker
 </span></code></pre></div>
 <p>Drops into a Python REPL with your app, container, config, and every
 <code>Model</code> subclass in <code>app/Models/</code> already imported by name -- mirrors
 Laravel's <code>artisan tinker</code>. Wrap an async call in <code>run(...)</code> to execute
 it; each one commits immediately on success (or rolls back on an
 exception), the same as a real request:</p>
-<div class="language-pycon highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="go">[&lt;Post id=1&gt;, &lt;Post id=2&gt;]</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">))</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello, world"</span><span class="p">))</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span>
+<div class="language-pycon highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="go">[&lt;Post id=1&gt;, &lt;Post id=2&gt;]</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">))</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello, world"</span><span class="p">))</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span>
 </span></code></pre></div>
 <p><code>app</code>/<code>container</code>/<code>config</code> are also in scope, for anything that needs
 them directly (<code>container.make(SomeService)</code>, <code>config.get("app.debug")</code>).</p>

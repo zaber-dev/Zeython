@@ -86,6 +86,16 @@ zeython about                          # app name, environment, debug flag, Zeyt
 
 Both read your project the same way `zeython serve` does (they import `main.py`), so what they report is exactly what's actually wired up -- not something separately maintained that can drift from it. An AI coding agent working in your project gets the same information through `zeython mcp`'s `list_routes`/`app_info` tools -- see [AI Agents](https://zeython.zaber.dev/docs/ai-agents/index.md).
 
+## Maintenance mode
+
+```bash
+zeython down                           # every request gets a 503 until `zeython up`
+zeython down --message "Deploying, back in 5" --retry 300 --allow 1.2.3.4
+zeython up                             # bring the app back
+```
+
+See [Maintenance Mode](https://zeython.zaber.dev/docs/maintenance-mode/index.md).
+
 ## Tinker (interactive REPL)
 
 ```bash

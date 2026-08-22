@@ -8,6 +8,7 @@ Everything below is documented in its own page already -- this is the one-page i
 - **`APP_SECRET_KEY` is a real, unique secret**, not the value `zeython new` generated for local dev committed into version control. It signs the session cookie -- see [Authentication](https://zeython.zaber.dev/docs/authentication/index.md).
 - **`DATABASE_URL` points at a real database**, not the default SQLite file. SQLite is fine for a single-container demo; anything with more than one app replica needs Postgres/MySQL so writes are visible across processes. See [Database & Migrations](https://zeython.zaber.dev/docs/database/index.md).
 - **Migrations are applied**, not just written -- `alembic upgrade head` (the generated Docker image's `CMD` does this for you on a single-container deploy; see [Docker](https://zeython.zaber.dev/docs/docker/index.md)).
+- **A risky migration or deploy goes through `zeython down`/`up`**, not straight into production traffic against a half-migrated schema -- see [Maintenance Mode](https://zeython.zaber.dev/docs/maintenance-mode/index.md).
 
 ## Security
 
