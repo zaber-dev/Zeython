@@ -52,10 +52,11 @@ fetch("/posts", {
 });
 ```
 
-The **first** unsafe request after a client has never talked to your app
-before will fail — there's no cookie to read yet. Make any safe (`GET`)
-request first (loading the page itself counts), the same way Django's and
-Laravel's equivalents work.
+!!! warning "The first request from a new client must be a safe one"
+    The **first** unsafe request after a client has never talked to your
+    app before will fail — there's no cookie to read yet. Make any safe
+    (`GET`) request first (loading the page itself counts), the same way
+    Django's and Laravel's equivalents work.
 
 ## What's exempt
 
@@ -86,12 +87,15 @@ app.register(AuthServiceProvider(app, user_model=User))
 
 Configurable via `.env`:
 
-- `CSRF_ENABLED` — default `true`. Turning it off is rarely the right
-  call, since it's exactly what makes cookie-based auth safe to use from
-  a browser — a pure mobile/native client that never runs in a browser
-  context is the one legitimate reason to.
+- `CSRF_ENABLED` — default `true`.
 - `CSRF_COOKIE_NAME` — default `csrf_token`.
 - `CSRF_HEADER_NAME` — default `X-CSRF-Token`.
+
+!!! danger "Think twice before setting CSRF_ENABLED=false"
+    Turning it off is rarely the right call, since it's exactly what makes
+    cookie-based auth safe to use from a browser — a pure mobile/native
+    client that never runs in a browser context is the one legitimate
+    reason to.
 
 Using `CsrfMiddleware` standalone, without `AuthServiceProvider` (a
 generic double-submit-cookie check with no auth-awareness, protecting
