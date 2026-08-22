@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/caching/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/events/">
       
       
-        <link rel="prev" href="../mail/">
+        <link rel="prev" href="../localization/">
       
       
-        <link rel="next" href="../redis/">
+        <link rel="next" href="../queues/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Caching - Zeython Docs</title>
+        <title>Events - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#caching" class="md-skip">
+        <a href="#events" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Caching
+              Events
             
           </span>
         </div>
@@ -1650,10 +1650,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../events/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1669,6 +1696,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-and-dispatching-an-event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defining and dispatching an event
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registering-listeners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registering listeners
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registering listeners">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-decorator-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The decorator form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-listeners-and-what-happens-when-one-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple listeners, and what happens when one fails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events-vs-background-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Events vs. background jobs
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1790,37 +1909,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Caching
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../caching/" class="md-nav__link">
         
   
   
@@ -1836,59 +1928,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-basics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The basics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#remember-the-common-case" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        remember(): the common case
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-default-cache-is-process-local" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The default cache is process-local
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2605,10 +2644,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-basics" class="md-nav__link">
+  <a href="#why-this-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The basics
+        Why this exists
       
     </span>
   </a>
@@ -2616,10 +2655,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#remember-the-common-case" class="md-nav__link">
+  <a href="#defining-and-dispatching-an-event" class="md-nav__link">
     <span class="md-ellipsis">
       
-        remember(): the common case
+        Defining and dispatching an event
       
     </span>
   </a>
@@ -2627,10 +2666,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-default-cache-is-process-local" class="md-nav__link">
+  <a href="#registering-listeners" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The default cache is process-local
+        Registering listeners
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registering listeners">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-decorator-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The decorator form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-listeners-and-what-happens-when-one-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple listeners, and what happens when one fails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events-vs-background-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Events vs. background jobs
       
     </span>
   </a>
@@ -2654,7 +2732,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/caching.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/events.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2662,55 +2740,115 @@
   
 
 
-<h1 id="caching">Caching<a class="headerlink" href="#caching" title="Permanent link">&para;</a></h1>
-<p><code>zeython.cache</code> gives you a <code>Cache</code> bound in the container — an in-memory
-TTL cache by default — with <code>get</code>/<code>put</code>/<code>forget</code>/<code>has</code>/<code>flush</code>, plus
-<code>remember()</code> for the common "check the cache, else compute and store"
-pattern.</p>
-<h2 id="the-basics">The basics<a class="headerlink" href="#the-basics" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">cache</span><span class="p">:</span> <span class="n">Cache</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Cache</span><span class="p">)</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># expires in 60 seconds</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>                    <span class="c1"># "hello"</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing"</span><span class="p">,</span> <span class="s2">"default"</span><span class="p">)</span>           <span class="c1"># "default"</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>                     <span class="c1"># True</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">forget</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>
+<h1 id="events">Events<a class="headerlink" href="#events" title="Permanent link">&para;</a></h1>
+<p><code>zeython.events</code> gives you an <code>EventDispatcher</code> -- decoupled listeners
+reacting to an application-defined event (<code>OrderPlaced</code>, <code>UserRegistered</code>,
+...) without the code that raises it needing to know who's listening.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>A controller that creates a user often needs to do more than one thing in
+response: send a welcome email, write an audit log entry, sync a CRM,
+notify a Slack channel. Cramming all of that into the controller works at
+first, then turns it into a dumping ground every unrelated feature has to
+edit. An event lets the controller announce <em>what happened</em> once, and any
+number of independent listeners decide what to do about it -- adding a new
+reaction never means touching the controller again.</p>
+<p>This is deliberately separate from <a href="../model-events/">Model Events</a>'s
+<code>Observer</code> classes: an Observer reacts to one model's own lifecycle
+(<code>creating</code>, <code>updated</code>, <code>deleted</code>); an event here can be anything your
+application defines, dispatched from anywhere -- a controller, a job, a
+scheduled task, even a model hook itself.</p>
+<h2 id="defining-and-dispatching-an-event">Defining and dispatching an event<a class="headerlink" href="#defining-and-dispatching-an-event" title="Permanent link">&para;</a></h2>
+<p>An event is just a plain class -- a dataclass is the natural fit:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Events/order_placed.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nd">@dataclass</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">OrderPlaced</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">total_cents</span><span class="p">:</span> <span class="nb">int</span>
 </span></code></pre></div>
-<p><code>ttl</code> is in seconds; omit it (or pass <code>None</code>) for an entry that never
-expires on its own. There's no proactive sweep — an expired entry is
-evicted the next time it's read, not the moment it expires.</p>
-<h2 id="remember-the-common-case"><code>remember()</code>: the common case<a class="headerlink" href="#remember-the-common-case" title="Permanent link">&para;</a></h2>
-<p>Most caching is "check the cache; on a miss, compute the value and store
-it" — <code>remember()</code> is that in one call:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remember</span><span class="p">(</span><span class="s2">"posts:recent"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">fetch_recent_posts</span><span class="p">())</span>
+<p>Dispatch it with <code>emit()</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Events.order_placed</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderPlaced</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">order</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Order</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">await</span> <span class="n">emit</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">OrderPlaced</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total_cents</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">total_cents</span><span class="p">))</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">201</span><span class="p">)</span>
 </span></code></pre></div>
-<p>The callback only runs on a miss. <code>zeython new</code> wires this into the
-generated <code>PostController.index</code> — the post list is cached for 30 seconds
-and invalidated (<code>cache.forget(...)</code>) whenever a post is created, so reads
-stay fast without serving stale data past a create:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">cache</span><span class="p">:</span> <span class="n">Cache</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Cache</span><span class="p">)</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">():</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="k">return</span> <span class="p">[</span><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span> <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">]</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remember</span><span class="p">(</span><span class="s2">"posts:index"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">fetch</span><span class="p">))</span>
+<p>Outside of a request -- a job, a scheduled task, a model hook -- dispatch
+directly against a resolved dispatcher instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventDispatcher</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">dispatcher</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">EventDispatcher</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">await</span> <span class="n">dispatcher</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">OrderPlaced</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">total_cents</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">total_cents</span><span class="p">))</span>
 </span></code></pre></div>
-<h2 id="the-default-cache-is-process-local">The default cache is process-local<a class="headerlink" href="#the-default-cache-is-process-local" title="Permanent link">&para;</a></h2>
-<p><code>InMemoryCache</code> lives in this process's memory — correct and fast for a
-single worker, and a real limitation once you run multiple worker
-processes or machines: each caches independently, so a <code>put</code> in one worker
-isn't visible to a request served by another. Same trade-off as
-<code>RateLimiter</code> and the default <code>Queue</code>. For a shared cache, implement
-<code>Cache</code> against a real backend (Redis is the usual choice) and bind it in
-place of the default:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Cache</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyRedisCache</span><span class="p">(</span><span class="n">redis_client</span><span class="p">))</span>
+<h2 id="registering-listeners">Registering listeners<a class="headerlink" href="#registering-listeners" title="Permanent link">&para;</a></h2>
+<p>A listener is a plain function (sync or async) whose first parameter
+receives the event; any other parameters are resolved from the container,
+the same way <code>Job.handle()</code>'s are:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># app/Listeners/send_receipt_email.py</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mailer</span><span class="p">,</span> <span class="n">Message</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Events.order_placed</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderPlaced</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_receipt_email</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">OrderPlaced</span><span class="p">,</span> <span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">Message</span><span class="p">(</span><span class="n">to</span><span class="o">=...</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"Your receipt"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Order #</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">order_id</span><span class="si">}</span><span class="s2">"</span><span class="p">))</span>
 </span></code></pre></div>
+<p>Register listeners in a <code>ServiceProvider</code> subclassing <code>EventServiceProvider</code>
+-- <code>super().boot()</code> first, since that's what actually binds the
+<code>EventDispatcher</code> this then adds listeners to:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># app/Providers/app_event_service_provider.py</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventDispatcher</span><span class="p">,</span> <span class="n">EventServiceProvider</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Events.order_placed</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderPlaced</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Listeners.send_receipt_email</span><span class="w"> </span><span class="kn">import</span> <span class="n">send_receipt_email</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Listeners.notify_fulfillment_webhook</span><span class="w"> </span><span class="kn">import</span> <span class="n">notify_fulfillment_webhook</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">AppEventServiceProvider</span><span class="p">(</span><span class="n">EventServiceProvider</span><span class="p">):</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">boot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">boot</span><span class="p">()</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">dispatcher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">EventDispatcher</span><span class="p">)</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">dispatcher</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">OrderPlaced</span><span class="p">,</span> <span class="n">send_receipt_email</span><span class="p">)</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="n">dispatcher</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">OrderPlaced</span><span class="p">,</span> <span class="n">notify_fulfillment_webhook</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AppEventServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+</span></code></pre></div>
+<p>A generated project already has this wired up for <code>UserRegistered</code>,
+dispatched from <code>AuthController.register</code> alongside the welcome-email job
+-- see <code>app/Events/</code>, <code>app/Listeners/</code>, and
+<code>app/Providers/app_event_service_provider.py</code>.</p>
+<h3 id="the-decorator-form">The decorator form<a class="headerlink" href="#the-decorator-form" title="Permanent link">&para;</a></h3>
+<p>For a quick one-off listener, <code>.on()</code> works as a decorator instead of a
+separate <code>.listen()</code> call:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nd">@dispatcher</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">OrderPlaced</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">log_order</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">OrderPlaced</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"order placed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="multiple-listeners-and-what-happens-when-one-fails">Multiple listeners, and what happens when one fails<a class="headerlink" href="#multiple-listeners-and-what-happens-when-one-fails" title="Permanent link">&para;</a></h2>
+<p>Every listener registered for an event's type runs, in registration order.
+A listener's own exception is logged and reported (see
+<a href="../error-monitoring/">Error Monitoring</a> -- it's a no-op if Sentry isn't
+configured), <strong>not</strong> raised: one broken listener (a webhook that's down, a
+typo in an audit-log write) doesn't stop the others from running. You
+wouldn't want a failed Slack notification to also silently swallow the
+receipt email.</p>
+<p>If a listener genuinely needs to block the request until it's done and
+fail loudly if it can't, call it directly instead of going through the
+dispatcher -- events are for reactions that can fail independently of the
+thing that triggered them.</p>
+<h2 id="events-vs-background-jobs">Events vs. background jobs<a class="headerlink" href="#events-vs-background-jobs" title="Permanent link">&para;</a></h2>
+<p>They compose, they don't replace each other. <code>emit()</code> calls every listener
+<strong>inline</strong>, in the current request -- fine for fast, in-process work (an
+audit-log write, updating an in-memory cache). For anything slower (an
+actual outbound email send, a real webhook call), dispatch a
+<a href="../queues/">background job</a> from inside the listener, or dispatch the job
+directly instead of using an event at all if there's only ever going to be
+one reaction. The starter scaffold's <code>UserRegistered</code> listener is the
+cheap, synchronous case (a log line); the actual welcome email is a
+separately-dispatched job, run by a worker, not a listener.</p>
 
 
 
@@ -2746,7 +2884,7 @@ place of the default:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../mail/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Mail">
+          <a href="../localization/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Localization">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2756,20 +2894,20 @@ place of the default:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Mail
+                Localization
               </div>
             </div>
           </a>
         
         
           
-          <a href="../redis/" class="md-footer__link md-footer__link--next" aria-label="Next: Redis (Distributed)">
+          <a href="../queues/" class="md-footer__link md-footer__link--next" aria-label="Next: Background Jobs">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Redis (Distributed)
+                Background Jobs
               </div>
             </div>
             <div class="md-footer__button md-icon">

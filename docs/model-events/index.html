@@ -1755,6 +1755,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -2758,6 +2786,9 @@ fire after the model's own same-named hook, in the order shown above.</p>
 don't belong on the model, not a place to move logic that does. If a hook
 is really about the model's own data (deriving a field, normalizing input
 before validation), keep it a method on the model, not an observer.</p>
+<p>It's also not for application-defined events that aren't tied to a
+specific model's lifecycle at all (<code>OrderPlaced</code>, a scheduled report
+finishing) — see <a href="../events/">Events</a> for those.</p>
 
 
 

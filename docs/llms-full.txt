@@ -1402,6 +1402,8 @@ Post.observe(PostSearchIndexObserver)
 
 An observer doesn't replace a model's own hooks — it's for reactions that don't belong on the model, not a place to move logic that does. If a hook is really about the model's own data (deriving a field, normalizing input before validation), keep it a method on the model, not an observer.
 
+It's also not for application-defined events that aren't tied to a specific model's lifecycle at all (`OrderPlaced`, a scheduled report finishing) — see [Events](https://zeython.zaber.dev/docs/events/index.md) for those.
+
 # Database Factories & Seeders
 
 A fresh `zeython db migrate` gives you empty tables. Getting from there to something a developer can actually click around in -- an admin user, a handful of demo posts -- or a fixed reference row production genuinely needs, is what factories and seeders are for.
@@ -2772,6 +2774,111 @@ translator = app.container.make(Translator)
 translator.t("welcome.title", locale="es")
 ```
 
+# Events
+
+`zeython.events` gives you an `EventDispatcher` -- decoupled listeners reacting to an application-defined event (`OrderPlaced`, `UserRegistered`, ...) without the code that raises it needing to know who's listening.
+
+## Why this exists
+
+A controller that creates a user often needs to do more than one thing in response: send a welcome email, write an audit log entry, sync a CRM, notify a Slack channel. Cramming all of that into the controller works at first, then turns it into a dumping ground every unrelated feature has to edit. An event lets the controller announce *what happened* once, and any number of independent listeners decide what to do about it -- adding a new reaction never means touching the controller again.
+
+This is deliberately separate from [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)'s `Observer` classes: an Observer reacts to one model's own lifecycle (`creating`, `updated`, `deleted`); an event here can be anything your application defines, dispatched from anywhere -- a controller, a job, a scheduled task, even a model hook itself.
+
+## Defining and dispatching an event
+
+An event is just a plain class -- a dataclass is the natural fit:
+
+```python
+# app/Events/order_placed.py
+from dataclasses import dataclass
+
+@dataclass
+class OrderPlaced:
+    order_id: int
+    total_cents: int
+```
+
+Dispatch it with `emit()`:
+
+```python
+from zeython.events import emit
+
+from app.Events.order_placed import OrderPlaced
+
+async def store(self, request):
+    order = await Order.create(...)
+    await emit(request, OrderPlaced(order_id=order.id, total_cents=order.total_cents))
+    return JSONResponse(order.to_dict(), status_code=201)
+```
+
+Outside of a request -- a job, a scheduled task, a model hook -- dispatch directly against a resolved dispatcher instead:
+
+```python
+from zeython.events import EventDispatcher
+
+dispatcher = app.container.make(EventDispatcher)
+await dispatcher.dispatch(OrderPlaced(order_id=order.id, total_cents=order.total_cents))
+```
+
+## Registering listeners
+
+A listener is a plain function (sync or async) whose first parameter receives the event; any other parameters are resolved from the container, the same way `Job.handle()`'s are:
+
+```python
+# app/Listeners/send_receipt_email.py
+from zeython import Mailer, Message
+
+from app.Events.order_placed import OrderPlaced
+
+async def send_receipt_email(event: OrderPlaced, mailer: Mailer) -> None:
+    await mailer.send(Message(to=..., subject="Your receipt", body=f"Order #{event.order_id}"))
+```
+
+Register listeners in a `ServiceProvider` subclassing `EventServiceProvider` -- `super().boot()` first, since that's what actually binds the `EventDispatcher` this then adds listeners to:
+
+```python
+# app/Providers/app_event_service_provider.py
+from zeython import EventDispatcher, EventServiceProvider
+
+from app.Events.order_placed import OrderPlaced
+from app.Listeners.send_receipt_email import send_receipt_email
+from app.Listeners.notify_fulfillment_webhook import notify_fulfillment_webhook
+
+class AppEventServiceProvider(EventServiceProvider):
+    def boot(self) -> None:
+        super().boot()
+        dispatcher = self.container.make(EventDispatcher)
+        dispatcher.listen(OrderPlaced, send_receipt_email)
+        dispatcher.listen(OrderPlaced, notify_fulfillment_webhook)
+```
+
+```python
+# main.py
+app.register(AppEventServiceProvider(app))
+```
+
+A generated project already has this wired up for `UserRegistered`, dispatched from `AuthController.register` alongside the welcome-email job -- see `app/Events/`, `app/Listeners/`, and `app/Providers/app_event_service_provider.py`.
+
+### The decorator form
+
+For a quick one-off listener, `.on()` works as a decorator instead of a separate `.listen()` call:
+
+```python
+@dispatcher.on(OrderPlaced)
+async def log_order(event: OrderPlaced) -> None:
+    logger.info("order placed: %s", event.order_id)
+```
+
+## Multiple listeners, and what happens when one fails
+
+Every listener registered for an event's type runs, in registration order. A listener's own exception is logged and reported (see [Error Monitoring](https://zeython.zaber.dev/docs/error-monitoring/index.md) -- it's a no-op if Sentry isn't configured), **not** raised: one broken listener (a webhook that's down, a typo in an audit-log write) doesn't stop the others from running. You wouldn't want a failed Slack notification to also silently swallow the receipt email.
+
+If a listener genuinely needs to block the request until it's done and fail loudly if it can't, call it directly instead of going through the dispatcher -- events are for reactions that can fail independently of the thing that triggered them.
+
+## Events vs. background jobs
+
+They compose, they don't replace each other. `emit()` calls every listener **inline**, in the current request -- fine for fast, in-process work (an audit-log write, updating an in-memory cache). For anything slower (an actual outbound email send, a real webhook call), dispatch a [background job](https://zeython.zaber.dev/docs/queues/index.md) from inside the listener, or dispatch the job directly instead of using an event at all if there's only ever going to be one reaction. The starter scaffold's `UserRegistered` listener is the cheap, synchronous case (a log line); the actual welcome email is a separately-dispatched job, run by a worker, not a listener.
+
 # Background Jobs
 
 `zeython.queue` runs work off the request/response cycle: a `Job` you define, a `dispatch()` call that queues it, and a queue that runs it — `InMemoryQueue` by default, a background `asyncio` task with no framework wiring required.
@@ -4102,7 +4209,7 @@ Most of these classes and functions are also re-exported from the top-level `zey
 
 # Core
 
-The application bootstrap, DI container, config, routing, service providers, view rendering, and the framework's exception/validation primitives.
+The application bootstrap, DI container, config, routing, service providers, the application-level event dispatcher, view rendering, and the framework's exception/validation primitives.
 
 ## application
 
@@ -4535,6 +4642,179 @@ def __init__(self, app: Application) -> None:
     self.app = app
     self.container = app.container
     self.config = app.config
+```
+
+## events
+
+Application-level events: decoupled listeners reacting to a domain event (`OrderPlaced`, `UserRegistered`, ...) without the code that raises it needing to know who's listening.
+
+Deliberately separate from :class:`zeython.db.Observer` -- an Observer reacts to one model's own lifecycle (`creating`, `updated`, ...); an event here can be anything your application defines, dispatched from anywhere (a controller, a job, a scheduled task), with any number of independent listeners reacting to it without editing the code that dispatches it. A common pattern is dispatching an event *from* a model hook (`created()`) once the write itself is the model's own concern but what happens next (send a receipt, notify a webhook, update a search index) isn't.
+
+### EventDispatcher
+
+```python
+EventDispatcher(*, container: Container | None = None)
+```
+
+Maps an event type to the listeners registered for it.
+
+Source code in `src/zeython/events.py`
+
+```python
+def __init__(self, *, container: Container | None = None) -> None:
+    self._listeners: dict[type, list[Listener]] = defaultdict(list)
+    self._container = container
+```
+
+#### listen
+
+```python
+listen(event_type: type[E], listener: Listener) -> None
+```
+
+Register `listener` to run whenever an instance of `event_type` is dispatched.
+
+Source code in `src/zeython/events.py`
+
+```python
+def listen(self, event_type: type[E], listener: Listener) -> None:
+    """Register ``listener`` to run whenever an instance of ``event_type`` is dispatched."""
+    self._listeners[event_type].append(listener)
+```
+
+#### on
+
+```python
+on(event_type: type[E]) -> Callable[[Listener], Listener]
+```
+
+Decorator form of :meth:`listen`::
+
+@dispatcher.on(OrderPlaced) async def send_receipt(event: OrderPlaced) -> None: ...
+
+Source code in `src/zeython/events.py`
+
+```python
+def on(self, event_type: type[E]) -> Callable[[Listener], Listener]:
+    """Decorator form of :meth:`listen`::
+
+        @dispatcher.on(OrderPlaced)
+        async def send_receipt(event: OrderPlaced) -> None:
+            ...
+    """
+
+    def decorator(listener: Listener) -> Listener:
+        self.listen(event_type, listener)
+        return listener
+
+    return decorator
+```
+
+#### listeners_for
+
+```python
+listeners_for(event_type: type) -> list[Listener]
+```
+
+The listeners currently registered for `event_type`, in registration order.
+
+Source code in `src/zeython/events.py`
+
+```python
+def listeners_for(self, event_type: type) -> list[Listener]:
+    """The listeners currently registered for ``event_type``, in registration order."""
+    return list(self._listeners.get(event_type, ()))
+```
+
+#### dispatch
+
+```python
+dispatch(event: object) -> None
+```
+
+Call every listener registered for `type(event)`, in registration order.
+
+A listener's own exception is logged and reported (see :mod:`zeython.error_monitoring`), not raised -- one broken listener (a bad webhook call, a typo in an audit-log write) shouldn't stop the others from running, the same way a failed Slack notification shouldn't also silently swallow the receipt email.
+
+Source code in `src/zeython/events.py`
+
+```python
+async def dispatch(self, event: object) -> None:
+    """Call every listener registered for ``type(event)``, in registration order.
+
+    A listener's own exception is logged and reported (see
+    :mod:`zeython.error_monitoring`), not raised -- one broken listener
+    (a bad webhook call, a typo in an audit-log write) shouldn't stop
+    the others from running, the same way a failed Slack notification
+    shouldn't also silently swallow the receipt email.
+    """
+    for listener in self._listeners.get(type(event), ()):
+        try:
+            await self._invoke(listener, event)
+        except Exception as exc:
+            report_exception(exc, listener=getattr(listener, "__qualname__", repr(listener)))
+            logger.exception("Event listener %r raised while handling %r", listener, event)
+```
+
+### EventServiceProvider
+
+```python
+EventServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Binds an :class:`EventDispatcher` into the container.
+
+Register your own listeners by subclassing and overriding `boot()` (calling `super().boot()` first, so the dispatcher exists) -- registration happens once, at startup, the same way route modules and other providers wire themselves up::
+
+```text
+class AppEventServiceProvider(EventServiceProvider):
+    def boot(self) -> None:
+        super().boot()
+        dispatcher = self.container.make(EventDispatcher)
+        dispatcher.listen(OrderPlaced, send_receipt_email)
+        dispatcher.listen(OrderPlaced, notify_fulfillment_webhook)
+```
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### emit
+
+```python
+emit(request: Request, event: object) -> None
+```
+
+Dispatch `event` to every listener registered for its type.
+
+Uses whichever :class:`EventDispatcher` is bound in the container (see :class:`EventServiceProvider`). Outside of a request -- a job, a scheduled task, a model hook -- dispatch directly against a resolved dispatcher instead::
+
+```text
+await app.container.make(EventDispatcher).dispatch(event)
+```
+
+Source code in `src/zeython/events.py`
+
+```python
+async def emit(request: Request, event: object) -> None:
+    """Dispatch ``event`` to every listener registered for its type.
+
+    Uses whichever :class:`EventDispatcher` is bound in the container (see
+    :class:`EventServiceProvider`). Outside of a request -- a job, a
+    scheduled task, a model hook -- dispatch directly against a resolved
+    dispatcher instead::
+
+        await app.container.make(EventDispatcher).dispatch(event)
+    """
+    dispatcher: EventDispatcher = request.app.state.container.make(EventDispatcher)
+    await dispatcher.dispatch(event)
 ```
 
 ## routing
