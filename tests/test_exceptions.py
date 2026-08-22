@@ -374,3 +374,76 @@ async def test_unhandled_exception_handler_traceback_includes_real_frames_in_deb
     assert "Traceback (most recent call last):" in full_traceback
     assert "_raise" in full_traceback
     assert "ValueError: boom" in full_traceback
+
+
+# -- unhandled_exception_handler: HTML debug page ------------------------------------
+
+
+class _FakeURL:
+    path = "/broken"
+
+
+class _FakeHtmlRequest:
+    method = "GET"
+    url = _FakeURL()
+    headers = {"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
+
+    class app:  # noqa: N801
+        class state:
+            debug = True
+
+
+def _raise_boom() -> None:
+    raise ValueError("boom")
+
+
+async def test_html_debug_page_rendered_for_browser_request_in_debug_mode() -> None:
+    try:
+        _raise_boom()
+    except ValueError as exc:
+        response = await unhandled_exception_handler(_FakeHtmlRequest(), exc)
+
+    assert response.status_code == 500
+    assert response.headers["content-type"].startswith("text/html")
+
+    body = response.body.decode()
+    assert "ValueError" in body
+    assert "boom" in body
+    assert "_raise_boom" in body
+    assert "GET /broken" in body
+
+
+async def test_html_debug_page_omitted_when_debug_is_false() -> None:
+    class _FakeRequest(_FakeHtmlRequest):
+        class app:  # noqa: N801
+            class state:
+                debug = False
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    assert response.headers["content-type"].startswith("application/json")
+
+
+async def test_html_debug_page_omitted_for_non_html_accept_header() -> None:
+    class _FakeRequest(_FakeHtmlRequest):
+        headers = {"accept": "application/json"}
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    assert response.headers["content-type"].startswith("application/json")
+
+
+async def test_problem_json_takes_priority_over_html_debug_page(tmp_path: Path) -> None:
+    (tmp_path / ".env-problem-json-html").write_text("API_PROBLEM_JSON=true\n")
+    config = Config.load(tmp_path, env_file=".env-problem-json-html")
+
+    class _FakeRequest(_FakeHtmlRequest):
+        class app:  # noqa: N801
+            class state:
+                debug = True
+
+    _FakeRequest.app.state.config = config
+
+    response = await unhandled_exception_handler(_FakeRequest(), ValueError("boom"))
+
+    assert response.headers["content-type"].startswith("application/problem+json")
