@@ -70,6 +70,25 @@ async def test_different_keys_are_independent() -> None:
     assert (await limiter.hit("b", limit=3, window=60)).allowed
 
 
+async def test_result_reports_limit_and_reset_after() -> None:
+    clock = _FakeClock()
+    limiter = InMemoryRateLimiter(clock=clock)
+
+    first = await limiter.hit("key", limit=2, window=10)
+    assert first.limit == 2
+    assert first.reset_after == 10  # window resets 10s after this, the only hit so far
+
+    clock.advance(1)
+    second = await limiter.hit("key", limit=2, window=10)
+    assert second.allowed
+    assert second.reset_after == 9  # still measured from the first hit
+
+    denied = await limiter.hit("key", limit=2, window=10)
+    assert not denied.allowed
+    assert denied.limit == 2
+    assert denied.reset_after == denied.retry_after == 9
+
+
 # -- throttle() guard ---------------------------------------------------------------
 
 
@@ -109,6 +128,53 @@ async def test_throttle_returns_429_with_retry_after_header(tmp_path: Path) -> N
     assert response.status_code == 429
     assert "retry-after" in {k.lower() for k in response.headers}
     assert response.json()["status"] == 429
+
+
+async def test_throttle_sets_ratelimit_headers_on_allowed_response(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+
+    @app.get("/ping")
+    async def ping(request):
+        await throttle(request, key="test", limit=3, window=60)
+        return JSONResponse({"ok": True})
+
+    async with client(app) as http:
+        response = await http.get("/ping")
+
+    assert response.headers["X-RateLimit-Limit"] == "3"
+    assert response.headers["X-RateLimit-Remaining"] == "2"
+    assert int(response.headers["X-RateLimit-Reset"]) > 0
+
+
+async def test_throttle_sets_ratelimit_headers_on_429_response(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+
+    @app.get("/ping")
+    async def ping(request):
+        await throttle(request, key="test", limit=1, window=60)
+        return JSONResponse({"ok": True})
+
+    async with client(app) as http:
+        await http.get("/ping")
+        response = await http.get("/ping")
+
+    assert response.status_code == 429
+    assert response.headers["X-RateLimit-Limit"] == "1"
+    assert response.headers["X-RateLimit-Remaining"] == "0"
+    assert int(response.headers["X-RateLimit-Reset"]) > 0
+
+
+async def test_ratelimit_headers_absent_when_throttle_never_called(tmp_path: Path) -> None:
+    app = _make_app(tmp_path)
+
+    @app.get("/ping")
+    async def ping(request):
+        return JSONResponse({"ok": True})
+
+    async with client(app) as http:
+        response = await http.get("/ping")
+
+    assert "X-RateLimit-Limit" not in response.headers
 
 
 async def test_throttle_defaults_to_per_ip_key(tmp_path: Path) -> None:
@@ -157,6 +223,29 @@ async def test_middleware_enforces_blanket_limit_when_enabled(tmp_path: Path) ->
         statuses = [(await http.get("/ping")).status_code for _ in range(4)]
 
     assert statuses == [200, 200, 200, 429]
+
+
+async def test_middleware_sets_ratelimit_headers_on_allowed_and_429_responses(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text(
+        "RATE_LIMIT_ENABLED=true\nRATE_LIMIT_MAX_REQUESTS=2\nRATE_LIMIT_WINDOW_SECONDS=60\n"
+    )
+    app = _make_app(tmp_path)
+
+    @app.get("/ping")
+    async def ping(request):
+        return JSONResponse({"ok": True})
+
+    async with client(app) as http:
+        allowed = await http.get("/ping")
+        await http.get("/ping")
+        denied = await http.get("/ping")
+
+    assert allowed.headers["X-RateLimit-Limit"] == "2"
+    assert allowed.headers["X-RateLimit-Remaining"] == "1"
+
+    assert denied.status_code == 429
+    assert denied.headers["X-RateLimit-Limit"] == "2"
+    assert denied.headers["X-RateLimit-Remaining"] == "0"
 
 
 async def test_rate_limiter_is_available_in_the_container(tmp_path: Path) -> None:
