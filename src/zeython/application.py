@@ -133,7 +133,14 @@ class Application:
     def _build_asgi(self) -> Starlette:
         self.boot()
         app = Starlette(
-            debug=self.config.debug,
+            # Deliberately not self.config.debug: Starlette's own debug=True
+            # makes its ServerErrorMiddleware render its own traceback page
+            # directly for every unhandled exception, bypassing the
+            # Exception handler below entirely -- zeython.exceptions already
+            # implements its own debug-aware behavior (JSON traceback, or an
+            # HTML debug page for a browser request) driven by
+            # app.state.debug below, and that's the one that should run.
+            debug=False,
             routes=self.router.routes,
             middleware=self._middleware,
             exception_handlers=default_exception_handlers(),

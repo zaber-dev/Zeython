@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import html
+import linecache
 import traceback
 from http import HTTPStatus
 from typing import Any
 
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response
 
 from zeython.error_monitoring import report_exception
 from zeython.request_id import request_id
@@ -89,6 +91,139 @@ def _format_traceback(exc: BaseException) -> list[str]:
     return traceback.format_exception(type(exc), exc, exc.__traceback__)
 
 
+def _wants_html(request: Request | None) -> bool:
+    """Whether this looks like a browser navigating directly to a broken page,
+    rather than an API/fetch client -- decides whether debug mode's
+    unhandled-exception page renders as a browsable HTML page (with a real
+    stack trace and source snippets) instead of JSON. A browser's default
+    ``Accept`` header lists ``text/html``; a JSON API client's typically
+    doesn't. ``getattr``-guarded the same way the rest of this module is,
+    since these handlers are also called directly against minimal request
+    doubles in tests.
+    """
+    headers = getattr(request, "headers", None)
+    accept = headers.get("accept", "") if headers is not None else ""
+    return "text/html" in accept
+
+
+_DEBUG_PAGE_CONTEXT_LINES = 5
+
+
+def _frame_snippet(filename: str, lineno: int) -> list[tuple[int, str, bool]]:
+    """Up to ``2 * _DEBUG_PAGE_CONTEXT_LINES + 1`` source lines around
+    ``lineno``, as ``(line_number, text, is_culprit_line)`` -- empty if the
+    source isn't readable (e.g. a file that no longer exists).
+    """
+    start = max(lineno - _DEBUG_PAGE_CONTEXT_LINES, 1)
+    end = lineno + _DEBUG_PAGE_CONTEXT_LINES
+    lines = []
+    for n in range(start, end + 1):
+        text = linecache.getline(filename, n)
+        if not text:
+            continue
+        lines.append((n, text.rstrip("\n"), n == lineno))
+    return lines
+
+
+_DEBUG_PAGE_CSS = """
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #1b1e23; color: #d5d8dc;
+  font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+header {
+  padding: 28px 32px; background: #23272e; border-bottom: 1px solid #33383f;
+}
+header h1 {
+  margin: 0 0 6px; font-size: 22px; color: #ff6b6b;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+header .message { margin: 0 0 4px; font-size: 15px; color: #f0f2f4; }
+header .request-line {
+  margin: 0; color: #8a919c; font-family: ui-monospace, monospace; font-size: 13px;
+}
+main { padding: 20px 32px 60px; }
+.frame {
+  border: 1px solid #33383f; border-radius: 6px; margin-bottom: 10px; overflow: hidden;
+}
+.frame-header {
+  padding: 10px 14px; background: #23272e; cursor: default;
+  display: flex; gap: 10px; align-items: baseline; font-size: 13px; flex-wrap: wrap;
+}
+.frame-index { color: #6b7280; font-family: ui-monospace, monospace; }
+.frame-location {
+  color: #7dd3fc; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.frame-func { color: #9aa1ac; }
+.frame-func strong { color: #d5d8dc; }
+.frame-code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px; background: #17191d;
+}
+.frame-code .line { display: flex; white-space: pre; }
+.frame-code .lineno {
+  flex: 0 0 48px; text-align: right; padding: 1px 12px 1px 0;
+  color: #565d68; user-select: none; border-right: 1px solid #262a31;
+}
+.frame-code .code { padding: 1px 14px; white-space: pre-wrap; word-break: break-all; }
+.frame-code .line.culprit { background: #3a1f24; }
+.frame-code .line.culprit .lineno { color: #ff8f8f; }
+footer {
+  padding: 16px 32px; color: #6b7280; font-size: 12px;
+  border-top: 1px solid #33383f;
+}
+"""
+
+
+def _render_debug_html(request: Request, exc: BaseException) -> str:
+    """A Laravel/Django-style debug page: exception, request line, and every
+    stack frame with a source-code snippet around the culprit line -- shown
+    only when ``APP_DEBUG=true`` *and* the request looks like a browser
+    navigation (see :func:`_wants_html`), never to an API client.
+    """
+    frames = traceback.extract_tb(exc.__traceback__)
+    method = getattr(request, "method", "")
+    path = getattr(getattr(request, "url", None), "path", "")
+
+    frame_sections = []
+    for i, frame in enumerate(reversed(frames)):
+        snippet = _frame_snippet(frame.filename, frame.lineno or 0)
+        snippet_html = "".join(
+            f'<div class="line{" culprit" if is_culprit else ""}">'
+            f'<span class="lineno">{n}</span><span class="code">{html.escape(text)}</span></div>'
+            for n, text, is_culprit in snippet
+        )
+        frame_sections.append(
+            f"""<div class="frame">
+  <div class="frame-header">
+    <span class="frame-index">#{len(frames) - i}</span>
+    <span class="frame-location">{html.escape(frame.filename)}:{frame.lineno}</span>
+    <span class="frame-func">in <strong>{html.escape(frame.name)}</strong></span>
+  </div>
+  <div class="frame-code">{snippet_html}</div>
+</div>"""
+        )
+
+    return f"""<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{html.escape(type(exc).__name__)} — Zeython Debug</title>
+<style>{_DEBUG_PAGE_CSS}</style>
+</head>
+<body>
+<header>
+  <h1>{html.escape(type(exc).__name__)}</h1>
+  <p class="message">{html.escape(str(exc))}</p>
+  <p class="request-line">{html.escape(method)} {html.escape(path)}</p>
+</header>
+<main>{"".join(frame_sections)}</main>
+<footer>This page is only shown because APP_DEBUG=true. Turn it off in production.</footer>
+</body>
+</html>"""
+
+
 def _problem_response(
     status_code: int,
     detail: str,
@@ -132,7 +267,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     return JSONResponse(payload, status_code=exc.status_code, headers=exc.headers)
 
 
-async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def unhandled_exception_handler(request: Request, exc: Exception) -> Response:
     # A genuine bug, not an expected control-flow exception (those are
     # HTTPException subclasses, handled separately above and never reach
     # here) -- reported to Sentry if zeython.error_monitoring is
@@ -155,6 +290,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
         return _problem_response(
             500, "An unexpected error occurred.", exception=exception_detail, exc_traceback=exc_traceback
         )
+
+    # A browser hitting a broken page in development gets the full debug
+    # page (stack trace + source snippets); an API/fetch client -- even in
+    # debug mode -- still gets the plain JSON shape below, so a frontend
+    # dev's error handling code doesn't have to special-case HTML bodies.
+    if debug and _wants_html(request):
+        return HTMLResponse(_render_debug_html(request, exc), status_code=500)
 
     payload: dict[str, Any] = {"error": "Internal Server Error", "status": 500}
     if debug:
