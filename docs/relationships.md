@@ -137,5 +137,9 @@ ran 47 times in one request. Eager-load the relationship instead
 (include=(...), see docs/relationships.md). Query: SELECT posts.author_id, ...
 ```
 
+For the full picture of what queries a request ran and how long each
+took — not just a warning past a threshold — see
+[Request & Query Profiling](profiling.md).
+
 The fix is the same one this whole page is about — eager-load with
 `include=(...)` instead of touching the relationship inside a loop.

@@ -55,6 +55,7 @@ from zeython.mail import LogMailer, Mailer, MailServiceProvider, Message, SmtpMa
 from zeython.n_plus_one import N1QueryDetectionMiddleware, N1QueryDetectionServiceProvider
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.plugins import PluginServiceProvider, discover_plugins
+from zeython.profiler import QueryRecord, RequestProfilerServiceProvider, current_queries
 from zeython.providers import (
     CorsServiceProvider,
     DatabaseServiceProvider,
@@ -166,6 +167,9 @@ __all__ = [
     "translate",
     "N1QueryDetectionMiddleware",
     "N1QueryDetectionServiceProvider",
+    "QueryRecord",
+    "current_queries",
+    "RequestProfilerServiceProvider",
     "describe",
     "model_schema",
     "generate_openapi",
