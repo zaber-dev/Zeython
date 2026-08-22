@@ -57,6 +57,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../assets/copy-markdown.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -2005,6 +2007,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#feeding-the-docs-site-itself-to-an-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feeding the docs site itself to an LLM
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#scope" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2639,6 +2652,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#feeding-the-docs-site-itself-to-an-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feeding the docs site itself to an LLM
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#scope" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2753,6 +2777,27 @@ ship one of its own (the framework's <code>AGENTS.md</code> covers building <em>
 Zeython, not a specific app) -- copy the relevant sections into your
 project's own <code>AGENTS.md</code> if your agent doesn't already have access to the
 framework repository.</p>
+<h2 id="feeding-the-docs-site-itself-to-an-llm">Feeding the docs site itself to an LLM<a class="headerlink" href="#feeding-the-docs-site-itself-to-an-llm" title="Permanent link">&para;</a></h2>
+<p>The MCP server above is for an agent <em>working inside</em> a Zeython project.
+For pasting documentation into an LLM chat, or letting a web-browsing
+agent fetch it directly, the <a href="https://zeython.zaber.dev/docs/">docs site</a>
+is itself structured for that:</p>
+<ul>
+<li>Every page has a <strong>"Copy page as Markdown"</strong> button next to the
+  "Edit this page" pencil icon — copies that page's content as clean
+  Markdown (no nav chrome, no HTML), ready to paste into a chat.</li>
+<li>The same content is served directly at <code>&lt;page-url&gt;index.md</code> for any
+  page — e.g. <code>/docs/csrf/index.md</code> — no button needed if you're fetching
+  it programmatically.</li>
+<li><a href="https://zeython.zaber.dev/docs/llms.txt"><code>/docs/llms.txt</code></a> lists every
+  page as a Markdown link, grouped by section — the emerging
+  <a href="https://llmstxt.org/">llms.txt</a> convention for "here's what this site
+  has, and where to find it" in a shape an LLM can consume without
+  crawling HTML.</li>
+<li><a href="https://zeython.zaber.dev/docs/llms-full.txt"><code>/docs/llms-full.txt</code></a>
+  concatenates every page's Markdown into one file, for pasting the whole
+  framework's documentation into a single context window at once.</li>
+</ul>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
 <p>This is deliberately read-only introspection, not a way to run arbitrary
 code or modify a project through the protocol -- an agent with shell access
@@ -2877,6 +2922,8 @@ actual state of a live project's routing table and schema.</p>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../assets/copy-markdown.js"></script>
       
     
   </body>

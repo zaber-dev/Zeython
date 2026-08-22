@@ -1,0 +1,88 @@
+# Zeython Docs
+
+> Zeython — an async-first, batteries-included MVC framework for Python
+
+Zeython is an async-first, batteries-included MVC framework for Python: a dependency injection container, an Active-Record-style async ORM, session and API-token auth, RBAC authorization, queues, WebSockets, and a Laravel-style CLI, built on Starlette and SQLAlchemy 2.0.
+
+## Getting Started
+
+- [Overview](https://zeython.zaber.dev/docs/index.md)
+- [Getting Started](https://zeython.zaber.dev/docs/getting-started/index.md)
+- [Architecture](https://zeython.zaber.dev/docs/architecture/index.md)
+
+## Tutorial
+
+- [Overview](https://zeython.zaber.dev/docs/tutorial/index.md)
+- [1. Setup](https://zeython.zaber.dev/docs/tutorial-1-setup/index.md)
+- [2. Models](https://zeython.zaber.dev/docs/tutorial-2-models/index.md)
+- [3. Controllers & Routes](https://zeython.zaber.dev/docs/tutorial-3-controllers/index.md)
+- [4. Relationships](https://zeython.zaber.dev/docs/tutorial-4-relationships/index.md)
+- [5. Authentication & Authorization](https://zeython.zaber.dev/docs/tutorial-5-auth/index.md)
+- [6. Testing](https://zeython.zaber.dev/docs/tutorial-6-testing/index.md)
+
+## The Basics
+
+- [Database & Migrations](https://zeython.zaber.dev/docs/database/index.md)
+- [Relationships](https://zeython.zaber.dev/docs/relationships/index.md)
+- [Validation](https://zeython.zaber.dev/docs/validation/index.md)
+- [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)
+- [Factories & Seeders](https://zeython.zaber.dev/docs/database-seeding/index.md)
+- [Views](https://zeython.zaber.dev/docs/views/index.md)
+- [Frontend & CSS](https://zeython.zaber.dev/docs/frontend/index.md)
+
+## Security
+
+- [Authentication](https://zeython.zaber.dev/docs/authentication/index.md)
+- [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)
+- [Authorization](https://zeython.zaber.dev/docs/authorization/index.md)
+- [API Authentication](https://zeython.zaber.dev/docs/api-authentication/index.md)
+- [Security Headers](https://zeython.zaber.dev/docs/security-headers/index.md)
+- [Rate Limiting](https://zeython.zaber.dev/docs/rate-limiting/index.md)
+- [Multi-Tenancy](https://zeython.zaber.dev/docs/multi-tenancy/index.md)
+
+## Building APIs
+
+- [OpenAPI & API Docs](https://zeython.zaber.dev/docs/openapi/index.md)
+- [API Standards](https://zeython.zaber.dev/docs/api-standards/index.md)
+
+## Digging Deeper
+
+- [CLI Reference](https://zeython.zaber.dev/docs/cli/index.md)
+- [Console Commands](https://zeython.zaber.dev/docs/console-commands/index.md)
+- [Plugins](https://zeython.zaber.dev/docs/plugins/index.md)
+- [Localization](https://zeython.zaber.dev/docs/localization/index.md)
+- [Background Jobs](https://zeython.zaber.dev/docs/queues/index.md)
+- [Scheduling](https://zeython.zaber.dev/docs/scheduling/index.md)
+- [WebSockets](https://zeython.zaber.dev/docs/websockets/index.md)
+- [Mail](https://zeython.zaber.dev/docs/mail/index.md)
+- [Caching](https://zeython.zaber.dev/docs/caching/index.md)
+- [Redis (Distributed)](https://zeython.zaber.dev/docs/redis/index.md)
+- [File Storage](https://zeython.zaber.dev/docs/storage/index.md)
+- [Admin Panel](https://zeython.zaber.dev/docs/admin/index.md)
+- [AI](https://zeython.zaber.dev/docs/ai/index.md)
+- [AI Agents](https://zeython.zaber.dev/docs/ai-agents/index.md)
+
+## Testing
+
+- [Testing](https://zeython.zaber.dev/docs/testing/index.md)
+
+## Deployment & Operations
+
+- [Health Check](https://zeython.zaber.dev/docs/health-check/index.md)
+- [Observability](https://zeython.zaber.dev/docs/observability/index.md)
+- [Error Monitoring](https://zeython.zaber.dev/docs/error-monitoring/index.md)
+- [Docker](https://zeython.zaber.dev/docs/docker/index.md)
+- [Production Checklist](https://zeython.zaber.dev/docs/production-checklist/index.md)
+- [Benchmarks](https://zeython.zaber.dev/docs/benchmarks/index.md)
+
+## API Reference
+
+- [Overview](https://zeython.zaber.dev/docs/reference/index.md)
+- [Core](https://zeython.zaber.dev/docs/reference/core/index.md)
+- [Database](https://zeython.zaber.dev/docs/reference/database/index.md)
+- [Security](https://zeython.zaber.dev/docs/reference/security/index.md)
+- [HTTP & APIs](https://zeython.zaber.dev/docs/reference/http-api/index.md)
+- [Jobs & Realtime](https://zeython.zaber.dev/docs/reference/jobs-realtime/index.md)
+- [Operations](https://zeython.zaber.dev/docs/reference/operations/index.md)
+- [Extensibility](https://zeython.zaber.dev/docs/reference/extensibility/index.md)
+
