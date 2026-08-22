@@ -1,3 +1,4 @@
+import httpx
 from starlette.responses import JSONResponse, PlainTextResponse
 
 from zeython.application import Application
@@ -94,3 +95,52 @@ def test_container_exposes_config_and_router(tmp_path) -> None:
 
     assert app.container.make(Config) is app.config
     assert app.container.make(type(app.router)) is app.router
+
+
+async def test_unhandled_exception_uses_zeythons_own_handler_in_debug_mode(tmp_path) -> None:
+    """Regression: Application must never pass its own debug flag straight
+    through to Starlette's constructor. Starlette's own ``debug=True``
+    makes ``ServerErrorMiddleware`` render its own built-in traceback page
+    directly for any unhandled exception, bypassing zeython's registered
+    ``Exception`` handler (the JSON traceback / HTML debug page in
+    zeython.exceptions) entirely -- checked via a real ASGI round-trip with
+    ``raise_app_exceptions=False`` (zeython.testing.client() can't be
+    used here: it re-raises the original exception after handling, per
+    Starlette's own test-transport behavior; see tests/test_exceptions.py).
+    """
+    (tmp_path / ".env").write_text("APP_DEBUG=true\n")
+    app = _make_app(tmp_path)
+
+    @app.get("/boom")
+    async def boom(request):
+        raise ValueError("kaboom")
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        response = await http.get("/boom")
+
+    assert response.status_code == 500
+    assert response.headers["content-type"].startswith("application/json")
+    body = response.json()
+    assert body["error"] == "Internal Server Error"
+    assert body["exception"] == "ValueError: kaboom"
+    assert "traceback" in body
+
+
+async def test_unhandled_exception_renders_html_debug_page_for_a_browser_request(tmp_path) -> None:
+    (tmp_path / ".env").write_text("APP_DEBUG=true\n")
+    app = _make_app(tmp_path)
+
+    @app.get("/boom")
+    async def boom(request):
+        raise ValueError("kaboom")
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        response = await http.get("/boom", headers={"accept": "text/html,application/xhtml+xml"})
+
+    assert response.status_code == 500
+    assert response.headers["content-type"].startswith("text/html")
+    assert "ValueError" in response.text
+    assert "kaboom" in response.text
+    assert "GET /boom" in response.text
