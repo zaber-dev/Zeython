@@ -2737,20 +2737,19 @@ doesn't give you. Zeython's WebSocket support is built directly on
 Starlette's ASGI-native handling: no separate server, no extra process, no
 new protocol library to add.</p>
 <h2 id="defining-a-handler">Defining a handler<a class="headerlink" href="#defining-a-handler" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># routes/web.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython.websockets</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">WebSocketDisconnect</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">"/ws/echo"</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">echo</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span>
-            <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"echo:</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">WebSocketDisconnect</span><span class="p">:</span>
-        <span class="k">pass</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># routes/web.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.websockets</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">WebSocketDisconnect</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nd">@app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">"/ws/echo"</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">echo</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>            <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"echo:</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="k">except</span> <span class="n">WebSocketDisconnect</span><span class="p">:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="k">pass</span>
+</span></code></pre></div>
 <p><code>@app.websocket(path, name=...)</code> registers a handler the same way
 <code>@app.get(...)</code> does for HTTP -- one required argument, the <code>WebSocket</code>
 connection, no request/response cycle. <code>WebSocket</code>/<code>WebSocketDisconnect</code>
@@ -2763,23 +2762,22 @@ the client sends something (or disconnects, raising <code>WebSocketDisconnect</c
 <p>Most real-time features aren't one client talking to itself -- they're one
 client's message reaching every <em>other</em> connected client. <code>WebSocketHub</code>
 is that registry:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.websockets</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">WebSocketDisconnect</span><span class="p">,</span> <span class="n">WebSocketHub</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">"/ws/chat"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"chat"</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">hub</span><span class="p">:</span> <span class="n">WebSocketHub</span> <span class="o">=</span> <span class="n">websocket</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">WebSocketHub</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">hub</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">websocket</span><span class="p">):</span>
-        <span class="k">return</span>  <span class="c1"># origin rejected -- already closed, see "Origin protection" below</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span>
-            <span class="k">await</span> <span class="n">hub</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">websocket</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">WebSocketDisconnect</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">hub</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.websockets</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">WebSocketDisconnect</span><span class="p">,</span> <span class="n">WebSocketHub</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nd">@app</span><span class="o">.</span><span class="n">websocket</span><span class="p">(</span><span class="s2">"/ws/chat"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"chat"</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">hub</span><span class="p">:</span> <span class="n">WebSocketHub</span> <span class="o">=</span> <span class="n">websocket</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">WebSocketHub</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">hub</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">websocket</span><span class="p">):</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="k">return</span>  <span class="c1"># origin rejected -- already closed, see "Origin protection" below</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>            <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="k">await</span> <span class="n">hub</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">websocket</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="k">except</span> <span class="n">WebSocketDisconnect</span><span class="p">:</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="k">pass</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">hub</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
+</span></code></pre></div>
 <p><code>hub.connect(websocket)</code> accepts the handshake and starts tracking the
 connection, returning <code>True</code> -- or, if the origin check below rejects it,
 closes the connection without ever accepting it and returns <code>False</code>, in
@@ -2797,13 +2795,12 @@ disconnected but hasn't reached <code>disconnect()</code> yet) doesn't stop the
 broadcast reaching everyone else; that connection is just dropped from
 the hub instead.</p>
 <h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">WebSocketHubServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">WebSocketHubServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">WebSocketHubServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">WebSocketHubServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Registered by default in a generated project, alongside a working
 <code>/ws/chat</code> demo in <code>routes/web.py</code>.</p>
 <h3 id="origin-protection">Origin protection<a class="headerlink" href="#origin-protection" title="Permanent link">&para;</a></h3>
@@ -2814,9 +2811,8 @@ connection here using a logged-in visitor's session (cross-site WebSocket
 hijacking, the WebSocket analogue of <a href="../csrf/">CSRF</a>). Set
 <code>WEBSOCKET_ALLOWED_ORIGINS</code> (comma-separated) once real browser clients
 are involved and you're not deliberately serving other origins too:</p>
-<div class="codehilite"><pre><span></span><code>WEBSOCKET_ALLOWED_ORIGINS=https://example.com,https://app.example.com
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>WEBSOCKET_ALLOWED_ORIGINS=https://example.com,https://app.example.com
+</span></code></pre></div>
 <p>Unset by default -- every origin is accepted, matching every earlier
 release. A request with no <code>Origin</code> header at all (a native app, a
 server-to-server client, <code>curl</code>) is always allowed through regardless:
@@ -2828,9 +2824,8 @@ each one costs a slot in the hub's memory and a slot in the set every
 <code>broadcast()</code> iterates, so a runaway or malicious client degrades the
 service for everyone else. Set <code>WEBSOCKET_MAX_CONNECTIONS_PER_IP</code> to cap
 concurrent connections per client:</p>
-<div class="codehilite"><pre><span></span><code>WEBSOCKET_MAX_CONNECTIONS_PER_IP=5
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>WEBSOCKET_MAX_CONNECTIONS_PER_IP=5
+</span></code></pre></div>
 <p>Unset by default -- no limit, matching every earlier release. A
 connection past the cap is rejected the same way a bad <code>Origin</code> is:
 closed (code <code>4429</code>) without ever being accepted, and <code>hub.connect(...)</code>
@@ -2850,14 +2845,13 @@ subscribe, forwarding what it receives to its own local connections; the
 shape doesn't change (<code>connect</code>/<code>disconnect</code>/<code>broadcast</code>), only where the
 fan-out happens.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">websocket_client</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">test_echo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">websocket_client</span><span class="p">(</span><span class="n">app</span><span class="p">)</span><span class="o">.</span><span class="n">websocket_connect</span><span class="p">(</span><span class="s2">"/ws/echo"</span><span class="p">)</span> <span class="k">as</span> <span class="n">ws</span><span class="p">:</span>
-        <span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="s2">"hello"</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">ws</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"echo:hello"</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">websocket_client</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_echo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">with</span> <span class="n">websocket_client</span><span class="p">(</span><span class="n">app</span><span class="p">)</span><span class="o">.</span><span class="n">websocket_connect</span><span class="p">(</span><span class="s2">"/ws/echo"</span><span class="p">)</span> <span class="k">as</span> <span class="n">ws</span><span class="p">:</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="s2">"hello"</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="k">assert</span> <span class="n">ws</span><span class="o">.</span><span class="n">receive_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"echo:hello"</span>
+</span></code></pre></div>
 <p><code>websocket_client()</code> wraps <code>starlette.testclient.TestClient</code> -- unlike
 <code>zeython.testing.client</code> (an async <code>httpx.AsyncClient</code> for HTTP), this is
 <strong>synchronous</strong>: httpx has no WebSocket support, and Starlette's own

@@ -2717,28 +2717,26 @@ response" 200. The optional <code>@describe(...)</code> decorator is how you giv
 route a real summary, tags, or request/response schema instead.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>Registered by default in a generated project:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">OpenApiServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">app_name</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">OpenApiServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">app_name</span><span class="p">))</span>
+</span></code></pre></div>
 <p>Visit <code>/docs</code> for the Swagger UI, <code>/openapi.json</code> for the raw spec.</p>
 <h2 id="describing-a-route">Describing a route<a class="headerlink" href="#describing-a-route" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.openapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">model_schema</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.post</span><span class="w"> </span><span class="kn">import</span> <span class="n">Post</span>
-
-<span class="n">_POST_SCHEMA</span> <span class="o">=</span> <span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">PostController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-    <span class="nd">@describe</span><span class="p">(</span>
-        <span class="n">summary</span><span class="o">=</span><span class="s2">"List posts"</span><span class="p">,</span>
-        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"posts"</span><span class="p">],</span>
-        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="mi">200</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The post list"</span><span class="p">,</span>
-            <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"application/json"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"array"</span><span class="p">,</span> <span class="s2">"items"</span><span class="p">:</span> <span class="n">_POST_SCHEMA</span><span class="p">}}},</span>
-        <span class="p">}},</span>
-    <span class="p">)</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.openapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">model_schema</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.post</span><span class="w"> </span><span class="kn">import</span> <span class="n">Post</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">_POST_SCHEMA</span> <span class="o">=</span> <span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">PostController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nd">@describe</span><span class="p">(</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">summary</span><span class="o">=</span><span class="s2">"List posts"</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"posts"</span><span class="p">],</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="mi">200</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The post list"</span><span class="p">,</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"application/json"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"array"</span><span class="p">,</span> <span class="s2">"items"</span><span class="p">:</span> <span class="n">_POST_SCHEMA</span><span class="p">}}},</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="p">}},</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">)</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
+</span></code></pre></div>
 <p><code>@describe</code> works on both function-based routes and <code>Controller</code> methods —
 it attaches to the underlying function, and Python's bound-method attribute
 lookup falls through to it automatically, so it survives being wrapped as
@@ -2746,21 +2744,19 @@ lookup falls through to it automatically, so it survives being wrapped as
 <h2 id="model_schema"><code>model_schema()</code><a class="headerlink" href="#model_schema" title="Permanent link">&para;</a></h2>
 <p>A convenience for building the JSON Schema fragments <code>@describe</code> takes,
 from a model's actual mapped columns:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
-<span class="c1"># {"type": "object", "properties": {"id": {"type": "integer"}, "title": {"type": "string"}, ...}, "required": [...]}</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">model_schema</span><span class="p">(</span><span class="n">Post</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># {"type": "object", "properties": {"id": {"type": "integer"}, "title": {"type": "string"}, ...}, "required": [...]}</span>
+</span></code></pre></div>
 <p>Automatically excludes <code>__hidden__</code> fields (<code>password_hash</code>, etc.) — the
 same fields <code>to_dict()</code> never serializes shouldn't show up as "here's the
 shape of this response" either. This is documentation, generated once when
 the module loads — nothing checks an actual response body against it at
 request time.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="n">OPENAPI_ENABLED</span><span class="o">=</span><span class="n">true</span><span class="w">       </span><span class="p">#</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">exposing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">routes</span>
-<span class="n">OPENAPI_JSON_PATH</span><span class="o">=/</span><span class="n">openapi</span><span class="p">.</span><span class="n">json</span>
-<span class="n">OPENAPI_DOCS_PATH</span><span class="o">=/</span><span class="n">docs</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>OPENAPI_ENABLED=true       # false to register the provider without exposing the routes
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>OPENAPI_JSON_PATH=/openapi.json
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>OPENAPI_DOCS_PATH=/docs
+</span></code></pre></div>
 <p>Set <code>OPENAPI_ENABLED=false</code> to keep <code>generate_openapi()</code> usable
 programmatically (e.g. to write <code>openapi.json</code> to a file as part of a
 build step) without exposing <code>/docs</code>/<code>/openapi.json</code> over HTTP — a

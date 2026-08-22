@@ -2852,13 +2852,12 @@ response and the logs.</p>
   formatter.</li>
 </ul>
 <h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">RequestIdServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RequestIdServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">RequestIdServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RequestIdServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Registered by default in a generated project. Unlike
 <a href="../security-headers/">Security Headers</a>, there's no application-specific
 default to get wrong here — it only adds a response header and a piece of
@@ -2868,13 +2867,12 @@ log context, never changes what a request is allowed to do.</p>
 <li><code>REQUEST_ID_HEADER</code> — default <code>X-Request-ID</code>.</li>
 </ul>
 <h3 id="reading-it-in-a-handler">Reading it in a handler<a class="headerlink" href="#reading-it-in-a-handler" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">request_id</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/whoami"</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">whoami</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">"request_id"</span><span class="p">:</span> <span class="n">request_id</span><span class="p">()}</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">request_id</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/whoami"</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">whoami</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"request_id"</span><span class="p">:</span> <span class="n">request_id</span><span class="p">()}</span>
+</span></code></pre></div>
 <h3 id="in-your-own-logging">In your own logging<a class="headerlink" href="#in-your-own-logging" title="Permanent link">&para;</a></h3>
 <p>Registering <code>RequestIdServiceProvider</code> also installs a <code>logging.Filter</code>
 on the root logger, so every <code>LogRecord</code> gets a <code>request_id</code> attribute —
@@ -2882,53 +2880,46 @@ on the root logger, so every <code>LogRecord</code> gets a <code>request_id</cod
 job). If your app hasn't customized <code>logging.basicConfig()</code> yet (the
 framework's own default format from <code>Application.__init__</code>), the provider
 folds <code>%(request_id)s</code> into it automatically:</p>
-<div class="codehilite"><pre><span></span><code><span class="mf">2026</span><span class="o">-</span><span class="mf">08</span><span class="o">-</span><span class="mf">17</span><span class="w"> </span><span class="mf">10</span><span class="p">:</span><span class="mf">22</span><span class="p">:</span><span class="mf">03</span><span class="w"> </span><span class="n">INFO</span><span class="w">     </span><span class="n">app</span><span class="mf">.</span><span class="kr">cont</span><span class="n">rollers</span><span class="mf">.</span><span class="nb">pos</span><span class="n">ts</span><span class="w"> </span><span class="err">[</span><span class="mf">3</span><span class="n">f2a9e1c</span><span class="o">-</span><span class="mf">...</span><span class="err">]</span><span class="p">:</span><span class="w"> </span><span class="n">created</span><span class="w"> </span><span class="nb">pos</span><span class="n">t</span><span class="w"> </span><span class="mf">42</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>2026-08-17 10:22:03 INFO     app.controllers.posts [3f2a9e1c-...]: created post 42
+</span></code></pre></div>
 <p>Configured your own formatter already? The provider leaves it alone —
 <code>record.request_id</code> is still there to build <code>%(request_id)s</code> into it
 yourself, or to pull directly in a handler:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">RequestIdFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
-    <span class="k">pass</span>  <span class="c1"># add %(request_id)s to your own fmt string</span>
-
-<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"processing order </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># record.request_id is set automatically</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">RequestIdFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">pass</span>  <span class="c1"># add %(request_id)s to your own fmt string</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"processing order </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># record.request_id is set automatically</span>
+</span></code></pre></div>
 <h3 id="using-the-middleware-directly">Using the middleware directly<a class="headerlink" href="#using-the-middleware-directly" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestIdMiddleware</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">RequestIdMiddleware</span><span class="p">,</span> <span class="n">header_name</span><span class="o">=</span><span class="s2">"X-Correlation-ID"</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestIdMiddleware</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">RequestIdMiddleware</span><span class="p">,</span> <span class="n">header_name</span><span class="o">=</span><span class="s2">"X-Correlation-ID"</span><span class="p">)</span>
+</span></code></pre></div>
 <h3 id="verifying-it">Verifying it<a class="headerlink" href="#verifying-it" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
-curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-Request-ID: my-own-id"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-Request-ID: my-own-id"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
+</span></code></pre></div>
 <p>The second call gets back exactly <code>my-own-id</code> — the middleware never
 overwrites a caller-supplied value.</p>
 <h2 id="structured-json-logging">Structured (JSON) logging<a class="headerlink" href="#structured-json-logging" title="Permanent link">&para;</a></h2>
 <p>The framework's default log line (<code>Application.__init__</code> calls this if
 nothing else configured <code>logging</code> first) is a human-readable text line:</p>
-<div class="codehilite"><pre><span></span><code><span class="mf">2026</span><span class="o">-</span><span class="mf">08</span><span class="o">-</span><span class="mf">17</span><span class="w"> </span><span class="mf">10</span><span class="p">:</span><span class="mf">22</span><span class="p">:</span><span class="mf">03</span><span class="w"> </span><span class="n">INFO</span><span class="w">     </span><span class="n">app</span><span class="mf">.</span><span class="kr">cont</span><span class="n">rollers</span><span class="mf">.</span><span class="nb">pos</span><span class="n">ts</span><span class="w"> </span><span class="err">[</span><span class="mf">3</span><span class="n">f2a9e1c</span><span class="o">-</span><span class="mf">...</span><span class="err">]</span><span class="p">:</span><span class="w"> </span><span class="n">created</span><span class="w"> </span><span class="nb">pos</span><span class="n">t</span><span class="w"> </span><span class="mf">42</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>2026-08-17 10:22:03 INFO     app.controllers.posts [3f2a9e1c-...]: created post 42
+</span></code></pre></div>
 <p>Fine to read in a terminal, painful for a log shipper (Datadog, ELK/Logstash,
 CloudWatch Logs Insights, Splunk) that wants structured fields to filter and
 query on rather than a regex over free text. <code>LOG_FORMAT=json</code> switches the
 same default handler to one JSON object per line instead:</p>
-<div class="codehilite"><pre><span></span><code>{"timestamp": "2026-08-17 10:22:03,041", "level": "INFO", "logger": "app.controllers.posts", "message": "created post 42", "request_id": "3f2a9e1c-..."}
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>{"timestamp": "2026-08-17 10:22:03,041", "level": "INFO", "logger": "app.controllers.posts", "message": "created post 42", "request_id": "3f2a9e1c-..."}
+</span></code></pre></div>
 <h3 id="setup_1">Setup<a class="headerlink" href="#setup_1" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># .env</span>
-<span class="nv">LOG_FORMAT</span><span class="o">=</span>json
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># .env</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">LOG_FORMAT</span><span class="o">=</span>json
+</span></code></pre></div>
 <p>Nothing else changes — same loggers, same levels, same <code>RequestIdServiceProvider</code>
 integration (<code>request_id</code> is present whenever that provider is registered,
 <code>"-"</code> outside a request, same as the text format). Only takes effect
@@ -2941,12 +2932,10 @@ it's skipped entirely if the root logger already has a handler (you called
 exception info (<code>logger.exception(...)</code>, or <code>exc_info=True</code>) additionally
 gets <code>exception</code> — the formatted traceback as a single string. Anything
 passed via <code>extra=</code> is included as its own top-level field:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"order placed"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"order_id"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"total"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">total</span><span class="p">})</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code>{"timestamp": "...", "level": "INFO", "logger": "app.jobs", "message": "order placed", "order_id": 42, "total": 19.99}
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"order placed"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"order_id"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"total"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">total</span><span class="p">})</span>
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>{"timestamp": "...", "level": "INFO", "logger": "app.jobs", "message": "order placed", "order_id": 42, "total": 19.99}
+</span></code></pre></div>
 <p>A field that isn't natively JSON-serializable (a <code>Decimal</code>, a <code>datetime</code>, a
 dataclass) degrades to its <code>str()</code> rather than raising and losing the whole
 log line.</p>
@@ -2955,13 +2944,13 @@ log line.</p>
 to your own handler if you need something LOG_FORMAT=json's all-or-nothing
 default doesn't cover (a second handler with a different format, non-default
 log setup):</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonFormatter</span>
-
-<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
-<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">JsonFormatter</span><span class="p">())</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"app.audit"</span><span class="p">)</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonFormatter</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">JsonFormatter</span><span class="p">())</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"app.audit"</span><span class="p">)</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+</span></code></pre></div>
 
 
 

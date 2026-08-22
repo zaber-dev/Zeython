@@ -2888,13 +2888,12 @@ did) — it never overrides an existing setup. Without this, INFO-level logs
 (including background job failures — see <a href="../queues/">Background Jobs</a>) are
 silently dropped, since uvicorn only configures its own logger namespaces.</p>
 <h2 id="boot-lifecycle">Boot lifecycle<a class="headerlink" href="#boot-lifecycle" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
+</span></code></pre></div>
 <ol>
 <li><code>Application()</code> loads <code>Config</code> from <code>.env</code>, and creates a <code>Container</code> and <code>Router</code>.</li>
 <li><code>app.register(provider)</code> calls the provider's <code>register()</code> immediately — this is
@@ -2915,34 +2914,31 @@ order. <code>DatabaseServiceProvider</code>, for example, binds the <code>Databa
 <code>contextvars.ContextVar</code>, and commits/rolls back automatically when the request
 finishes. <code>Model</code> methods pull that session via <code>current_session()</code> — you never
 pass a session object through your call stack:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"users"</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
-    <span class="n">email</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"users"</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">email</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
+</span></code></pre></div>
 <p>Outside of a request (a script, a test, a REPL), open a session explicitly:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">session</span><span class="p">():</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Ada"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"ada@example.com"</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">session</span><span class="p">():</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Ada"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"ada@example.com"</span><span class="p">)</span>
+</span></code></pre></div>
 <p>The whole session commits/rolls back around the request; <code>transaction()</code>
 scopes a <code>SAVEPOINT</code> inside it, for a chunk of work that should roll back
 on its own without ending the request — see <a href="../database/#transactions">Transactions</a>.</p>
 <h2 id="routing-and-controllers">Routing and controllers<a class="headerlink" href="#routing-and-controllers" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">UserController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">"/users"</span><span class="p">,</span> <span class="n">UserController</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="s2">"show"</span><span class="p">,</span> <span class="s2">"store"</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">UserController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span> <span class="o">...</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">"/users"</span><span class="p">,</span> <span class="n">UserController</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="s2">"show"</span><span class="p">,</span> <span class="s2">"store"</span><span class="p">))</span>
+</span></code></pre></div>
 <p><code>resource()</code> maps <code>index</code>/<code>store</code>/<code>show</code>/<code>update</code>/<code>destroy</code> to the conventional
 REST verbs and paths, the same mapping Laravel and Rails use. Function-based routes
 via <code>@app.get("/path")</code> work exactly like Flask/FastAPI for everything else.</p>

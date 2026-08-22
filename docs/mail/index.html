@@ -2702,50 +2702,46 @@ backends: <code>LogMailer</code> (the default — writes to your logs instead of
 sending, so a fresh project needs zero mail configuration) and <code>SmtpMailer</code>
 (stdlib <code>smtplib</code>, no third-party dependency).</p>
 <h2 id="sending">Sending<a class="headerlink" href="#sending" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mailer</span><span class="p">,</span> <span class="n">Message</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_something</span><span class="p">(</span><span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">):</span>
-    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">Message</span><span class="p">(</span>
-        <span class="n">to</span><span class="o">=</span><span class="s2">"ada@example.com"</span><span class="p">,</span>
-        <span class="n">subject</span><span class="o">=</span><span class="s2">"Welcome!"</span><span class="p">,</span>
-        <span class="n">body</span><span class="o">=</span><span class="s2">"Hi Ada, welcome aboard."</span><span class="p">,</span>
-        <span class="n">html</span><span class="o">=</span><span class="s2">"&lt;p&gt;Hi Ada, &lt;b&gt;welcome&lt;/b&gt; aboard.&lt;/p&gt;"</span><span class="p">,</span>   <span class="c1"># optional</span>
-    <span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mailer</span><span class="p">,</span> <span class="n">Message</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_something</span><span class="p">(</span><span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">):</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">Message</span><span class="p">(</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        <span class="n">to</span><span class="o">=</span><span class="s2">"ada@example.com"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="n">subject</span><span class="o">=</span><span class="s2">"Welcome!"</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="n">body</span><span class="o">=</span><span class="s2">"Hi Ada, welcome aboard."</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">html</span><span class="o">=</span><span class="s2">"&lt;p&gt;Hi Ada, &lt;b&gt;welcome&lt;/b&gt; aboard.&lt;/p&gt;"</span><span class="p">,</span>   <span class="c1"># optional</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="p">))</span>
+</span></code></pre></div>
 <p><code>Message.to</code> accepts a single address or a list.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">MailServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">MailServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">MailServiceProvider</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">MailServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <h2 id="sending-from-a-background-job">Sending from a background job<a class="headerlink" href="#sending-from-a-background-job" title="Permanent link">&para;</a></h2>
 <p>This is the common case — see <a href="../queues/">Background Jobs</a>. A job's
 <code>handle()</code> can declare <code>mailer: Mailer</code> as a parameter and have it resolved
 automatically, the same autowiring the rest of the framework uses:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># app/Jobs/send_welcome_email_job.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">Mailer</span><span class="p">,</span> <span class="n">Message</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-    <span class="n">to_email</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">Message</span><span class="p">(</span>
-            <span class="n">to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_email</span><span class="p">,</span>
-            <span class="n">subject</span><span class="o">=</span><span class="s2">"Welcome!"</span><span class="p">,</span>
-            <span class="n">body</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Hi </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, welcome aboard."</span><span class="p">,</span>
-        <span class="p">))</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">to_email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># app/Jobs/send_welcome_email_job.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">Mailer</span><span class="p">,</span> <span class="n">Message</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nd">@dataclass</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">to_email</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">Message</span><span class="p">(</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>            <span class="n">to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_email</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="n">subject</span><span class="o">=</span><span class="s2">"Welcome!"</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>            <span class="n">body</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Hi </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, welcome aboard."</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="p">))</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">to_email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</span></code></pre></div>
 <p>This works with any job, not just mail — a job's <code>handle()</code> can request
 <em>any</em> type bound in the container (a <code>Database</code>, your own service), not
 only <code>Mailer</code>. See <a href="../queues/#defining-a-job">Background Jobs</a>.</p>
@@ -2799,8 +2795,8 @@ SMTP credentials or a risk of spamming real addresses.</p>
 <h2 id="writing-your-own-backend">Writing your own backend<a class="headerlink" href="#writing-your-own-backend" title="Permanent link">&para;</a></h2>
 <p>Subclass <code>Mailer</code> and implement <code>async def send(self, message: Message) -&gt;
 None</code>, then bind it in place of <code>MailServiceProvider</code>'s default:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Mailer</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyTransactionalEmailApiMailer</span><span class="p">(</span><span class="n">api_key</span><span class="o">=...</span><span class="p">))</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Mailer</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyTransactionalEmailApiMailer</span><span class="p">(</span><span class="n">api_key</span><span class="o">=...</span><span class="p">))</span>
+</span></code></pre></div>
 
 
 

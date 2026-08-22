@@ -2683,38 +2683,34 @@ that module lets an AI coding agent introspect and operate on a Zeython
 <em>project</em>. This module lets a Zeython <em>app</em> call an LLM as part of its own
 logic — summarizing a support ticket, drafting a reply, classifying input.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>ai<span class="o">]</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>ai<span class="o">]</span>
+</span></code></pre></div>
 <p>Register the provider where you need it — it's opt-in, not registered by
 default:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AIServiceProvider</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AIServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AIServiceProvider</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AIServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AI</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">ai</span><span class="p">:</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">AI</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ai</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">"text"</span><span class="p">],</span>
-        <span class="n">system</span><span class="o">=</span><span class="s2">"Summarize the following text in one sentence."</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"summary"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AI</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">ai</span><span class="p">:</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">AI</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ai</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">data</span><span class="p">[</span><span class="s2">"text"</span><span class="p">],</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">system</span><span class="o">=</span><span class="s2">"Summarize the following text in one sentence."</span><span class="p">,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"summary"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+</span></code></pre></div>
 <p><code>complete()</code> returns an <code>AIResponse</code> with <code>.text</code> and <code>.model</code>.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>AI_PROVIDER=echo          # default -- no network, no credentials required
-<span class="gh">#</span> AI_PROVIDER=anthropic
-<span class="gh">#</span> ANTHROPIC_API_KEY=sk-ant-...
-<span class="gh">#</span> AI_MODEL=claude-sonnet-5
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>AI_PROVIDER=echo          # default -- no network, no credentials required
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a># AI_PROVIDER=anthropic
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a># ANTHROPIC_API_KEY=sk-ant-...
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a># AI_MODEL=claude-sonnet-5
+</span></code></pre></div>
 <p><code>AI_PROVIDER</code> defaults to <code>echo</code> — the same role <code>LogMailer</code> and
 <code>InMemoryQueue</code> play for their subsystems: a fresh <code>zeython new</code> project
 (and its tests) work immediately with zero external credentials.
@@ -2728,16 +2724,15 @@ loudly at boot, not silently on whichever request happens to hit it first.</p>
 <h2 id="other-providers">Other providers<a class="headerlink" href="#other-providers" title="Permanent link">&para;</a></h2>
 <p>There's no plugin registry — implement <code>AI</code> yourself and bind it in place
 of the default, the same pattern as <code>RateLimiter</code>, <code>Cache</code>, and <code>Storage</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AI</span><span class="p">,</span> <span class="n">AIResponse</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">MyOpenAI</span><span class="p">(</span><span class="n">AI</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
-        <span class="o">...</span>
-        <span class="k">return</span> <span class="n">AIResponse</span><span class="p">(</span><span class="n">text</span><span class="o">=...</span><span class="p">,</span> <span class="n">model</span><span class="o">=...</span><span class="p">)</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">AI</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyOpenAI</span><span class="p">())</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AI</span><span class="p">,</span> <span class="n">AIResponse</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyOpenAI</span><span class="p">(</span><span class="n">AI</span><span class="p">):</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="o">...</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="k">return</span> <span class="n">AIResponse</span><span class="p">(</span><span class="n">text</span><span class="o">=...</span><span class="p">,</span> <span class="n">model</span><span class="o">=...</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">AI</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyOpenAI</span><span class="p">())</span>
+</span></code></pre></div>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
 <p><code>complete()</code> is deliberately the entire interface — no streaming, no tool
 use, no conversation/message history management. Those are real needs for

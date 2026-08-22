@@ -2633,49 +2633,45 @@
 <h1 id="views">Views<a class="headerlink" href="#views" title="Permanent link">&para;</a></h1>
 <p>Zeython renders server-side HTML with Jinja2, by convention reading templates
 from <code>resources/views/</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># app/Controllers/page_controller.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">PageController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"pages/show.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Hello"</span><span class="p">})</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="cm">&lt;!-- resources/views/pages/show.html --&gt;</span>
-<span class="cp">&lt;!doctype html&gt;</span>
-<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Controllers/page_controller.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">PageController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"pages/show.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Hello"</span><span class="p">})</span>
+</span></code></pre></div>
+<div class="language-html highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- resources/views/pages/show.html --&gt;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">&lt;!doctype html&gt;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></code></pre></div>
 <h2 id="wiring-it-up">Wiring it up<a class="headerlink" href="#wiring-it-up" title="Permanent link">&para;</a></h2>
 <p><code>render()</code> looks up the application's <code>Views</code> instance from the container, so
 register <code>ViewServiceProvider</code> alongside your other providers:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span><span class="p">,</span> <span class="n">ViewServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ViewServiceProvider</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span><span class="p">,</span> <span class="n">ViewServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ViewServiceProvider</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
+</span></code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <p>By default templates are read from <code>&lt;project root&gt;/resources/views</code>. Override
 with <code>VIEWS_PATH</code> in <code>.env</code>:</p>
-<div class="codehilite"><pre><span></span><code>VIEWS_PATH=templates
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>VIEWS_PATH=templates
+</span></code></pre></div>
 <h2 id="using-the-views-object-directly">Using the <code>Views</code> object directly<a class="headerlink" href="#using-the-views-object-directly" title="Permanent link">&para;</a></h2>
 <p><code>render()</code> is sugar over the container-bound <code>Views</code> instance; you can also
 resolve and use it directly if you need more control (custom filters, globals):</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Views</span>
-
-<span class="n">views</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Views</span><span class="p">)</span>
-<span class="n">views</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"shout"</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Views</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">views</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Views</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">views</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"shout"</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</span></code></pre></div>
 
 
 

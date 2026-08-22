@@ -2682,36 +2682,32 @@ caller. The two never mix in one handler: a signed cookie and a bearer
 token are verified differently, and a handler should be unambiguous about
 which one it expects.</p>
 <h2 id="getting-a-token">Getting a token<a class="headerlink" href="#getting-a-token" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/api/token<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"email": "ada@example.com", "password": "hunter2"}'</span>
-<span class="c1"># {"token": "...", "token_type": "Bearer"}</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/api/token<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"email": "ada@example.com", "password": "hunter2"}'</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># {"token": "...", "token_type": "Bearer"}</span>
+</span></code></pre></div>
 <p><code>zeython new</code> wires this into <code>AuthController.token</code> — it checks
 credentials the same way <code>/login</code> does (<code>AuthManager.attempt</code>), then issues
 a token instead of setting a cookie. Throttled the same way <code>/login</code> is
 (see <a href="../rate-limiting/">Rate Limiting</a>).</p>
 <h2 id="using-a-token">Using a token<a class="headerlink" href="#using-a-token" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>http://127.0.0.1:8000/api/me<span class="w"> </span>-H<span class="w"> </span><span class="s1">'Authorization: Bearer &lt;token&gt;'</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.api_auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_api_auth</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_me</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">require_api_auth</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>http://127.0.0.1:8000/api/me<span class="w"> </span>-H<span class="w"> </span><span class="s1">'Authorization: Bearer &lt;token&gt;'</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.api_auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_api_auth</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_me</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">require_api_auth</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</span></code></pre></div>
 <p><code>require_api_auth</code> raises <code>UnauthorizedException</code> (401) for a missing or
 invalid token, same shape as <code>require_auth</code> for cookie sessions.
 <code>current_api_user</code> is the non-raising version, returning <code>None</code> instead.</p>
 <h2 id="registering">Registering<a class="headerlink" href="#registering" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiAuthServiceProvider</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ApiAuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiAuthServiceProvider</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ApiAuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>
+</span></code></pre></div>
 <p>Configuration (<code>.env</code>): <code>API_TOKEN_EXPIRES_IN</code> — seconds, default 30 days.</p>
 <h2 id="how-tokens-work-and-what-that-trades-away">How tokens work, and what that trades away<a class="headerlink" href="#how-tokens-work-and-what-that-trades-away" title="Permanent link">&para;</a></h2>
 <p>Tokens are signed with <code>itsdangerous</code> (already a framework dependency —
@@ -2732,15 +2728,14 @@ place; nothing else in the framework assumes the stateless implementation.</p>
 <p><code>authorize()</code> (see <a href="../authorization/">Authorization</a>) works the same way
 regardless of which auth path produced the user — it just needs a user
 object:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">require_api_auth</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
-    <span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Gate</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">gate</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">"delete-post"</span><span class="p">,</span> <span class="n">post</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">ForbiddenException</span><span class="p">(</span><span class="s2">"..."</span><span class="p">)</span>
-    <span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">require_api_auth</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Gate</span><span class="p">)</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">gate</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">"delete-post"</span><span class="p">,</span> <span class="n">post</span><span class="p">):</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="k">raise</span> <span class="n">ForbiddenException</span><span class="p">(</span><span class="s2">"..."</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</span></code></pre></div>
 <p>(<code>authorize()</code> itself calls <code>require_auth</code>, the cookie-session version —
 for a bearer-token handler, call <code>require_api_auth</code> first and use <code>gate.allows</code>
 directly, as above, rather than <code>authorize()</code>.)</p>

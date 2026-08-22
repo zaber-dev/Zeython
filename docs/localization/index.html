@@ -2743,51 +2743,46 @@
 <h1 id="localization">Localization<a class="headerlink" href="#localization" title="Permanent link">&para;</a></h1>
 <p>Translation strings live in flat JSON files, one per locale, under
 <code>resources/lang/</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// resources/lang/en.json</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"welcome.title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Welcome!"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"greeting"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello, {name}!"</span>
-<span class="p">}</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="c1">// resources/lang/es.json</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">"welcome.title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"¡Bienvenido!"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"greeting"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hola, {name}!"</span>
-<span class="p">}</span>
-</code></pre></div>
-
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// resources/lang/en.json</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">"welcome.title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Welcome!"</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">"greeting"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello, {name}!"</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// resources/lang/es.json</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">"welcome.title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"¡Bienvenido!"</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">"greeting"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hola, {name}!"</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</span></code></pre></div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">LocalizationServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">LocalizationServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">LocalizationServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">LocalizationServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Registering it does two things: binds a <code>Translator</code> that loads and
 caches those files, and adds <code>LocaleMiddleware</code>, which resolves a locale
 for every request and makes it available to <code>Translator</code> without a
 <code>request</code> threaded through every call.</p>
 <h2 id="translating-in-a-controller">Translating in a controller<a class="headerlink" href="#translating-in-a-controller" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython.localization</span><span class="w"> </span><span class="kn">import</span> <span class="n">t</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">WelcomeController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"message"</span><span class="p">:</span> <span class="n">t</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"welcome.title"</span><span class="p">)})</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.localization</span><span class="w"> </span><span class="kn">import</span> <span class="n">t</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">WelcomeController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"message"</span><span class="p">:</span> <span class="n">t</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"welcome.title"</span><span class="p">)})</span>
+</span></code></pre></div>
 <p><code>t(request, key, **params)</code> follows the same shape as
 <a href="../views/"><code>render(request, ...)</code></a> and
 <a href="../queues/"><code>dispatch(request, job)</code></a>: an explicit <code>request</code> first
 argument, everything else resolved from the app it belongs to.</p>
 <h2 id="translating-in-a-view">Translating in a view<a class="headerlink" href="#translating-in-a-view" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="cm">&lt;!-- resources/views/welcome.html --&gt;</span>
-<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ t("welcome.title") }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ t("greeting", name=user.name) }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
-</code></pre></div>
-
+<div class="language-html highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cm">&lt;!-- resources/views/welcome.html --&gt;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ t("welcome.title") }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{{ t("greeting", name=user.name) }}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</span></code></pre></div>
 <p>No <code>request</code> needed here — <code>LocalizationServiceProvider</code> registers <code>t</code> as
 a Jinja global (if <a href="../views/"><code>ViewServiceProvider</code></a> is registered too),
 and <code>Translator</code> resolves the current locale from the same request the
@@ -2795,9 +2790,8 @@ template is being rendered for internally.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <p>A <code>{name}</code>-style placeholder in a translation string is filled from
 keyword arguments via <code>str.format</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">t</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"greeting"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Ana"</span><span class="p">)</span>   <span class="c1"># "Hello, Ana!" (locale=en)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">t</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"greeting"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Ana"</span><span class="p">)</span>   <span class="c1"># "Hello, Ana!" (locale=en)</span>
+</span></code></pre></div>
 <p>A placeholder with no matching argument is left as-is rather than
 raising — a missing translation parameter shouldn't 500 a page that would
 otherwise render fine.</p>
@@ -2815,11 +2809,10 @@ otherwise render fine.</p>
    at all.</li>
 </ol>
 <p>Read it back with <code>current_locale()</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.localization</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_locale</span>
-
-<span class="n">locale</span> <span class="o">=</span> <span class="n">current_locale</span><span class="p">()</span>   <span class="c1"># "es", or None outside a request</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.localization</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_locale</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">locale</span> <span class="o">=</span> <span class="n">current_locale</span><span class="p">()</span>   <span class="c1"># "es", or None outside a request</span>
+</span></code></pre></div>
 <h2 id="a-missing-key-or-locale-never-crashes-a-request">A missing key or locale never crashes a request<a class="headerlink" href="#a-missing-key-or-locale-never-crashes-a-request" title="Permanent link">&para;</a></h2>
 <ul>
 <li>A key missing from the resolved locale falls back to <code>LOCALE_FALLBACK</code>
@@ -2867,9 +2860,9 @@ otherwise render fine.</p>
 <code>current_locale()</code> returns <code>None</code> there, so <code>Translator.t()</code> falls back to
 <code>LOCALE_DEFAULT</code>. Pass <code>locale=</code> explicitly to translate in a specific
 locale regardless:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">translator</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Translator</span><span class="p">)</span>
-<span class="n">translator</span><span class="o">.</span><span class="n">t</span><span class="p">(</span><span class="s2">"welcome.title"</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s2">"es"</span><span class="p">)</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">translator</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Translator</span><span class="p">)</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">translator</span><span class="o">.</span><span class="n">t</span><span class="p">(</span><span class="s2">"welcome.title"</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s2">"es"</span><span class="p">)</span>
+</span></code></pre></div>
 
 
 

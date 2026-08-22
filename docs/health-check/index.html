@@ -2634,12 +2634,10 @@
 <p><code>HealthCheckServiceProvider</code> registers <code>/up</code> -- what a load balancer,
 a Kubernetes liveness/readiness probe, or an uptime monitor expects to
 find. It's registered by default in a generated project.</p>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>http://localhost:8000/up
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">,</span><span class="w"> </span><span class="nt">"checks"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"database"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">}}</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>http://localhost:8000/up
+</span></code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">,</span><span class="w"> </span><span class="nt">"checks"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"database"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">}}</span>
+</span></code></pre></div>
 <p>A healthy response is a <code>200</code> with <code>"status": "ok"</code>. If any check fails,
 the response is a <code>503</code> with <code>"status": "error"</code> -- the status code is
 what a load balancer actually acts on to decide whether to route traffic
@@ -2661,13 +2659,12 @@ failing.</p>
   expects a different convention (<code>/healthz</code> is common on Kubernetes).</li>
 </ul>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">HealthCheckServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">HealthCheckServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">HealthCheckServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">HealthCheckServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Register it early -- before <code>DatabaseServiceProvider</code> is fine either way,
 since providers' <code>register()</code> phase runs to completion before any
 <code>boot()</code> runs (see <a href="../architecture/">Architecture</a>), so the database

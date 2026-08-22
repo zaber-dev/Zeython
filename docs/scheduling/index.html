@@ -2727,87 +2727,79 @@ with the code it runs, drifting out of sync with what's actually deployed.
 <code>zeython.schedule</code> keeps it in code instead: one cron entry, total,
 regardless of how many tasks you actually schedule.</p>
 <h2 id="defining-a-schedule">Defining a schedule<a class="headerlink" href="#defining-a-schedule" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># schedule.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
-
-<span class="n">schedule</span><span class="p">:</span> <span class="n">Schedule</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Schedule</span><span class="p">)</span>
-
-
-<span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="o">...</span>
-
-
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_daily_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># schedule.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">schedule</span><span class="p">:</span> <span class="n">Schedule</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Schedule</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="o">...</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_daily_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
+</span></code></pre></div>
 <p><code>schedule.py</code> lives at the project root, imported for its side effect of
 registering events — the same convention <code>routes/web.py</code> uses for routes.
 <code>schedule.call(callback)</code> returns a <code>ScheduledEvent</code>; chain a frequency
 method to set when it's due:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_reminder</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">sync_inventory</span><span class="p">)</span><span class="o">.</span><span class="n">every_five_minutes</span><span class="p">()</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">refresh_cache</span><span class="p">)</span><span class="o">.</span><span class="n">hourly</span><span class="p">()</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily</span><span class="p">()</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">weekly_report</span><span class="p">)</span><span class="o">.</span><span class="n">weekly</span><span class="p">()</span>          <span class="c1"># Sunday at midnight</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">monthly_invoice</span><span class="p">)</span><span class="o">.</span><span class="n">monthly</span><span class="p">()</span>       <span class="c1"># 1st of the month at midnight</span>
-<span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">custom</span><span class="p">)</span><span class="o">.</span><span class="n">cron</span><span class="p">(</span><span class="s2">"*/10 8-17 * * 1-5"</span><span class="p">)</span>  <span class="c1"># any raw 5-field expression</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_reminder</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">sync_inventory</span><span class="p">)</span><span class="o">.</span><span class="n">every_five_minutes</span><span class="p">()</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">refresh_cache</span><span class="p">)</span><span class="o">.</span><span class="n">hourly</span><span class="p">()</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily</span><span class="p">()</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">weekly_report</span><span class="p">)</span><span class="o">.</span><span class="n">weekly</span><span class="p">()</span>          <span class="c1"># Sunday at midnight</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">monthly_invoice</span><span class="p">)</span><span class="o">.</span><span class="n">monthly</span><span class="p">()</span>       <span class="c1"># 1st of the month at midnight</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">custom</span><span class="p">)</span><span class="o">.</span><span class="n">cron</span><span class="p">(</span><span class="s2">"*/10 8-17 * * 1-5"</span><span class="p">)</span>  <span class="c1"># any raw 5-field expression</span>
+</span></code></pre></div>
 <p><code>cron()</code> supports <code>*</code>, single values, comma lists (<code>1,3,5</code>), ranges
 (<code>1-5</code>), and step values (<code>*/15</code>, <code>1-10/2</code>) across all five fields
 (<code>minute hour day month weekday</code>). The weekday field is <code>0</code>-<code>6</code>
 (<code>0</code> = Sunday) — unlike some cron implementations, <code>7</code> isn't accepted as
 an alias for Sunday.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">ScheduleServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ScheduleServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">ScheduleServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ScheduleServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+</span></code></pre></div>
 <p>Not registered by default. <code>ScheduleServiceProvider</code> binds a <code>Schedule</code>
 singleton into the container and imports <code>schedule.py</code> for its side
 effect — register it once you actually have recurring tasks to define.</p>
 <h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>schedule<span class="w"> </span>run
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>run
+</span></code></pre></div>
 <p>Checks every registered event against the current minute and runs the
 ones that are due — that's it, no daemon, no loop. Wire it up to fire once
 a minute:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># crontab -e</span>
-<span class="o">*</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">project</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/.</span><span class="n">venv</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zeython</span><span class="w"> </span><span class="n">schedule</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">schedule</span><span class="o">.</span><span class="n">log</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># crontab -e
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>* * * * * cd /path/to/project &amp;&amp; /path/to/.venv/bin/zeython schedule run &gt;&gt; /var/log/schedule.log 2&gt;&amp;1
+</span></code></pre></div>
 <p>This is the entire point: <strong>one</strong> cron entry, ever, regardless of how many
 tasks <code>schedule.py</code> grows to define — add a new recurring task by adding a
 line to <code>schedule.py</code>, not by editing a crontab on a server somewhere.</p>
 <p>In a container deployment without host cron, run a sidecar loop instead —
 see <a href="../docker/#scheduled-tasks">Docker</a>.</p>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>schedule<span class="w"> </span>list<span class="w">    </span><span class="c1"># every registered task and its cron expression</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>list<span class="w">    </span><span class="c1"># every registered task and its cron expression</span>
+</span></code></pre></div>
 <h2 id="dependency-injection">Dependency injection<a class="headerlink" href="#dependency-injection" title="Permanent link">&para;</a></h2>
 <p>A scheduled callback works exactly like a <code>Job</code>'s <code>handle()</code>: beyond the
 arguments you pass, any type-hinted parameter is autowired from the
 container.</p>
-<div class="codehilite"><pre><span></span><code><span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">(</span><span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">(</span><span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span></code></pre></div>
 <h2 id="preventing-overlapping-runs">Preventing overlapping runs<a class="headerlink" href="#preventing-overlapping-runs" title="Permanent link">&para;</a></h2>
 <p>A task that occasionally runs longer than its own interval (a report that
 usually takes seconds but sometimes minutes, scheduled every minute) can
 end up with two copies running against each other. <code>without_overlapping()</code>
 guards against that:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">generate_report</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span><span class="o">.</span><span class="n">without_overlapping</span><span class="p">(</span><span class="n">for_seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">generate_report</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span><span class="o">.</span><span class="n">without_overlapping</span><span class="p">(</span><span class="n">for_seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Implemented via the container's bound <code>RateLimiter</code> as a "run at most once
 per window" gate, keyed by the event's name — a time-based lock, same
 trade-off Laravel's own <code>withoutOverlapping()</code> makes: it expires after
@@ -2832,13 +2824,13 @@ matches; build retry logic into the callback itself if a task needs it.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <p><code>Schedule</code> and <code>ScheduledEvent</code> are plain objects — test a callback
 directly, or exercise the cron matching with a fixed time:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython.schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">cron_matches</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">test_runs_at_seven_am</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">assert</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">cron_matches</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_runs_at_seven_am</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">assert</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">assert</span> <span class="ow">not</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span></code></pre></div>
 
 
 

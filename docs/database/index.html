@@ -2720,35 +2720,33 @@
 
 <h1 id="database-migrations">Database &amp; Migrations<a class="headerlink" href="#database-migrations" title="Permanent link">&para;</a></h1>
 <h2 id="defining-a-model">Defining a model<a class="headerlink" href="#defining-a-model" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># app/Models/post.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span><span class="p">,</span> <span class="n">Text</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"posts"</span>
-
-    <span class="n">title</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
-    <span class="n">body</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Models/post.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span><span class="p">,</span> <span class="n">Text</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"posts"</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">title</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">body</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Every <code>Model</code> subclass already has <code>id</code>, <code>created_at</code>, <code>updated_at</code>, <code>is_deleted</code>,
 and <code>deleted_at</code> columns — you only declare the columns specific to your table.</p>
 <p>Register new models in <code>app/Models/__init__.py</code> (done automatically by
 <code>zeython make model</code>) so Alembic's autogenerate can see them.</p>
 <h2 id="active-record-api">Active Record API<a class="headerlink" href="#active-record-api" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"World"</span><span class="p">)</span>
-<span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Updated"</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>                 <span class="c1"># soft delete by default</span>
-<span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">soft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>       <span class="c1"># hard delete</span>
-<span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
-<span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>                      <span class="c1"># JSON-serializable dict</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"World"</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Updated"</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>                 <span class="c1"># soft delete by default</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">soft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>       <span class="c1"># hard delete</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">await</span> <span class="n">post</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>                      <span class="c1"># JSON-serializable dict</span>
+</span></code></pre></div>
 <p>All of these require an active database session — present automatically inside
 a request, or via <code>async with database.session():</code> elsewhere (see
 <a href="../architecture/#request-scoped-database-sessions">Architecture</a>).</p>
@@ -2768,34 +2766,32 @@ even one your own exception handler already turned into a response.
 Starlette re-raises the original exception to outer ASGI middleware after
 handling it, specifically so this kind of outer cleanup still runs. Nothing
 extra is needed for "undo everything this request did if it fails":</p>
-<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="k">await</span> <span class="n">from_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">from_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span>
-    <span class="k">await</span> <span class="n">to_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">to_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">+</span> <span class="n">amount</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">something_goes_wrong</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ConflictException</span><span class="p">(</span><span class="s2">"Transfer failed"</span><span class="p">)</span>
-        <span class="c1"># both updates above are rolled back -- the whole request's</span>
-        <span class="c1"># writes are, whenever an exception ends it</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">await</span> <span class="n">from_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">from_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">await</span> <span class="n">to_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">to_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">+</span> <span class="n">amount</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">if</span> <span class="n">something_goes_wrong</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="k">raise</span> <span class="n">ConflictException</span><span class="p">(</span><span class="s2">"Transfer failed"</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="c1"># both updates above are rolled back -- the whole request's</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="c1"># writes are, whenever an exception ends it</span>
+</span></code></pre></div>
 <p><code>transaction()</code> is for a narrower case: isolating <em>part</em> of a request so a
 failure there doesn't undo everything else, without ending the request:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="n">order</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Order</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">"pending"</span><span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="n">transaction</span><span class="p">():</span>
-            <span class="k">await</span> <span class="n">reserve_inventory</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>   <span class="c1"># several writes</span>
-            <span class="k">await</span> <span class="n">charge_payment</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>      <span class="c1"># might raise</span>
-    <span class="k">except</span> <span class="n">PaymentFailedException</span><span class="p">:</span>
-        <span class="k">await</span> <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">"payment_failed"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"Payment failed"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">402</span><span class="p">)</span>
-
-    <span class="k">await</span> <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">"confirmed"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">order</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Order</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">"pending"</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">transaction</span><span class="p">():</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="k">await</span> <span class="n">reserve_inventory</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>   <span class="c1"># several writes</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="k">await</span> <span class="n">charge_payment</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>      <span class="c1"># might raise</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="k">except</span> <span class="n">PaymentFailedException</span><span class="p">:</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="k">await</span> <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">"payment_failed"</span><span class="p">)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"Payment failed"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">402</span><span class="p">)</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="k">await</span> <span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">"confirmed"</span><span class="p">)</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</span></code></pre></div>
 <p>If <code>reserve_inventory</code>/<code>charge_payment</code> raise, only their writes roll back
 (a <code>SAVEPOINT</code> under the hood) -- <code>order</code>'s initial creation isn't touched,
 and the handler keeps running to record the failure and respond normally,
@@ -2808,17 +2804,16 @@ raises the same <code>RuntimeError</code> as calling <code>Model.create()</code>
 <p><code>all()</code> loads every matching row — fine for a small table, not for a
 listing endpoint whose table grows without bound. <code>paginate()</code> is the
 same query, sliced:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">page</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-
-<span class="n">page</span><span class="o">.</span><span class="n">items</span>         <span class="c1"># list[Post] -- this page's rows</span>
-<span class="n">page</span><span class="o">.</span><span class="n">page</span>          <span class="c1"># 1</span>
-<span class="n">page</span><span class="o">.</span><span class="n">per_page</span>      <span class="c1"># 20</span>
-<span class="n">page</span><span class="o">.</span><span class="n">total</span>         <span class="c1"># every matching row, not just this page</span>
-<span class="n">page</span><span class="o">.</span><span class="n">total_pages</span>   <span class="c1"># ceil(total / per_page)</span>
-<span class="n">page</span><span class="o">.</span><span class="n">has_next</span>       <span class="c1"># page &lt; total_pages</span>
-<span class="n">page</span><span class="o">.</span><span class="n">has_prev</span>       <span class="c1"># page &gt; 1</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">page</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">page</span><span class="o">.</span><span class="n">items</span>         <span class="c1"># list[Post] -- this page's rows</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">page</span><span class="o">.</span><span class="n">page</span>          <span class="c1"># 1</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">page</span><span class="o">.</span><span class="n">per_page</span>      <span class="c1"># 20</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">page</span><span class="o">.</span><span class="n">total</span>         <span class="c1"># every matching row, not just this page</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">page</span><span class="o">.</span><span class="n">total_pages</span>   <span class="c1"># ceil(total / per_page)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">page</span><span class="o">.</span><span class="n">has_next</span>       <span class="c1"># page &lt; total_pages</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">page</span><span class="o">.</span><span class="n">has_prev</span>       <span class="c1"># page &gt; 1</span>
+</span></code></pre></div>
 <p><code>total</code> costs a second query (a <code>COUNT(*)</code> over the same filters) to
 compute — that's the price of knowing <code>total_pages</code>/<code>has_next</code> up front,
 not a bug. If you don't need that, <code>all()</code> with a hand-rolled <code>limit</code>
@@ -2830,25 +2825,22 @@ as <code>find</code>/<code>all</code>/<code>find_by</code>. <code>zeython new</c
 <code>app/Controllers/user_controller.py</code>.</p>
 <p><code>page.to_dict()</code> serializes a whole page in one call — items (via each
 item's own <code>to_dict()</code>, for <code>Model</code> instances) plus the metadata above:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
-<span class="c1"># {"items": [...], "page": 1, "per_page": 20, "total": 57,</span>
-<span class="c1">#  "total_pages": 3, "has_next": true, "has_prev": false}</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># {"items": [...], "page": 1, "per_page": 20, "total": 57,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1">#  "total_pages": 3, "has_next": true, "has_prev": false}</span>
+</span></code></pre></div>
 <p>Pass the current request to also get <code>next_url</code>/<code>prev_url</code> — the same
 URL with only the <code>page</code> query param changed (every other query param
 carries over), <code>None</code> when there is no next/previous page:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">))</span>
-<span class="c1"># adds "next_url": "http://.../users?page=2", "prev_url": null</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">))</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># adds "next_url": "http://.../users?page=2", "prev_url": null</span>
+</span></code></pre></div>
 <h2 id="connection-pooling">Connection pooling<a class="headerlink" href="#connection-pooling" title="Permanent link">&para;</a></h2>
 <p><code>DatabaseServiceProvider</code> forwards <code>DATABASE_POOL_SIZE</code>/<code>DATABASE_MAX_OVERFLOW</code>
 straight through to SQLAlchemy's connection pool, unset by default:</p>
-<div class="codehilite"><pre><span></span><code>DATABASE_POOL_SIZE=10
-DATABASE_MAX_OVERFLOW=20
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>DATABASE_POOL_SIZE=10
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>DATABASE_MAX_OVERFLOW=20
+</span></code></pre></div>
 <ul>
 <li><code>DATABASE_POOL_SIZE</code> — steady-state connections the pool keeps open.</li>
 <li><code>DATABASE_MAX_OVERFLOW</code> — extra connections allowed beyond that under
@@ -2869,16 +2861,14 @@ reasonable start: your app server's worker count, or a little above it).</p>
 of the primary — a report, a dashboard, an analytics query, anything
 that can tolerate a little replication lag and that you'd rather not have
 competing with write traffic for the primary's connections:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="o">+</span><span class="nl">asyncpg</span><span class="p">:</span><span class="o">//</span><span class="k">user</span><span class="err">:</span><span class="n">pass</span><span class="nv">@primary</span><span class="o">/</span><span class="n">app</span>
-<span class="n">DATABASE_READ_URL</span><span class="o">=</span><span class="n">postgresql</span><span class="o">+</span><span class="nl">asyncpg</span><span class="p">:</span><span class="o">//</span><span class="k">user</span><span class="err">:</span><span class="n">pass</span><span class="nv">@replica</span><span class="o">/</span><span class="n">app</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">monthly_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">read_replica</span><span class="p">():</span>
-        <span class="n">orders</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Order</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">build_report</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>DATABASE_URL=postgresql+asyncpg://user:pass@primary/app
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>DATABASE_READ_URL=postgresql+asyncpg://user:pass@replica/app
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">monthly_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">read_replica</span><span class="p">():</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>        <span class="n">orders</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Order</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">build_report</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span>
+</span></code></pre></div>
 <p><code>read_replica()</code> opens a session against the replica exactly the way
 <code>database.session()</code> opens one against the primary — same
 <code>current_session()</code> underneath, so <code>Model.find/all/find_by/...</code> all work
@@ -2903,10 +2893,9 @@ mechanism accepts any other keyword <code>create_async_engine()</code> understan
 if you construct <code>Database</code> yourself instead of going through
 <code>DatabaseServiceProvider</code>.</p>
 <h2 id="migrations">Migrations<a class="headerlink" href="#migrations" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add posts table"</span>
-zeython<span class="w"> </span>db<span class="w"> </span>migrate
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add posts table"</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate
+</span></code></pre></div>
 <p><code>zeython new</code> scaffolds a working Alembic setup (<code>alembic.ini</code>, <code>migrations/env.py</code>)
 pointed at your <code>DATABASE_URL</code> and your <code>app.Models</code> metadata, so
 <code>--autogenerate</code> works out of the box against SQLite, PostgreSQL (<code>pip install

@@ -2694,35 +2694,36 @@ can trigger the cookie to be sent automatically, but can't <em>read</em> its
 value — the same-origin policy blocks that — so it can't also set the
 matching header. A forged request is missing the header, or has the wrong
 value, and gets rejected with a <code>403</code>.</p>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost:8000/<span class="w">          </span><span class="c1"># any response sets the csrf_token cookie</span>
-curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/posts<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: &lt;value of the csrf_token cookie&gt;"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"title": "..."}'</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-i<span class="w"> </span>http://localhost:8000/<span class="w">          </span><span class="c1"># any response sets the csrf_token cookie</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/posts<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: &lt;value of the csrf_token cookie&gt;"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"title": "..."}'</span>
+</span></code></pre></div>
 <h2 id="from-a-browserjs-client">From a browser/JS client<a class="headerlink" href="#from-a-browserjs-client" title="Permanent link">&para;</a></h2>
 <p>Read the cookie directly — no server round trip needed to fetch a token
 separately:</p>
-<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">csrfToken</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span>
-<span class="w">    </span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"; "</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="nx">find</span><span class="p">((</span><span class="nx">row</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">row</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">"csrf_token="</span><span class="p">))</span>
-<span class="w">    </span><span class="o">?</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">)[</span><span class="mf">1</span><span class="p">];</span>
-<span class="p">}</span>
-
-<span class="nx">fetch</span><span class="p">(</span><span class="s2">"/posts"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"X-CSRF-Token"</span><span class="o">:</span><span class="w"> </span><span class="nx">csrfToken</span><span class="p">(),</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="s2">"..."</span><span class="w"> </span><span class="p">}),</span>
-<span class="w">  </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">"same-origin"</span><span class="p">,</span>
-<span class="p">});</span>
-</code></pre></div>
-
-<p>The <strong>first</strong> unsafe request after a client has never talked to your app
-before will fail — there's no cookie to read yet. Make any safe (<code>GET</code>)
-request first (loading the page itself counts), the same way Django's and
-Laravel's equivalents work.</p>
+<div class="language-js highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">function</span><span class="w"> </span><span class="nx">csrfToken</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"; "</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">.</span><span class="nx">find</span><span class="p">((</span><span class="nx">row</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">row</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">"csrf_token="</span><span class="p">))</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="o">?</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">)[</span><span class="mf">1</span><span class="p">];</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nx">fetch</span><span class="p">(</span><span class="s2">"/posts"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"X-CSRF-Token"</span><span class="o">:</span><span class="w"> </span><span class="nx">csrfToken</span><span class="p">(),</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="s2">"..."</span><span class="w"> </span><span class="p">}),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">"same-origin"</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">});</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">The first request from a new client must be a safe one</p>
+<p>The <strong>first</strong> unsafe request after a client has never talked to your
+app before will fail — there's no cookie to read yet. Make any safe
+(<code>GET</code>) request first (loading the page itself counts), the same way
+Django's and Laravel's equivalents work.</p>
+</div>
 <h2 id="whats-exempt">What's exempt<a class="headerlink" href="#whats-exempt" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Safe methods</strong> (<code>GET</code>/<code>HEAD</code>/<code>OPTIONS</code>/<code>TRACE</code>) — they never change
@@ -2740,46 +2741,46 @@ Laravel's equivalents work.</p>
 </ul>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>Comes bundled with <code>AuthServiceProvider</code> — nothing extra to register:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">AuthServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">AuthServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>
+</span></code></pre></div>
 <p>Configurable via <code>.env</code>:</p>
 <ul>
-<li><code>CSRF_ENABLED</code> — default <code>true</code>. Turning it off is rarely the right
-  call, since it's exactly what makes cookie-based auth safe to use from
-  a browser — a pure mobile/native client that never runs in a browser
-  context is the one legitimate reason to.</li>
+<li><code>CSRF_ENABLED</code> — default <code>true</code>.</li>
 <li><code>CSRF_COOKIE_NAME</code> — default <code>csrf_token</code>.</li>
 <li><code>CSRF_HEADER_NAME</code> — default <code>X-CSRF-Token</code>.</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">Think twice before setting CSRF_ENABLED=false</p>
+<p>Turning it off is rarely the right call, since it's exactly what makes
+cookie-based auth safe to use from a browser — a pure mobile/native
+client that never runs in a browser context is the one legitimate
+reason to.</p>
+</div>
 <p>Using <code>CsrfMiddleware</code> standalone, without <code>AuthServiceProvider</code> (a
 generic double-submit-cookie check with no auth-awareness, protecting
 every unsafe request unconditionally):</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CsrfMiddleware</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">CsrfMiddleware</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CsrfMiddleware</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">CsrfMiddleware</span><span class="p">)</span>
+</span></code></pre></div>
 <h2 id="server-rendered-forms">Server-rendered forms<a class="headerlink" href="#server-rendered-forms" title="Permanent link">&para;</a></h2>
 <p>For an app submitting real HTML forms instead of driving everything
 through <code>fetch</code>, embed the token as a hidden field using <code>csrf_token(request)</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">csrf_token</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/posts/new"</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">new_post_form</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"posts/new.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"csrf_token"</span><span class="p">:</span> <span class="n">csrf_token</span><span class="p">(</span><span class="n">request</span><span class="p">)})</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">"post"</span> <span class="na">action</span><span class="o">=</span><span class="s">"/posts"</span><span class="p">&gt;</span>
-  <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"csrf_token"</span> <span class="na">value</span><span class="o">=</span><span class="s">"{{ csrf_token }}"</span> <span class="p">/&gt;</span>
-  ...
-<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">csrf_token</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/posts/new"</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">new_post_form</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"posts/new.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"csrf_token"</span><span class="p">:</span> <span class="n">csrf_token</span><span class="p">(</span><span class="n">request</span><span class="p">)})</span>
+</span></code></pre></div>
+<div class="language-html highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">"post"</span> <span class="na">action</span><span class="o">=</span><span class="s">"/posts"</span><span class="p">&gt;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"csrf_token"</span> <span class="na">value</span><span class="o">=</span><span class="s">"{{ csrf_token }}"</span> <span class="p">/&gt;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  ...
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</span></code></pre></div>
 <p>(<code>CsrfMiddleware</code> reads the token from the header, not a form field — pair
 this with a tiny bit of JS that copies the hidden field's value into the
 <code>X-CSRF-Token</code> header on submit, or submit via <code>fetch</code> instead of a plain

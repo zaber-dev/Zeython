@@ -2632,39 +2632,37 @@
 
 <h1 id="part-1-setup">Part 1: Setup<a class="headerlink" href="#part-1-setup" title="Permanent link">&para;</a></h1>
 <h2 id="scaffold-the-project">Scaffold the project<a class="headerlink" href="#scaffold-the-project" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-pip<span class="w"> </span>install<span class="w"> </span>zeython
-zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"TaskFlow"</span>
-<span class="nb">cd</span><span class="w"> </span>task_flow
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev]"</span>
-cp<span class="w"> </span>.env.example<span class="w"> </span>.env
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"TaskFlow"</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">cd</span><span class="w"> </span>task_flow
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev]"</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+</span></code></pre></div>
 <p><code>zeython new</code> generated a real, runnable project — not a single-file demo.
 (The <code>[dev]</code> extra pulls in <code>pytest</code>, <code>pytest-asyncio</code>, and <code>httpx</code> — the
 project ships with a passing test in <code>tests/test_home.py</code> already, and
 you'll write more of your own starting in
 <a href="../tutorial-6-testing/">Part 6</a>.) Look at what's there:</p>
-<div class="codehilite"><pre><span></span><code>task_flow/
-├── app/
-│   ├── Controllers/       # request handlers
-│   ├── Models/            # async Active Record models
-│   ├── Middleware/        # ASGI middleware
-│   ├── Providers/         # your own service providers
-│   ├── Jobs/               # background jobs
-│   └── Console/Commands/   # custom <span class="sb">`zeython command &lt;name&gt;`</span> CLI commands
-├── database/
-│   ├── factories/          # model factories for tests/seeding
-│   └── seeders/            # <span class="sb">`zeython db seed`</span>
-├── routes/
-│   └── web.py               # route definitions
-├── migrations/               # Alembic migrations
-├── tests/
-├── main.py                   # application entry point -- start here
-├── alembic.ini
-└── .env.example
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>task_flow/
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── app/
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   ├── Controllers/       # request handlers
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── Models/            # async Active Record models
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── Middleware/        # ASGI middleware
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── Providers/         # your own service providers
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── Jobs/               # background jobs
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   └── Console/Commands/   # custom `zeython command &lt;name&gt;` CLI commands
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>├── database/
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   ├── factories/          # model factories for tests/seeding
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   └── seeders/            # `zeython db seed`
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>├── routes/
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   └── web.py               # route definitions
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>├── migrations/               # Alembic migrations
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>├── tests/
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>├── main.py                   # application entry point -- start here
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>├── alembic.ini
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>└── .env.example
+</span></code></pre></div>
 <p><code>main.py</code> is worth opening now. It's not hidden framework magic — it's
 plain Python that constructs an <code>Application</code>, registers the providers
 your app needs (<code>AuthServiceProvider</code>, <code>DatabaseServiceProvider</code>,
@@ -2680,11 +2678,10 @@ the list of which pieces you're using.</p>
 <p>A fresh scaffold ships with the <code>User</code> model already written but no
 migration file for it yet — <code>revision</code> autogenerates one by diffing your
 models against the (empty) database, <code>migrate</code> applies it:</p>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"create users table"</span>
-zeython<span class="w"> </span>db<span class="w"> </span>migrate
-zeython<span class="w"> </span>serve
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"create users table"</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>zeython<span class="w"> </span>serve
+</span></code></pre></div>
 <p>Visit <code>http://127.0.0.1:8000</code> — you'll get a small JSON welcome payload.
 <code>zeython serve</code> auto-reloads on file changes, so leave it running for the
 rest of this tutorial.</p>
@@ -2693,23 +2690,19 @@ rest of this tutorial.</p>
 authentication out of the box (see <a href="../authentication/">Authentication</a>
 for the full picture later) — you get to use it for free instead of
 building login from scratch:</p>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-sS<span class="w"> </span>-c<span class="w"> </span>cookies.txt<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-c<span class="w"> </span>cookies.txt<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'</span>
+</span></code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
+</span></code></pre></div>
 <p><code>-c cookies.txt</code> saves the session cookie <code>/register</code> sets — you're now
 logged in as Ada, and every following <code>curl</code> in this tutorial that
 passes <code>-b cookies.txt</code> will be authenticated as her. Confirm it:</p>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>http://127.0.0.1:8000/me
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>http://127.0.0.1:8000/me
+</span></code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
+</span></code></pre></div>
 <p>That's the whole account system you'd otherwise hand-roll — password
 hashing, a signed session cookie, CSRF protection on every unsafe
 request from here on (you'll deal with that directly in

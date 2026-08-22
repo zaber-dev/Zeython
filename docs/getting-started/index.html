@@ -2680,56 +2680,52 @@
 <li>Python 3.11+</li>
 </ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-pip<span class="w"> </span>install<span class="w"> </span>zeython
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython
+</span></code></pre></div>
 <h2 id="scaffold-a-project">Scaffold a project<a class="headerlink" href="#scaffold-a-project" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span>
-<span class="nb">cd</span><span class="w"> </span>my_blog
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-cp<span class="w"> </span>.env.example<span class="w"> </span>.env
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>my_blog
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+</span></code></pre></div>
 <p>This generates:</p>
-<div class="codehilite"><pre><span></span><code>my_blog/
-├── app/
-│   ├── Controllers/     # request handlers
-│   ├── Models/          # async Active Record models
-│   └── Middleware/       # ASGI middleware
-├── routes/
-│   └── web.py           # route definitions
-├── migrations/           # Alembic migrations
-├── tests/
-├── main.py               # application entry point
-├── alembic.ini
-└── .env.example
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>my_blog/
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── app/
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│   ├── Controllers/     # request handlers
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│   ├── Models/          # async Active Record models
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│   └── Middleware/       # ASGI middleware
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>├── routes/
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│   └── web.py           # route definitions
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>├── migrations/           # Alembic migrations
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>├── tests/
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>├── main.py               # application entry point
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>├── alembic.ini
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>└── .env.example
+</span></code></pre></div>
 <h2 id="run-it">Run it<a class="headerlink" href="#run-it" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>serve
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>serve
+</span></code></pre></div>
 <p>Visit <code>http://127.0.0.1:8000</code> — you should see a JSON welcome message. Try
 registering a user and listing them:</p>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2"}'</span>
-
-curl<span class="w"> </span>http://127.0.0.1:8000/users
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2"}'</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>curl<span class="w"> </span>http://127.0.0.1:8000/users
+</span></code></pre></div>
 <p><code>/users</code> is paginated (see <a href="../database/#pagination">Database &amp; Migrations</a>)
 — the response is <code>{"items": [...], "page": 1, "total": 1, ...}</code>, not a
 bare array.</p>
-<p>If you get a database error, generate and apply the initial migration first
-(a fresh scaffold ships with the <code>User</code> model but no migration file yet —
-<code>revision</code> autogenerates one from your models, <code>migrate</code> applies it):</p>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"create users table"</span>
-zeython<span class="w"> </span>db<span class="w"> </span>migrate
-</code></pre></div>
-
+<div class="admonition tip">
+<p class="admonition-title">Getting a database error?</p>
+<p>A fresh scaffold ships with the <code>User</code> model but no migration file yet
+— generate and apply the initial one first:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"create users table"</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate
+</span></code></pre></div>
+</div>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Follow the <a href="../tutorial/">Tutorial</a> to build a real, tested, multi-model

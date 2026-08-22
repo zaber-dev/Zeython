@@ -2679,19 +2679,17 @@
 <code>.dockerignore</code> -- a working container from <code>zeython new</code> onward, not
 something you have to bolt on before a first deployment.</p>
 <h2 id="building-and-running">Building and running<a class="headerlink" href="#building-and-running" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--build
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--build
+</span></code></pre></div>
 <p>This builds the image, runs pending migrations, and starts the server on
 <code>http://localhost:8000</code>. <code>docker compose</code> reads <code>.env</code> for configuration
 (copy <code>.env.example</code> to <code>.env</code> first, same as running locally) --
 <code>.dockerignore</code> deliberately excludes <code>.env</code> from the build context itself,
 so a secret never ends up baked into an image layer.</p>
 <p>Without compose:</p>
-<div class="codehilite"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-app<span class="w"> </span>.
-docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--env-file<span class="w"> </span>.env<span class="w"> </span>my-app
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-app<span class="w"> </span>.
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--env-file<span class="w"> </span>.env<span class="w"> </span>my-app
+</span></code></pre></div>
 <h2 id="what-the-image-does">What the image does<a class="headerlink" href="#what-the-image-does" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Multi-stage build.</strong> A <code>builder</code> stage installs dependencies into a

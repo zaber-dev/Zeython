@@ -2698,13 +2698,12 @@ generated <code>AuthController.login</code> and <code>.register</code> out of th
 per minute per IP for login, 5 per hour for register. This is table stakes
 for an auth endpoint, not an optional extra.</p>
 <h2 id="protecting-a-specific-route">Protecting a specific route<a class="headerlink" href="#protecting-a-specific-route" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.rate_limit</span><span class="w"> </span><span class="kn">import</span> <span class="n">throttle</span>
-
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># 5 requests/minute per IP</span>
-    <span class="o">...</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.rate_limit</span><span class="w"> </span><span class="kn">import</span> <span class="n">throttle</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># 5 requests/minute per IP</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="o">...</span>
+</span></code></pre></div>
 <p>Raises <code>TooManyRequestsException</code> (429, with a <code>Retry-After</code> header) once
 the limit is hit — already rendered as JSON by the framework's default
 error handler, same as any other <code>HTTPException</code>.</p>
@@ -2712,20 +2711,18 @@ error handler, same as any other <code>HTTPException</code>.</p>
 <p>By default the key is the client's IP. Namespace it per-endpoint (so
 <code>/login</code> and <code>/register</code> don't share a counter) or scope it to something
 other than IP:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.rate_limit</span><span class="w"> </span><span class="kn">import</span> <span class="n">client_ip</span><span class="p">,</span> <span class="n">throttle</span>
-
-<span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">"login:</span><span class="si">{</span><span class="n">client_ip</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">"login:</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># per-account instead of per-IP</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.rate_limit</span><span class="w"> </span><span class="kn">import</span> <span class="n">client_ip</span><span class="p">,</span> <span class="n">throttle</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">"login:</span><span class="si">{</span><span class="n">client_ip</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">await</span> <span class="n">throttle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">"login:</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># per-account instead of per-IP</span>
+</span></code></pre></div>
 <h2 id="blanket-limiting-across-the-whole-api">Blanket limiting across the whole API<a class="headerlink" href="#blanket-limiting-across-the-whole-api" title="Permanent link">&para;</a></h2>
 <p>Opt-in via <code>.env</code> — <code>RateLimitServiceProvider</code> is registered by every
 generated app already, this just turns the middleware on:</p>
-<div class="codehilite"><pre><span></span><code>RATE_LIMIT_ENABLED=true
-RATE_LIMIT_MAX_REQUESTS=60
-RATE_LIMIT_WINDOW_SECONDS=60
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>RATE_LIMIT_ENABLED=true
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>RATE_LIMIT_MAX_REQUESTS=60
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>RATE_LIMIT_WINDOW_SECONDS=60
+</span></code></pre></div>
 <p>This applies to every request regardless of route, independent of any
 <code>throttle()</code> calls in your handlers — the two compose (a request can be
 rejected by either).</p>
@@ -2736,10 +2733,10 @@ processes or machines — each counts independently, so the <em>effective</em> l
 multiplies by worker count. For a distributed limit, implement <code>RateLimiter</code>
 against a shared store (Redis <code>INCR</code>+<code>EXPIRE</code> is the usual choice) and bind
 it in place of the default:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">RateLimiter</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">RateLimiter</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyRedisRateLimiter</span><span class="p">(</span><span class="n">redis_client</span><span class="p">))</span>
-</code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">RateLimiter</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">RateLimiter</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyRedisRateLimiter</span><span class="p">(</span><span class="n">redis_client</span><span class="p">))</span>
+</span></code></pre></div>
 
 
 

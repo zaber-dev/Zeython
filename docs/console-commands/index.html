@@ -2661,21 +2661,19 @@ entirely: its own hand-rolled <code>Application()</code> bootstrap, no access to
 <code>container.make(...)</code>, easy to drift from how the real app is actually
 configured. <code>zeython command &lt;name&gt;</code> closes that gap.</p>
 <h2 id="writing-a-command">Writing a command<a class="headerlink" href="#writing-a-command" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>make<span class="w"> </span><span class="nb">command</span><span class="w"> </span>PruneOldPosts
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="c1"># app/Console/Commands/prune_old_posts_command.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">PruneOldPostsCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Run with: zeython command prune-old-posts"""</span>
-
-    <span class="n">help</span> <span class="o">=</span> <span class="s2">"TODO: describe what this command does."</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="o">...</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>zeython<span class="w"> </span>make<span class="w"> </span><span class="nb">command</span><span class="w"> </span>PruneOldPosts
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Console/Commands/prune_old_posts_command.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">PruneOldPostsCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="sd">"""Run with: zeython command prune-old-posts"""</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">help</span> <span class="o">=</span> <span class="s2">"TODO: describe what this command does."</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="o">...</span>
+</span></code></pre></div>
 <p>One file per command in <code>app/Console/Commands/</code>, one <code>Command</code> subclass per
 file. <code>handle()</code> is async and receives every extra CLI argument as a raw
 string — there's no typed option parsing, deliberately: it's the same shape
@@ -2683,23 +2681,21 @@ string — there's no typed option parsing, deliberately: it's the same shape
 needs (or ignore it and hardcode behavior).</p>
 <p>Inside <code>handle()</code>, <code>self.app</code>, <code>self.container</code>, and <code>self.config</code> are the
 same instances the rest of the app uses:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.db.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">PruneOldPostsCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">database</span><span class="p">:</span> <span class="n">Database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Database</span><span class="p">)</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">session</span><span class="p">():</span>
-            <span class="o">...</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.db.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">PruneOldPostsCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">database</span><span class="p">:</span> <span class="n">Database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Database</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">database</span><span class="o">.</span><span class="n">session</span><span class="p">():</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="o">...</span>
+</span></code></pre></div>
 <p>A command runs outside any request, so there's no request-scoped database
 session automatically available — open one explicitly, as above, the same
 way any other out-of-request code does.</p>
 <h2 id="running-commands">Running commands<a class="headerlink" href="#running-commands" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>commands<span class="w">              </span><span class="c1"># list every discovered command</span>
-zeython<span class="w"> </span><span class="nb">command</span><span class="w"> </span>prune-old-posts<span class="w"> </span>foo<span class="w"> </span>--bar<span class="o">=</span>baz
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>commands<span class="w">              </span><span class="c1"># list every discovered command</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>zeython<span class="w"> </span><span class="nb">command</span><span class="w"> </span>prune-old-posts<span class="w"> </span>foo<span class="w"> </span>--bar<span class="o">=</span>baz
+</span></code></pre></div>
 <p><code>zeython commands</code> lists every <code>Command</code> subclass found in
 <code>app/Console/Commands/</code>, along with its <code>help</code> text. <code>zeython command &lt;name&gt;</code>
 runs one, passing every trailing argument through untouched — <code>foo</code> and
@@ -2712,10 +2708,9 @@ turned into dashes, and a trailing <code>_command</code> dropped — <code>prune
 becomes <code>prune-old-posts</code>. Override it with a <code>name</code> class attribute for
 something else entirely (a namespaced style like <code>reports:send</code>, for
 instance):</p>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SendReportCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s2">"reports:send"</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SendReportCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">name</span> <span class="o">=</span> <span class="s2">"reports:send"</span>
+</span></code></pre></div>
 <h2 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h2>
 <p>Pointing a bare <code>cron</code> entry straight at <code>zeython command &lt;name&gt;</code> works,
 but the schedule itself then lives outside the app entirely — on a server

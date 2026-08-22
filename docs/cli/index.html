@@ -2786,89 +2786,78 @@
 
 <h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">&para;</a></h1>
 <h2 id="project-scaffolding">Project scaffolding<a class="headerlink" href="#project-scaffolding" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span><span class="w">                </span><span class="c1"># creates ./my_blog</span>
-zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span><span class="w"> </span>--path<span class="w"> </span>~/code/blog
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span><span class="w">                </span><span class="c1"># creates ./my_blog</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>zeython<span class="w"> </span>new<span class="w"> </span><span class="s2">"My Blog"</span><span class="w"> </span>--path<span class="w"> </span>~/code/blog
+</span></code></pre></div>
 <h2 id="development-server">Development server<a class="headerlink" href="#development-server" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>serve<span class="w">                        </span><span class="c1"># reads host/port/reload from .env</span>
-zeython<span class="w"> </span>serve<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span><span class="w"> </span>--no-reload
-zeython<span class="w"> </span>serve<span class="w"> </span>--app<span class="w"> </span>my_app:app<span class="w">       </span><span class="c1"># if your ASGI app isn't main:app</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>zeython<span class="w"> </span>serve<span class="w">                        </span><span class="c1"># reads host/port/reload from .env</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>zeython<span class="w"> </span>serve<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span><span class="w"> </span>--no-reload
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>zeython<span class="w"> </span>serve<span class="w"> </span>--app<span class="w"> </span>my_app:app<span class="w">       </span><span class="c1"># if your ASGI app isn't main:app</span>
+</span></code></pre></div>
 <h2 id="code-generators">Code generators<a class="headerlink" href="#code-generators" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>make<span class="w"> </span>model<span class="w"> </span>Post<span class="w">              </span><span class="c1"># app/Models/post.py, wired into app/Models/__init__.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>controller<span class="w"> </span>Post<span class="w">         </span><span class="c1"># app/Controllers/post_controller.py (PostController)</span>
-zeython<span class="w"> </span>make<span class="w"> </span>middleware<span class="w"> </span>RequestLogger<span class="w">  </span><span class="c1"># app/Middleware/request_logger.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>provider<span class="w"> </span>Payment<span class="w">        </span><span class="c1"># app/Providers/payment_service_provider.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>job<span class="w"> </span>SendWelcomeEmail<span class="w">    </span><span class="c1"># app/Jobs/send_welcome_email_job.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span><span class="nb">command</span><span class="w"> </span>PruneOldPosts<span class="w">   </span><span class="c1"># app/Console/Commands/prune_old_posts_command.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>factory<span class="w"> </span>Post<span class="w">            </span><span class="c1"># database/factories/post_factory.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>seeder<span class="w"> </span>User<span class="w">             </span><span class="c1"># database/seeders/user_seeder.py</span>
-zeython<span class="w"> </span>make<span class="w"> </span>policy<span class="w"> </span>Post<span class="w">             </span><span class="c1"># app/Policies/post_policy.py (PostPolicy)</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>zeython<span class="w"> </span>make<span class="w"> </span>model<span class="w"> </span>Post<span class="w">              </span><span class="c1"># app/Models/post.py, wired into app/Models/__init__.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>zeython<span class="w"> </span>make<span class="w"> </span>controller<span class="w"> </span>Post<span class="w">         </span><span class="c1"># app/Controllers/post_controller.py (PostController)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>zeython<span class="w"> </span>make<span class="w"> </span>middleware<span class="w"> </span>RequestLogger<span class="w">  </span><span class="c1"># app/Middleware/request_logger.py</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>zeython<span class="w"> </span>make<span class="w"> </span>provider<span class="w"> </span>Payment<span class="w">        </span><span class="c1"># app/Providers/payment_service_provider.py</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>zeython<span class="w"> </span>make<span class="w"> </span>job<span class="w"> </span>SendWelcomeEmail<span class="w">    </span><span class="c1"># app/Jobs/send_welcome_email_job.py</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>zeython<span class="w"> </span>make<span class="w"> </span><span class="nb">command</span><span class="w"> </span>PruneOldPosts<span class="w">   </span><span class="c1"># app/Console/Commands/prune_old_posts_command.py</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>zeython<span class="w"> </span>make<span class="w"> </span>factory<span class="w"> </span>Post<span class="w">            </span><span class="c1"># database/factories/post_factory.py</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>zeython<span class="w"> </span>make<span class="w"> </span>seeder<span class="w"> </span>User<span class="w">             </span><span class="c1"># database/seeders/user_seeder.py</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>zeython<span class="w"> </span>make<span class="w"> </span>policy<span class="w"> </span>Post<span class="w">             </span><span class="c1"># app/Policies/post_policy.py (PostPolicy)</span>
+</span></code></pre></div>
 <p>See <a href="../authorization/#policies">Authorization</a> for registering a generated policy with <code>Gate.policy(...)</code>.</p>
 <h2 id="custom-commands">Custom commands<a class="headerlink" href="#custom-commands" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>commands<span class="w">                     </span><span class="c1"># list every command in app/Console/Commands/</span>
-zeython<span class="w"> </span><span class="nb">command</span><span class="w"> </span>prune-old-posts<span class="w">      </span><span class="c1"># run one, with any trailing args passed through raw</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>commands<span class="w">                     </span><span class="c1"># list every command in app/Console/Commands/</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>zeython<span class="w"> </span><span class="nb">command</span><span class="w"> </span>prune-old-posts<span class="w">      </span><span class="c1"># run one, with any trailing args passed through raw</span>
+</span></code></pre></div>
 <p>See <a href="../console-commands/">Console Commands</a> for how to write one.</p>
 <h2 id="database-migrations-alembic">Database migrations (Alembic)<a class="headerlink" href="#database-migrations-alembic" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add posts table"</span><span class="w">   </span><span class="c1"># autogenerate a migration from model changes</span>
-zeython<span class="w"> </span>db<span class="w"> </span>migrate<span class="w">                          </span><span class="c1"># apply all pending migrations</span>
-zeython<span class="w"> </span>db<span class="w"> </span>downgrade<span class="w">                        </span><span class="c1"># revert the most recent migration</span>
-zeython<span class="w"> </span>db<span class="w"> </span>downgrade<span class="w"> </span>&lt;revision&gt;
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add posts table"</span><span class="w">   </span><span class="c1"># autogenerate a migration from model changes</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate<span class="w">                          </span><span class="c1"># apply all pending migrations</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>zeython<span class="w"> </span>db<span class="w"> </span>downgrade<span class="w">                        </span><span class="c1"># revert the most recent migration</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>zeython<span class="w"> </span>db<span class="w"> </span>downgrade<span class="w"> </span>&lt;revision&gt;
+</span></code></pre></div>
 <p>These are thin wrappers around <code>alembic</code> using the project's <code>alembic.ini</code> and
 <code>migrations/</code> directory, generated automatically by <code>zeython new</code>.</p>
 <h2 id="seeding">Seeding<a class="headerlink" href="#seeding" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>db<span class="w"> </span>seed<span class="w">                        </span><span class="c1"># runs DatabaseSeeder</span>
-zeython<span class="w"> </span>db<span class="w"> </span>seed<span class="w"> </span>--class<span class="w"> </span>UserSeeder<span class="w">      </span><span class="c1"># runs a specific seeder instead</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>seed<span class="w">                        </span><span class="c1"># runs DatabaseSeeder</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>seed<span class="w"> </span>--class<span class="w"> </span>UserSeeder<span class="w">      </span><span class="c1"># runs a specific seeder instead</span>
+</span></code></pre></div>
 <p>See <a href="../database-seeding/">Factories &amp; Seeders</a>.</p>
 <h2 id="queue-worker">Queue worker<a class="headerlink" href="#queue-worker" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>queue<span class="w"> </span>work<span class="w">                     </span><span class="c1"># process jobs from a durable queue (QUEUE_DRIVER=redis)</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>zeython<span class="w"> </span>queue<span class="w"> </span>work<span class="w">                     </span><span class="c1"># process jobs from a durable queue (QUEUE_DRIVER=redis)</span>
+</span></code></pre></div>
 <p>Only meaningful with <code>QUEUE_DRIVER=redis</code> — the default in-memory queue
 already runs its own worker inside your app's process, so there's nothing
 for a separate process to pull from. See <a href="../queues/#queue_driverredis-a-durable-queue">Background Jobs</a>.</p>
 <h2 id="scheduled-tasks">Scheduled tasks<a class="headerlink" href="#scheduled-tasks" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>schedule<span class="w"> </span>run<span class="w">                   </span><span class="c1"># run every task due this minute -- point cron at this</span>
-zeython<span class="w"> </span>schedule<span class="w"> </span>list<span class="w">                  </span><span class="c1"># list every registered task and its cron expression</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>run<span class="w">                   </span><span class="c1"># run every task due this minute -- point cron at this</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>list<span class="w">                  </span><span class="c1"># list every registered task and its cron expression</span>
+</span></code></pre></div>
 <p>See <a href="../scheduling/">Scheduling</a>.</p>
 <h2 id="project-introspection">Project introspection<a class="headerlink" href="#project-introspection" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>routes<span class="w">                         </span><span class="c1"># list every registered HTTP route: method(s), path, name</span>
-zeython<span class="w"> </span>about<span class="w">                          </span><span class="c1"># app name, environment, debug flag, Zeython version, providers</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>zeython<span class="w"> </span>routes<span class="w">                         </span><span class="c1"># list every registered HTTP route: method(s), path, name</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>zeython<span class="w"> </span>about<span class="w">                          </span><span class="c1"># app name, environment, debug flag, Zeython version, providers</span>
+</span></code></pre></div>
 <p>Both read your project the same way <code>zeython serve</code> does (they import
 <code>main.py</code>), so what they report is exactly what's actually wired up --
 not something separately maintained that can drift from it. An AI coding
 agent working in your project gets the same information through
 <code>zeython mcp</code>'s <code>list_routes</code>/<code>app_info</code> tools -- see <a href="../ai-agents/">AI Agents</a>.</p>
 <h2 id="tinker-interactive-repl">Tinker (interactive REPL)<a class="headerlink" href="#tinker-interactive-repl" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>zeython<span class="w"> </span>tinker
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>zeython<span class="w"> </span>tinker
+</span></code></pre></div>
 <p>Drops into a Python REPL with your app, container, config, and every
 <code>Model</code> subclass in <code>app/Models/</code> already imported by name -- mirrors
 Laravel's <code>artisan tinker</code>. Wrap an async call in <code>run(...)</code> to execute
 it; each one commits immediately on success (or rolls back on an
 exception), the same as a real request:</p>
-<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
-<span class="go">[&lt;Post id=1&gt;, &lt;Post id=2&gt;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello, world"</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span>
-</code></pre></div>
-
+<div class="language-pycon highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="go">[&lt;Post id=1&gt;, &lt;Post id=2&gt;]</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">))</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello, world"</span><span class="p">))</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">run</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span>
+</span></code></pre></div>
 <p><code>app</code>/<code>container</code>/<code>config</code> are also in scope, for anything that needs
 them directly (<code>container.make(SomeService)</code>, <code>config.get("app.debug")</code>).</p>
 

@@ -2747,136 +2747,140 @@ real docs instead of repeating them. Go through it once before a first
 production deploy, and again whenever you add something (a queue, a
 second replica, a new external API) that changes the answer.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong><code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>.</strong> Debug mode leaks
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>.</strong> Debug mode leaks
   stack traces and internals into error responses -- fine locally, a
   disclosure bug in production. <code>zeython new</code> scaffolds both as
   development-friendly defaults; flip them in your deployment's <code>.env</code>
   or environment variables, not in the repo.</li>
-<li>[ ] <strong><code>APP_SECRET_KEY</code> is a real, unique secret</strong>, not the value
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>APP_SECRET_KEY</code> is a real, unique secret</strong>, not the value
   <code>zeython new</code> generated for local dev committed into version control.
   It signs the session cookie -- see <a href="../authentication/">Authentication</a>.</li>
-<li>[ ] <strong><code>DATABASE_URL</code> points at a real database</strong>, not the default
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>DATABASE_URL</code> points at a real database</strong>, not the default
   SQLite file. SQLite is fine for a single-container demo; anything with
   more than one app replica needs Postgres/MySQL so writes are visible
   across processes. See <a href="../database/">Database &amp; Migrations</a>.</li>
-<li>[ ] <strong>Migrations are applied</strong>, not just written --
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Migrations are applied</strong>, not just written --
   <code>alembic upgrade head</code> (the generated Docker image's <code>CMD</code> does this
   for you on a single-container deploy; see <a href="../docker/">Docker</a>).</li>
 </ul>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong>CSRF protection is on</strong> -- it is by default for session auth, see
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CSRF protection is on</strong> -- it is by default for session auth, see
   <a href="../csrf/">CSRF Protection</a>. Don't disable it on a route just because a
   test was inconvenient.</li>
-<li>[ ] <strong>Rate limiting is configured</strong> on auth endpoints (on by default,
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Rate limiting is configured</strong> on auth endpoints (on by default,
   see <a href="../rate-limiting/">Rate Limiting</a>) and, if this is a public API,
   blanket-enabled across the rest of it too
   (<code>RATE_LIMIT_ENABLED=true</code>).</li>
-<li>[ ] <strong>Security headers are registered</strong> -- <code>SecurityHeadersServiceProvider</code>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Security headers are registered</strong> -- <code>SecurityHeadersServiceProvider</code>
   is opt-in, not on by default, because a wrong CSP silently breaks a
   real app. Decide your policy and register it; see
   <a href="../security-headers/">Security Headers</a>.</li>
-<li>[ ] <strong>CORS is scoped to real origins</strong>, not <code>*</code>, if <code>CorsServiceProvider</code>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CORS is scoped to real origins</strong>, not <code>*</code>, if <code>CorsServiceProvider</code>
   is registered at all. Wildcard origins on an authenticated API mean any
   site can read the response.</li>
-<li>[ ] <strong>WebSocket origin checking</strong> is on if you're not the only expected
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>WebSocket origin checking</strong> is on if you're not the only expected
   client -- see the Origin-check note in
   <a href="../websockets/">WebSockets</a>.</li>
-<li>[ ] <strong>RBAC/authorization is actually enforced</strong> on every route that
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>RBAC/authorization is actually enforced</strong> on every route that
   needs it -- an undefined ability is a bug, not a silent deny (see
   <a href="../authorization/">Authorization</a>), so audit routes for a missing
   <code>authorize()</code>/<code>Gate.allows()</code> call rather than trusting that one exists.</li>
-<li>[ ] <strong>You've read <a href="https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md">SECURITY.md</a></strong>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>You've read <a href="https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md">SECURITY.md</a></strong>
   -- supported versions and how to report a vulnerability privately, for
   your own app as much as for the framework.</li>
 </ul>
 <h2 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong>Connection pooling is sized for your deployment</strong>, not left at
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Connection pooling is sized for your deployment</strong>, not left at
   SQLAlchemy's defaults if you're running multiple app processes against
   one database -- see <a href="../database/#connection-pooling">Connection pooling</a>.</li>
-<li>[ ] <strong>A read replica is wired up</strong> (<code>DATABASE_READ_URL</code> +
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A read replica is wired up</strong> (<code>DATABASE_READ_URL</code> +
   <code>Database.read_replica()</code>) if read load is the bottleneck, not before
   -- see <a href="../database/#read-replicas">Read replicas</a>.</li>
-<li>[ ] <strong>N+1 query detection has actually been run</strong> against real traffic
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>N+1 query detection has actually been run</strong> against real traffic
   paths in dev (<code>APP_DEBUG=true</code>, <code>N1QueryDetectionServiceProvider</code>) at
   least once before shipping a new list/index endpoint -- see
   <a href="../relationships/#detecting-n1s-automatically">Detecting N+1s automatically</a>.</li>
-<li>[ ] <strong>Multi-step writes that must succeed or fail together use
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Multi-step writes that must succeed or fail together use
   <code>transaction()</code></strong> (a <code>SAVEPOINT</code>-scoped nested transaction), not
   several unguarded writes hoping nothing fails in between -- see
   <a href="../database/#transactions">Transactions</a>.</li>
 </ul>
 <h2 id="observability">Observability<a class="headerlink" href="#observability" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong>Structured logging is on</strong> if you ship to a log aggregator
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Structured logging is on</strong> if you ship to a log aggregator
   (Datadog, ELK, CloudWatch Logs Insights, Splunk) -- <code>LOG_FORMAT=json</code>,
   see <a href="../observability/#structured-json-logging">Structured (JSON) logging</a>.
   Plain text is fine if a human is the only consumer.</li>
-<li>[ ] <strong><code>X-Request-ID</code> correlation is working end to end</strong> -- it's on by
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>X-Request-ID</code> correlation is working end to end</strong> -- it's on by
   default (<code>RequestIdServiceProvider</code>), but confirm your proxy/load
   balancer isn't stripping the header before it reaches the app. See
   <a href="../observability/#requestcorrelation-ids">Request/Correlation IDs</a>.</li>
-<li>[ ] <strong>Error monitoring is wired up</strong> (Sentry via
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error monitoring is wired up</strong> (Sentry via
   <code>ErrorMonitoringServiceProvider</code> + <code>SENTRY_DSN</code>) so an unhandled
   exception, an exhausted job retry, or a raising scheduled task reaches
   you instead of only a log line nobody's watching. See
   <a href="../error-monitoring/">Error Monitoring</a>.</li>
-<li>[ ] <strong><code>/up</code> is actually wired into your infrastructure's health
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>/up</code> is actually wired into your infrastructure's health
   check</strong> -- a load balancer target group, a Kubernetes probe, an uptime
   monitor -- not just reachable by hand. See <a href="../health-check/">Health Check</a>.</li>
 </ul>
 <h2 id="background-work">Background work<a class="headerlink" href="#background-work" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong><code>QUEUE_DRIVER=redis</code>, not <code>memory</code></strong>, for any job whose loss on a
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>QUEUE_DRIVER=redis</code>, not <code>memory</code></strong>, for any job whose loss on a
   crash or restart you can't tolerate (payment capture, anything with a
   side effect outside your database) -- see
   <a href="../queues/">Background Jobs</a>. The in-memory driver is fine for
   low-stakes work and local dev.</li>
-<li>[ ] <strong>A <code>queue-worker</code> process is actually running</strong> if you switched to
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A <code>queue-worker</code> process is actually running</strong> if you switched to
   the Redis driver -- jobs pushed to a durable queue with nothing
   consuming them just pile up. <code>docker-compose.yml</code> includes a
   commented-out service for this; see <a href="../docker/#postgres-redis">Docker</a>.</li>
-<li>[ ] <strong>A scheduler process is running</strong> if <code>schedule.py</code> defines
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A scheduler process is running</strong> if <code>schedule.py</code> defines
   anything -- a host crontab entry, or the commented-out <code>scheduler</code>
   sidecar in <code>docker-compose.yml</code>. See
   <a href="../scheduling/">Scheduling</a> and <a href="../docker/#scheduled-tasks">Docker</a>.</li>
 </ul>
 <h2 id="api-standards">API standards<a class="headerlink" href="#api-standards" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong>Response compression is on</strong> for a JSON API with non-trivial
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Response compression is on</strong> for a JSON API with non-trivial
   payloads (<code>GzipServiceProvider</code>) -- opt-in, not registered by default.
   See <a href="../api-standards/#compression-gzip">Compression (gzip)</a>.</li>
-<li>[ ] <strong>Conditional GETs are on</strong> if clients re-fetch the same resources
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Conditional GETs are on</strong> if clients re-fetch the same resources
   often (<code>ETagServiceProvider</code>) -- know the memory trade-off (it buffers
   the full response body) before turning it on for large or streamed
   responses. See <a href="../api-standards/#conditional-requests-etags">Conditional requests (ETags)</a>.</li>
-<li>[ ] <strong>Error response shape matches what your clients expect</strong> -- the
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error response shape matches what your clients expect</strong> -- the
   default <code>{"error": ..., "status": ...}</code> shape, or RFC 7807
   <code>application/problem+json</code> (<code>API_PROBLEM_JSON=true</code>) if you're
   integrating with tooling that expects the standard. Decide once, not
   per route. See <a href="../api-standards/#rfc-7807-error-responses-applicationproblemjson">RFC 7807 error responses</a>.</li>
 </ul>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[ ] <strong>Tests that touch the database roll back between runs</strong>, not
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Tests that touch the database roll back between runs</strong>, not
   leaving state for the next test to trip over -- see
   <a href="../testing/#rolling-back-writes-between-tests">Rolling back writes between tests</a>.</li>
-<li>[ ] <strong>Routes that require login are tested as an authenticated user</strong>,
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Routes that require login are tested as an authenticated user</strong>,
   not skipped because wiring up a real login flow in a test felt like
   too much -- see <a href="../testing/#logging-a-test-client-in-directly">Logging a test client in directly</a>.</li>
-<li>[ ] <strong>CI is actually green</strong> on the branch you're deploying, not
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CI is actually green</strong> on the branch you're deploying, not
   "green last time I looked."</li>
 </ul>
 <h2 id="what-this-deliberately-doesnt-cover">What this deliberately doesn't cover<a class="headerlink" href="#what-this-deliberately-doesnt-cover" title="Permanent link">&para;</a></h2>
-<p>This checklist is about configuring and wiring up features the framework
-already ships -- it is not a substitute for your own judgment about your
-specific deployment: infrastructure choice, TLS termination, backup
-strategy, secrets management (a real secrets manager, not <code>.env</code> in
-production), and load testing are all yours to own. If a section above
-doesn't apply to your app (no background jobs, no public API), skip it --
-this is a checklist to consult, not a form to fill out completely.</p>
+<div class="admonition note">
+<p class="admonition-title">This isn't a substitute for your own judgment</p>
+<p>This checklist is about configuring and wiring up features the
+framework already ships -- it is not a substitute for your own
+judgment about your specific deployment: infrastructure choice, TLS
+termination, backup strategy, secrets management (a real secrets
+manager, not <code>.env</code> in production), and load testing are all yours to
+own. If a section above doesn't apply to your app (no background
+jobs, no public API), skip it -- this is a checklist to consult, not
+a form to fill out completely.</p>
+</div>
 
 
 

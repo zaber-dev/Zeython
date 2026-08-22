@@ -2637,22 +2637,25 @@ guess a response's content type, don't leak the full URL on a cross-origin
 navigation, don't restrict which scripts/styles/assets a page is allowed to
 load. <code>SecurityHeadersMiddleware</code> adds them; <code>SecurityHeadersServiceProvider</code>
 wires it up from <code>.env</code>.</p>
-<p><strong>Not registered by default</strong>, unlike <a href="../csrf/">CSRF protection</a> or the
-<a href="../websockets/#origin-protection">WebSocket Origin check</a>. The headers with
-a real default here (<code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>,
-<code>Referrer-Policy</code>) are safe to turn on for any app, but <code>Content-Security-Policy</code>
-genuinely isn't — a policy this framework picked for you would either be
-loose enough to be pointless, or break your own inline scripts, your own
-CDN-loaded assets, or the Swagger UI at <code>/docs</code>. Register the provider once
-you've decided what your own policy actually is.</p>
+<div class="admonition warning">
+<p class="admonition-title">Not registered by default</p>
+<p>Unlike <a href="../csrf/">CSRF protection</a> or the
+<a href="../websockets/#origin-protection">WebSocket Origin check</a>. The headers
+with a real default here (<code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>,
+<code>Referrer-Policy</code>) are safe to turn on for any app, but
+<code>Content-Security-Policy</code> genuinely isn't — a policy this framework
+picked for you would either be loose enough to be pointless, or break
+your own inline scripts, your own CDN-loaded assets, or the Swagger UI
+at <code>/docs</code>. Register the provider once you've decided what your own
+policy actually is.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">SecurityHeadersServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">SecurityHeadersServiceProvider</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">SecurityHeadersServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">SecurityHeadersServiceProvider</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Configurable via <code>.env</code>:</p>
 <ul>
 <li><code>SECURITY_HEADERS_CSP</code> — your <code>Content-Security-Policy</code> value. Unset by
@@ -2673,31 +2676,33 @@ you've decided what your own policy actually is.</p>
 <li><code>SECURITY_HEADERS_HSTS</code> — default <code>false</code>. Sends
   <code>Strict-Transport-Security</code> once enabled, telling the browser to refuse
   plain HTTP for this host for <code>SECURITY_HEADERS_HSTS_MAX_AGE</code> seconds
-  going forward — including on a link the user typed themselves. Only turn
-  this on once every path to this app is actually served over HTTPS; there's
-  no clean way to undo it before the max-age expires for a client that's
-  already seen it.</li>
+  going forward — including on a link the user typed themselves.</li>
 <li><code>SECURITY_HEADERS_HSTS_MAX_AGE</code> — default <code>31536000</code> (1 year).</li>
 </ul>
+<div class="admonition danger">
+<p class="admonition-title">HSTS is hard to undo once a client has seen it</p>
+<p>Only turn this on once every path to this app is actually served over
+HTTPS. There's no clean way to undo it before the max-age expires for
+a client that's already seen the header — they'll refuse plain HTTP
+to this host for the full duration, no matter what you change server-side.</p>
+</div>
 <h2 id="using-the-middleware-directly">Using the middleware directly<a class="headerlink" href="#using-the-middleware-directly" title="Permanent link">&para;</a></h2>
 <p>Registering via <code>Application.add_middleware</code> skips config entirely — useful
 in tests, or if you'd rather set values in code:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.security_headers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecurityHeadersMiddleware</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
-    <span class="n">SecurityHeadersMiddleware</span><span class="p">,</span>
-    <span class="n">content_security_policy</span><span class="o">=</span><span class="s2">"default-src 'self'"</span><span class="p">,</span>
-    <span class="n">hsts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.security_headers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecurityHeadersMiddleware</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">SecurityHeadersMiddleware</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">content_security_policy</span><span class="o">=</span><span class="s2">"default-src 'self'"</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">hsts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
+</span></code></pre></div>
 <p>Pass <code>None</code>/<code>False</code> to omit a header entirely rather than send an empty
 one — <code>frame_options=None</code>, <code>content_type_options=False</code>, and
 <code>referrer_policy=None</code> all work.</p>
 <h2 id="verifying-it">Verifying it<a class="headerlink" href="#verifying-it" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-Ei<span class="w"> </span><span class="s1">'^(x-frame-options|x-content-type-options|referrer-policy|content-security-policy|strict-transport-security):'</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-Ei<span class="w"> </span><span class="s1">'^(x-frame-options|x-content-type-options|referrer-policy|content-security-policy|strict-transport-security):'</span>
+</span></code></pre></div>
 <p>With the provider unregistered, none of these appear at all — every
 response is exactly what it would have been without this module.</p>
 

@@ -2663,15 +2663,13 @@ interfaces, backed by a Redis instance every worker points at.
 <code>RedisQueue</code> is the same idea for background jobs, with its own page —
 see <a href="../queues/#queue_driverredis-a-durable-queue">Background Jobs</a>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>redis<span class="o">]</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span><span class="p">,</span> <span class="n">RateLimiter</span><span class="p">,</span> <span class="n">RedisCache</span><span class="p">,</span> <span class="n">RedisRateLimiter</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Cache</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisCache</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">RateLimiter</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisRateLimiter</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
-</code></pre></div>
-
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>redis<span class="o">]</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span><span class="p">,</span> <span class="n">RateLimiter</span><span class="p">,</span> <span class="n">RedisCache</span><span class="p">,</span> <span class="n">RedisRateLimiter</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Cache</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisCache</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">RateLimiter</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">RedisRateLimiter</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)))</span>
+</span></code></pre></div>
 <p>Bind them directly instead of registering <code>CacheServiceProvider</code>/
 <code>RateLimitServiceProvider</code> — those always bind the in-memory default.
 <code>config.get("redis.url")</code> reads <code>REDIS_URL</code> from <code>.env</code>

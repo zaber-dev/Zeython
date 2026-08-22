@@ -2699,18 +2699,17 @@
 <h1 id="relationships">Relationships<a class="headerlink" href="#relationships" title="Permanent link">&para;</a></h1>
 <p>Defining a relationship on a <code>Model</code> is plain SQLAlchemy — no framework
 wrapper needed:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># app/Models/user.py</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"users"</span>
-    <span class="n">posts</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="s2">"Post"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">back_populates</span><span class="o">=</span><span class="s2">"author"</span><span class="p">)</span>
-
-<span class="c1"># app/Models/post.py</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"posts"</span>
-    <span class="n">author_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"users.id"</span><span class="p">))</span>
-    <span class="n">author</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="n">User</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">back_populates</span><span class="o">=</span><span class="s2">"posts"</span><span class="p">)</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Models/user.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"users"</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">posts</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="s2">"Post"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">back_populates</span><span class="o">=</span><span class="s2">"author"</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># app/Models/post.py</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"posts"</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">author_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"users.id"</span><span class="p">))</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">author</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="n">User</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">back_populates</span><span class="o">=</span><span class="s2">"posts"</span><span class="p">)</span>
+</span></code></pre></div>
 <p>Where Zeython actually adds value is <em>loading</em> relationships safely.</p>
 <h2 id="why-this-needs-care-in-async-code">Why this needs care in async code<a class="headerlink" href="#why-this-needs-care-in-async-code" title="Permanent link">&para;</a></h2>
 <p>Touching an unloaded relationship in a sync SQLAlchemy app just triggers a
@@ -2726,52 +2725,46 @@ applying <code>selectinload()</code> for each relationship name — the query fe
 related rows up front, so touching the relationship afterward (even after
 the session that fetched it has closed) is just reading already-loaded
 Python attributes, no further DB access:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-<span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>          <span class="c1"># safe -- already loaded</span>
-
-<span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-<span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">:</span>
-    <span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>      <span class="c1"># safe for every row -- one extra query total, not N+1</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>          <span class="c1"># safe -- already loaded</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">:</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>      <span class="c1"># safe for every row -- one extra query total, not N+1</span>
+</span></code></pre></div>
 <p>Without <code>include=</code>, the same access raises:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>          <span class="c1"># MissingGreenlet</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">post</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span>          <span class="c1"># MissingGreenlet</span>
+</span></code></pre></div>
 <h2 id="serializing-relationships-with-to_dictinclude">Serializing relationships with <code>to_dict(include=...)</code><a class="headerlink" href="#serializing-relationships-with-to_dictinclude" title="Permanent link">&para;</a></h2>
 <p><code>to_dict()</code> accepts the same <code>include=</code> and nests the related object's own
 <code>to_dict()</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-<span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-<span class="c1"># {"id": 1, "title": "...", "author": {"id": 1, "name": "Ada", ...}, ...}</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># {"id": 1, "title": "...", "author": {"id": 1, "name": "Ada", ...}, ...}</span>
+</span></code></pre></div>
 <p>If you pass <code>include=</code> for a relationship that wasn't eager-loaded,
 <code>to_dict()</code> raises a <code>RuntimeError</code> telling you exactly what to fix, rather
 than either silently omitting the data or crashing with <code>MissingGreenlet</code>
 three frames deep in SQLAlchemy:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>           <span class="c1"># no include=</span>
-<span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-<span class="c1"># RuntimeError: Cannot serialize unloaded relationship 'author' on Post.</span>
-<span class="c1"># Eager-load it first, e.g. `await Post.find(id, include=('author',))`.</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>           <span class="c1"># no include=</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># RuntimeError: Cannot serialize unloaded relationship 'author' on Post.</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Eager-load it first, e.g. `await Post.find(id, include=('author',))`.</span>
+</span></code></pre></div>
 <p>Without <code>include=</code> at all, <code>to_dict()</code> only ever touches columns — it never
 attempts a relationship, loaded or not.</p>
 <h2 id="assigning-a-relationship-keeps-it-loaded">Assigning a relationship keeps it loaded<a class="headerlink" href="#assigning-a-relationship-keeps-it-loaded" title="Permanent link">&para;</a></h2>
 <p>Setting a relationship attribute directly (rather than just the foreign key
 column) keeps it loaded in memory immediately, no query needed — useful
 right after creating a row when you already have the related object:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">current_user</span><span class="p">)</span>
-<span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>   <span class="c1"># works immediately, no extra query</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="n">current_user</span><span class="p">)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>   <span class="c1"># works immediately, no extra query</span>
+</span></code></pre></div>
 <p>vs. setting only the FK, which leaves the relationship unloaded:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">,</span> <span class="n">author_id</span><span class="o">=</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>   <span class="c1"># RuntimeError -- author was never loaded</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">post</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">"..."</span><span class="p">,</span> <span class="n">author_id</span><span class="o">=</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>   <span class="c1"># RuntimeError -- author was never loaded</span>
+</span></code></pre></div>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
 <p><code>include=</code> loads one level of relationships per name; it doesn't support
 nested paths like <code>"comments.author"</code>. For anything beyond that — complex
@@ -2785,14 +2778,13 @@ and fetches the related row one at a time instead — doesn't crash, it just
 runs one query per row: fine with 3 rows, a real production slowdown with
 3,000. <code>N1QueryDetectionServiceProvider</code> catches this in development
 before it ships:</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">N1QueryDetectionServiceProvider</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>             <span class="c1"># must run first -- binds Database</span>
-<span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">N1QueryDetectionServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
-</code></pre></div>
-
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">N1QueryDetectionServiceProvider</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>             <span class="c1"># must run first -- binds Database</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">N1QueryDetectionServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+</span></code></pre></div>
 <p>Not registered by default, but its <code>boot()</code> is a no-op unless <code>APP_DEBUG</code>
 is true, so it's safe to always register — no per-query overhead and no
 query text logged from real production traffic. It hooks SQLAlchemy's
@@ -2801,11 +2793,10 @@ parameters aside — <code>SELECT ... WHERE id = ?</code> run once per row in a 
 one shape, run many times) per request; more than <code>N1_QUERY_THRESHOLD</code>
 (default <code>10</code>) of the same shape in one request logs a warning naming the
 route and the query:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">WARNING</span><span class="w"> </span><span class="n">zeython</span><span class="o">.</span><span class="n">n_plus_one</span><span class="p">:</span><span class="w"> </span><span class="n">Possible</span><span class="w"> </span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="o">/</span><span class="n">posts</span><span class="p">:</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">statement</span>
-<span class="n">ran</span><span class="w"> </span><span class="mi">47</span><span class="w"> </span><span class="n">times</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">request</span><span class="o">.</span><span class="w"> </span><span class="n">Eager</span><span class="o">-</span><span class="nb">load</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">relationship</span><span class="w"> </span><span class="n">instead</span>
-<span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="o">...</span><span class="p">),</span><span class="w"> </span><span class="n">see</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">relationships</span><span class="o">.</span><span class="n">md</span><span class="p">)</span><span class="o">.</span><span class="w"> </span><span class="n">Query</span><span class="p">:</span><span class="w"> </span><span class="n">SELECT</span><span class="w"> </span><span class="n">posts</span><span class="o">.</span><span class="n">author_id</span><span class="p">,</span><span class="w"> </span><span class="o">...</span>
-</code></pre></div>
-
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>WARNING zeython.n_plus_one: Possible N+1 query on /posts: the same statement
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ran 47 times in one request. Eager-load the relationship instead
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>(include=(...), see docs/relationships.md). Query: SELECT posts.author_id, ...
+</span></code></pre></div>
 <p>The fix is the same one this whole page is about — eager-load with
 <code>include=(...)</code> instead of touching the relationship inside a loop.</p>
 
