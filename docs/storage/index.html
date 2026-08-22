@@ -1901,6 +1901,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#private-files-temporary-signed-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private files: temporary (signed) URLs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#s3-compatible-object-storage" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2608,6 +2619,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#private-files-temporary-signed-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private files: temporary (signed) URLs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#s3-compatible-object-storage" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2727,24 +2749,41 @@ a CDN/reverse proxy in production (<code>STORAGE_SERVE_LOCALLY=false</code>).</p
 </tr>
 </tbody>
 </table>
+<h2 id="private-files-temporary-signed-urls">Private files: temporary (signed) URLs<a class="headerlink" href="#private-files-temporary-signed-urls" title="Permanent link">&para;</a></h2>
+<p><code>stored.url</code>/<code>Storage.url(key)</code> is a permanent, unauthenticated link — fine
+for public assets, wrong for a private document (an invoice, a user's own
+upload) you don't want reachable by anyone who guesses or leaks it.
+<code>Storage.temporary_url(key, expires_in=...)</code> gives out a signed link that
+stops working after <code>expires_in</code> seconds (default one hour) instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">storage</span><span class="p">:</span> <span class="n">Storage</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Storage</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">download_url</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">temporary_url</span><span class="p">(</span><span class="n">stored</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">expires_in</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  <span class="c1"># 5 minutes</span>
+</span></code></pre></div>
+<p>For <code>LocalStorage</code> this is an <code>itsdangerous</code>-signed token verified by a
+dedicated route (<code>&lt;STORAGE_URL_PREFIX&gt;/signed/&lt;token&gt;</code>) that
+<code>StorageServiceProvider</code> registers automatically — requires <code>APP_SECRET_KEY</code>
+to be set (only checked the first time you call <code>temporary_url()</code>, not at
+boot). For <code>S3Storage</code> it's a real S3 presigned URL, served directly by S3
+rather than proxied through your app.</p>
 <h2 id="s3-compatible-object-storage">S3-compatible object storage<a class="headerlink" href="#s3-compatible-object-storage" title="Permanent link">&para;</a></h2>
 <p>Requires the <code>s3</code> extra (<code>pip install zeython[s3]</code>, adds <code>boto3</code>). Works
 against AWS S3 and anything S3-compatible (MinIO, Cloudflare R2,
 DigitalOcean Spaces) via <code>endpoint_url</code>. Bind it directly instead of
 registering <code>StorageServiceProvider</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">Storage</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">S3Storage</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">Storage</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="k">lambda</span><span class="p">:</span> <span class="n">S3Storage</span><span class="p">(</span><span class="s2">"my-bucket"</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">"us-east-1"</span><span class="p">),</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">Storage</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">S3Storage</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">Storage</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="k">lambda</span><span class="p">:</span> <span class="n">S3Storage</span><span class="p">(</span><span class="s2">"my-bucket"</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">"us-east-1"</span><span class="p">),</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="writing-your-own-backend">Writing your own backend<a class="headerlink" href="#writing-your-own-backend" title="Permanent link">&para;</a></h2>
-<p>Subclass <code>Storage</code> and implement <code>put</code>/<code>get</code>/<code>delete</code>/<code>exists</code>/<code>url</code> — five
-async methods (<code>url</code> is sync, since it's typically pure string formatting).
-Bind an instance the same way as <code>S3Storage</code> above.</p>
+<p>Subclass <code>Storage</code> and implement <code>put</code>/<code>get</code>/<code>delete</code>/<code>exists</code>/<code>url</code>/
+<code>temporary_url</code> — <code>url</code> and <code>temporary_url</code> are sync (typically pure string
+formatting, or in <code>S3Storage</code>'s case a local signing computation with no
+network call), the rest async. Bind an instance the same way as <code>S3Storage</code>
+above.</p>
 
 
 

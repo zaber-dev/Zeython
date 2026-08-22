@@ -49,6 +49,17 @@ By default this binds a `LocalStorage` rooted at `storage/app/` and — in devel
 | `STORAGE_URL_PREFIX`    | `/storage`              | Prefix used both for `Storage.url()` and the mounted static route. |
 | `STORAGE_SERVE_LOCALLY` | `true`                  | Mount the storage directory for direct GET access.                 |
 
+## Private files: temporary (signed) URLs
+
+`stored.url`/`Storage.url(key)` is a permanent, unauthenticated link — fine for public assets, wrong for a private document (an invoice, a user's own upload) you don't want reachable by anyone who guesses or leaks it. `Storage.temporary_url(key, expires_in=...)` gives out a signed link that stops working after `expires_in` seconds (default one hour) instead:
+
+```python
+storage: Storage = request.app.state.container.make(Storage)
+download_url = storage.temporary_url(stored.key, expires_in=300)  # 5 minutes
+```
+
+For `LocalStorage` this is an `itsdangerous`-signed token verified by a dedicated route (`<STORAGE_URL_PREFIX>/signed/<token>`) that `StorageServiceProvider` registers automatically — requires `APP_SECRET_KEY` to be set (only checked the first time you call `temporary_url()`, not at boot). For `S3Storage` it's a real S3 presigned URL, served directly by S3 rather than proxied through your app.
+
 ## S3-compatible object storage
 
 Requires the `s3` extra (`pip install zeython[s3]`, adds `boto3`). Works against AWS S3 and anything S3-compatible (MinIO, Cloudflare R2, DigitalOcean Spaces) via `endpoint_url`. Bind it directly instead of registering `StorageServiceProvider`:
@@ -66,4 +77,4 @@ app.container.singleton(
 
 ## Writing your own backend
 
-Subclass `Storage` and implement `put`/`get`/`delete`/`exists`/`url` — five async methods (`url` is sync, since it's typically pure string formatting). Bind an instance the same way as `S3Storage` above.
+Subclass `Storage` and implement `put`/`get`/`delete`/`exists`/`url`/ `temporary_url` — `url` and `temporary_url` are sync (typically pure string formatting, or in `S3Storage`'s case a local signing computation with no network call), the rest async. Bind an instance the same way as `S3Storage` above.

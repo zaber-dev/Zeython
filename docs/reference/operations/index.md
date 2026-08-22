@@ -406,11 +406,33 @@ def url(self, key: str) -> str:
     """A URL clients can use to fetch this key. Does not guarantee it resolves publicly."""
 ```
 
+#### temporary_url
+
+```python
+temporary_url(key: str, *, expires_in: float = 3600) -> str
+```
+
+A signed URL that grants access to `key` for `expires_in` seconds, then stops working -- for a private file (an invoice, a user upload) you don't want reachable from :meth:`url` forever, without standing up your own auth check in front of it.
+
+Source code in `src/zeython/storage.py`
+
+```python
+@abstractmethod
+def temporary_url(self, key: str, *, expires_in: float = 3600) -> str:
+    """A signed URL that grants access to ``key`` for ``expires_in`` seconds, then stops
+    working -- for a private file (an invoice, a user upload) you don't want reachable
+    from :meth:`url` forever, without standing up your own auth check in front of it.
+    """
+```
+
 ### LocalStorage
 
 ```python
 LocalStorage(
-    root: str | Path, *, url_prefix: str = "/storage"
+    root: str | Path,
+    *,
+    url_prefix: str = "/storage",
+    secret_key: str | None = None,
 )
 ```
 
@@ -423,10 +445,38 @@ Every key is resolved against `root` and checked to still be inside it — a key
 Source code in `src/zeython/storage.py`
 
 ```python
-def __init__(self, root: str | Path, *, url_prefix: str = "/storage") -> None:
+def __init__(self, root: str | Path, *, url_prefix: str = "/storage", secret_key: str | None = None) -> None:
     self.root = Path(root).resolve()
     self.root.mkdir(parents=True, exist_ok=True)
     self.url_prefix = url_prefix.rstrip("/") or "/storage"
+    self._secret_key = secret_key
+```
+
+#### verify_temporary_url_token
+
+```python
+verify_temporary_url_token(token: str) -> str | None
+```
+
+The storage key `token` grants access to, or `None` if it's missing, tampered with, or past its `expires_in`. Used by the `.../signed/{token}` route :class:`StorageServiceProvider` registers -- not meant to be called directly in application code.
+
+Source code in `src/zeython/storage.py`
+
+```python
+def verify_temporary_url_token(self, token: str) -> str | None:
+    """The storage key ``token`` grants access to, or ``None`` if it's missing,
+    tampered with, or past its ``expires_in``. Used by the ``.../signed/{token}``
+    route :class:`StorageServiceProvider` registers -- not meant to be called
+    directly in application code.
+    """
+    try:
+        data = self._signer().loads(token)
+    except BadSignature:
+        return None
+    if not isinstance(data, dict) or data.get("exp", 0) < time.time():
+        return None
+    key = data.get("key")
+    return key if isinstance(key, str) else None
 ```
 
 ### S3Storage
@@ -485,6 +535,8 @@ Binds a :class:`Storage` backend into the container — local filesystem by defa
 - `STORAGE_PATH` — local storage root (default: `<project>/storage/app`)
 - `STORAGE_URL_PREFIX` — default: `/storage`
 - `STORAGE_SERVE_LOCALLY` — mount the storage directory for direct GET access during development (default: `true`; turn off once you serve uploads from a CDN/reverse proxy in production)
+
+Also registers the route :meth:`LocalStorage.temporary_url` links point at (`<url_prefix>/signed/<token>`) — independent of `STORAGE_SERVE_LOCALLY`, since that's the point of a signed URL: a way to hand out time-limited access to a specific file without making the whole storage directory public. Requires `APP_SECRET_KEY` to be set (only enforced the first time you actually call `temporary_url()`, not at boot).
 
 For S3, construct and bind an :class:`S3Storage` yourself instead of registering this provider::
 
