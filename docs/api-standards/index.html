@@ -2194,6 +2194,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../error-monitoring/" class="md-nav__link">
         
   
@@ -2798,6 +2826,10 @@ regardless of <code>Accept</code>, since they're expected control flow, not a cr
 <p>Like every other debug-mode behavior, this leaks source code and file
 paths — see the <a href="../production-checklist/">production checklist</a> for why
 <code>APP_DEBUG=false</code> is non-negotiable in production.</p>
+<p>If <a href="../profiling/"><code>RequestProfilerServiceProvider</code></a> is registered, both
+the HTML page and the JSON/<code>problem+json</code> bodies also show the queries
+the crashed request ran before it failed — often the fastest way to see
+<em>why</em>.</p>
 
 
 

@@ -1232,6 +1232,8 @@ ran 47 times in one request. Eager-load the relationship instead
 (include=(...), see docs/relationships.md). Query: SELECT posts.author_id, ...
 ```
 
+For the full picture of what queries a request ran and how long each took — not just a warning past a threshold — see [Request & Query Profiling](https://zeython.zaber.dev/docs/profiling/index.md).
+
 The fix is the same one this whole page is about — eager-load with `include=(...)` instead of touching the relationship inside a loop.
 
 # Validation
@@ -2436,6 +2438,8 @@ Which response you get is decided per-request, by the `Accept` header, not by a 
 Only ever shown for a genuine unhandled exception (a bug), never for an `HTTPException` your own code raised deliberately (`NotFoundException`, `ValidationException`, ...) — those keep returning their normal JSON body regardless of `Accept`, since they're expected control flow, not a crash.
 
 Like every other debug-mode behavior, this leaks source code and file paths — see the [production checklist](https://zeython.zaber.dev/docs/production-checklist/index.md) for why `APP_DEBUG=false` is non-negotiable in production.
+
+If [`RequestProfilerServiceProvider`](https://zeython.zaber.dev/docs/profiling/index.md) is registered, both the HTML page and the JSON/`problem+json` bodies also show the queries the crashed request ran before it failed — often the fastest way to see *why*.
 # Digging Deeper
 
 # CLI Reference
@@ -3944,6 +3948,73 @@ handler.setFormatter(JsonFormatter())
 logging.getLogger("app.audit").addHandler(handler)
 ```
 
+# Request & Query Profiling
+
+`zeython.profiler` answers the question Laravel Telescope and Django Debug Toolbar exist for -- "how many queries did this request run, and how long did they take" -- without a bundled UI, since most of what this framework serves is a JSON API rather than server-rendered HTML pages a toolbar overlay could attach to. Every response gets the numbers as headers instead, inspectable from any HTTP client, a browser's network tab, or a test assertion.
+
+Deliberately separate from [N+1 query detection](https://zeython.zaber.dev/docs/relationships/#detecting-n1s-automatically), which answers a narrower question (the same statement shape repeated suspiciously many times) -- register either independently of the other.
+
+## Setup
+
+```python
+# main.py
+from zeython import Application, DatabaseServiceProvider, RequestProfilerServiceProvider
+
+app = Application()
+app.register(DatabaseServiceProvider)             # must run first -- binds Database
+app.register(RequestProfilerServiceProvider(app))
+```
+
+A generated project already has this registered (see `main.py`) -- unlike `N1QueryDetectionServiceProvider`, there's no application-specific default to get wrong: its `boot()` is a no-op unless `APP_DEBUG` is true, so it's safe to always register, the same reasoning `RequestIdServiceProvider` already relies on.
+
+## Response headers
+
+Every response carries:
+
+| Header                  | Meaning                                |
+| ----------------------- | -------------------------------------- |
+| `X-Debug-Duration-Ms`   | Total time spent handling the request. |
+| `X-Debug-Query-Count`   | Number of SQL queries the request ran. |
+| `X-Debug-Query-Time-Ms` | Total time spent inside those queries. |
+
+```bash
+curl -sI http://localhost:8000/posts | grep -i x-debug
+# X-Debug-Duration-Ms: 12.40
+# X-Debug-Query-Count: 3
+# X-Debug-Query-Time-Ms: 2.91
+```
+
+A large gap between duration and query time points at time spent somewhere else -- template rendering, an outgoing HTTP call, plain Python work -- not the database.
+
+## Slow query logging
+
+Any single query at or past `PROFILER_SLOW_QUERY_MS` (default `100`) logs a warning naming the route and the query:
+
+```text
+WARNING zeython.profiler: Slow query on /posts: 340.12 ms -- SELECT posts.*, ...
+```
+
+Only logged for a request that completes normally -- see ["Queries on a crashed request"](#queries-on-a-crashed-request) below for why a request that raises doesn't go through this path, and how you still see its queries.
+
+## Inspecting the current request's queries yourself
+
+```python
+from zeython.profiler import current_queries
+
+async def some_handler(request):
+    ...
+    for query in current_queries():
+        print(query.statement, query.duration_ms)
+```
+
+Empty if `RequestProfilerServiceProvider` isn't registered (or `APP_DEBUG` is false), or called outside a request.
+
+## Queries on a crashed request
+
+The queries a request ran before it crashed show up on the [debug error page/body](https://zeython.zaber.dev/docs/api-standards/#debug-mode-a-browsable-html-error-page) too -- often the fastest way to see *why* it crashed (a query that returned nothing an `include=` expected, one that ran against the wrong table). The HTML debug page gets a "Queries" panel above the stack trace; the JSON/`problem+json` debug bodies get a `queries` array, each entry `{"sql": ..., "duration_ms": ...}`.
+
+This only works because `RequestProfilerMiddleware` deliberately doesn't reset its internal state while an exception is still propagating -- Starlette's own error-handling middleware sits *outside* every user-added middleware (this one included), so the debug page is built after the crash has already unwound past this middleware's own code. A naive cleanup-in-`finally` would erase the query log at exactly the moment it's most useful. Nothing leaks from skipping that cleanup: each request gets a fresh, empty query list the moment it starts, regardless of how the previous one ended.
+
 # Error Monitoring
 
 An unhandled exception in production is either logged to a file nobody tails, or it's in front of you the moment it happens. `zeython.error_monitoring` is the second option: an opt-in [Sentry](https://sentry.io) integration that reports unhandled request exceptions, jobs that exhaust their retries, and scheduled tasks that raise -- the same three places `docs/observability.md`, `docs/queues.md`, and `docs/scheduling.md` already log to, now also sent somewhere you get paged for.
@@ -5111,7 +5182,7 @@ def validate(data: dict[str, Any], rules: dict[str, list[Rule]]) -> dict[str, li
 
 # Database
 
-The async SQLAlchemy-backed `Model` base class, session/transaction management, N+1 query detection, and factories & seeders for tests and local data.
+The async SQLAlchemy-backed `Model` base class, session/transaction management, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
 
 ## db
 
@@ -6040,6 +6111,83 @@ def __init__(self, app: Application) -> None:
     self.app = app
     self.container = app.container
     self.config = app.config
+```
+
+## profiler
+
+Request/query profiler: an opt-in, dev-only record of every SQL query a request ran, with duration -- the Laravel Telescope / Django Debug Toolbar question ("how many queries did this request run, and how long did they take") answered without a bundled UI, since most of what this framework serves is a JSON API rather than server-rendered HTML pages a toolbar overlay could attach to.
+
+Every response gets `X-Debug-Duration-Ms`/`X-Debug-Query-Count`/ `X-Debug-Query-Time-Ms` headers instead -- inspectable from any HTTP client, a browser's network tab, or a test assertion, no special tooling required. A request that crashes gets the same information baked into the debug error page/body (see :mod:`zeython.exceptions`).
+
+Deliberately separate from :mod:`zeython.n_plus_one`, which answers a different, narrower question (the same statement shape repeated suspiciously many times) and can be registered independently of this.
+
+### RequestProfilerMiddleware
+
+```python
+RequestProfilerMiddleware(
+    app: Callable[..., Any],
+    *,
+    slow_query_threshold_ms: float = DEFAULT_SLOW_QUERY_MS,
+)
+```
+
+Pure ASGI middleware: records this request's queries via a :class:`~contextvars.ContextVar` (the same mechanism :mod:`zeython.request_id`/:mod:`zeython.n_plus_one` use), stamps `X-Debug-Duration-Ms`/`X-Debug-Query-Count`/`X-Debug-Query-Time-Ms` on the response, and logs (`zeython.profiler`, at `WARNING`) any individual query at or past `slow_query_threshold_ms`.
+
+Source code in `src/zeython/profiler.py`
+
+```python
+def __init__(self, app: Callable[..., Any], *, slow_query_threshold_ms: float = DEFAULT_SLOW_QUERY_MS) -> None:
+    self.app = app
+    self.slow_query_threshold_ms = slow_query_threshold_ms
+```
+
+### RequestProfilerServiceProvider
+
+```python
+RequestProfilerServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Hooks the SQLAlchemy engine and registers :class:`RequestProfilerMiddleware` -- not registered by default, and a no-op in `boot()` unless `APP_DEBUG` is true, so it's safe to always register (including in a production `main.py`) without worrying about the per-query event-listener overhead or leaking query text/timing from real traffic::
+
+```text
+# main.py
+app.register(DatabaseServiceProvider)  # must run first -- binds Database
+app.register(RequestProfilerServiceProvider(app))
+```
+
+Configurable via `.env`:
+
+- `PROFILER_SLOW_QUERY_MS` -- default 100.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### current_queries
+
+```python
+current_queries() -> list[QueryRecord]
+```
+
+The SQL queries executed so far during the current request, in order -- empty if :class:`RequestProfilerServiceProvider` isn't registered (or `APP_DEBUG` is false), or if called outside a request/response cycle the middleware wrapped.
+
+Source code in `src/zeython/profiler.py`
+
+```python
+def current_queries() -> list[QueryRecord]:
+    """The SQL queries executed so far during the current request, in
+    order -- empty if :class:`RequestProfilerServiceProvider` isn't
+    registered (or ``APP_DEBUG`` is false), or if called outside a
+    request/response cycle the middleware wrapped.
+    """
+    return list(_current_queries.get() or [])
 ```
 
 # Security

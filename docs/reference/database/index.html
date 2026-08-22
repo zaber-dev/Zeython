@@ -2098,6 +2098,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../error-monitoring/" class="md-nav__link">
         
   
@@ -2927,6 +2955,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zeython.profiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        profiler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="profiler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.RequestProfilerMiddleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RequestProfilerMiddleware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.RequestProfilerServiceProvider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RequestProfilerServiceProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.current_queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3647,6 +3725,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zeython.profiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        profiler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="profiler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.RequestProfilerMiddleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RequestProfilerMiddleware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.RequestProfilerServiceProvider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RequestProfilerServiceProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.profiler.current_queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3674,8 +3802,8 @@
 
 <h1 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h1>
 <p>The async SQLAlchemy-backed <code>Model</code> base class, session/transaction
-management, N+1 query detection, and factories &amp; seeders for tests and
-local data.</p>
+management, N+1 query detection, a request/query profiler, and factories
+&amp; seeders for tests and local data.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -5851,6 +5979,239 @@ app.register(N1QueryDetectionServiceProvider(app))
 
 </div>
 
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="zeython.profiler" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">profiler</span>
+
+
+<a href="#zeython.profiler" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Request/query profiler: an opt-in, dev-only record of every SQL query a
+request ran, with duration -- the Laravel Telescope / Django Debug Toolbar
+question ("how many queries did this request run, and how long did they
+take") answered without a bundled UI, since most of what this framework
+serves is a JSON API rather than server-rendered HTML pages a toolbar
+overlay could attach to.</p>
+<p>Every response gets <code>X-Debug-Duration-Ms</code>/<code>X-Debug-Query-Count</code>/
+<code>X-Debug-Query-Time-Ms</code> headers instead -- inspectable from any HTTP
+client, a browser's network tab, or a test assertion, no special
+tooling required. A request that crashes gets the same information baked
+into the debug error page/body (see :mod:<code>zeython.exceptions</code>).</p>
+<p>Deliberately separate from :mod:<code>zeython.n_plus_one</code>, which answers a
+different, narrower question (the same statement shape repeated
+suspiciously many times) and can be registered independently of this.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zeython.profiler.RequestProfilerMiddleware" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">RequestProfilerMiddleware</span>
+
+
+<a href="#zeython.profiler.RequestProfilerMiddleware" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">RequestProfilerMiddleware</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">app</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">slow_query_threshold_ms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SLOW_QUERY_MS</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Pure ASGI middleware: records this request's queries via a
+:class:<code>~contextvars.ContextVar</code> (the same mechanism
+:mod:<code>zeython.request_id</code>/:mod:<code>zeython.n_plus_one</code> use), stamps
+<code>X-Debug-Duration-Ms</code>/<code>X-Debug-Query-Count</code>/<code>X-Debug-Query-Time-Ms</code>
+on the response, and logs (<code>zeython.profiler</code>, at <code>WARNING</code>) any
+individual query at or past <code>slow_query_threshold_ms</code>.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/zeython/profiler.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-82">82</a></span>
+<span class="normal"><a href="#__codelineno-0-83">83</a></span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">slow_query_threshold_ms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SLOW_QUERY_MS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">slow_query_threshold_ms</span> <span class="o">=</span> <span class="n">slow_query_threshold_ms</span>
+</span></code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zeython.profiler.RequestProfilerServiceProvider" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">RequestProfilerServiceProvider</span>
+
+
+<a href="#zeython.profiler.RequestProfilerServiceProvider" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">RequestProfilerServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Application</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ServiceProvider (zeython.providers.ServiceProvider)" href="../core/#zeython.providers.ServiceProvider">ServiceProvider</a></code></p>
+
+
+
+        <p>Hooks the SQLAlchemy engine and registers
+:class:<code>RequestProfilerMiddleware</code> -- not registered by default, and a
+no-op in <code>boot()</code> unless <code>APP_DEBUG</code> is true, so it's safe to
+always register (including in a production <code>main.py</code>) without
+worrying about the per-query event-listener overhead or leaking query
+text/timing from real traffic::</p>
+<div class="language-text highlight"><pre><span></span><code># main.py
+app.register(DatabaseServiceProvider)  # must run first -- binds Database
+app.register(RequestProfilerServiceProvider(app))
+</code></pre></div>
+<p>Configurable via <code>.env</code>:</p>
+<ul>
+<li><code>PROFILER_SLOW_QUERY_MS</code> -- default 100.</li>
+</ul>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/zeython/providers.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Application</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span>
+</span></code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="zeython.profiler.current_queries" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">current_queries</span>
+
+
+<a href="#zeython.profiler.current_queries" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">current_queries</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">QueryRecord</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>The SQL queries executed so far during the current request, in
+order -- empty if :class:<code>RequestProfilerServiceProvider</code> isn't
+registered (or <code>APP_DEBUG</code> is false), or if called outside a
+request/response cycle the middleware wrapped.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/zeython/profiler.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span>
+<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+<span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="k">def</span><span class="w"> </span><span class="nf">current_queries</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">QueryRecord</span><span class="p">]:</span>
+</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="w">    </span><span class="sd">"""The SQL queries executed so far during the current request, in</span>
+</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    order -- empty if :class:`RequestProfilerServiceProvider` isn't</span>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    registered (or ``APP_DEBUG`` is false), or if called outside a</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    request/response cycle the middleware wrapped.</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    """</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_current_queries</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> <span class="p">[])</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 

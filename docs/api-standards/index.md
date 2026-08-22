@@ -94,3 +94,5 @@ Which response you get is decided per-request, by the `Accept` header, not by a 
 Only ever shown for a genuine unhandled exception (a bug), never for an `HTTPException` your own code raised deliberately (`NotFoundException`, `ValidationException`, ...) — those keep returning their normal JSON body regardless of `Accept`, since they're expected control flow, not a crash.
 
 Like every other debug-mode behavior, this leaks source code and file paths — see the [production checklist](https://zeython.zaber.dev/docs/production-checklist/index.md) for why `APP_DEBUG=false` is non-negotiable in production.
+
+If [`RequestProfilerServiceProvider`](https://zeython.zaber.dev/docs/profiling/index.md) is registered, both the HTML page and the JSON/`problem+json` bodies also show the queries the crashed request ran before it failed — often the fastest way to see *why*.

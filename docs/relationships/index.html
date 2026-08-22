@@ -2216,6 +2216,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../error-monitoring/" class="md-nav__link">
         
   
@@ -2829,6 +2857,9 @@ route and the query:</p>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ran 47 times in one request. Eager-load the relationship instead
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>(include=(...), see docs/relationships.md). Query: SELECT posts.author_id, ...
 </span></code></pre></div>
+<p>For the full picture of what queries a request ran and how long each
+took — not just a warning past a threshold — see
+<a href="../profiling/">Request &amp; Query Profiling</a>.</p>
 <p>The fix is the same one this whole page is about — eager-load with
 <code>include=(...)</code> instead of touching the relationship inside a loop.</p>
 

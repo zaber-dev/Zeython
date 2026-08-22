@@ -1,6 +1,6 @@
 # Database
 
-The async SQLAlchemy-backed `Model` base class, session/transaction management, N+1 query detection, and factories & seeders for tests and local data.
+The async SQLAlchemy-backed `Model` base class, session/transaction management, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
 
 ## db
 
@@ -929,4 +929,81 @@ def __init__(self, app: Application) -> None:
     self.app = app
     self.container = app.container
     self.config = app.config
+```
+
+## profiler
+
+Request/query profiler: an opt-in, dev-only record of every SQL query a request ran, with duration -- the Laravel Telescope / Django Debug Toolbar question ("how many queries did this request run, and how long did they take") answered without a bundled UI, since most of what this framework serves is a JSON API rather than server-rendered HTML pages a toolbar overlay could attach to.
+
+Every response gets `X-Debug-Duration-Ms`/`X-Debug-Query-Count`/ `X-Debug-Query-Time-Ms` headers instead -- inspectable from any HTTP client, a browser's network tab, or a test assertion, no special tooling required. A request that crashes gets the same information baked into the debug error page/body (see :mod:`zeython.exceptions`).
+
+Deliberately separate from :mod:`zeython.n_plus_one`, which answers a different, narrower question (the same statement shape repeated suspiciously many times) and can be registered independently of this.
+
+### RequestProfilerMiddleware
+
+```python
+RequestProfilerMiddleware(
+    app: Callable[..., Any],
+    *,
+    slow_query_threshold_ms: float = DEFAULT_SLOW_QUERY_MS,
+)
+```
+
+Pure ASGI middleware: records this request's queries via a :class:`~contextvars.ContextVar` (the same mechanism :mod:`zeython.request_id`/:mod:`zeython.n_plus_one` use), stamps `X-Debug-Duration-Ms`/`X-Debug-Query-Count`/`X-Debug-Query-Time-Ms` on the response, and logs (`zeython.profiler`, at `WARNING`) any individual query at or past `slow_query_threshold_ms`.
+
+Source code in `src/zeython/profiler.py`
+
+```python
+def __init__(self, app: Callable[..., Any], *, slow_query_threshold_ms: float = DEFAULT_SLOW_QUERY_MS) -> None:
+    self.app = app
+    self.slow_query_threshold_ms = slow_query_threshold_ms
+```
+
+### RequestProfilerServiceProvider
+
+```python
+RequestProfilerServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Hooks the SQLAlchemy engine and registers :class:`RequestProfilerMiddleware` -- not registered by default, and a no-op in `boot()` unless `APP_DEBUG` is true, so it's safe to always register (including in a production `main.py`) without worrying about the per-query event-listener overhead or leaking query text/timing from real traffic::
+
+```text
+# main.py
+app.register(DatabaseServiceProvider)  # must run first -- binds Database
+app.register(RequestProfilerServiceProvider(app))
+```
+
+Configurable via `.env`:
+
+- `PROFILER_SLOW_QUERY_MS` -- default 100.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### current_queries
+
+```python
+current_queries() -> list[QueryRecord]
+```
+
+The SQL queries executed so far during the current request, in order -- empty if :class:`RequestProfilerServiceProvider` isn't registered (or `APP_DEBUG` is false), or if called outside a request/response cycle the middleware wrapped.
+
+Source code in `src/zeython/profiler.py`
+
+```python
+def current_queries() -> list[QueryRecord]:
+    """The SQL queries executed so far during the current request, in
+    order -- empty if :class:`RequestProfilerServiceProvider` isn't
+    registered (or ``APP_DEBUG`` is false), or if called outside a
+    request/response cycle the middleware wrapped.
+    """
+    return list(_current_queries.get() or [])
 ```

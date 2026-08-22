@@ -71,6 +71,7 @@ Zeython is an async-first, batteries-included MVC framework for Python: a depend
 
 - [Health Check](https://zeython.zaber.dev/docs/health-check/index.md)
 - [Observability](https://zeython.zaber.dev/docs/observability/index.md)
+- [Profiling](https://zeython.zaber.dev/docs/profiling/index.md)
 - [Error Monitoring](https://zeython.zaber.dev/docs/error-monitoring/index.md)
 - [Docker](https://zeython.zaber.dev/docs/docker/index.md)
 - [Production Checklist](https://zeython.zaber.dev/docs/production-checklist/index.md)
