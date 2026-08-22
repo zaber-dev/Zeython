@@ -73,16 +73,27 @@ class RequestIdMiddleware:
         current_id = incoming.decode("latin-1") if incoming else str(uuid.uuid4())
 
         token = _current_request_id.set(current_id)
+
+        async def send_with_header(message: dict) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.append(self.header_name, current_id)
+            await send(message)
+
         try:
-
-            async def send_with_header(message: dict) -> None:
-                if message["type"] == "http.response.start":
-                    headers = MutableHeaders(scope=message)
-                    headers.append(self.header_name, current_id)
-                await send(message)
-
             await self.app(scope, receive, send_with_header)
-        finally:
+        except BaseException:
+            # Deliberately no reset here -- see the identical note in
+            # zeython.profiler.RequestProfilerMiddleware. Starlette's
+            # ServerErrorMiddleware sits *outside* every user-added
+            # middleware (including this one), so unhandled_exception_handler
+            # (zeython.exceptions) -- which reads request_id() to tag the
+            # error report -- only runs after this exception has already
+            # propagated past us. Resetting here would blank the request ID
+            # right before the one call that most needs it: correlating a
+            # crash report back to this request's other log lines.
+            raise
+        else:
             _current_request_id.reset(token)
 
 

@@ -2,6 +2,8 @@ import io
 import logging
 from pathlib import Path
 
+import httpx
+import pytest
 from starlette.responses import JSONResponse
 
 from zeython.application import Application
@@ -69,6 +71,53 @@ async def test_header_name_is_configurable(tmp_path: Path) -> None:
 
 async def test_request_id_is_none_outside_of_a_request() -> None:
     assert request_id() is None
+
+
+async def test_request_id_still_visible_to_the_unhandled_exception_handler(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression: RequestIdMiddleware must not reset its contextvar on the
+    exception path. Starlette's ServerErrorMiddleware sits *outside* every
+    user-added middleware, so unhandled_exception_handler -- which reads
+    request_id() to tag the error report -- only runs after the exception
+    has already propagated past RequestIdMiddleware's own try block. A
+    naive try/finally reset there would blank the ID before that handler
+    (and report_exception) ever saw it, silently losing request
+    correlation for every crash report. Caught by testing the real
+    zeython.exceptions integration end-to-end, not RequestIdMiddleware in
+    isolation.
+    """
+    import zeython.exceptions as exceptions_module
+
+    captured_request_ids: list[str | None] = []
+    monkeypatch.setattr(
+        exceptions_module,
+        "report_exception",
+        lambda exc, **tags: captured_request_ids.append(tags.get("request_id")),
+    )
+
+    app = Application(Config.load(tmp_path))
+    app.register(RequestIdServiceProvider)
+
+    @app.get("/boom")
+    async def boom(request):
+        raise ValueError("kaboom")
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        await http.get("/boom")
+
+    # Not compared against a response header: ServerErrorMiddleware builds
+    # and sends the crashed response using the *original*, unwrapped send
+    # it was itself given -- a separate, pre-existing limitation (no user
+    # middleware's send-wrapping reaches a truly unhandled exception's
+    # response) unrelated to this fix. What matters here is that the
+    # contextvar itself was still readable when report_exception ran --
+    # before this fix, RequestIdMiddleware's own try/finally reset it to
+    # None while the exception was still propagating past it, so
+    # report_exception always saw None for a crash, no matter what.
+    assert captured_request_ids
+    assert captured_request_ids[0] is not None
 
 
 # -- Wired via RequestIdServiceProvider ------------------------------------------------------
