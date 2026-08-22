@@ -101,3 +101,7 @@ An observer doesn't replace a model's own hooks — it's for reactions that
 don't belong on the model, not a place to move logic that does. If a hook
 is really about the model's own data (deriving a field, normalizing input
 before validation), keep it a method on the model, not an observer.
+
+It's also not for application-defined events that aren't tied to a
+specific model's lifecycle at all (`OrderPlaced`, a scheduled report
+finishing) — see [Events](events.md) for those.

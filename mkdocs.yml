@@ -43,6 +43,7 @@ nav:
       - Console Commands: console-commands.md
       - Plugins: plugins.md
       - Localization: localization.md
+      - Events: events.md
       - Background Jobs: queues.md
       - Scheduling: scheduling.md
       - WebSockets: websockets.md
@@ -193,6 +194,7 @@ plugins:
           - console-commands.md
           - plugins.md
           - localization.md
+          - events.md
           - queues.md
           - scheduling.md
           - websockets.md
