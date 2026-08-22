@@ -1,0 +1,6 @@
+# Default owner for everything in the repository, unless a more specific
+# rule below matches. See https://docs.github.com/articles/about-codeowners
+# for syntax -- this file drives GitHub's automatic review request on PRs,
+# it does not restrict who *can* contribute.
+
+* @zaber-dev

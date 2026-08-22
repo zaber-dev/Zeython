@@ -30,6 +30,9 @@ end-to-end tutorial. Licensed under MIT.
   connection pooling (`DATABASE_POOL_SIZE`/`DATABASE_MAX_OVERFLOW`).
 - Model validation (`__rules__`, built-in `Rule`s: `required`, `email`,
   `min_length`, `max_length`, `one_of`, `matches`).
+- An application-level event dispatcher (`zeython.events`) — `emit()`,
+  decoupled `listen()` handlers, an `EventServiceProvider` for wiring an
+  app's own listeners in one place.
 
 ### Auth, authorization & security
 
@@ -66,6 +69,8 @@ end-to-end tutorial. Licensed under MIT.
 - OpenAPI spec generation and a Swagger UI (`zeython.openapi`).
 - WebSocket support: real-time handlers, a broadcast hub
   (`WebSocketHub`), and per-IP connection limiting.
+- `RedisWebSocketHub` — distributed broadcast across every process/container
+  in a multi-instance deployment, via Redis pub/sub.
 - gzip compression and ETags/conditional GETs.
 - An MCP server (`zeython.mcp`) exposing route/model introspection and
   docs search to AI coding agents.
@@ -73,8 +78,15 @@ end-to-end tutorial. Licensed under MIT.
 ### Operability
 
 - `/up` health check and a production-ready `Dockerfile`.
+- `zeython down`/`up` maintenance mode (`zeython.maintenance`) — a flag-file
+  503 with `Retry-After`, allowed IPs, and a bypass secret, mirroring
+  Laravel's `artisan down`/`up`.
 - Request/correlation-ID observability (`RequestIdServiceProvider`) and
   optional `LOG_FORMAT=json` structured logging.
+- A request/query profiler for debug mode (`zeython.profiler`) —
+  `X-Debug-Duration-Ms`/`X-Debug-Query-Count`/`X-Debug-Query-Time-Ms`
+  headers, slow-query logging, and the queries a crashed request ran shown
+  on its debug page.
 - Sentry error monitoring (`zeython.error_monitoring`).
 - A consolidated production-readiness checklist (`docs/production-checklist.md`).
 
@@ -90,7 +102,7 @@ end-to-end tutorial. Licensed under MIT.
 
 - `zeython new`, `serve`, `make model|controller|middleware|provider|
   policy|factory|seeder|job|command`, `db revision|migrate|downgrade|seed`,
-  `queue work`, `schedule run`, `mcp`, `routes`, `about`.
+  `queue work`, `schedule run`, `mcp`, `routes`, `about`, `down`, `up`.
 
 ### Testing & docs
 

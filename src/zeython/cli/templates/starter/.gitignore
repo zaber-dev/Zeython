@@ -12,3 +12,5 @@ dist/
 build/
 /storage/app/*
 !/storage/app/.gitkeep
+/storage/framework/*
+!/storage/framework/.gitkeep

@@ -1,0 +1,69 @@
+name: Bug report
+description: Something in the framework isn't working as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found a **security vulnerability** instead? Please don't file it here --
+        see [SECURITY.md](https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md)
+        for how to report it privately.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: To reproduce
+      description: >-
+        Minimal steps to reproduce -- ideally a few lines of code against
+        `zeython`, or `zeython new` plus the diff that triggers it.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: input
+    id: zeython-version
+    attributes:
+      label: Zeython version
+      description: 'Run: `python -c "import zeython; print(zeython.__version__)"`'
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: 'Run: `python --version`'
+    validations:
+      required: true
+
+  - type: input
+    id: database
+    attributes:
+      label: Database
+      placeholder: "e.g. SQLite, PostgreSQL 16, MySQL 8"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Stack trace, logs, anything else that might help.
+    validations:
+      required: false

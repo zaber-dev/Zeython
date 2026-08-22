@@ -7,6 +7,7 @@ from zeython import (
     DatabaseServiceProvider,
     HealthCheckServiceProvider,
     MailServiceProvider,
+    MaintenanceModeServiceProvider,
     OpenApiServiceProvider,
     QueueServiceProvider,
     RateLimitServiceProvider,
@@ -106,6 +107,15 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # guess. Uncomment, pick a real resolver, and add
 # `from zeython import TenancyServiceProvider` above. See docs/multi-tenancy.md.
 # app.register(TenancyServiceProvider(app, resolver=lambda request: request.headers.get("X-Tenant-ID")))
+
+# `zeython down`/`zeython up` -- see docs/maintenance-mode.md. Kept as the
+# very last registration in this file deliberately: the most recently
+# registered middleware wraps outermost, and maintenance mode needs to
+# intercept a request before anything else runs (including opening a
+# database session) -- keep any new middleware-adding provider you add
+# above this line, not below it. Its own boot() is a no-op unless
+# storage/framework/down.json exists, so it's safe to always register.
+app.register(MaintenanceModeServiceProvider)
 
 if __name__ == "__main__":
     app.run()
