@@ -57,6 +57,7 @@ nav:
   - Testing: testing.md
   - Deployment & Operations:
       - Health Check: health-check.md
+      - Maintenance Mode: maintenance-mode.md
       - Observability: observability.md
       - Profiling: profiling.md
       - Error Monitoring: error-monitoring.md
@@ -210,6 +211,7 @@ plugins:
           - testing.md
         Deployment & Operations:
           - health-check.md
+          - maintenance-mode.md
           - observability.md
           - profiling.md
           - error-monitoring.md

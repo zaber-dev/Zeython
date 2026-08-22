@@ -2,10 +2,9 @@
 
 ## Supported versions
 
-Zeython is pre-1.0 (currently `2.0.0a1`) and moving fast — there's no
-long-term-support branch yet. Only the latest published release on PyPI
-gets security fixes; upgrading to it is the fix for anything reported
-against an older one.
+Zeython moves fast and there's no long-term-support branch yet. Only the
+latest published release gets security fixes; upgrading to it is the fix
+for anything reported against an older one.
 
 | Version        | Supported          |
 | -------------- | ------------------ |

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question / discuss an idea
+    url: https://github.com/zaber-dev/Zeython/discussions
+    about: For usage questions and open-ended discussion, not a specific bug or feature.
+  - name: Documentation
+    url: https://zeython.zaber.dev/docs/
+    about: Check the docs before filing -- the answer might already be there.

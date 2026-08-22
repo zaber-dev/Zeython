@@ -109,6 +109,12 @@ extend-exclude = ["src/zeython/cli/templates"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
+[tool.ruff.lint.flake8-bugbear]
+# typer.Option()/typer.Argument() defaults are typer's own dependency-injection
+# pattern (mirrors fastapi.Depends()), evaluated once at CLI-definition time by
+# design -- not the "shared mutable default" bug B008 exists to catch.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
