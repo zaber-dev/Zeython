@@ -18,7 +18,10 @@ This is deliberately separate from [Model Events](model-events.md)'s
 `Observer` classes: an Observer reacts to one model's own lifecycle
 (`creating`, `updated`, `deleted`); an event here can be anything your
 application defines, dispatched from anywhere -- a controller, a job, a
-scheduled task, even a model hook itself.
+scheduled task, even a model hook itself. Also deliberately separate from
+[Notifications](notifications.md): an event is "this happened, react
+however you like" (any number of listeners, no fixed shape); a
+notification is "tell *this one recipient*, on *these* channels."
 
 ## Defining and dispatching an event
 

@@ -44,6 +44,7 @@ nav:
       - Plugins: plugins.md
       - Localization: localization.md
       - Events: events.md
+      - Notifications: notifications.md
       - Background Jobs: queues.md
       - Scheduling: scheduling.md
       - WebSockets: websockets.md
@@ -197,6 +198,7 @@ plugins:
           - plugins.md
           - localization.md
           - events.md
+          - notifications.md
           - queues.md
           - scheduling.md
           - websockets.md
