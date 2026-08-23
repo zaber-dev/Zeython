@@ -35,6 +35,9 @@ GPL-3.0 to MIT.
 - An application-level event dispatcher (`zeython.events`) — `emit()`,
   decoupled `listen()` handlers, an `EventServiceProvider` for wiring an
   app's own listeners in one place.
+- Feature flags (`zeython.feature_flags`) — static `.env`-driven toggles
+  and deterministic percentage rollouts, no database or Redis required;
+  `zeython features` lists every defined flag and its current resolution.
 
 ### Auth, authorization & security
 
@@ -110,7 +113,7 @@ GPL-3.0 to MIT.
 - `zeython new`, `serve`, `make model|controller|middleware|provider|
   policy|notification|factory|seeder|job|command`,
   `db revision|migrate|downgrade|seed`, `queue work`, `schedule run`, `mcp`,
-  `routes`, `about`, `down`, `up`.
+  `routes`, `about`, `features`, `down`, `up`.
 
 ### Testing & docs
 

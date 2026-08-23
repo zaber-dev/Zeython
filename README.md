@@ -180,6 +180,7 @@ empty scaffold to a tested, authenticated API
 [Localization](docs/localization.md) ·
 [Events](docs/events.md) ·
 [Notifications](docs/notifications.md) ·
+[Feature Flags](docs/feature-flags.md) ·
 [Background Jobs](docs/queues.md) ·
 [Scheduling](docs/scheduling.md) ·
 [WebSockets](docs/websockets.md) ·

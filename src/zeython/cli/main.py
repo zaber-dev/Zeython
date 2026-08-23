@@ -219,6 +219,36 @@ def routes() -> None:
 
 
 @app.command()
+def features() -> None:
+    """List every registered feature flag and its current global resolution
+    (context=None -- a per-user flag may still resolve differently for a
+    real user). See docs/feature-flags.md."""
+    from zeython.feature_flags import FeatureManager
+    from zeython.mcp import introspect
+
+    application = introspect.load_app(Path.cwd())
+    # Flags are defined in a FeatureServiceProvider subclass's boot() (the
+    # same pattern AppEventServiceProvider uses), not register() -- and
+    # boot() only runs lazily, on the app's first real request otherwise.
+    # load_app() alone (what `routes`/`about` get away without) isn't
+    # enough here.
+    application.boot()
+    if not application.container.has(FeatureManager):
+        typer.echo("No FeatureServiceProvider registered.")
+        return
+
+    manager = application.container.make(FeatureManager)
+    names = manager.names()
+    if not names:
+        typer.echo("No feature flags defined.")
+        return
+
+    for name in names:
+        active = asyncio.run(manager.active(name))
+        typer.echo(f"  {name:<30} {'ON' if active else 'off'}")
+
+
+@app.command()
 def tinker() -> None:
     """Interactive REPL with the application, its models, and a database
     session already loaded -- mirrors Laravel's `artisan tinker`.

@@ -47,6 +47,7 @@ def test_new_project_creates_the_full_directory_layout(tmp_path: Path) -> None:
         "app/Models/notification.py",
         "app/Notifications/__init__.py",
         "app/Notifications/welcome_notification.py",
+        "app/Providers/app_feature_service_provider.py",
         "app/Middleware/__init__.py",
         "app/Jobs/__init__.py",
         "app/Providers/__init__.py",

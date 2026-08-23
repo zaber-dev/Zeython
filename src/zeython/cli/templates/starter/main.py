@@ -23,6 +23,7 @@ from zeython import (
 from app.Models.notification import Notification
 from app.Models.user import User
 from app.Providers.app_event_service_provider import AppEventServiceProvider
+from app.Providers.app_feature_service_provider import AppFeatureServiceProvider
 from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
 
 app = Application()
@@ -53,6 +54,9 @@ app.register(NotificationServiceProvider(app, record_model=Notification))
 # -- see docs/events.md. AppEventServiceProvider (app/Providers/) is where
 # this app's own listeners are registered.
 app.register(AppEventServiceProvider(app))
+# Feature flags -- see docs/feature-flags.md. AppFeatureServiceProvider
+# (app/Providers/) is where this app's own flags are defined.
+app.register(AppFeatureServiceProvider(app))
 app.register(AuthServiceProvider(app, user_model=User))
 app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)

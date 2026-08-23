@@ -6,6 +6,7 @@ from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
 from zeython.events import emit
+from zeython.feature_flags import feature
 from zeython.notifications import notify
 from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
@@ -83,7 +84,14 @@ class AuthController(Controller):
         user = await current_user(request)
         if user is None:
             raise UnauthorizedException("Not logged in.")
-        return JSONResponse(user.to_dict())
+
+        data = user.to_dict()
+        # A real feature check (see docs/feature-flags.md and
+        # AppFeatureServiceProvider) -- the same user always gets the same
+        # answer, since beta_dashboard is a deterministic rollout keyed by
+        # this user's own id.
+        data["features"] = {"beta_dashboard": await feature(request, "beta_dashboard", user)}
+        return JSONResponse(data)
 
     async def token(self, request):
         await throttle(request, key=f"api-token:{client_ip(request)}", limit=5, window=60)

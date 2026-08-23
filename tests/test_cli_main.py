@@ -281,6 +281,64 @@ def test_about_reports_app_name_and_zeython_version(tmp_path: Path, monkeypatch:
     assert zeython.__version__ in result.stdout
 
 
+# -- features -------------------------------------------------------------------------------
+
+
+def test_features_reports_when_no_provider_registered(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text("from zeython import Application\n\napp = Application()\n")
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(cli_app, ["features"])
+
+    assert result.exit_code == 0
+    assert "No FeatureServiceProvider registered" in result.stdout
+
+
+def test_features_reports_when_none_are_defined(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application, FeatureServiceProvider\n\n"
+        "app = Application()\n"
+        "app.register(FeatureServiceProvider)\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(cli_app, ["features"])
+
+    assert result.exit_code == 0
+    assert "No feature flags defined" in result.stdout
+
+
+def test_features_lists_defined_flags_with_their_resolution(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Regression: flags are defined in a FeatureServiceProvider subclass's
+    # boot() (not register()), and boot() only runs lazily on an app's
+    # first real request otherwise -- `zeython features` must boot the app
+    # itself after load_app(), or every flag looks undefined no matter
+    # what a project actually registers.
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=test\n")
+    (tmp_path / "main.py").write_text(
+        "from zeython import Application, FeatureManager, FeatureServiceProvider\n\n"
+        "class AppFeatureServiceProvider(FeatureServiceProvider):\n"
+        "    def boot(self) -> None:\n"
+        "        super().boot()\n"
+        "        manager = self.container.make(FeatureManager)\n"
+        "        manager.boolean('new_checkout', default=True)\n"
+        "        manager.boolean('old_billing', default=False)\n\n"
+        "app = Application()\n"
+        "app.register(AppFeatureServiceProvider(app))\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(cli_app, ["features"])
+
+    assert result.exit_code == 0
+    assert "new_checkout" in result.stdout
+    assert "old_billing" in result.stdout
+    assert "ON" in result.stdout
+    assert "off" in result.stdout
+
+
 # -- db migrate / revision / downgrade (the alembic subprocess wrapper) -----------------
 
 
