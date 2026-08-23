@@ -121,6 +121,18 @@ class RedisFlakyJob(Job):
 
 
 @dataclass
+class RedisCountingJob(Job):
+    """Increments a Redis counter on every run -- lets a test tell two
+    separately-pushed, identically-payloaded jobs apart by how many times
+    handle() actually ran, rather than by a single fixed marker key."""
+
+    counter_key: str
+
+    async def handle(self, redis_client: Redis) -> None:
+        await redis_client.incr(self.counter_key)
+
+
+@dataclass
 class RedisAlwaysFailsJob(Job):
     max_attempts: int = 1
 
@@ -166,6 +178,31 @@ async def test_pushed_payload_round_trips_the_job_class_and_fields(queue: RedisQ
 async def test_a_non_dataclass_job_raises_type_error_on_push(queue: RedisQueue) -> None:
     with pytest.raises(TypeError, match="dataclass"):
         await queue.push(NotADataclassJob())
+
+
+async def test_two_identically_payloaded_delayed_pushes_are_not_collapsed(queue: RedisQueue) -> None:
+    # Regression guard: the delayed set's Redis members must be unique
+    # (a uuid per push, not the raw serialized payload) or two jobs that
+    # serialize identically -- same class, same fields, same starting
+    # attempts -- silently collapse into one ZADD, dropping one push
+    # entirely with no error.
+    await queue.push(RedisRecordingJob(marker_key="dup"), delay=100)
+    await queue.push(RedisRecordingJob(marker_key="dup"), delay=150)
+
+    assert await queue._client.zcard(queue._delayed_key) == 2
+
+
+async def test_two_identically_payloaded_delayed_jobs_both_run(queue: RedisQueue, redis_client) -> None:
+    await queue.push(RedisCountingJob(counter_key="dup-runs-counter"), delay=0.1)
+    await queue.push(RedisCountingJob(counter_key="dup-runs-counter"), delay=0.15)
+
+    async def _both_ran() -> bool:
+        count = await redis_client.get("dup-runs-counter")
+        return count is not None and int(count) >= 2
+
+    await _run_worker_until(queue, _both_ran, timeout=3.0)
+
+    assert int(await redis_client.get("dup-runs-counter")) == 2
 
 
 # -- run_worker(): success -------------------------------------------------------------
