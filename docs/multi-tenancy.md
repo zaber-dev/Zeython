@@ -6,6 +6,10 @@ else's, rather than a database (or schema) per tenant. A model opts in
 just by declaring a `tenant_id` column; there's no mixin and nothing to
 remember to add to each query.
 
+A different question from [Feature Flags](feature-flags.md): tenancy
+answers "which tenant's data should this query see," not "is this
+capability switched on right now."
+
 ## Setup
 
 ```python

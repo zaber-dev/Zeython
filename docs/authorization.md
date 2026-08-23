@@ -9,6 +9,10 @@ there's nothing else in the framework that helps with it — without this,
 that logic ends up as ad hoc `if post.author_id != user.id: raise ...`
 scattered across controllers.
 
+A different question again from [Feature Flags](feature-flags.md): a
+permission is usually permanent ("editors can delete posts"); a flag is
+usually temporary ("this user is in the beta of the new editor").
+
 ## Defining abilities
 
 Abilities are named checks registered on a `Gate`, typically in a
