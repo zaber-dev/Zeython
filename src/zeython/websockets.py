@@ -167,8 +167,15 @@ class RedisWebSocketHub(WebSocketHub):
     The listener starts automatically on this hub's first :meth:`connect`
     call -- there's no ASGI lifespan hook to start it any earlier, and
     nothing needs the listener running before the first connection exists
-    anyway. Call :meth:`stop` to shut it down cleanly (mainly useful in
-    tests; a real process just exits, taking the task with it).
+    anyway. That first ``connect()`` (and only that one -- later calls see
+    the subscription already confirmed) doesn't return until the ``SUBSCRIBE``
+    has actually been acknowledged by Redis, not just scheduled: without
+    that wait, a client that connects and immediately triggers a broadcast
+    could publish before this instance's own subscription had taken
+    effect, and Redis pub/sub never redelivers a message to a subscriber
+    that wasn't listening yet. Call :meth:`stop` to shut the listener down
+    cleanly (mainly useful in tests; a real process just exits, taking the
+    task with it).
 
     Doesn't attempt to reconnect if the Redis connection drops mid-stream
     -- the listener task logs the error and stops; broadcasts stop
@@ -199,10 +206,26 @@ class RedisWebSocketHub(WebSocketHub):
         self._channel = channel
         self._instance_id = uuid.uuid4().hex
         self._listener_task: asyncio.Task[None] | None = None
+        self._subscribed = asyncio.Event()
 
     async def connect(self, websocket: WebSocket) -> bool:
         if self._listener_task is None:
+            # A fresh Event per listener, not reused across a stop()+reconnect
+            # cycle -- reusing the previous (already-set) one would make the
+            # wait() below return instantly, before the *new* listener
+            # task has actually resubscribed.
+            self._subscribed = asyncio.Event()
             self._listener_task = asyncio.create_task(self._listen())
+        # Without this, a connect() that returns as soon as the listener
+        # task is merely *scheduled* -- not yet actually SUBSCRIBEd --
+        # races broadcast()'s PUBLISH: a caller that connects and
+        # immediately triggers a broadcast can publish before this
+        # instance's own subscription has taken effect, and Redis pub/sub
+        # never redelivers a message to a subscriber that wasn't listening
+        # yet. Waiting here closes that window -- every connect() that
+        # returns is a guarantee this instance is subscribed and ready to
+        # relay whatever gets published after.
+        await self._subscribed.wait()
         return await super().connect(websocket)
 
     async def stop(self) -> None:
@@ -226,6 +249,7 @@ class RedisWebSocketHub(WebSocketHub):
     async def _listen(self) -> None:
         pubsub = self._client.pubsub()
         await pubsub.subscribe(self._channel)
+        self._subscribed.set()
         try:
             async for message in pubsub.listen():
                 if message["type"] != "message":

@@ -3,15 +3,55 @@ installed, or if no Redis server is reachable at TEST_REDIS_URL (default
 redis://localhost:6379/15 -- db 15, to stay out of the way of anything
 else that might be using db 0). See tests/test_redis_backends.py.
 
-Each `websocket_client(app)` connection runs the app in its own
-background thread with its own event loop (Starlette's TestClient), torn
-down when its `with websocket_connect(...)` block exits -- a legitimate
-stand-in for "a different worker process," and why these tests never call
-`hub.stop()` on a hub whose listener task was created inside one of those
-threads (the task, and the thread's whole event loop, are already gone by
-the time the `with` block exits; there's nothing left to cancel). The one
-test that does call `stop()` builds everything in the outer event loop
-directly, without going through a TestClient at all.
+Each `websocket_client(app)` call creates a *new* `TestClient`, which runs
+the app in its own background thread with its own event loop (Starlette's
+TestClient design) -- a legitimate stand-in for "a different worker
+process" when two connections are meant to belong to different hub
+instances (`test_broadcast_reaches_a_different_process_via_redis`).
+
+But two connections meant to share *one* hub instance (two clients on the
+same process/app) must come from the *same* `TestClient` -- i.e. call
+`websocket_client(app)` once and open both `.websocket_connect()`s on
+that one instance, the same way `test_broadcast_reaches_local_connections`
+already does. `RedisWebSocketHub.connect()` lazily binds its listener
+task to whichever event loop happens to be running on the *first*
+`connect()` call, and `broadcast()` (called from any connected client's
+handler) walks every connection in the shared `_connections` set,
+including ones that live on a different `TestClient`'s thread/loop --
+awaiting a send on a WebSocket object owned by a foreign event loop is
+undefined behavior with anyio's stream primitives, and was observed to
+hang intermittently in CI until connections sharing a hub were changed to
+share a `TestClient` too. This is purely a test-harness hazard: a real
+ASGI server serves an entire process from one event loop, so production
+`WebSocketHub`/`RedisWebSocketHub` usage never has connections spanning
+more than one loop to begin with.
+
+Tests never call `hub.stop()` on a hub whose listener task was created
+inside a TestClient's background thread (the task, and the thread's whole
+event loop, are already gone by the time the `with` block exits; there's
+nothing left to cancel). The one test that does call `stop()` builds
+everything in the outer event loop directly, without going through a
+TestClient at all.
+
+Two real races were found and fixed via repeated local stress-testing
+against a real Redis server (CI failures alone don't reproduce reliably
+enough to debug from): the cross-TestClient hub-sharing hazard above, and
+RedisWebSocketHub.connect() previously returning as soon as its listener
+task was merely *scheduled*, not once its SUBSCRIBE was actually
+acknowledged by Redis -- closed by having connect() await that
+confirmation (see the class docstring in zeython/websockets.py). Both
+measurably cut the hang rate (roughly 1 in 15-18 runs down to roughly 1
+in 40), but didn't eliminate it entirely -- a residual, rarer hang
+(observed as low as 1 in 80 runs, on tests that don't obviously touch the
+races above) remains, same accepted, not-fully-root-caused category as
+tests/test_redis_queue.py's own documented flake: something about
+Starlette TestClient's one-thread-plus-one-event-loop-per-connection
+model, redis-py's async client, and anyio's blocking portal occasionally
+missing a wakeup under load. pytest-timeout (pyproject.toml, 60s) is the
+backstop so a recurrence fails a CI job loudly within a minute instead of
+hanging it indefinitely -- if a run fails here with a Timeout traceback,
+re-running is the correct response, not a sign your change broke
+something.
 """
 
 import os
@@ -118,10 +158,13 @@ def test_broadcast_is_not_duplicated_on_the_senders_own_process(tmp_path: Path, 
     # extra "first" instead of the genuinely next "second" message.
     app_a = _make_app_with_chat(tmp_path / "a", RedisWebSocketHub(REDIS_URL, channel=channel))
     app_b = _make_app_with_chat(tmp_path / "b", RedisWebSocketHub(REDIS_URL, channel=channel))
+    # sender/same_process_peer share app_a's hub -- must share a TestClient
+    # (see the module docstring for why crossing threads here can hang).
+    client_a = websocket_client(app_a)
 
     with (
-        websocket_client(app_a).websocket_connect("/ws/chat") as sender,
-        websocket_client(app_a).websocket_connect("/ws/chat") as same_process_peer,
+        client_a.websocket_connect("/ws/chat") as sender,
+        client_a.websocket_connect("/ws/chat") as same_process_peer,
         websocket_client(app_b).websocket_connect("/ws/chat") as other_process_peer,
     ):
         sender.send_text("first")
@@ -136,11 +179,14 @@ def test_broadcast_is_not_duplicated_on_the_senders_own_process(tmp_path: Path, 
 def test_different_channels_do_not_cross_talk(tmp_path: Path) -> None:
     app_a = _make_app_with_chat(tmp_path / "a", RedisWebSocketHub(REDIS_URL, channel="zeython-test:ws:channel-a"))
     app_b = _make_app_with_chat(tmp_path / "b", RedisWebSocketHub(REDIS_URL, channel="zeython-test:ws:channel-b"))
+    # sender_b/peer_b share app_b's hub -- must share a TestClient (see
+    # the module docstring for why crossing threads here can hang).
+    client_b = websocket_client(app_b)
 
     with (
         websocket_client(app_a).websocket_connect("/ws/chat") as sender_a,
-        websocket_client(app_b).websocket_connect("/ws/chat") as sender_b,
-        websocket_client(app_b).websocket_connect("/ws/chat") as peer_b,
+        client_b.websocket_connect("/ws/chat") as sender_b,
+        client_b.websocket_connect("/ws/chat") as peer_b,
     ):
         sender_a.send_text("should stay on channel a")
         # If that leaked onto channel b, peer_b's next message would be
