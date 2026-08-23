@@ -27,6 +27,7 @@ zeython make command PruneOldPosts   # app/Console/Commands/prune_old_posts_comm
 zeython make factory Post            # database/factories/post_factory.py
 zeython make seeder User             # database/seeders/user_seeder.py
 zeython make policy Post             # app/Policies/post_policy.py (PostPolicy)
+zeython make notification InvoicePaid # app/Notifications/invoice_paid_notification.py
 ```
 
 See [Authorization](https://zeython.zaber.dev/docs/authorization/#policies) for registering a generated policy with `Gate.policy(...)`.

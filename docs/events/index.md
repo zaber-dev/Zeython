@@ -6,7 +6,7 @@
 
 A controller that creates a user often needs to do more than one thing in response: send a welcome email, write an audit log entry, sync a CRM, notify a Slack channel. Cramming all of that into the controller works at first, then turns it into a dumping ground every unrelated feature has to edit. An event lets the controller announce *what happened* once, and any number of independent listeners decide what to do about it -- adding a new reaction never means touching the controller again.
 
-This is deliberately separate from [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)'s `Observer` classes: an Observer reacts to one model's own lifecycle (`creating`, `updated`, `deleted`); an event here can be anything your application defines, dispatched from anywhere -- a controller, a job, a scheduled task, even a model hook itself.
+This is deliberately separate from [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)'s `Observer` classes: an Observer reacts to one model's own lifecycle (`creating`, `updated`, `deleted`); an event here can be anything your application defines, dispatched from anywhere -- a controller, a job, a scheduled task, even a model hook itself. Also deliberately separate from [Notifications](https://zeython.zaber.dev/docs/notifications/index.md): an event is "this happened, react however you like" (any number of listeners, no fixed shape); a notification is "tell *this one recipient*, on *these* channels."
 
 ## Defining and dispatching an event
 

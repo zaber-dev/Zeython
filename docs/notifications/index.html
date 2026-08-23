@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/views/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/notifications/">
       
       
-        <link rel="prev" href="../database-seeding/">
+        <link rel="prev" href="../events/">
       
       
-        <link rel="next" href="../frontend/">
+        <link rel="next" href="../queues/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Views - Zeython Docs</title>
+        <title>Notifications - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#views" class="md-skip">
+        <a href="#notifications" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Views
+              Notifications
             
           </span>
         </div>
@@ -267,12 +267,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../database/" class="md-tabs__link">
           
   
@@ -329,10 +327,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../cli/" class="md-tabs__link">
           
   
@@ -856,31 +856,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -898,7 +893,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1053,37 +1048,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Views
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../views/" class="md-nav__link">
         
   
   
@@ -1099,59 +1067,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#wiring-it-up" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Wiring it up
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-views-object-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using the Views object directly
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1566,26 +1481,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1603,7 +1523,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1758,10 +1678,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../notifications/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1777,6 +1724,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-a-notification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defining a notification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sending-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sending it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-happens-when-a-channel-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens when a channel fails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-record-model-database-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The record model (database channel)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notifications-vs-background-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notifications vs. background jobs
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2689,10 +2744,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#wiring-it-up" class="md-nav__link">
+  <a href="#why-this-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Wiring it up
+        Why this exists
       
     </span>
   </a>
@@ -2700,10 +2755,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
+        Setup
       
     </span>
   </a>
@@ -2711,10 +2766,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-the-views-object-directly" class="md-nav__link">
+  <a href="#defining-a-notification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using the Views object directly
+        Defining a notification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sending-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sending it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-happens-when-a-channel-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens when a channel fails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-record-model-database-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The record model (database channel)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notifications-vs-background-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notifications vs. background jobs
       
     </span>
   </a>
@@ -2738,7 +2848,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/views.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/notifications.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2746,48 +2856,158 @@
   
 
 
-<h1 id="views">Views<a class="headerlink" href="#views" title="Permanent link">&para;</a></h1>
-<p>Zeython renders server-side HTML with Jinja2, by convention reading templates
-from <code>resources/views/</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Controllers/page_controller.py</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">PageController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"pages/show.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Hello"</span><span class="p">})</span>
+<h1 id="notifications">Notifications<a class="headerlink" href="#notifications" title="Permanent link">&para;</a></h1>
+<p><code>zeython.notifications</code> gives you a <code>Notification</code> class: describe what
+happened and which channels (<code>mail</code>, <code>database</code>, <code>broadcast</code>) should carry
+it to one recipient, then fire it with <code>notify()</code>. Mirrors Laravel's
+Notification system.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>A "you have a new comment" message often needs to reach a user more than
+one way: an email, a row in an in-app notification list, maybe a live
+WebSocket push if they're online right now. Without this, that's three
+separate call sites to keep in sync every time the content changes. A
+<code>Notification</code> describes its own rendering per channel once; <code>notify()</code>
+fires whichever channels it asks for.</p>
+<p>This is deliberately separate from <a href="../events/">Events</a> -- an event is "this
+happened, react however you like" (any number of independent listeners, no
+fixed shape); a notification is "tell <em>this one recipient</em>, on <em>these</em>
+channels, in <em>this</em> format."</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">NotificationServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.notification</span><span class="w"> </span><span class="kn">import</span> <span class="n">Notification</span>  <span class="c1"># your own record model, below</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">NotificationServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">record_model</span><span class="o">=</span><span class="n">Notification</span><span class="p">))</span>
 </span></code></pre></div>
-<div class="language-html highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- resources/views/pages/show.html --&gt;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">&lt;!doctype html&gt;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+<p>A generated project already has this wired up -- see <code>app/Models/notification.py</code>,
+<code>app/Notifications/welcome_notification.py</code>, and the <code>notify()</code> call in
+<code>AuthController.register</code>.</p>
+<p><code>record_model</code> is only required if you use the <code>database</code> channel; omit it
+if every notification you write only ever uses <code>mail</code>/<code>broadcast</code>.</p>
+<h2 id="defining-a-notification">Defining a notification<a class="headerlink" href="#defining-a-notification" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Notifications/invoice_paid_notification.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">Notification</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">InvoicePaidNotification</span><span class="p">(</span><span class="n">Notification</span><span class="p">):</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">invoice</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">invoice</span> <span class="o">=</span> <span class="n">invoice</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">via</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifiable</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="k">return</span> <span class="p">[</span><span class="s2">"mail"</span><span class="p">,</span> <span class="s2">"database"</span><span class="p">]</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_mail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifiable</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="k">return</span> <span class="n">Message</span><span class="p">(</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>            <span class="n">to</span><span class="o">=</span><span class="n">notifiable</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>            <span class="n">subject</span><span class="o">=</span><span class="s2">"Invoice paid"</span><span class="p">,</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>            <span class="n">body</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Thanks! We received $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">invoice</span><span class="o">.</span><span class="n">amount</span><span class="si">}</span><span class="s2">."</span><span class="p">,</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifiable</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">"invoice_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoice</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"amount"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoice</span><span class="o">.</span><span class="n">amount</span><span class="p">}</span>
 </span></code></pre></div>
-<h2 id="wiring-it-up">Wiring it up<a class="headerlink" href="#wiring-it-up" title="Permanent link">&para;</a></h2>
-<p><code>render()</code> looks up the application's <code>Views</code> instance from the container, so
-register <code>ViewServiceProvider</code> alongside your other providers:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span><span class="p">,</span> <span class="n">ViewServiceProvider</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ViewServiceProvider</span><span class="p">)</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
+<p><code>via()</code> decides the channels <em>per recipient</em> -- nothing stops it from
+returning something different depending on <code>notifiable</code> (e.g. only email
+users who opted in). Only implement the <code>to_*</code> methods the channels you
+chose actually need; <code>zeython make notification InvoicePaid</code> scaffolds
+this shape in <code>app/Notifications/</code>.</p>
+<h2 id="sending-it">Sending it<a class="headerlink" href="#sending-it" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Notifications.invoice_paid_notification</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvoicePaidNotification</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mark_paid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">invoice</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">await</span> <span class="n">notify</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">invoice</span><span class="o">.</span><span class="n">customer</span><span class="p">,</span> <span class="n">InvoicePaidNotification</span><span class="p">(</span><span class="n">invoice</span><span class="p">))</span>
 </span></code></pre></div>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>By default templates are read from <code>&lt;project root&gt;/resources/views</code>. Override
-with <code>VIEWS_PATH</code> in <code>.env</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>VIEWS_PATH=templates
+<p>Outside of a request -- a job, a scheduled task -- resolve a
+<code>NotificationManager</code> directly instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.notifications</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotificationManager</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">NotificationManager</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">await</span> <span class="n">manager</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">invoice</span><span class="o">.</span><span class="n">customer</span><span class="p">,</span> <span class="n">InvoicePaidNotification</span><span class="p">(</span><span class="n">invoice</span><span class="p">))</span>
 </span></code></pre></div>
-<h2 id="using-the-views-object-directly">Using the <code>Views</code> object directly<a class="headerlink" href="#using-the-views-object-directly" title="Permanent link">&para;</a></h2>
-<p><code>render()</code> is sugar over the container-bound <code>Views</code> instance; you can also
-resolve and use it directly if you need more control (custom filters, globals):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Views</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">views</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Views</span><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">views</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"shout"</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<h2 id="channels">Channels<a class="headerlink" href="#channels" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Requires</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mail</code></td>
+<td><code>Mailer</code> bound (<code>MailServiceProvider</code>)</td>
+<td>Sends <code>to_mail(notifiable)</code> through whichever <code>Mailer</code> is bound -- see <a href="../mail/">Mail</a>.</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td><code>NotificationServiceProvider(app, record_model=...)</code></td>
+<td>Writes one row: <code>notifiable_id</code>, <code>type</code> (the class name), <code>data</code> (<code>to_database(notifiable)</code>), <code>read_at</code>.</td>
+</tr>
+<tr>
+<td><code>broadcast</code></td>
+<td><code>WebSocketHubServiceProvider</code> registered</td>
+<td>Pushes <code>{"type": ..., "notifiable_id": ..., "data": to_broadcast(notifiable)}</code> to every connected client via <code>WebSocketHub.broadcast()</code> -- see <a href="../websockets/">WebSockets</a>. Not scoped to just the recipient's own connection; filter on the client side by <code>notifiable_id</code>, or subscribe recipients to their own channel/room if your app has that concept.</td>
+</tr>
+</tbody>
+</table>
+<p><code>to_broadcast()</code> defaults to whatever <code>to_database()</code> returns, so a
+notification using both doesn't have to write the payload twice.</p>
+<p>Calling a channel that isn't set up (<code>database</code> with no <code>record_model</code>,
+<code>broadcast</code> with no hub registered) raises immediately, naming the fix.
+An unrecognized channel name from <code>via()</code> logs a warning instead of
+raising -- a typo in one channel shouldn't take down the others.</p>
+<h2 id="what-happens-when-a-channel-fails">What happens when a channel fails<a class="headerlink" href="#what-happens-when-a-channel-fails" title="Permanent link">&para;</a></h2>
+<p>Each channel in <code>via()</code> runs independently. One failing (a down SMTP
+server) is logged and reported (see <a href="../error-monitoring/">Error Monitoring</a>),
+<strong>not</strong> raised -- it doesn't stop the others, the same reasoning
+<a href="../events/#multiple-listeners-and-what-happens-when-one-fails">Events</a> uses
+for listeners. A failed email shouldn't also silently swallow the in-app
+notification that would have told the user something happened.</p>
+<h2 id="the-record-model-database-channel">The record model (<code>database</code> channel)<a class="headerlink" href="#the-record-model-database-channel" title="Permanent link">&para;</a></h2>
+<p>Not framework-provided -- like <code>AuthServiceProvider</code>'s <code>user_model</code>, this is
+your own <code>Model</code> subclass, generated into a fresh project by default:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># app/Models/notification.py</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSON</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">Notification</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"notifications"</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">notifiable_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"users.id"</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="nb">type</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">JSON</span><span class="p">)</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">read_at</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
+<p>Query it with the ordinary <code>Model</code> API, or the two small helpers this
+module provides:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.notifications</span><span class="w"> </span><span class="kn">import</span> <span class="n">mark_as_read</span><span class="p">,</span> <span class="n">unread_notifications</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.notification</span><span class="w"> </span><span class="kn">import</span> <span class="n">Notification</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">unread</span> <span class="o">=</span> <span class="k">await</span> <span class="n">unread_notifications</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="n">Notification</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="k">await</span> <span class="n">mark_as_read</span><span class="p">(</span><span class="n">unread</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span></code></pre></div>
+<p>Nothing here forces a mixin onto your <code>notifiable</code> model -- pass the same
+<code>record_model</code> you registered with <code>NotificationServiceProvider</code>, and any
+object with an <code>.id</code> can be a recipient.</p>
+<h2 id="notifications-vs-background-jobs">Notifications vs. background jobs<a class="headerlink" href="#notifications-vs-background-jobs" title="Permanent link">&para;</a></h2>
+<p>They compose. <code>notify()</code> runs every channel <strong>inline</strong>, in the current
+request -- fine for a fast <code>database</code> write, slower for a real outbound
+<code>mail</code> send. For a notification that might be slow, dispatch a
+<a href="../queues/">background job</a> that calls <code>notify()</code> from inside <code>handle()</code>,
+rather than blocking the request on it directly.</p>
 
 
 
@@ -2823,7 +3043,7 @@ resolve and use it directly if you need more control (custom filters, globals):<
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../database-seeding/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Factories &amp; Seeders">
+          <a href="../events/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Events">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2833,20 +3053,20 @@ resolve and use it directly if you need more control (custom filters, globals):<
                 Previous
               </span>
               <div class="md-ellipsis">
-                Factories & Seeders
+                Events
               </div>
             </div>
           </a>
         
         
           
-          <a href="../frontend/" class="md-footer__link md-footer__link--next" aria-label="Next: Frontend &amp; CSS">
+          <a href="../queues/" class="md-footer__link md-footer__link--next" aria-label="Next: Background Jobs">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Frontend & CSS
+                Background Jobs
               </div>
             </div>
             <div class="md-footer__button md-icon">

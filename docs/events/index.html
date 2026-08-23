@@ -18,7 +18,7 @@
         <link rel="prev" href="../localization/">
       
       
-        <link rel="next" href="../queues/">
+        <link rel="next" href="../notifications/">
       
       
         
@@ -1800,6 +1800,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -2812,7 +2840,10 @@ reaction never means touching the controller again.</p>
 <code>Observer</code> classes: an Observer reacts to one model's own lifecycle
 (<code>creating</code>, <code>updated</code>, <code>deleted</code>); an event here can be anything your
 application defines, dispatched from anywhere -- a controller, a job, a
-scheduled task, even a model hook itself.</p>
+scheduled task, even a model hook itself. Also deliberately separate from
+<a href="../notifications/">Notifications</a>: an event is "this happened, react
+however you like" (any number of listeners, no fixed shape); a
+notification is "tell <em>this one recipient</em>, on <em>these</em> channels."</p>
 <h2 id="defining-and-dispatching-an-event">Defining and dispatching an event<a class="headerlink" href="#defining-and-dispatching-an-event" title="Permanent link">&para;</a></h2>
 <p>An event is just a plain class -- a dataclass is the natural fit:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Events/order_placed.py</span>
@@ -2957,13 +2988,13 @@ separately-dispatched job, run by a worker, not a listener.</p>
         
         
           
-          <a href="../queues/" class="md-footer__link md-footer__link--next" aria-label="Next: Background Jobs">
+          <a href="../notifications/" class="md-footer__link md-footer__link--next" aria-label="Next: Notifications">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Background Jobs
+                Notifications
               </div>
             </div>
             <div class="md-footer__button md-icon">

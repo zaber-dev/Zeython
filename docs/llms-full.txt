@@ -2471,6 +2471,7 @@ zeython make command PruneOldPosts   # app/Console/Commands/prune_old_posts_comm
 zeython make factory Post            # database/factories/post_factory.py
 zeython make seeder User             # database/seeders/user_seeder.py
 zeython make policy Post             # app/Policies/post_policy.py (PostPolicy)
+zeython make notification InvoicePaid # app/Notifications/invoice_paid_notification.py
 ```
 
 See [Authorization](https://zeython.zaber.dev/docs/authorization/#policies) for registering a generated policy with `Gate.policy(...)`.
@@ -2796,7 +2797,7 @@ translator.t("welcome.title", locale="es")
 
 A controller that creates a user often needs to do more than one thing in response: send a welcome email, write an audit log entry, sync a CRM, notify a Slack channel. Cramming all of that into the controller works at first, then turns it into a dumping ground every unrelated feature has to edit. An event lets the controller announce *what happened* once, and any number of independent listeners decide what to do about it -- adding a new reaction never means touching the controller again.
 
-This is deliberately separate from [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)'s `Observer` classes: an Observer reacts to one model's own lifecycle (`creating`, `updated`, `deleted`); an event here can be anything your application defines, dispatched from anywhere -- a controller, a job, a scheduled task, even a model hook itself.
+This is deliberately separate from [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)'s `Observer` classes: an Observer reacts to one model's own lifecycle (`creating`, `updated`, `deleted`); an event here can be anything your application defines, dispatched from anywhere -- a controller, a job, a scheduled task, even a model hook itself. Also deliberately separate from [Notifications](https://zeython.zaber.dev/docs/notifications/index.md): an event is "this happened, react however you like" (any number of listeners, no fixed shape); a notification is "tell *this one recipient*, on *these* channels."
 
 ## Defining and dispatching an event
 
@@ -2892,6 +2893,137 @@ If a listener genuinely needs to block the request until it's done and fail loud
 ## Events vs. background jobs
 
 They compose, they don't replace each other. `emit()` calls every listener **inline**, in the current request -- fine for fast, in-process work (an audit-log write, updating an in-memory cache). For anything slower (an actual outbound email send, a real webhook call), dispatch a [background job](https://zeython.zaber.dev/docs/queues/index.md) from inside the listener, or dispatch the job directly instead of using an event at all if there's only ever going to be one reaction. The starter scaffold's `UserRegistered` listener is the cheap, synchronous case (a log line); the actual welcome email is a separately-dispatched job, run by a worker, not a listener.
+
+# Notifications
+
+`zeython.notifications` gives you a `Notification` class: describe what happened and which channels (`mail`, `database`, `broadcast`) should carry it to one recipient, then fire it with `notify()`. Mirrors Laravel's Notification system.
+
+## Why this exists
+
+A "you have a new comment" message often needs to reach a user more than one way: an email, a row in an in-app notification list, maybe a live WebSocket push if they're online right now. Without this, that's three separate call sites to keep in sync every time the content changes. A `Notification` describes its own rendering per channel once; `notify()` fires whichever channels it asks for.
+
+This is deliberately separate from [Events](https://zeython.zaber.dev/docs/events/index.md) -- an event is "this happened, react however you like" (any number of independent listeners, no fixed shape); a notification is "tell *this one recipient*, on *these* channels, in *this* format."
+
+## Setup
+
+```python
+# main.py
+from zeython import Application, DatabaseServiceProvider, NotificationServiceProvider
+
+from app.Models.notification import Notification  # your own record model, below
+
+app = Application()
+app.register(DatabaseServiceProvider)
+app.register(NotificationServiceProvider(app, record_model=Notification))
+```
+
+A generated project already has this wired up -- see `app/Models/notification.py`, `app/Notifications/welcome_notification.py`, and the `notify()` call in `AuthController.register`.
+
+`record_model` is only required if you use the `database` channel; omit it if every notification you write only ever uses `mail`/`broadcast`.
+
+## Defining a notification
+
+```python
+# app/Notifications/invoice_paid_notification.py
+from typing import Any
+
+from zeython import Message, Notification
+
+
+class InvoicePaidNotification(Notification):
+    def __init__(self, invoice) -> None:
+        self.invoice = invoice
+
+    def via(self, notifiable: Any) -> list[str]:
+        return ["mail", "database"]
+
+    def to_mail(self, notifiable: Any) -> Message:
+        return Message(
+            to=notifiable.email,
+            subject="Invoice paid",
+            body=f"Thanks! We received ${self.invoice.amount}.",
+        )
+
+    def to_database(self, notifiable: Any) -> dict:
+        return {"invoice_id": self.invoice.id, "amount": self.invoice.amount}
+```
+
+`via()` decides the channels *per recipient* -- nothing stops it from returning something different depending on `notifiable` (e.g. only email users who opted in). Only implement the `to_*` methods the channels you chose actually need; `zeython make notification InvoicePaid` scaffolds this shape in `app/Notifications/`.
+
+## Sending it
+
+```python
+from app.Notifications.invoice_paid_notification import InvoicePaidNotification
+
+async def mark_paid(self, request):
+    invoice = await Invoice.find(...)
+    await notify(request, invoice.customer, InvoicePaidNotification(invoice))
+```
+
+Outside of a request -- a job, a scheduled task -- resolve a `NotificationManager` directly instead:
+
+```python
+from zeython.notifications import NotificationManager
+
+manager = app.container.make(NotificationManager)
+await manager.notify(invoice.customer, InvoicePaidNotification(invoice))
+```
+
+## Channels
+
+| Channel     | Requires                                             | Notes                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mail`      | `Mailer` bound (`MailServiceProvider`)               | Sends `to_mail(notifiable)` through whichever `Mailer` is bound -- see [Mail](https://zeython.zaber.dev/docs/mail/index.md).                                                                                                                                                                                                                                                                      |
+| `database`  | `NotificationServiceProvider(app, record_model=...)` | Writes one row: `notifiable_id`, `type` (the class name), `data` (`to_database(notifiable)`), `read_at`.                                                                                                                                                                                                                                                                                          |
+| `broadcast` | `WebSocketHubServiceProvider` registered             | Pushes `{"type": ..., "notifiable_id": ..., "data": to_broadcast(notifiable)}` to every connected client via `WebSocketHub.broadcast()` -- see [WebSockets](https://zeython.zaber.dev/docs/websockets/index.md). Not scoped to just the recipient's own connection; filter on the client side by `notifiable_id`, or subscribe recipients to their own channel/room if your app has that concept. |
+
+`to_broadcast()` defaults to whatever `to_database()` returns, so a notification using both doesn't have to write the payload twice.
+
+Calling a channel that isn't set up (`database` with no `record_model`, `broadcast` with no hub registered) raises immediately, naming the fix. An unrecognized channel name from `via()` logs a warning instead of raising -- a typo in one channel shouldn't take down the others.
+
+## What happens when a channel fails
+
+Each channel in `via()` runs independently. One failing (a down SMTP server) is logged and reported (see [Error Monitoring](https://zeython.zaber.dev/docs/error-monitoring/index.md)), **not** raised -- it doesn't stop the others, the same reasoning [Events](https://zeython.zaber.dev/docs/events/#multiple-listeners-and-what-happens-when-one-fails) uses for listeners. A failed email shouldn't also silently swallow the in-app notification that would have told the user something happened.
+
+## The record model (`database` channel)
+
+Not framework-provided -- like `AuthServiceProvider`'s `user_model`, this is your own `Model` subclass, generated into a fresh project by default:
+
+```python
+# app/Models/notification.py
+from datetime import datetime
+
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from zeython import Model
+
+
+class Notification(Model):
+    __tablename__ = "notifications"
+
+    notifiable_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
+    type: Mapped[str] = mapped_column(String(255))
+    data: Mapped[dict] = mapped_column(JSON)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+```
+
+Query it with the ordinary `Model` API, or the two small helpers this module provides:
+
+```python
+from zeython.notifications import mark_as_read, unread_notifications
+
+from app.Models.notification import Notification
+
+unread = await unread_notifications(current_user, Notification)
+await mark_as_read(unread[0])
+```
+
+Nothing here forces a mixin onto your `notifiable` model -- pass the same `record_model` you registered with `NotificationServiceProvider`, and any object with an `.id` can be a recipient.
+
+## Notifications vs. background jobs
+
+They compose. `notify()` runs every channel **inline**, in the current request -- fine for a fast `database` write, slower for a real outbound `mail` send. For a notification that might be slow, dispatch a [background job](https://zeython.zaber.dev/docs/queues/index.md) that calls `notify()` from inside `handle()`, rather than blocking the request on it directly.
 
 # Background Jobs
 
@@ -3325,6 +3457,10 @@ Subclass `Mailer` and implement `async def send(self, message: Message) -> None`
 ```python
 app.container.singleton(Mailer, lambda: MyTransactionalEmailApiMailer(api_key=...))
 ```
+
+## Sending mail as one channel of several
+
+Calling `mailer.send(...)` directly is right for a one-off email. If the same message should also become an in-app notification or a live push -- or you want one class describing all three renderings together -- see [Notifications](https://zeython.zaber.dev/docs/notifications/index.md)'s `mail` channel instead.
 
 # Caching
 
@@ -7968,7 +8104,7 @@ def generate_openapi(
 
 # Jobs & Realtime
 
-Background job queues (in-memory, synchronous, and Redis-backed), the in-app scheduler, WebSockets, and outgoing mail.
+Background job queues (in-memory, synchronous, and Redis-backed), the in-app scheduler, WebSockets, outgoing mail, and multi-channel notifications.
 
 ## queue
 
@@ -8925,6 +9061,189 @@ def __init__(self, app: Application) -> None:
     self.app = app
     self.container = app.container
     self.config = app.config
+```
+
+## notifications
+
+Multi-channel notifications: one :class:`Notification` subclass describes what happened and which channels (`mail`, `database`, `broadcast`) should carry it; :func:`notify` fires all of them. Mirrors Laravel's Notification system.
+
+Deliberately separate from :mod:`zeython.events` -- an event is "this happened, react however you like" (any number of independent listeners, no fixed shape); a notification is "tell *this one recipient*, on *these* channels, in *this* format" -- one `Notification` instance describes its own rendering per channel rather than leaving each listener to reinvent it.
+
+### Notification
+
+Base class for a notification.
+
+Override :meth:`via` to pick channels for a given recipient, and whichever `to_*` builder each of those channels actually needs::
+
+```text
+class InvoicePaid(Notification):
+    def __init__(self, invoice: Invoice) -> None:
+        self.invoice = invoice
+
+    def via(self, notifiable: Any) -> list[str]:
+        return ["mail", "database"]
+
+    def to_mail(self, notifiable: Any) -> Message:
+        return Message(
+            to=notifiable.email,
+            subject="Invoice paid",
+            body=f"Thanks! We received ${self.invoice.amount}.",
+        )
+
+    def to_database(self, notifiable: Any) -> dict:
+        return {"invoice_id": self.invoice.id, "amount": self.invoice.amount}
+```
+
+### NotificationManager
+
+```python
+NotificationManager(
+    container: Container,
+    *,
+    record_model: type[Model] | None = None,
+)
+```
+
+Fires a :class:`Notification` at a recipient across whichever channels it asks for. Bound in the container by :class:`NotificationServiceProvider` -- use :func:`notify` from a request handler, or resolve this directly outside of one (a job, a scheduled task).
+
+Source code in `src/zeython/notifications.py`
+
+```python
+def __init__(self, container: Container, *, record_model: type[Model] | None = None) -> None:
+    self._container = container
+    self.record_model = record_model
+```
+
+#### notify
+
+```python
+notify(notifiable: Any, notification: Notification) -> None
+```
+
+Send `notification` to `notifiable` on every channel :meth:`Notification.via` names.
+
+A channel's own failure is logged and reported (see :mod:`zeython.error_monitoring`), not raised -- the same reasoning :class:`~zeython.events.EventDispatcher` uses for listeners: a down SMTP server shouldn't also silently swallow the in-app notification that would have told the user something happened.
+
+Source code in `src/zeython/notifications.py`
+
+```python
+async def notify(self, notifiable: Any, notification: Notification) -> None:
+    """Send ``notification`` to ``notifiable`` on every channel
+    :meth:`Notification.via` names.
+
+    A channel's own failure is logged and reported (see
+    :mod:`zeython.error_monitoring`), not raised -- the same reasoning
+    :class:`~zeython.events.EventDispatcher` uses for listeners: a
+    down SMTP server shouldn't also silently swallow the in-app
+    notification that would have told the user something happened.
+    """
+    for channel in notification.via(notifiable):
+        try:
+            await self._send(channel, notifiable, notification)
+        except Exception as exc:
+            report_exception(
+                exc, channel=channel, notification=type(notification).__name__
+            )
+            logger.exception(
+                "Notification channel %r failed for %s", channel, type(notification).__name__
+            )
+```
+
+### NotificationServiceProvider
+
+```python
+NotificationServiceProvider(
+    app: Any, *, record_model: type[Model] | None = None
+)
+```
+
+Bases: `ServiceProvider`
+
+Binds a :class:`NotificationManager` into the container.
+
+```text
+app.register(NotificationServiceProvider(app, record_model=Notification))
+```
+
+`record_model` is your own `Model` subclass for the `database` channel (columns: `notifiable_id`, `type`, `data`, `read_at`) -- generated by `zeython make notification` alongside a `Notification` example class, wired into a fresh project's `app/Models/notification.py` by default. Omit it if you only ever use the `mail`/`broadcast` channels; calling the `database` channel without one raises immediately, naming the fix.
+
+Source code in `src/zeython/notifications.py`
+
+```python
+def __init__(self, app: Any, *, record_model: type[Model] | None = None) -> None:
+    super().__init__(app)
+    self.record_model = record_model
+```
+
+### notify
+
+```python
+notify(
+    request: Request,
+    notifiable: Any,
+    notification: Notification,
+) -> None
+```
+
+Send `notification` to `notifiable` using whichever :class:`NotificationManager` is bound in the container (see :class:`NotificationServiceProvider`). Outside of a request -- a job, a scheduled task -- resolve directly instead::
+
+```text
+manager = app.container.make(NotificationManager)
+await manager.notify(user, WelcomeNotification())
+```
+
+Source code in `src/zeython/notifications.py`
+
+```python
+async def notify(request: Request, notifiable: Any, notification: Notification) -> None:
+    """Send ``notification`` to ``notifiable`` using whichever
+    :class:`NotificationManager` is bound in the container (see
+    :class:`NotificationServiceProvider`). Outside of a request -- a job,
+    a scheduled task -- resolve directly instead::
+
+        manager = app.container.make(NotificationManager)
+        await manager.notify(user, WelcomeNotification())
+    """
+    manager: NotificationManager = request.app.state.container.make(NotificationManager)
+    await manager.notify(notifiable, notification)
+```
+
+### unread_notifications
+
+```python
+unread_notifications(
+    notifiable: Any, record_model: type[Model]
+) -> list[Model]
+```
+
+Every `record_model` row for `notifiable` not yet marked read, newest first -- the framework doesn't force a mixin onto your notifiable model to get this, just pass the same `record_model` you registered with :class:`NotificationServiceProvider`.
+
+Source code in `src/zeython/notifications.py`
+
+```python
+async def unread_notifications(notifiable: Any, record_model: type[Model]) -> list[Model]:
+    """Every ``record_model`` row for ``notifiable`` not yet marked read,
+    newest first -- the framework doesn't force a mixin onto your
+    notifiable model to get this, just pass the same ``record_model`` you
+    registered with :class:`NotificationServiceProvider`."""
+    rows = await record_model.find_by(notifiable_id=notifiable.id, read_at=None)
+    return sorted(rows, key=lambda row: row.created_at, reverse=True)
+```
+
+### mark_as_read
+
+```python
+mark_as_read(notification: Model) -> Model
+```
+
+Stamp `notification.read_at` with the current time and save it.
+
+Source code in `src/zeython/notifications.py`
+
+```python
+async def mark_as_read(notification: Model) -> Model:
+    """Stamp ``notification.read_at`` with the current time and save it."""
+    return await notification.update(read_at=datetime.now(UTC))
 ```
 
 # Operations

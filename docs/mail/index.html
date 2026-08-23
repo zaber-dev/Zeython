@@ -1681,6 +1681,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../notifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notifications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -1884,6 +1912,17 @@
     <span class="md-ellipsis">
       
         Writing your own backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sending-mail-as-one-channel-of-several" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sending mail as one channel of several
       
     </span>
   </a>
@@ -2759,6 +2798,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#sending-mail-as-one-channel-of-several" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sending mail as one channel of several
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2885,6 +2935,11 @@ SMTP credentials or a risk of spamming real addresses.</p>
 None</code>, then bind it in place of <code>MailServiceProvider</code>'s default:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Mailer</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyTransactionalEmailApiMailer</span><span class="p">(</span><span class="n">api_key</span><span class="o">=...</span><span class="p">))</span>
 </span></code></pre></div>
+<h2 id="sending-mail-as-one-channel-of-several">Sending mail as one channel of several<a class="headerlink" href="#sending-mail-as-one-channel-of-several" title="Permanent link">&para;</a></h2>
+<p>Calling <code>mailer.send(...)</code> directly is right for a one-off email. If the
+same message should also become an in-app notification or a live push --
+or you want one class describing all three renderings together -- see
+<a href="../notifications/">Notifications</a>'s <code>mail</code> channel instead.</p>
 
 
 
