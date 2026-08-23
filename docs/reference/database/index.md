@@ -559,7 +559,7 @@ read_replica() -> AsyncIterator[AsyncSession]
 
 Open a session against the read replica (or the primary, if no `read_url` was configured) -- for a read-heavy path that can tolerate replication lag (a report, a dashboard, an analytics query), not a substitute for :meth:`session` in general.
 
-Read-only in practice, not by any framework-enforced check: a real replica is normally configured read-only at the database level (Postgres's `default_transaction_read_only`, a MySQL replica user with no write grants), so a write attempted here fails with a clear database error rather than being silently accepted -- Zeython doesn't duplicate that check in Python. There's also no commit: a replica session is for reads, so nothing here needs to be flushed.
+Read-only in practice, not by any framework-enforced check, and Zeython doesn't duplicate one in Python: whether a write attempted here is actually rejected depends entirely on how the replica is configured at the database level (Postgres's `default_transaction_read_only`, a MySQL replica user with no write grants). Configured that way, it fails with a database error; left writable, the write silently succeeds against the replica and is never flushed back to the primary, since there's no commit here -- a replica session is for reads, so nothing needs to be flushed. Configure the replica read-only at the database level if you want a stray write here to fail loudly instead of vanishing.
 
 Source code in `src/zeython/db/session.py`
 
@@ -571,13 +571,17 @@ async def read_replica(self) -> AsyncIterator[AsyncSession]:
     tolerate replication lag (a report, a dashboard, an analytics
     query), not a substitute for :meth:`session` in general.
 
-    Read-only in practice, not by any framework-enforced check: a real
-    replica is normally configured read-only at the database level
-    (Postgres's ``default_transaction_read_only``, a MySQL replica
-    user with no write grants), so a write attempted here fails with a
-    clear database error rather than being silently accepted -- Zeython
-    doesn't duplicate that check in Python. There's also no commit: a
-    replica session is for reads, so nothing here needs to be flushed.
+    Read-only in practice, not by any framework-enforced check, and
+    Zeython doesn't duplicate one in Python: whether a write attempted
+    here is actually rejected depends entirely on how the replica is
+    configured at the database level (Postgres's
+    ``default_transaction_read_only``, a MySQL replica user with no
+    write grants). Configured that way, it fails with a database error;
+    left writable, the write silently succeeds against the replica and
+    is never flushed back to the primary, since there's no commit here
+    -- a replica session is for reads, so nothing needs to be flushed.
+    Configure the replica read-only at the database level if you want a
+    stray write here to fail loudly instead of vanishing.
     """
     factory = self.read_session_factory or self.session_factory
     session = factory()
@@ -635,7 +639,7 @@ async with transaction():
 # is unaffected.
 ```
 
-Rolling back an *entire* request already happens for free and needs no extra API: an exception that propagates out of a request handler unwinds past `DatabaseSessionMiddleware` and rolls back the whole session (see :meth:`Database.session`) -- Starlette re-raises the original exception to outer ASGI middleware even after one of your own exception handlers already sent a response for it. `transaction()` is for the narrower case where you catch the failure yourself and keep the request going, but still don't want its partial writes kept.
+Rolling back an *entire* request already happens for free and needs no extra API: `DatabaseSessionMiddleware` rolls back the whole session whenever the response status ends up `4xx`/`5xx` -- whether that's a genuinely unhandled exception unwinding past it, or one of `zeython`'s own `HTTPException` subclasses your handler raised (`NotFoundException`, `ValidationException`, etc.), which Starlette's inner `ExceptionMiddleware` turns into that response without ever re-raising past this middleware -- see :class:`DatabaseSessionMiddleware`. `transaction()` is for the narrower case where you catch the failure yourself, keep the request going, and still return a success response, but don't want that chunk's partial writes kept.
 
 Source code in `src/zeython/db/session.py`
 
@@ -656,13 +660,17 @@ async def transaction() -> AsyncIterator[AsyncSession]:
         # is unaffected.
 
     Rolling back an *entire* request already happens for free and needs
-    no extra API: an exception that propagates out of a request handler
-    unwinds past ``DatabaseSessionMiddleware`` and rolls back the whole
-    session (see :meth:`Database.session`) -- Starlette re-raises the
-    original exception to outer ASGI middleware even after one of your own
-    exception handlers already sent a response for it. ``transaction()``
-    is for the narrower case where you catch the failure yourself and keep
-    the request going, but still don't want its partial writes kept.
+    no extra API: ``DatabaseSessionMiddleware`` rolls back the whole
+    session whenever the response status ends up ``4xx``/``5xx`` --
+    whether that's a genuinely unhandled exception unwinding past it, or
+    one of ``zeython``'s own ``HTTPException`` subclasses your handler
+    raised (`NotFoundException`, `ValidationException`, etc.), which
+    Starlette's inner ``ExceptionMiddleware`` turns into that response
+    without ever re-raising past this middleware -- see
+    :class:`DatabaseSessionMiddleware`. ``transaction()`` is for the
+    narrower case where you catch the failure yourself, keep the request
+    going, and still return a success response, but don't want that
+    chunk's partial writes kept.
     """
     session = current_session()
     async with session.begin_nested():

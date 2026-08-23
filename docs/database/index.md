@@ -42,7 +42,7 @@ A model that declares a `tenant_id` column gets every one of these methods scope
 
 ## Transactions
 
-Every request already runs inside one implicit transaction: `DatabaseSessionMiddleware` opens a session at the start of the request and commits it at the end, or rolls it back if an unhandled exception reaches the end of the request -- even one your own exception handler already turned into a response. Starlette re-raises the original exception to outer ASGI middleware after handling it, specifically so this kind of outer cleanup still runs. Nothing extra is needed for "undo everything this request did if it fails":
+Every request already runs inside one implicit transaction: `DatabaseSessionMiddleware` opens a session at the start of the request and commits it if the response status ends up below 400, or rolls it back otherwise -- whether that's a genuinely unhandled exception unwinding past the middleware, or one of `zeython`'s own `HTTPException` subclasses (`NotFoundException`, `ValidationException`, etc.) that your handler raised and Starlette's inner `ExceptionMiddleware` turned into a response without ever re-raising past this middleware. Only the response status reveals that case, which is exactly why the middleware checks it instead of relying on exception propagation alone. Nothing extra is needed for "undo everything this request did if it fails":
 
 ```python
 async def transfer(self, request):

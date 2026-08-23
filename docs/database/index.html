@@ -2903,13 +2903,17 @@ code differently than you'd expect from sync SQLAlchemy. See
 methods scoped to the current tenant automatically — see
 <a href="../multi-tenancy/">Multi-Tenancy</a>.</p>
 <h2 id="transactions">Transactions<a class="headerlink" href="#transactions" title="Permanent link">&para;</a></h2>
-<p>Every request already runs inside one implicit transaction: <code>DatabaseSessionMiddleware</code>
-opens a session at the start of the request and commits it at the end, or
-rolls it back if an unhandled exception reaches the end of the request --
-even one your own exception handler already turned into a response.
-Starlette re-raises the original exception to outer ASGI middleware after
-handling it, specifically so this kind of outer cleanup still runs. Nothing
-extra is needed for "undo everything this request did if it fails":</p>
+<p>Every request already runs inside one implicit transaction:
+<code>DatabaseSessionMiddleware</code> opens a session at the start of the request and
+commits it if the response status ends up below 400, or rolls it back
+otherwise -- whether that's a genuinely unhandled exception unwinding past
+the middleware, or one of <code>zeython</code>'s own <code>HTTPException</code> subclasses
+(<code>NotFoundException</code>, <code>ValidationException</code>, etc.) that your handler raised
+and Starlette's inner <code>ExceptionMiddleware</code> turned into a response without
+ever re-raising past this middleware. Only the response status reveals that
+case, which is exactly why the middleware checks it instead of relying on
+exception propagation alone. Nothing extra is needed for "undo everything
+this request did if it fails":</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">await</span> <span class="n">from_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">from_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">await</span> <span class="n">to_account</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">balance</span><span class="o">=</span><span class="n">to_account</span><span class="o">.</span><span class="n">balance</span> <span class="o">+</span> <span class="n">amount</span><span class="p">)</span>
