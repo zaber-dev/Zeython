@@ -90,6 +90,46 @@ async def test_service_providers_boot_before_first_request(tmp_path) -> None:
     assert boot_order == ["first", "second"]
 
 
+async def test_the_most_recently_added_middleware_wraps_outermost(tmp_path) -> None:
+    # Regression guard: add_middleware() must prepend, not append, so the
+    # documented contract ("the most recently registered middleware wraps
+    # outermost" -- relied on by MaintenanceModeMiddleware and every doc
+    # that tells users to register it last) actually holds. Proven by
+    # observed call order: the outermost middleware sees the request
+    # first and the response last.
+    app = _make_app(tmp_path)
+    events: list[str] = []
+
+    def _tracking_middleware(name: str):
+        class _Middleware:
+            def __init__(self, asgi_app: object) -> None:
+                self.app = asgi_app
+
+            async def __call__(self, scope, receive, send) -> None:
+                events.append(f"{name}:before")
+                await self.app(scope, receive, send)  # type: ignore[operator]
+                events.append(f"{name}:after")
+
+        return _Middleware
+
+    @app.get("/")
+    async def index(request):
+        return PlainTextResponse("ok")
+
+    app.add_middleware(_tracking_middleware("added-first"))
+    app.add_middleware(_tracking_middleware("added-last"))
+
+    async with client(app) as http:
+        await http.get("/")
+
+    assert events == [
+        "added-last:before",
+        "added-first:before",
+        "added-first:after",
+        "added-last:after",
+    ]
+
+
 def test_container_exposes_config_and_router(tmp_path) -> None:
     app = _make_app(tmp_path)
 
