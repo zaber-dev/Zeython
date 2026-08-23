@@ -22,6 +22,7 @@ import importlib
 import json
 import logging
 import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -188,6 +189,10 @@ def _serialize_job(job: Job) -> str:
         )
     return json.dumps(
         {
+            # A per-push unique id, unused by _deserialize_job itself but
+            # carried through every re-serialization (retry, requeue) --
+            # see RedisQueue.push()'s use of it for why this has to be here.
+            "_id": uuid.uuid4().hex,
             "job_class": f"{type(job).__module__}.{type(job).__qualname__}",
             "payload": dataclasses.asdict(job),
             "attempts": 0,
@@ -260,6 +265,13 @@ class RedisQueue(Queue):
     async def push(self, job: Job, *, delay: float = 0.0) -> None:
         raw = _serialize_job(job)
         if delay > 0:
+            # The Redis sorted set backing the delayed queue requires unique
+            # *members* -- ZADD on an existing member just updates its
+            # score, it doesn't add a second entry. Two jobs that would
+            # otherwise serialize identically (same class + payload +
+            # attempts, e.g. two independent dispatches of the same job
+            # with the same arguments) collapse into one entry without
+            # _serialize_job's per-push "_id", silently dropping one push.
             await self._client.zadd(self._delayed_key, {raw: time.time() + delay})
         else:
             await self._client.lpush(self._pending_key, raw)
