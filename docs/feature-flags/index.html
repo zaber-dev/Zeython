@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/tutorial-5-auth/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/feature-flags/">
       
       
-        <link rel="prev" href="../tutorial-4-relationships/">
+        <link rel="prev" href="../notifications/">
       
       
-        <link rel="next" href="../tutorial-6-testing/">
+        <link rel="next" href="../queues/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>5. Authentication & Authorization - Zeython Docs</title>
+        <title>Feature Flags - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#part-5-authentication-authorization" class="md-skip">
+        <a href="#feature-flags" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              5. Authentication & Authorization
+              Feature Flags
             
           </span>
         </div>
@@ -247,12 +247,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../tutorial/" class="md-tabs__link">
           
   
@@ -329,10 +327,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../cli/" class="md-tabs__link">
           
   
@@ -601,31 +601,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -643,7 +638,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -798,37 +793,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    5. Authentication & Authorization
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../tutorial-5-auth/" class="md-nav__link">
         
   
   
@@ -844,70 +812,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#track-who-created-a-task" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Track who created a task
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#require-login-to-create-a-task" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Require login to create a task
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#only-the-author-may-delete-their-own-task" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Only the author may delete their own task
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#try-it-including-the-part-that-should-fail" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Try it, including the part that should fail
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1577,26 +1481,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1614,7 +1523,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1797,10 +1706,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../feature-flags/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Flags
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1816,6 +1752,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-a-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking a flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#static-env-driven-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Static, .env-driven flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#percentage-rollouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Percentage rollouts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-own-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your own resolver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-flags-vs-multi-tenancy-vs-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature flags vs. multi-tenancy vs. authorization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2728,10 +2750,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#track-who-created-a-task" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Track who created a task
+        Setup
       
     </span>
   </a>
@@ -2739,10 +2761,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#require-login-to-create-a-task" class="md-nav__link">
+  <a href="#checking-a-flag" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Require login to create a task
+        Checking a flag
       
     </span>
   </a>
@@ -2750,10 +2772,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#only-the-author-may-delete-their-own-task" class="md-nav__link">
+  <a href="#static-env-driven-flags" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Only the author may delete their own task
+        Static, .env-driven flags
       
     </span>
   </a>
@@ -2761,10 +2783,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#try-it-including-the-part-that-should-fail" class="md-nav__link">
+  <a href="#percentage-rollouts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Try it, including the part that should fail
+        Percentage rollouts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-own-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your own resolver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-flags-vs-multi-tenancy-vs-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature flags vs. multi-tenancy vs. authorization
       
     </span>
   </a>
@@ -2788,7 +2832,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/tutorial-5-auth.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/feature-flags.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2796,145 +2840,117 @@
   
 
 
-<h1 id="part-5-authentication-authorization">Part 5: Authentication &amp; Authorization<a class="headerlink" href="#part-5-authentication-authorization" title="Permanent link">&para;</a></h1>
-<p>Right now anyone can create or delete any task. Fix that: creating a
-task requires being logged in, and only the person who created a task
-can delete it. Two different questions — <em>"is anyone logged in"</em>
-(authentication) and <em>"can this specific logged-in user do this specific
-thing"</em> (authorization) — and Zeython answers them with two different
-tools.</p>
-<h2 id="track-who-created-a-task">Track who created a task<a class="headerlink" href="#track-who-created-a-task" title="Permanent link">&para;</a></h2>
-<p>Add an <code>author</code> to <code>app/Models/task.py</code>, linking to the <code>User</code> model
-that's been there since <a href="../tutorial-1-setup/">Part 1</a>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">String</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span><span class="p">,</span> <span class="n">relationship</span>
+<h1 id="feature-flags">Feature Flags<a class="headerlink" href="#feature-flags" title="Permanent link">&para;</a></h1>
+<p><code>zeython.feature_flags</code> gives you named boolean toggles: static
+(<code>.env</code>-driven) flags for a plain on/off switch, and deterministic
+percentage rollouts for gradually shipping something to a fraction of
+users -- no database or Redis required for either. Mirrors the
+boolean/rollout building blocks of Laravel Pennant.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">FeatureServiceProvider</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">required</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Providers.app_feature_service_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppFeatureServiceProvider</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.project</span><span class="w"> </span><span class="kn">import</span> <span class="n">Project</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"tasks"</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">__rules__</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="s2">"title"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">(),</span> <span class="n">max_length</span><span class="p">(</span><span class="mi">255</span><span class="p">)],</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="p">}</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">title</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">done</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">project_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"projects.id"</span><span class="p">))</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">author_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"users.id"</span><span class="p">))</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">project</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="n">Project</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">back_populates</span><span class="o">=</span><span class="s2">"tasks"</span><span class="p">)</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="n">author</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="n">User</span><span class="p">]</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">()</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AppFeatureServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add task.author_id"</span>
+<p>Flags are defined in your own subclass of <code>FeatureServiceProvider</code> --
+<code>super().boot()</code> first, the same pattern
+<a href="../events/#registering-listeners"><code>EventServiceProvider</code></a> uses:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Providers/app_feature_service_provider.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">FeatureManager</span><span class="p">,</span> <span class="n">FeatureServiceProvider</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">AppFeatureServiceProvider</span><span class="p">(</span><span class="n">FeatureServiceProvider</span><span class="p">):</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">boot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">boot</span><span class="p">()</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">FeatureManager</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">manager</span><span class="o">.</span><span class="n">boolean</span><span class="p">(</span><span class="s2">"new_checkout"</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">manager</span><span class="o">.</span><span class="n">percentage</span><span class="p">(</span><span class="s2">"beta_dashboard"</span><span class="p">,</span> <span class="n">rollout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Same real-world migration wrinkle as <a href="../tutorial-4-relationships/#migrate">Part 4</a>:
-if your <code>tasks</code> table already has rows, the generated <code>author_id</code> column
-comes out <code>nullable=False</code> with nothing to backfill existing rows with.
-Give it a default (Ada is user <code>1</code>):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">batch_op</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">'author_id'</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">server_default</span><span class="o">=</span><span class="s1">'1'</span><span class="p">))</span>
+<p>A generated project already has this wired up -- a <code>beta_dashboard</code>
+rollout checked from <code>AuthController.me</code>, see <code>app/Providers/app_feature_service_provider.py</code>.</p>
+<h2 id="checking-a-flag">Checking a flag<a class="headerlink" href="#checking-a-flag" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.feature_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">feature</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">if</span> <span class="k">await</span> <span class="n">feature</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"beta_dashboard"</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">current_user</span><span class="p">):</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">new_dashboard_payload</span><span class="p">())</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">classic_dashboard_payload</span><span class="p">())</span>
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate
+<p>Outside of a request -- a job, a scheduled task -- resolve a
+<code>FeatureManager</code> directly instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.feature_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">FeatureManager</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">FeatureManager</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">await</span> <span class="n">manager</span><span class="o">.</span><span class="n">active</span><span class="p">(</span><span class="s2">"beta_dashboard"</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="require-login-to-create-a-task">Require login to create a task<a class="headerlink" href="#require-login-to-create-a-task" title="Permanent link">&para;</a></h2>
-<p><code>require_auth(request)</code> returns the logged-in user, or raises
-<code>UnauthorizedException</code> (a 401) if nobody's logged in — call it at the
-top of <code>store</code> in <code>app/Controllers/task_controller.py</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_auth</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># ...</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">require_auth</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Task</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span> <span class="n">project_id</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project_id"</span><span class="p">),</span> <span class="n">author_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Task</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"project"</span><span class="p">,))</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"project"</span><span class="p">,)),</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">201</span><span class="p">)</span>
+<p><code>context</code> is whatever the flag's resolver needs -- typically the current
+user, <code>None</code> for a flag that shouldn't vary per-request. Checking an
+undefined flag name (a typo, a flag checked before its provider
+registered it) resolves <code>False</code> and logs a warning rather than raising --
+a flag check should always be safe to add.</p>
+<h2 id="static-env-driven-flags">Static, <code>.env</code>-driven flags<a class="headerlink" href="#static-env-driven-flags" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">manager</span><span class="o">.</span><span class="n">boolean</span><span class="p">(</span><span class="s2">"new_checkout"</span><span class="p">)</span>            <span class="c1"># default False</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">manager</span><span class="o">.</span><span class="n">boolean</span><span class="p">(</span><span class="s2">"new_checkout"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="only-the-author-may-delete-their-own-task">Only the author may delete their own task<a class="headerlink" href="#only-the-author-may-delete-their-own-task" title="Permanent link">&para;</a></h2>
-<p><code>require_auth</code> alone isn't enough here — <em>any</em> logged-in user passes
-that check, and you specifically want <em>this task's own creator</em>. That's
-what <a href="../authorization/"><code>Gate</code></a> is for: named abilities, checked against
-a specific resource. Generate a policy:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zeython<span class="w"> </span>make<span class="w"> </span>policy<span class="w"> </span>Task
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># .env</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">FEATURE_NEW_CHECKOUT</span><span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
-<p>This created <code>app/Policies/task_policy.py</code> with <code>view</code>/<code>create</code>/<code>update</code>/<code>delete</code>
-stubs. Fill in <code>delete</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">TaskPolicy</span><span class="p">:</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>        <span class="k">return</span> <span class="n">task</span><span class="o">.</span><span class="n">author_id</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+<p>Resolves the same for every context -- there's no per-user variation.
+Flip it in a deployment's environment (and restart) without touching
+code. <code>zeython features</code> lists every defined flag and its current
+resolution:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$<span class="w"> </span>zeython<span class="w"> </span>features
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>beta_dashboard<span class="w">                 </span>off
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>new_checkout<span class="w">                   </span>ON
 </span></code></pre></div>
-<p>Register it — service providers are where wiring like this lives (see
-<a href="../tutorial-1-setup/">Part 1</a> if that's still a fuzzy concept). Create
-<code>app/Providers/task_policy_service_provider.py</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">ServiceProvider</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Policies.task_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskPolicy</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">TaskPolicyServiceProvider</span><span class="p">(</span><span class="n">ServiceProvider</span><span class="p">):</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">boot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Gate</span><span class="p">)</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="n">gate</span><span class="o">.</span><span class="n">policy</span><span class="p">(</span><span class="n">Task</span><span class="p">,</span> <span class="n">TaskPolicy</span><span class="p">)</span>
+<h2 id="percentage-rollouts">Percentage rollouts<a class="headerlink" href="#percentage-rollouts" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">manager</span><span class="o">.</span><span class="n">percentage</span><span class="p">(</span><span class="s2">"beta_dashboard"</span><span class="p">,</span> <span class="n">rollout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>   <span class="c1"># ~10% of contexts</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">manager</span><span class="o">.</span><span class="n">percentage</span><span class="p">(</span><span class="s2">"kill_switch"</span><span class="p">,</span> <span class="n">rollout</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># ~always off</span>
 </span></code></pre></div>
-<p>Add it to <code>main.py</code>, alongside the <code>PostPolicyServiceProvider</code> that's
-already there:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Providers.task_policy_service_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskPolicyServiceProvider</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># ...</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">TaskPolicyServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+<p>Deterministic: the same <code>context</code> always lands on the same side, via a
+stable hash of <code>(flag name, context)</code> -- no database write needed to keep
+a user's answer from flickering between requests. Buckets by
+<code>context.id</code> if present, else <code>str(context)</code>; pass a stable string
+directly (a request ID, a tenant slug) for a flag with no natural object
+to check against.</p>
+<p>This is a rollout, not a persisted assignment -- widening <code>rollout</code> from
+10 to 25 keeps everyone already in the 10% (the hash doesn't change) and
+adds more; narrowing it back removes exactly the users the wider number
+added. There's no support for manually pinning one user in or out beyond
+that; use <code>define()</code> with a custom resolver backed by a real store if you
+need durable per-user overrides an admin can toggle by hand.</p>
+<h2 id="your-own-resolver">Your own resolver<a class="headerlink" href="#your-own-resolver" title="Permanent link">&para;</a></h2>
+<p>For anything beyond a static toggle or a hash-based rollout -- reading a
+row from your own database, calling a third-party flag service --
+<code>define()</code> takes any callable:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">manager</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="s2">"vip_only"</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">lambda</span> <span class="n">user</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s2">"is_vip"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># Or async, if the check itself needs to be:</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">resolver</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">row</span> <span class="o">=</span> <span class="k">await</span> <span class="n">FeatureOverride</span><span class="o">.</span><span class="n">first_where</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="s2">"vip_only"</span><span class="p">)</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="k">return</span> <span class="n">row</span><span class="o">.</span><span class="n">enabled</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">False</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">manager</span><span class="o">.</span><span class="n">define</span><span class="p">(</span><span class="s2">"vip_only"</span><span class="p">,</span> <span class="n">resolver</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Now enforce it in <code>destroy</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.authorization</span><span class="w"> </span><span class="kn">import</span> <span class="n">authorize</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># ...</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Task</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="k">if</span> <span class="n">task</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="s2">"Task not found"</span><span class="p">)</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="k">await</span> <span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"delete"</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="k">await</span> <span class="n">task</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">204</span><span class="p">)</span>
-</span></code></pre></div>
-<p><code>authorize()</code> calls <code>require_auth</code> internally (a 401 if nobody's logged
-in at all), then checks the policy (a 403 if they're logged in but not
-this task's author). See <a href="../authorization/">Authorization</a> for
-<code>gate.before()</code> (a global "admins bypass everything" hook) and the rest
-of the <code>Gate</code>/Policy API.</p>
-<h2 id="try-it-including-the-part-that-should-fail">Try it, including the part that should fail<a class="headerlink" href="#try-it-including-the-part-that-should-fail" title="Permanent link">&para;</a></h2>
-<p><code>POST</code>/<code>PUT</code>/<code>DELETE</code> to a session-authenticated route need a CSRF
-header — see <a href="../csrf/">CSRF Protection</a> for why (the short version:
-without it, any other website could trigger a <code>POST</code> to your app using
-your visitor's cookie). Extract the token from the cookie jar you've
-been building since Part 1 and pass it back as a header:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">CSRF</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>csrf_token<span class="w"> </span>cookies.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{print $NF}'</span><span class="k">)</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: </span><span class="nv">$CSRF</span><span class="s2">"</span><span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/tasks<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"title": "Ship the redesign", "project_id": 1}'</span>
-</span></code></pre></div>
-<p>That succeeds — you're logged in as Ada. Now register a second user and
-try to delete Ada's task as them:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-c<span class="w"> </span>cookies2.txt<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Bob", "email": "bob@example.com", "password": "hunter2222"}'</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nv">CSRF2</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>csrf_token<span class="w"> </span>cookies2.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{print $NF}'</span><span class="k">)</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies2.txt<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: </span><span class="nv">$CSRF2</span><span class="s2">"</span><span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span>http://127.0.0.1:8000/tasks/2<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s1">'%{http_code}\n'</span>
-</span></code></pre></div>
-<p><code>403</code> — Bob is logged in (so it's not a 401), but he's not this task's
-author, so the policy says no. Delete it as Ada instead and it's a clean
-<code>204</code>.</p>
-<p>Continue to <a href="../tutorial-6-testing/">Part 6 — Testing</a>, where you'll
-write this exact scenario as a real, repeatable test instead of a
-sequence of <code>curl</code> commands.</p>
+<h2 id="feature-flags-vs-multi-tenancy-vs-authorization">Feature flags vs. multi-tenancy vs. authorization<a class="headerlink" href="#feature-flags-vs-multi-tenancy-vs-authorization" title="Permanent link">&para;</a></h2>
+<p>Three different questions, easy to conflate:</p>
+<ul>
+<li><strong>Authorization</strong> (<a href="../authorization/"><code>Gate</code>/<code>authorize()</code></a>) answers "is
+  this action allowed for this user, ever" -- a permission check, usually
+  permanent.</li>
+<li><strong>Multi-tenancy</strong> (<a href="../multi-tenancy/"><code>current_tenant_id()</code></a>) answers
+  "which tenant's data should this query see."</li>
+<li><strong>Feature flags</strong> answer "is this <em>capability</em> switched on right now" --
+  usually temporary (a flag graduates to always-on code, or gets deleted,
+  once a rollout finishes), and orthogonal to whether the user is
+  otherwise allowed to do something at all.</li>
+</ul>
 
 
 
@@ -2970,7 +2986,7 @@ sequence of <code>curl</code> commands.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../tutorial-4-relationships/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4. Relationships">
+          <a href="../notifications/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Notifications">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2980,20 +2996,20 @@ sequence of <code>curl</code> commands.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                4. Relationships
+                Notifications
               </div>
             </div>
           </a>
         
         
           
-          <a href="../tutorial-6-testing/" class="md-footer__link md-footer__link--next" aria-label="Next: 6. Testing">
+          <a href="../queues/" class="md-footer__link md-footer__link--next" aria-label="Next: Background Jobs">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                6. Testing
+                Background Jobs
               </div>
             </div>
             <div class="md-footer__button md-icon">

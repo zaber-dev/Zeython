@@ -2,6 +2,8 @@
 
 Row-level isolation for a shared database serving multiple tenants — one `tenants` table's worth of customers in the same tables as everyone else's, rather than a database (or schema) per tenant. A model opts in just by declaring a `tenant_id` column; there's no mixin and nothing to remember to add to each query.
 
+A different question from [Feature Flags](https://zeython.zaber.dev/docs/feature-flags/index.md): tenancy answers "which tenant's data should this query see," not "is this capability switched on right now."
+
 ## Setup
 
 ```python

@@ -2,6 +2,8 @@
 
 `zeython.authorization` answers a different question than [Authentication](https://zeython.zaber.dev/docs/authentication/index.md). `require_auth()` answers "is anyone logged in" — `authorize()` answers "can *this* logged-in user do *this* specific thing" (edit *this* post, not posts in general). Almost every mutating endpoint in a real app needs the second question answered, and there's nothing else in the framework that helps with it — without this, that logic ends up as ad hoc `if post.author_id != user.id: raise ...` scattered across controllers.
 
+A different question again from [Feature Flags](https://zeython.zaber.dev/docs/feature-flags/index.md): a permission is usually permanent ("editors can delete posts"); a flag is usually temporary ("this user is in the beta of the new editor").
+
 ## Defining abilities
 
 Abilities are named checks registered on a `Gate`, typically in a `ServiceProvider.boot()` (not `register()` — it needs the `Gate` that `AuthorizationServiceProvider` binds, and every provider's `register()` runs before any `boot()`, so this is safe regardless of registration order):

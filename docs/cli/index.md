@@ -83,6 +83,7 @@ See [Scheduling](https://zeython.zaber.dev/docs/scheduling/index.md).
 ```bash
 zeython routes                         # list every registered HTTP route: method(s), path, name
 zeython about                          # app name, environment, debug flag, Zeython version, providers
+zeython features                       # every registered feature flag and its current global resolution
 ```
 
 Both read your project the same way `zeython serve` does (they import `main.py`), so what they report is exactly what's actually wired up -- not something separately maintained that can drift from it. An AI coding agent working in your project gets the same information through `zeython mcp`'s `list_routes`/`app_info` tools -- see [AI Agents](https://zeython.zaber.dev/docs/ai-agents/index.md).

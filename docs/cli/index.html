@@ -1877,6 +1877,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../feature-flags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Flags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -2977,6 +3005,7 @@ for a separate process to pull from. See <a href="../queues/#queue_driverredis-a
 <h2 id="project-introspection">Project introspection<a class="headerlink" href="#project-introspection" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>zeython<span class="w"> </span>routes<span class="w">                         </span><span class="c1"># list every registered HTTP route: method(s), path, name</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>zeython<span class="w"> </span>about<span class="w">                          </span><span class="c1"># app name, environment, debug flag, Zeython version, providers</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>zeython<span class="w"> </span>features<span class="w">                       </span><span class="c1"># every registered feature flag and its current global resolution</span>
 </span></code></pre></div>
 <p>Both read your project the same way <code>zeython serve</code> does (they import
 <code>main.py</code>), so what they report is exactly what's actually wired up --

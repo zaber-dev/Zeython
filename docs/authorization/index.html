@@ -1844,6 +1844,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../feature-flags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Flags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -2865,6 +2893,9 @@ mutating endpoint in a real app needs the second question answered, and
 there's nothing else in the framework that helps with it — without this,
 that logic ends up as ad hoc <code>if post.author_id != user.id: raise ...</code>
 scattered across controllers.</p>
+<p>A different question again from <a href="../feature-flags/">Feature Flags</a>: a
+permission is usually permanent ("editors can delete posts"); a flag is
+usually temporary ("this user is in the beta of the new editor").</p>
 <h2 id="defining-abilities">Defining abilities<a class="headerlink" href="#defining-abilities" title="Permanent link">&para;</a></h2>
 <p>Abilities are named checks registered on a <code>Gate</code>, typically in a
 <code>ServiceProvider.boot()</code> (not <code>register()</code> — it needs the <code>Gate</code> that

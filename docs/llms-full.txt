@@ -1830,6 +1830,8 @@ async def new_post_form(request):
 
 `zeython.authorization` answers a different question than [Authentication](https://zeython.zaber.dev/docs/authentication/index.md). `require_auth()` answers "is anyone logged in" — `authorize()` answers "can *this* logged-in user do *this* specific thing" (edit *this* post, not posts in general). Almost every mutating endpoint in a real app needs the second question answered, and there's nothing else in the framework that helps with it — without this, that logic ends up as ad hoc `if post.author_id != user.id: raise ...` scattered across controllers.
 
+A different question again from [Feature Flags](https://zeython.zaber.dev/docs/feature-flags/index.md): a permission is usually permanent ("editors can delete posts"); a flag is usually temporary ("this user is in the beta of the new editor").
+
 ## Defining abilities
 
 Abilities are named checks registered on a `Gate`, typically in a `ServiceProvider.boot()` (not `register()` — it needs the `Gate` that `AuthorizationServiceProvider` binds, and every provider's `register()` runs before any `boot()`, so this is safe regardless of registration order):
@@ -2196,6 +2198,8 @@ Implement `RateLimiter` yourself instead if you need a different backend or algo
 
 Row-level isolation for a shared database serving multiple tenants — one `tenants` table's worth of customers in the same tables as everyone else's, rather than a database (or schema) per tenant. A model opts in just by declaring a `tenant_id` column; there's no mixin and nothing to remember to add to each query.
 
+A different question from [Feature Flags](https://zeython.zaber.dev/docs/feature-flags/index.md): tenancy answers "which tenant's data should this query see," not "is this capability switched on right now."
+
 ## Setup
 
 ```python
@@ -2527,6 +2531,7 @@ See [Scheduling](https://zeython.zaber.dev/docs/scheduling/index.md).
 ```bash
 zeython routes                         # list every registered HTTP route: method(s), path, name
 zeython about                          # app name, environment, debug flag, Zeython version, providers
+zeython features                       # every registered feature flag and its current global resolution
 ```
 
 Both read your project the same way `zeython serve` does (they import `main.py`), so what they report is exactly what's actually wired up -- not something separately maintained that can drift from it. An AI coding agent working in your project gets the same information through `zeython mcp`'s `list_routes`/`app_info` tools -- see [AI Agents](https://zeython.zaber.dev/docs/ai-agents/index.md).
@@ -3024,6 +3029,118 @@ Nothing here forces a mixin onto your `notifiable` model -- pass the same `recor
 ## Notifications vs. background jobs
 
 They compose. `notify()` runs every channel **inline**, in the current request -- fine for a fast `database` write, slower for a real outbound `mail` send. For a notification that might be slow, dispatch a [background job](https://zeython.zaber.dev/docs/queues/index.md) that calls `notify()` from inside `handle()`, rather than blocking the request on it directly.
+
+# Feature Flags
+
+`zeython.feature_flags` gives you named boolean toggles: static (`.env`-driven) flags for a plain on/off switch, and deterministic percentage rollouts for gradually shipping something to a fraction of users -- no database or Redis required for either. Mirrors the boolean/rollout building blocks of Laravel Pennant.
+
+## Setup
+
+```python
+# main.py
+from zeython import Application, FeatureServiceProvider
+
+from app.Providers.app_feature_service_provider import AppFeatureServiceProvider
+
+app = Application()
+app.register(AppFeatureServiceProvider(app))
+```
+
+Flags are defined in your own subclass of `FeatureServiceProvider` -- `super().boot()` first, the same pattern [`EventServiceProvider`](https://zeython.zaber.dev/docs/events/#registering-listeners) uses:
+
+```python
+# app/Providers/app_feature_service_provider.py
+from zeython import FeatureManager, FeatureServiceProvider
+
+
+class AppFeatureServiceProvider(FeatureServiceProvider):
+    def boot(self) -> None:
+        super().boot()
+        manager = self.container.make(FeatureManager)
+        manager.boolean("new_checkout")
+        manager.percentage("beta_dashboard", rollout=10)
+```
+
+A generated project already has this wired up -- a `beta_dashboard` rollout checked from `AuthController.me`, see `app/Providers/app_feature_service_provider.py`.
+
+## Checking a flag
+
+```python
+from zeython.feature_flags import feature
+
+async def show(self, request):
+    if await feature(request, "beta_dashboard", context=current_user):
+        return JSONResponse(new_dashboard_payload())
+    return JSONResponse(classic_dashboard_payload())
+```
+
+Outside of a request -- a job, a scheduled task -- resolve a `FeatureManager` directly instead:
+
+```python
+from zeython.feature_flags import FeatureManager
+
+manager = app.container.make(FeatureManager)
+await manager.active("beta_dashboard", context=user)
+```
+
+`context` is whatever the flag's resolver needs -- typically the current user, `None` for a flag that shouldn't vary per-request. Checking an undefined flag name (a typo, a flag checked before its provider registered it) resolves `False` and logs a warning rather than raising -- a flag check should always be safe to add.
+
+## Static, `.env`-driven flags
+
+```python
+manager.boolean("new_checkout")            # default False
+manager.boolean("new_checkout", default=True)
+```
+
+```bash
+# .env
+FEATURE_NEW_CHECKOUT=true
+```
+
+Resolves the same for every context -- there's no per-user variation. Flip it in a deployment's environment (and restart) without touching code. `zeython features` lists every defined flag and its current resolution:
+
+```bash
+$ zeython features
+  beta_dashboard                 off
+  new_checkout                   ON
+```
+
+## Percentage rollouts
+
+```python
+manager.percentage("beta_dashboard", rollout=10)   # ~10% of contexts
+manager.percentage("kill_switch", rollout=100, on=False)  # ~always off
+```
+
+Deterministic: the same `context` always lands on the same side, via a stable hash of `(flag name, context)` -- no database write needed to keep a user's answer from flickering between requests. Buckets by `context.id` if present, else `str(context)`; pass a stable string directly (a request ID, a tenant slug) for a flag with no natural object to check against.
+
+This is a rollout, not a persisted assignment -- widening `rollout` from 10 to 25 keeps everyone already in the 10% (the hash doesn't change) and adds more; narrowing it back removes exactly the users the wider number added. There's no support for manually pinning one user in or out beyond that; use `define()` with a custom resolver backed by a real store if you need durable per-user overrides an admin can toggle by hand.
+
+## Your own resolver
+
+For anything beyond a static toggle or a hash-based rollout -- reading a row from your own database, calling a third-party flag service -- `define()` takes any callable:
+
+```python
+manager.define(
+    "vip_only",
+    lambda user: getattr(user, "is_vip", False),
+)
+
+# Or async, if the check itself needs to be:
+async def resolver(user):
+    row = await FeatureOverride.first_where(user_id=user.id, flag="vip_only")
+    return row.enabled if row else False
+
+manager.define("vip_only", resolver)
+```
+
+## Feature flags vs. multi-tenancy vs. authorization
+
+Three different questions, easy to conflate:
+
+- **Authorization** ([`Gate`/`authorize()`](https://zeython.zaber.dev/docs/authorization/index.md)) answers "is this action allowed for this user, ever" -- a permission check, usually permanent.
+- **Multi-tenancy** ([`current_tenant_id()`](https://zeython.zaber.dev/docs/multi-tenancy/index.md)) answers "which tenant's data should this query see."
+- **Feature flags** answer "is this *capability* switched on right now" -- usually temporary (a flag graduates to always-on code, or gets deleted, once a rollout finishes), and orthogonal to whether the user is otherwise allowed to do something at all.
 
 # Background Jobs
 
@@ -4493,7 +4610,7 @@ Most of these classes and functions are also re-exported from the top-level `zey
 
 # Core
 
-The application bootstrap, DI container, config, routing, service providers, the application-level event dispatcher, view rendering, and the framework's exception/validation primitives.
+The application bootstrap, DI container, config, routing, service providers, the application-level event dispatcher, feature flags, view rendering, and the framework's exception/validation primitives.
 
 ## application
 
@@ -5099,6 +5216,225 @@ async def emit(request: Request, event: object) -> None:
     """
     dispatcher: EventDispatcher = request.app.state.container.make(EventDispatcher)
     await dispatcher.dispatch(event)
+```
+
+## feature_flags
+
+Feature flags: name a capability, decide who gets it, check it from anywhere. Static (`.env`-driven) toggles and deterministic percentage rollouts -- no database or Redis required. Mirrors the boolean/rollout building blocks of Laravel Pennant, without persisted per-user storage; :meth:`FeatureManager.define` takes a custom resolver if you need a flag backed by a real store (a table, a third-party flag service) instead.
+
+### FeatureManager
+
+```python
+FeatureManager(*, config: Config | None = None)
+```
+
+Holds every defined feature flag and resolves them per-context.
+
+Bound in the container by :class:`FeatureServiceProvider` -- define flags in your own subclass of it (the same pattern :class:`~zeython.events.EventServiceProvider` uses)::
+
+```text
+class AppFeatureServiceProvider(FeatureServiceProvider):
+    def boot(self) -> None:
+        super().boot()
+        manager = self.container.make(FeatureManager)
+        manager.boolean("new_checkout")
+        manager.percentage("beta_dashboard", rollout=10)
+```
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+def __init__(self, *, config: Config | None = None) -> None:
+    self._config = config
+    self._resolvers: dict[str, Resolver] = {}
+```
+
+#### define
+
+```python
+define(name: str, resolver: Resolver) -> None
+```
+
+Register a flag with a custom resolver. `resolver(context)` returns (or awaits to) a bool -- `context` is whatever the caller of :meth:`active`/:func:`feature` passed, typically the current user, `None` for a flag that doesn't vary per-request.
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+def define(self, name: str, resolver: Resolver) -> None:
+    """Register a flag with a custom resolver. ``resolver(context)``
+    returns (or awaits to) a bool -- ``context`` is whatever the
+    caller of :meth:`active`/:func:`feature` passed, typically the
+    current user, ``None`` for a flag that doesn't vary per-request."""
+    self._resolvers[name] = resolver
+```
+
+#### boolean
+
+```python
+boolean(name: str, *, default: bool = False) -> None
+```
+
+A static on/off flag, controlled via `.env` (`FEATURE_<NAME>`) without touching code -- flip it in a deployment's environment and restart, no redeploy of code needed.
+
+Resolves `default` for every context alike -- there's no per-user variation here; use :meth:`percentage` or :meth:`define` for that.
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+def boolean(self, name: str, *, default: bool = False) -> None:
+    """A static on/off flag, controlled via ``.env``
+    (``FEATURE_<NAME>``) without touching code -- flip it in a
+    deployment's environment and restart, no redeploy of code needed.
+
+    Resolves ``default`` for every context alike -- there's no
+    per-user variation here; use :meth:`percentage` or :meth:`define`
+    for that.
+    """
+    config = self._config
+
+    def resolver(context: Any) -> bool:
+        if config is None:
+            return default
+        return bool(config.get(f"feature.{name}", default))
+
+    self.define(name, resolver)
+```
+
+#### percentage
+
+```python
+percentage(
+    name: str, *, rollout: float, on: bool = True
+) -> None
+```
+
+A deterministic rollout: the same `context` always lands on the same side of the flag, so a percentage-rolled-out feature doesn't flicker on and off for the same user across requests -- no database write needed to get that stability, just a stable hash of `(name, context)`.
+
+Buckets by `context.id` if present, else `str(context)` -- pass whatever stable identifier makes sense for a flag with no natural object to check against (a request ID, a tenant slug).
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+def percentage(self, name: str, *, rollout: float, on: bool = True) -> None:
+    """A deterministic rollout: the same ``context`` always lands on
+    the same side of the flag, so a percentage-rolled-out feature
+    doesn't flicker on and off for the same user across requests --
+    no database write needed to get that stability, just a stable
+    hash of ``(name, context)``.
+
+    Buckets by ``context.id`` if present, else ``str(context)`` --
+    pass whatever stable identifier makes sense for a flag with no
+    natural object to check against (a request ID, a tenant slug).
+    """
+    if not 0 <= rollout <= 100:
+        raise ValueError(f"rollout must be between 0 and 100, got {rollout}")
+
+    def resolver(context: Any) -> bool:
+        key = str(getattr(context, "id", context))
+        digest = hashlib.sha256(f"{name}:{key}".encode()).hexdigest()
+        bucket = int(digest[:8], 16) % 100
+        return on if bucket < rollout else not on
+
+    self.define(name, resolver)
+```
+
+#### names
+
+```python
+names() -> list[str]
+```
+
+Every flag name currently defined, for introspection (`zeython features`).
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+def names(self) -> list[str]:
+    """Every flag name currently defined, for introspection (`zeython features`)."""
+    return sorted(self._resolvers)
+```
+
+#### active
+
+```python
+active(name: str, context: Any = None) -> bool
+```
+
+Whether `name` is active for `context`.
+
+An undefined flag resolves `False` and logs a warning -- most likely a typo, or a flag checked before its own `FeatureServiceProvider` subclass registered it. Never raises, so a flag check is always safe to sprinkle into a request path.
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+async def active(self, name: str, context: Any = None) -> bool:
+    """Whether ``name`` is active for ``context``.
+
+    An undefined flag resolves ``False`` and logs a warning -- most
+    likely a typo, or a flag checked before its own
+    ``FeatureServiceProvider`` subclass registered it. Never raises,
+    so a flag check is always safe to sprinkle into a request path.
+    """
+    resolver = self._resolvers.get(name)
+    if resolver is None:
+        logger.warning("Unknown feature flag %r checked -- resolves to False.", name)
+        return False
+    result = resolver(context)
+    if inspect.isawaitable(result):
+        result = await result
+    return bool(result)
+```
+
+### FeatureServiceProvider
+
+```python
+FeatureServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Binds a :class:`FeatureManager` into the container.
+
+Register no flags on its own -- subclass it and override `boot()` (calling `super().boot()` first, so the manager exists) to define your own, the same pattern :class:`~zeython.events.EventServiceProvider` uses. See docs/feature-flags.md.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### feature
+
+```python
+feature(
+    request: Request, name: str, context: Any = None
+) -> bool
+```
+
+Whether `name` is active, using whichever :class:`FeatureManager` is bound in the container (see :class:`FeatureServiceProvider`). Outside of a request -- a job, a scheduled task -- resolve directly instead::
+
+```text
+manager = app.container.make(FeatureManager)
+await manager.active("new_checkout", context=user)
+```
+
+Source code in `src/zeython/feature_flags.py`
+
+```python
+async def feature(request: Request, name: str, context: Any = None) -> bool:
+    """Whether ``name`` is active, using whichever :class:`FeatureManager`
+    is bound in the container (see :class:`FeatureServiceProvider`).
+    Outside of a request -- a job, a scheduled task -- resolve directly
+    instead::
+
+        manager = app.container.make(FeatureManager)
+        await manager.active("new_checkout", context=user)
+    """
+    manager: FeatureManager = request.app.state.container.make(FeatureManager)
+    return await manager.active(name, context)
 ```
 
 ## routing

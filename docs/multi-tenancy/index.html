@@ -1811,6 +1811,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../feature-flags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Flags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../queues/" class="md-nav__link">
         
   
@@ -2796,6 +2824,9 @@
 else's, rather than a database (or schema) per tenant. A model opts in
 just by declaring a <code>tenant_id</code> column; there's no mixin and nothing to
 remember to add to each query.</p>
+<p>A different question from <a href="../feature-flags/">Feature Flags</a>: tenancy
+answers "which tenant's data should this query see," not "is this
+capability switched on right now."</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">TenancyServiceProvider</span>
