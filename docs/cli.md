@@ -86,6 +86,7 @@ See [Scheduling](scheduling.md).
 ```bash
 zeython routes                         # list every registered HTTP route: method(s), path, name
 zeython about                          # app name, environment, debug flag, Zeython version, providers
+zeython features                       # every registered feature flag and its current global resolution
 ```
 
 Both read your project the same way `zeython serve` does (they import
