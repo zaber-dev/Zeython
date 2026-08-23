@@ -6,12 +6,14 @@ from zeython.auth import current_user
 from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
 from zeython.events import emit
+from zeython.notifications import notify
 from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
 
 from app.Events.user_registered import UserRegistered
 from app.Jobs.send_welcome_email_job import SendWelcomeEmailJob
 from app.Models.user import User
+from app.Notifications.welcome_notification import WelcomeNotification
 
 
 class AuthController(Controller):
@@ -52,6 +54,11 @@ class AuthController(Controller):
         # Add more listeners in AppEventServiceProvider without touching this
         # handler at all.
         await emit(request, UserRegistered(user_id=user.id, email=user.email))
+
+        # An in-app record of the signup (see docs/notifications.md) --
+        # separate from the welcome *email* above: this is what a "you have
+        # notifications" UI would read via unread_notifications(user, Notification).
+        await notify(request, user, WelcomeNotification())
 
         auth_login(request, user)
         return JSONResponse(user.to_dict(), status_code=201)

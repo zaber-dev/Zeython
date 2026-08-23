@@ -1,7 +1,8 @@
 # Jobs & Realtime
 
 Background job queues (in-memory, synchronous, and Redis-backed), the
-in-app scheduler, WebSockets, and outgoing mail.
+in-app scheduler, WebSockets, outgoing mail, and multi-channel
+notifications.
 
 ::: zeython.queue
 
@@ -10,3 +11,5 @@ in-app scheduler, WebSockets, and outgoing mail.
 ::: zeython.websockets
 
 ::: zeython.mail
+
+::: zeython.notifications

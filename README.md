@@ -174,6 +174,7 @@ empty scaffold to a tested, authenticated API
 [Plugins](docs/plugins.md) ·
 [Localization](docs/localization.md) ·
 [Events](docs/events.md) ·
+[Notifications](docs/notifications.md) ·
 [Background Jobs](docs/queues.md) ·
 [Scheduling](docs/scheduling.md) ·
 [WebSockets](docs/websockets.md) ·

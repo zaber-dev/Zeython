@@ -59,6 +59,14 @@ from zeython.maintenance import (
     enable_maintenance_mode,
 )
 from zeython.n_plus_one import N1QueryDetectionMiddleware, N1QueryDetectionServiceProvider
+from zeython.notifications import (
+    Notification,
+    NotificationManager,
+    NotificationServiceProvider,
+    mark_as_read,
+    notify,
+    unread_notifications,
+)
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.plugins import PluginServiceProvider, discover_plugins
 from zeython.profiler import QueryRecord, RequestProfilerServiceProvider, current_queries
@@ -238,6 +246,12 @@ __all__ = [
     "MaintenanceModeServiceProvider",
     "enable_maintenance_mode",
     "disable_maintenance_mode",
+    "Notification",
+    "NotificationManager",
+    "NotificationServiceProvider",
+    "notify",
+    "unread_notifications",
+    "mark_as_read",
     "TenancyServiceProvider",
     "TenantMiddleware",
     "as_tenant",
