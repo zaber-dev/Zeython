@@ -9203,7 +9203,7 @@ A :class:`WebSocketHub` whose broadcasts reach every process, not just this one 
 
 Every process running a `RedisWebSocketHub` against the same Redis PUBLISHes each broadcast to a shared channel and SUBSCRIBEs to that same channel, relaying whatever it receives to its own locally connected clients -- so a message broadcast from any one worker reaches clients connected to every worker, this one included, with no special-casing needed (each published message is tagged with this instance's own id so it doesn't relay its own broadcast back to clients that already got it directly from :meth:`broadcast`).
 
-The listener starts automatically on this hub's first :meth:`connect` call -- there's no ASGI lifespan hook to start it any earlier, and nothing needs the listener running before the first connection exists anyway. Call :meth:`stop` to shut it down cleanly (mainly useful in tests; a real process just exits, taking the task with it).
+The listener starts automatically on this hub's first :meth:`connect` call -- there's no ASGI lifespan hook to start it any earlier, and nothing needs the listener running before the first connection exists anyway. That first `connect()` (and only that one -- later calls see the subscription already confirmed) doesn't return until the `SUBSCRIBE` has actually been acknowledged by Redis, not just scheduled: without that wait, a client that connects and immediately triggers a broadcast could publish before this instance's own subscription had taken effect, and Redis pub/sub never redelivers a message to a subscriber that wasn't listening yet. Call :meth:`stop` to shut the listener down cleanly (mainly useful in tests; a real process just exits, taking the task with it).
 
 Doesn't attempt to reconnect if the Redis connection drops mid-stream -- the listener task logs the error and stops; broadcasts stop reaching other processes (and this process stops relaying theirs) until the process is restarted. The same accepted trade-off as the other Redis-backed classes here, none of which implement retry logic: simple and predictable beats a hand-rolled reconnect loop that becomes its own source of bugs.
 
@@ -9230,6 +9230,7 @@ def __init__(
     self._channel = channel
     self._instance_id = uuid.uuid4().hex
     self._listener_task: asyncio.Task[None] | None = None
+    self._subscribed = asyncio.Event()
 ```
 
 #### stop
