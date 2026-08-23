@@ -95,7 +95,19 @@ class Application:
         return list(self._providers)
 
     def add_middleware(self, middleware_class: Callable[..., Any], **options: Any) -> None:
-        self._middleware.append(Middleware(middleware_class, **options))
+        """Add a middleware layer, wrapping the app outside every layer added so far.
+
+        Prepends, matching Starlette's own ``Starlette.add_middleware()``
+        convention: the *most recently* added middleware ends up
+        *outermost* -- the one that sees a request first and a response
+        last -- since Starlette's ``build_middleware_stack()`` wraps its
+        ``middleware=[...]`` list from the end backward. Getting this
+        backward silently defeats anything that depends on running before
+        everything else (e.g. :class:`~zeython.maintenance.MaintenanceModeMiddleware`,
+        which is documented as needing to intercept a request before even a
+        database session is opened).
+        """
+        self._middleware.insert(0, Middleware(middleware_class, **options))
 
     def boot(self) -> Application:
         if self._booted:
