@@ -248,9 +248,17 @@ class RedisWebSocketHub(WebSocketHub):
 
     async def _listen(self) -> None:
         pubsub = self._client.pubsub()
-        await pubsub.subscribe(self._channel)
-        self._subscribed.set()
         try:
+            # SUBSCRIBE lives inside this try/finally too: if it fails (Redis
+            # unreachable at startup, say), the listener still "logs the
+            # error and stops" per this class's docstring instead of dying
+            # silently -- and, critically, self._subscribed still gets set
+            # in the finally below either way. Without that, every connect()
+            # already waiting on it (and every one after, since a dead task
+            # here isn't retried) would block forever: the event would never
+            # be set by anything else once this task is gone.
+            await pubsub.subscribe(self._channel)
+            self._subscribed.set()
             async for message in pubsub.listen():
                 if message["type"] != "message":
                     continue
@@ -266,6 +274,7 @@ class RedisWebSocketHub(WebSocketHub):
         except Exception:
             logger.exception("RedisWebSocketHub listener stopped unexpectedly")
         finally:
+            self._subscribed.set()
             await pubsub.unsubscribe(self._channel)
             await pubsub.aclose()
 
