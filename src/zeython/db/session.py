@@ -107,13 +107,17 @@ class Database:
         tolerate replication lag (a report, a dashboard, an analytics
         query), not a substitute for :meth:`session` in general.
 
-        Read-only in practice, not by any framework-enforced check: a real
-        replica is normally configured read-only at the database level
-        (Postgres's ``default_transaction_read_only``, a MySQL replica
-        user with no write grants), so a write attempted here fails with a
-        clear database error rather than being silently accepted -- Zeython
-        doesn't duplicate that check in Python. There's also no commit: a
-        replica session is for reads, so nothing here needs to be flushed.
+        Read-only in practice, not by any framework-enforced check, and
+        Zeython doesn't duplicate one in Python: whether a write attempted
+        here is actually rejected depends entirely on how the replica is
+        configured at the database level (Postgres's
+        ``default_transaction_read_only``, a MySQL replica user with no
+        write grants). Configured that way, it fails with a database error;
+        left writable, the write silently succeeds against the replica and
+        is never flushed back to the primary, since there's no commit here
+        -- a replica session is for reads, so nothing needs to be flushed.
+        Configure the replica read-only at the database level if you want a
+        stray write here to fail loudly instead of vanishing.
         """
         factory = self.read_session_factory or self.session_factory
         session = factory()
@@ -157,13 +161,17 @@ async def transaction() -> AsyncIterator[AsyncSession]:
         # is unaffected.
 
     Rolling back an *entire* request already happens for free and needs
-    no extra API: an exception that propagates out of a request handler
-    unwinds past ``DatabaseSessionMiddleware`` and rolls back the whole
-    session (see :meth:`Database.session`) -- Starlette re-raises the
-    original exception to outer ASGI middleware even after one of your own
-    exception handlers already sent a response for it. ``transaction()``
-    is for the narrower case where you catch the failure yourself and keep
-    the request going, but still don't want its partial writes kept.
+    no extra API: ``DatabaseSessionMiddleware`` rolls back the whole
+    session whenever the response status ends up ``4xx``/``5xx`` --
+    whether that's a genuinely unhandled exception unwinding past it, or
+    one of ``zeython``'s own ``HTTPException`` subclasses your handler
+    raised (`NotFoundException`, `ValidationException`, etc.), which
+    Starlette's inner ``ExceptionMiddleware`` turns into that response
+    without ever re-raising past this middleware -- see
+    :class:`DatabaseSessionMiddleware`. ``transaction()`` is for the
+    narrower case where you catch the failure yourself, keep the request
+    going, and still return a success response, but don't want that
+    chunk's partial writes kept.
     """
     session = current_session()
     async with session.begin_nested():
@@ -171,7 +179,24 @@ async def transaction() -> AsyncIterator[AsyncSession]:
 
 
 class DatabaseSessionMiddleware:
-    """Pure ASGI middleware that opens one DB session per HTTP request."""
+    """Pure ASGI middleware that opens one DB session per HTTP request.
+
+    Commits when the response status is a success/redirect (``< 400``),
+    rolls back otherwise -- including for a ``4xx``/``5xx`` your own
+    handler chose to send by raising one of ``zeython``'s
+    ``HTTPException`` subclasses (``ValidationException``,
+    ``NotFoundException``, etc.). Deliberately does **not** just reuse
+    :meth:`Database.session`'s "commit unless an exception propagates"
+    rule: Starlette's own ``ExceptionMiddleware`` sits *inside* this
+    (user-added) middleware and fully handles every registered
+    ``HTTPException`` there -- building and sending the response itself
+    -- without ever re-raising past this middleware, so ``self.app(...)``
+    below returns completely normally even for a request your handler
+    meant to abort. Only the actual response status reveals that. A
+    genuinely unhandled exception (no registered handler) still
+    propagates here directly and is rolled back the same way, then
+    re-raised unchanged.
+    """
 
     def __init__(self, app: object, database: Database) -> None:
         self.app = app
@@ -182,5 +207,26 @@ class DatabaseSessionMiddleware:
             await self.app(scope, receive, send)  # type: ignore[operator]
             return
 
-        async with self.database.session():
-            await self.app(scope, receive, send)  # type: ignore[operator]
+        status_code = 200
+
+        async def send_wrapper(message: dict) -> None:
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = message["status"]
+            await send(message)  # type: ignore[operator]
+
+        session = self.database.session_factory()
+        token = _current_session.set(session)
+        try:
+            await self.app(scope, receive, send_wrapper)  # type: ignore[operator]
+        except Exception:
+            await session.rollback()
+            raise
+        else:
+            if status_code < 400:
+                await session.commit()
+            else:
+                await session.rollback()
+        finally:
+            await session.close()
+            _current_session.reset(token)
