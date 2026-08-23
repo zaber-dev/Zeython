@@ -188,6 +188,15 @@ def make_policy(name: str = typer.Argument(..., help="Model name, e.g. Post or P
     typer.secho(f"Created {path}", fg=typer.colors.GREEN)
 
 
+@make_app.command("notification")
+def make_notification(
+    name: str = typer.Argument(..., help="Notification name, e.g. InvoicePaid or InvoicePaidNotification"),
+) -> None:
+    """Generate a new notification in app/Notifications/."""
+    path = scaffold.make_notification(name, Path.cwd())
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
 @app.command()
 def routes() -> None:
     """List every HTTP route registered in the current project."""

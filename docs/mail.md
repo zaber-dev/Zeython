@@ -89,3 +89,10 @@ None`, then bind it in place of `MailServiceProvider`'s default:
 ```python
 app.container.singleton(Mailer, lambda: MyTransactionalEmailApiMailer(api_key=...))
 ```
+
+## Sending mail as one channel of several
+
+Calling `mailer.send(...)` directly is right for a one-off email. If the
+same message should also become an in-app notification or a live push --
+or you want one class describing all three renderings together -- see
+[Notifications](notifications.md)'s `mail` channel instead.

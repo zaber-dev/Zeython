@@ -148,6 +148,30 @@ class {class_name}(Seeder):
         ...
 '''
 
+NOTIFICATION_TEMPLATE = '''from typing import Any
+
+from zeython import Notification
+
+
+class {class_name}(Notification):
+    """Dispatch with: await notify(request, some_user, {class_name}(...))
+
+    See docs/notifications.md.
+    """
+
+    def via(self, notifiable: Any) -> list[str]:
+        return ["database"]
+
+    # def to_mail(self, notifiable: Any):
+    #     from zeython import Message
+    #     return Message(to=notifiable.email, subject="TODO", body="TODO")
+
+    def to_database(self, notifiable: Any) -> dict:
+        return {{
+            # TODO: whatever this notification's UI needs to render it.
+        }}
+'''
+
 POLICY_TEMPLATE = '''class {class_name}:
     """Authorization policy for {model_class_name}.
 
@@ -279,4 +303,14 @@ def make_policy(name: str, cwd: Path) -> Path:
         path,
         POLICY_TEMPLATE.format(class_name=class_name, model_class_name=model_class_name, model_var=model_var),
     )
+    return path
+
+
+def make_notification(name: str, cwd: Path) -> Path:
+    if not name.endswith("Notification"):
+        name = f"{name}Notification"
+    class_name = to_pascal_case(name)
+    slug = to_snake_case(name)
+    path = cwd / "app" / "Notifications" / f"{slug}.py"
+    _write_new_file(path, NOTIFICATION_TEMPLATE.format(class_name=class_name))
     return path

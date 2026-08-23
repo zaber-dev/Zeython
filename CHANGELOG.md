@@ -63,6 +63,11 @@ GPL-3.0 to MIT.
 - In-app task scheduler (`zeython.schedule`) — recurring jobs defined in
   code, no separate cron entry needed.
 - Outbound mail (`zeython.mail`: `LogMailer`, `SmtpMailer`).
+- Multi-channel notifications (`zeython.notifications`) — one `Notification`
+  class describes its `mail`/`database`/`broadcast` rendering per
+  recipient; `notify()` fires whichever channels it asks for. A failing
+  channel is logged and reported, not raised, so one down channel doesn't
+  block another.
 - A caching layer (`zeython.cache`) plus `RedisCache` for distributed
   deployments.
 
@@ -103,8 +108,9 @@ GPL-3.0 to MIT.
 ### CLI
 
 - `zeython new`, `serve`, `make model|controller|middleware|provider|
-  policy|factory|seeder|job|command`, `db revision|migrate|downgrade|seed`,
-  `queue work`, `schedule run`, `mcp`, `routes`, `about`, `down`, `up`.
+  policy|notification|factory|seeder|job|command`,
+  `db revision|migrate|downgrade|seed`, `queue work`, `schedule run`, `mcp`,
+  `routes`, `about`, `down`, `up`.
 
 ### Testing & docs
 

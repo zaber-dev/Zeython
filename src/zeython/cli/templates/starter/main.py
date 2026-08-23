@@ -8,6 +8,7 @@ from zeython import (
     HealthCheckServiceProvider,
     MailServiceProvider,
     MaintenanceModeServiceProvider,
+    NotificationServiceProvider,
     OpenApiServiceProvider,
     QueueServiceProvider,
     RateLimitServiceProvider,
@@ -19,6 +20,7 @@ from zeython import (
     WebSocketHubServiceProvider,
 )
 
+from app.Models.notification import Notification
 from app.Models.user import User
 from app.Providers.app_event_service_provider import AppEventServiceProvider
 from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
@@ -42,6 +44,11 @@ app.register(RateLimitServiceProvider)
 app.register(MailServiceProvider)
 app.register(QueueServiceProvider)
 app.register(WebSocketHubServiceProvider)
+# Multi-channel notifications (mail/database/broadcast) -- see
+# docs/notifications.md. `record_model` is the Model the "database"
+# channel writes to (app/Models/notification.py); omit it if you only
+# ever use "mail"/"broadcast".
+app.register(NotificationServiceProvider(app, record_model=Notification))
 # Decoupled listeners reacting to app-defined events (UserRegistered, ...)
 # -- see docs/events.md. AppEventServiceProvider (app/Providers/) is where
 # this app's own listeners are registered.
