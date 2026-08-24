@@ -49,3 +49,23 @@ def test_resource_registers_conventional_crud_routes() -> None:
     paths = {(route.path, tuple(route.methods - {"HEAD"})) for route in router.routes}
     assert ("/users", ("GET",)) in paths
     assert ("/users/{id}", ("GET",)) in paths
+
+
+class UsersWithUpdate(Controller):
+    async def update(self, request):
+        return JSONResponse({"action": "update"})
+
+
+def test_resource_update_accepts_both_put_and_patch() -> None:
+    # Regression guard: resource()'s own docstring promises "update->PUT/PATCH
+    # path/{id}", but only PUT was ever actually registered -- a PATCH
+    # request to a resource's update action returned 405, never reaching
+    # the controller, contradicting the documented contract and ordinary
+    # REST convention.
+    router = Router()
+    router.resource("/users", UsersWithUpdate, only=("update",))
+
+    assert len(router.routes) == 1
+    route = router.routes[0]
+    assert route.path == "/users/{id}"
+    assert route.methods - {"HEAD"} == {"PUT", "PATCH"}
