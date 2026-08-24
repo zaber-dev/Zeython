@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import keyword
 import re
 import secrets
 from pathlib import Path
@@ -19,6 +20,30 @@ def to_snake_case(name: str) -> str:
 def to_pascal_case(name: str) -> str:
     parts = re.split(r"[^0-9a-zA-Z]+", name)
     return "".join(part[:1].upper() + part[1:] for part in parts if part)
+
+
+def _require_identifier(name: str, *, what: str) -> str:
+    """Raise ``ValueError`` unless ``name`` is a real, non-keyword Python identifier.
+
+    Every ``make_*`` generator below embeds a name derived from user input
+    (via :func:`to_pascal_case`/:func:`to_snake_case`) directly into
+    generated source -- a class name, a parameter name, or a module-path
+    segment in an import line. Neither helper rejects input that doesn't
+    survive as a valid identifier: a name with no letters at all (e.g.
+    ``"???"``) collapses to an empty string, and one that's *only* digits
+    (e.g. ``"123"``) survives unchanged, both syntactically invalid as a
+    Python name. Without this check, ``make_model`` in particular doesn't
+    just write one broken file -- it also appends the same invalid name
+    to the shared ``app/Models/__init__.py``, breaking every model import
+    in the project, not only the new one.
+    """
+    if not name.isidentifier() or keyword.iskeyword(name):
+        raise ValueError(
+            f"'{name}' is not usable as a Python {what} -- it must start with a letter or "
+            "underscore and contain only letters, digits, and underscores, and can't be a "
+            "reserved keyword. Try a different name."
+        )
+    return name
 
 
 def _render(text: str, context: dict[str, str]) -> str:
@@ -201,8 +226,8 @@ def _write_new_file(path: Path, content: str) -> None:
 
 
 def make_model(name: str, cwd: Path) -> Path:
-    class_name = to_pascal_case(name)
-    slug = to_snake_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
+    slug = _require_identifier(to_snake_case(name), what="module name")
     path = cwd / "app" / "Models" / f"{slug}.py"
     _write_new_file(path, MODEL_TEMPLATE.format(class_name=class_name, table_name=f"{slug}s"))
 
@@ -220,7 +245,7 @@ def make_model(name: str, cwd: Path) -> Path:
 def make_controller(name: str, cwd: Path) -> Path:
     if not name.endswith("Controller"):
         name = f"{name}Controller"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Controllers" / f"{slug}.py"
     _write_new_file(path, CONTROLLER_TEMPLATE.format(class_name=class_name))
@@ -228,7 +253,7 @@ def make_controller(name: str, cwd: Path) -> Path:
 
 
 def make_middleware(name: str, cwd: Path) -> Path:
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Middleware" / f"{slug}.py"
     _write_new_file(path, MIDDLEWARE_TEMPLATE.format(class_name=class_name))
@@ -238,7 +263,7 @@ def make_middleware(name: str, cwd: Path) -> Path:
 def make_provider(name: str, cwd: Path) -> Path:
     if not name.endswith("ServiceProvider") and not name.endswith("Provider"):
         name = f"{name}ServiceProvider"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Providers" / f"{slug}.py"
     _write_new_file(path, PROVIDER_TEMPLATE.format(class_name=class_name))
@@ -248,7 +273,7 @@ def make_provider(name: str, cwd: Path) -> Path:
 def make_job(name: str, cwd: Path) -> Path:
     if not name.endswith("Job"):
         name = f"{name}Job"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Jobs" / f"{slug}.py"
     _write_new_file(path, JOB_TEMPLATE.format(class_name=class_name))
@@ -258,7 +283,7 @@ def make_job(name: str, cwd: Path) -> Path:
 def make_command(name: str, cwd: Path) -> Path:
     if not name.endswith("Command"):
         name = f"{name}Command"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     command_name = slug.removesuffix("_command").replace("_", "-")
     path = cwd / "app" / "Console" / "Commands" / f"{slug}.py"
@@ -269,9 +294,9 @@ def make_command(name: str, cwd: Path) -> Path:
 def make_factory(name: str, cwd: Path) -> Path:
     if not name.endswith("Factory"):
         name = f"{name}Factory"
-    class_name = to_pascal_case(name)
-    model_class_name = class_name.removesuffix("Factory")
-    model_slug = to_snake_case(model_class_name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
+    model_class_name = _require_identifier(class_name.removesuffix("Factory"), what="model class name")
+    model_slug = _require_identifier(to_snake_case(model_class_name), what="model module name")
     slug = to_snake_case(name)
     path = cwd / "database" / "factories" / f"{slug}.py"
     _write_new_file(
@@ -284,7 +309,7 @@ def make_factory(name: str, cwd: Path) -> Path:
 def make_seeder(name: str, cwd: Path) -> Path:
     if not name.endswith("Seeder"):
         name = f"{name}Seeder"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "database" / "seeders" / f"{slug}.py"
     _write_new_file(path, SEEDER_TEMPLATE.format(class_name=class_name))
@@ -294,9 +319,9 @@ def make_seeder(name: str, cwd: Path) -> Path:
 def make_policy(name: str, cwd: Path) -> Path:
     if not name.endswith("Policy"):
         name = f"{name}Policy"
-    class_name = to_pascal_case(name)
-    model_class_name = class_name.removesuffix("Policy")
-    model_var = to_snake_case(model_class_name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
+    model_class_name = _require_identifier(class_name.removesuffix("Policy"), what="model class name")
+    model_var = _require_identifier(to_snake_case(model_class_name), what="parameter name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Policies" / f"{slug}.py"
     _write_new_file(
@@ -309,7 +334,7 @@ def make_policy(name: str, cwd: Path) -> Path:
 def make_notification(name: str, cwd: Path) -> Path:
     if not name.endswith("Notification"):
         name = f"{name}Notification"
-    class_name = to_pascal_case(name)
+    class_name = _require_identifier(to_pascal_case(name), what="class name")
     slug = to_snake_case(name)
     path = cwd / "app" / "Notifications" / f"{slug}.py"
     _write_new_file(path, NOTIFICATION_TEMPLATE.format(class_name=class_name))

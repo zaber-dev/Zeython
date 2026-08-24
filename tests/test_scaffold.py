@@ -168,6 +168,44 @@ def test_make_model_raises_if_the_file_already_exists(project: Path) -> None:
         scaffold.make_model("Comment", project)
 
 
+# -- Names that don't survive to a valid Python identifier -----------------------------
+
+
+def test_make_model_rejects_a_name_that_is_only_digits(project: Path) -> None:
+    # Regression guard: to_pascal_case("123") == "123" (unchanged -- there's
+    # no letter to capitalize), which is not a valid Python identifier
+    # (can't start with a digit). Before this was rejected, make_model
+    # wrote a syntactically invalid class definition *and* appended the
+    # same invalid name to the shared app/Models/__init__.py, breaking
+    # every model import in the project, not just this one.
+    before = (project / "app" / "Models" / "__init__.py").read_text()
+
+    with pytest.raises(ValueError, match="not usable as a Python"):
+        scaffold.make_model("123", project)
+
+    assert not (project / "app" / "Models" / "123.py").exists()
+    assert (project / "app" / "Models" / "__init__.py").read_text() == before
+
+
+def test_make_model_rejects_a_name_with_no_letters_or_digits(project: Path) -> None:
+    # to_pascal_case("???") == "" -- collapses to nothing at all.
+    with pytest.raises(ValueError, match="not usable as a Python"):
+        scaffold.make_model("???", project)
+
+
+def test_make_controller_rejects_an_unusable_name(project: Path) -> None:
+    with pytest.raises(ValueError, match="not usable as a Python"):
+        scaffold.make_controller("123", project)
+
+
+def test_make_policy_rejects_a_model_name_that_is_a_python_keyword(project: Path) -> None:
+    # to_snake_case("Class") == "class" -- a real identifier shape, but a
+    # reserved keyword, which would still be a SyntaxError as a parameter
+    # name in the generated `def view(self, user, class):`.
+    with pytest.raises(ValueError, match="not usable as a Python"):
+        scaffold.make_policy("Class", project)
+
+
 def test_make_controller_appends_controller_suffix_once(project: Path) -> None:
     path = scaffold.make_controller("Comment", project)
     assert path == project / "app" / "Controllers" / "comment_controller.py"
