@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import typer
@@ -125,67 +126,71 @@ def mcp() -> None:
     run_mcp_server()
 
 
+def _generate(generator: Callable[[str, Path], Path], name: str) -> None:
+    """Run a scaffold.make_* generator, turning its ValueError (an unusable
+    name -- see scaffold._require_identifier) or FileExistsError (target
+    already there) into a clean CLI error instead of a raw traceback.
+    """
+    try:
+        path = generator(name, Path.cwd())
+    except (ValueError, FileExistsError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+
+
 @make_app.command("model")
 def make_model(name: str = typer.Argument(..., help="Model name, e.g. Post")) -> None:
     """Generate a new database model in app/Models/."""
-    path = scaffold.make_model(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_model, name)
 
 
 @make_app.command("controller")
 def make_controller(name: str = typer.Argument(..., help="Controller name, e.g. Post or PostController")) -> None:
     """Generate a new controller in app/Controllers/."""
-    path = scaffold.make_controller(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_controller, name)
 
 
 @make_app.command("middleware")
 def make_middleware(name: str = typer.Argument(..., help="Middleware name, e.g. RequestLogger")) -> None:
     """Generate a new ASGI middleware class in app/Middleware/."""
-    path = scaffold.make_middleware(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_middleware, name)
 
 
 @make_app.command("provider")
 def make_provider(name: str = typer.Argument(..., help="Service provider name, e.g. Payment")) -> None:
     """Generate a new service provider in app/Providers/."""
-    path = scaffold.make_provider(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_provider, name)
 
 
 @make_app.command("job")
 def make_job(name: str = typer.Argument(..., help="Job name, e.g. SendWelcomeEmail")) -> None:
     """Generate a new background job in app/Jobs/."""
-    path = scaffold.make_job(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_job, name)
 
 
 @make_app.command("command")
 def make_command(name: str = typer.Argument(..., help="Command name, e.g. PruneOldPosts")) -> None:
     """Generate a new custom CLI command in app/Console/Commands/."""
-    path = scaffold.make_command(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_command, name)
 
 
 @make_app.command("factory")
 def make_factory(name: str = typer.Argument(..., help="Model name, e.g. Post or PostFactory")) -> None:
     """Generate a new model factory in database/factories/."""
-    path = scaffold.make_factory(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_factory, name)
 
 
 @make_app.command("seeder")
 def make_seeder(name: str = typer.Argument(..., help="Seeder name, e.g. User or UserSeeder")) -> None:
     """Generate a new database seeder in database/seeders/."""
-    path = scaffold.make_seeder(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_seeder, name)
 
 
 @make_app.command("policy")
 def make_policy(name: str = typer.Argument(..., help="Model name, e.g. Post or PostPolicy")) -> None:
     """Generate a new authorization policy in app/Policies/."""
-    path = scaffold.make_policy(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_policy, name)
 
 
 @make_app.command("notification")
@@ -193,8 +198,7 @@ def make_notification(
     name: str = typer.Argument(..., help="Notification name, e.g. InvoicePaid or InvoicePaidNotification"),
 ) -> None:
     """Generate a new notification in app/Notifications/."""
-    path = scaffold.make_notification(name, Path.cwd())
-    typer.secho(f"Created {path}", fg=typer.colors.GREEN)
+    _generate(scaffold.make_notification, name)
 
 
 @app.command()
