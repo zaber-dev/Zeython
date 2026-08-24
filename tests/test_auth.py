@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 from starlette.responses import JSONResponse
@@ -163,6 +164,40 @@ async def test_login_rejects_unknown_user(tmp_path: Path) -> None:
         await http.get("/me-or-none")  # primes the CSRF cookie -- see docs/csrf.md
         response = await http.post("/login", json={"email": "nobody@example.com", "password": "x"})
         assert response.status_code == 401
+
+
+async def test_attempt_still_hashes_on_an_unknown_username(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Regression guard against timing-based username enumeration:
+    # attempt() used to return immediately for an unknown username,
+    # skipping password hashing entirely -- hashing is deliberately slow
+    # (PBKDF2, 600k iterations) and a database miss is not, so an unknown
+    # username responded measurably faster than a known one with a wrong
+    # password. Verified deterministically (call count), not by timing,
+    # to avoid a flaky CI test -- verify_password() must run exactly once
+    # regardless of whether the user exists.
+    import zeython.auth as auth_module
+
+    app = await _make_app(tmp_path)
+    manager = app.container.make(AuthManager)
+
+    calls = 0
+    real_verify_password = auth_module.verify_password
+
+    def counting_verify_password(password: str, hashed: str) -> bool:
+        nonlocal calls
+        calls += 1
+        return real_verify_password(password, hashed)
+
+    monkeypatch.setattr(auth_module, "verify_password", counting_verify_password)
+
+    database = app.container.make(Database)
+    async with database.session():
+        result = await manager.attempt("nobody@example.com", "whatever")
+
+    assert result is None
+    assert calls == 1
 
 
 async def test_sessions_are_isolated_between_clients(tmp_path: Path) -> None:
