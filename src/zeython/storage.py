@@ -203,6 +203,36 @@ class S3Storage(Storage):
         )
 
 
+# Rejected by store_upload() *even with allowed_extensions left unset*
+# (unrestricted) -- every one of these is active content a browser will
+# run in the page's own origin if the file is ever served back and
+# opened directly (the local storage mount, a signed URL, a CDN in front
+# of the same bucket): stored XSS via file upload, not a hypothetical --
+# any app that accepts uploads without explicitly passing
+# allowed_extensions was exposed to it. A caller that genuinely wants to
+# accept one of these (e.g. user-supplied SVG icons) opts back in by
+# naming it explicitly in allowed_extensions -- that's a deliberate
+# decision at the call site, not a silent default.
+_DANGEROUS_EXTENSIONS = frozenset(
+    {"html", "htm", "xhtml", "shtml", "svg", "svgz", "xml", "js", "mjs"}
+)
+
+# Content-Disposition: attachment is forced for these when served through
+# the signed-download endpoint (see StorageServiceProvider.boot()) -- the
+# MIME-type counterpart of _DANGEROUS_EXTENSIONS above, for a file that
+# reached storage some other way than store_upload()'s own check.
+_BROWSER_RENDERABLE_CONTENT_TYPES = frozenset(
+    {
+        "text/html",
+        "application/xhtml+xml",
+        "image/svg+xml",
+        "text/xml",
+        "application/xml",
+        "application/javascript",
+        "text/javascript",
+    }
+)
+
 _FILENAME_SAFE_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
@@ -230,13 +260,32 @@ async def store_upload(
     Raises :class:`~zeython.exceptions.ValidationException` (422) if the
     extension isn't in ``allowed_extensions``, the file exceeds ``max_size``,
     or the file is empty.
+
+    ``allowed_extensions=None`` (the default) means unrestricted -- *except*
+    for a small denylist of extensions that are active content a browser
+    will execute if the stored file is ever opened directly (``.html``,
+    ``.svg``, ``.js``, etc. -- see :data:`_DANGEROUS_EXTENSIONS`), rejected
+    even then. Naming one of those explicitly in ``allowed_extensions`` opts
+    back in, if you genuinely need it (e.g. user-supplied SVG icons) --
+    make sure whatever serves it back sets a safe ``Content-Type`` and
+    ``Content-Disposition`` first.
     """
     filename = _safe_filename(upload.filename or "file")
     extension = Path(filename).suffix.lower().lstrip(".")
 
-    if allowed_extensions is not None and extension not in allowed_extensions:
-        allowed = ", ".join(allowed_extensions)
-        raise ValidationException({"file": [f"File type '.{extension}' is not allowed. Allowed: {allowed}."]})
+    if allowed_extensions is not None:
+        if extension not in allowed_extensions:
+            allowed = ", ".join(allowed_extensions)
+            raise ValidationException({"file": [f"File type '.{extension}' is not allowed. Allowed: {allowed}."]})
+    elif extension in _DANGEROUS_EXTENSIONS:
+        raise ValidationException(
+            {
+                "file": [
+                    f"File type '.{extension}' is not allowed by default because a browser would "
+                    "run it as active content. Pass allowed_extensions explicitly to allow it."
+                ]
+            }
+        )
 
     data = await upload.read()
     size = len(data)
@@ -304,7 +353,16 @@ class StorageServiceProvider(ServiceProvider):
                 raise NotFoundException("This link is invalid or has expired.")
             data = await storage.get(key)
             content_type = mimetypes.guess_type(key)[0] or "application/octet-stream"
-            return Response(data, media_type=content_type)
+            headers = {"X-Content-Type-Options": "nosniff"}
+            if content_type in _BROWSER_RENDERABLE_CONTENT_TYPES:
+                # store_upload() rejects these extensions by default, but a
+                # file stored some other way (a pre-existing file, an
+                # explicit allowed_extensions opt-in) could still land here
+                # -- force a download instead of letting the browser render
+                # it, so this endpoint is never the thing that turns a
+                # stored file into active content in this app's origin.
+                headers["Content-Disposition"] = f'attachment; filename="{Path(key).name}"'
+            return Response(data, media_type=content_type, headers=headers)
 
         if bool(self.config.get("storage.serve_locally", True)):
             from starlette.staticfiles import StaticFiles
