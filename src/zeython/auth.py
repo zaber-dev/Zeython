@@ -175,12 +175,26 @@ class AuthServiceProvider(ServiceProvider):
         if bool(self.config.get("csrf.enabled", True)):
             from zeython.csrf import DEFAULT_COOKIE_NAME, DEFAULT_HEADER_NAME, CsrfMiddleware
 
+            # Deliberately no protect_if_cookie_present here (unlike its
+            # general docstring's "a token-issuing endpoint" example):
+            # this provider's own login endpoint is a cookie-session login
+            # -- the request that *establishes* the session cookie in the
+            # first place, so it never carries one yet. Exempting unsafe
+            # requests that lack the session cookie would exempt login
+            # itself, opening a classic login-CSRF hole: a cross-site page
+            # could force a victim's browser to log in as an attacker's
+            # account (no cookie needed to forge that, since the login
+            # request has none to begin with), silently attributing
+            # whatever the victim does next to the attacker's account.
+            # The CSRF cookie itself has nothing to do with the session
+            # cookie and is already set on a visitor's very first request
+            # (e.g. loading the login page), so protecting login too costs
+            # nothing -- the token is already there to send back.
             self.app.add_middleware(
                 CsrfMiddleware,
                 cookie_name=self.config.get("csrf.cookie_name", DEFAULT_COOKIE_NAME),
                 header_name=self.config.get("csrf.header_name", DEFAULT_HEADER_NAME),
                 secure=https_only,
-                protect_if_cookie_present=session_cookie_name,
             )
 
 

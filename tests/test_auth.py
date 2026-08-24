@@ -122,6 +122,40 @@ async def test_login_rejects_wrong_password(tmp_path: Path) -> None:
         assert response.status_code == 200
 
 
+async def test_login_itself_requires_a_valid_csrf_token(tmp_path: Path) -> None:
+    # Regression guard against login CSRF: AuthServiceProvider used to pass
+    # protect_if_cookie_present=<session cookie name> to CsrfMiddleware,
+    # which skips the CSRF check for any unsafe request that doesn't
+    # already carry that cookie -- exactly true of the login request
+    # itself, since it's the request that *establishes* the session
+    # cookie. That exempted login from CSRF protection entirely: a
+    # cross-site page could force a victim's browser to log in as an
+    # attacker-controlled account with no way to be blocked, since the
+    # forged request never had a session cookie to be missing in the
+    # first place. Uses a plain httpx client (not zeython.testing.client(),
+    # which auto-attaches the CSRF header) specifically to send a request
+    # that has the CSRF cookie but not the matching header -- what a
+    # cross-site attacker's forged request looks like, since it can read
+    # neither.
+    import httpx
+
+    app = await _make_app(tmp_path)
+
+    async with client(app) as http:
+        await http.get("/me-or-none")  # primes the CSRF cookie
+        await http.post("/register", json={"email": "ada@example.com", "password": "hunter2"})
+        await http.post("/logout")
+        csrf_cookie = http.cookies.get("csrf_token")
+
+    assert csrf_cookie is not None
+    transport = httpx.ASGITransport(app=app.asgi)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as forged:
+        forged.cookies.set("csrf_token", csrf_cookie)
+        response = await forged.post("/login", json={"email": "ada@example.com", "password": "hunter2"})
+
+    assert response.status_code == 403
+
+
 async def test_login_rejects_unknown_user(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
