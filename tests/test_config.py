@@ -45,3 +45,38 @@ def test_secret_key_raises_when_unset(tmp_path: Path, monkeypatch) -> None:
 
     with pytest.raises(RuntimeError):
         _ = config.secret_key
+
+
+def test_an_all_digit_secret_key_stays_a_string(tmp_path: Path) -> None:
+    # Regression guard: _coerce() used to run unconditionally on every
+    # value, including keys meant to stay opaque strings -- an all-digit
+    # secret (a plausible, if sloppy, dev value) silently became a Python
+    # int instead of a str, crashing the first time anything tried to
+    # sign something with it (itsdangerous requires bytes/str).
+    (tmp_path / ".env").write_text("APP_SECRET_KEY=12345678\n")
+
+    config = Config.load(tmp_path)
+
+    assert config.secret_key == "12345678"
+    assert isinstance(config.secret_key, str)
+
+
+def test_a_secret_shaped_value_that_looks_like_a_bool_stays_a_string(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("API_TOKEN=true\n")
+
+    config = Config.load(tmp_path)
+
+    assert config.get("api.token") == "true"
+
+
+def test_non_secret_keys_are_still_type_coerced(tmp_path: Path) -> None:
+    # The fix must not regress ordinary boolean/int coercion for keys
+    # that aren't secret-shaped -- many providers rely on it (e.g.
+    # bool(self.config.get("csrf.enabled", True)) only works because
+    # "false" is already coerced to the boolean False before that cast).
+    (tmp_path / ".env").write_text("FEATURE_ENABLED=false\nMAX_ITEMS=42\n")
+
+    config = Config.load(tmp_path)
+
+    assert config.get("feature.enabled") is False
+    assert config.get("max.items") == 42
