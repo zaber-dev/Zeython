@@ -17,6 +17,8 @@ belong in the same code path as cookie sessions.
 
 from __future__ import annotations
 
+import functools
+import secrets
 from typing import TYPE_CHECKING, Any
 
 from starlette.requests import Request
@@ -30,6 +32,15 @@ if TYPE_CHECKING:
     from zeython.db import Model
 
 _SESSION_KEY = "auth_user_id"
+
+
+@functools.cache
+def _dummy_password_hash() -> str:
+    """A syntactically valid hash nothing can ever match, computed once
+    per process (lazily, on first use) at the real hashing cost -- see
+    :func:`AuthManager.attempt`'s use of it below.
+    """
+    return hash_password(secrets.token_hex(32))
 
 
 class Authenticatable:
@@ -76,6 +87,14 @@ class AuthManager:
         filters: dict[str, Any] = {self.username_field: username}
         user = await self.user_model.first_where(**filters)
         if user is None:
+            # Still pay PBKDF2's real cost against a hash nothing can
+            # ever match, rather than returning immediately -- an
+            # unknown username would otherwise respond measurably faster
+            # than a known one with a wrong password (hashing is
+            # deliberately slow; a database miss is not), letting an
+            # attacker enumerate valid usernames purely from response
+            # timing without a single successful login.
+            verify_password(password, _dummy_password_hash())
             return None
 
         hashed = getattr(user, self.password_field, None)
