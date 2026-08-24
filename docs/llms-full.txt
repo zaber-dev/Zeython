@@ -6941,6 +6941,14 @@ async def attempt(self, username: str, password: str) -> Model | None:
     filters: dict[str, Any] = {self.username_field: username}
     user = await self.user_model.first_where(**filters)
     if user is None:
+        # Still pay PBKDF2's real cost against a hash nothing can
+        # ever match, rather than returning immediately -- an
+        # unknown username would otherwise respond measurably faster
+        # than a known one with a wrong password (hashing is
+        # deliberately slow; a database miss is not), letting an
+        # attacker enumerate valid usernames purely from response
+        # timing without a single successful login.
+        verify_password(password, _dummy_password_hash())
         return None
 
     hashed = getattr(user, self.password_field, None)
