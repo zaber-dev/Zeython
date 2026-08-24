@@ -156,6 +156,26 @@ async def test_delayed_push_runs_after_the_delay() -> None:
     await queue.close()
 
 
+async def test_join_alone_waits_out_a_delayed_pushs_full_delay() -> None:
+    # Regression guard: join() used to only track work already put() onto
+    # the underlying asyncio.Queue -- a delayed push doesn't call put()
+    # until its wait elapses, so join() returned instantly, before the
+    # job had even been enqueued, let alone run. A caller doing
+    # `await queue.join(); await queue.close()` as a graceful-shutdown
+    # drain (a reasonable reading of join()'s own docstring) would
+    # silently cancel and lose any job still waiting on its delay.
+    # Deliberately no manual `asyncio.sleep()` before join() here (unlike
+    # the sibling test above) -- join() alone must now be sufficient.
+    queue = InMemoryQueue()
+    log: list[str] = []
+
+    await queue.push(RecordingJob(log=log, value="delayed"), delay=0.1)
+    await queue.join()
+
+    assert log == ["delayed"]
+    await queue.close()
+
+
 async def test_close_cancels_pending_delayed_pushes() -> None:
     queue = InMemoryQueue()
     log: list[str] = []
