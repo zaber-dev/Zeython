@@ -59,6 +59,37 @@ async def test_window_expiry_allows_further_hits() -> None:
     assert (await limiter.hit("key", limit=2, window=10)).allowed
 
 
+async def test_tracked_key_count_is_bounded_by_max_tracked_keys() -> None:
+    # Regression guard: an idle key's now-empty bucket is only ever
+    # cleaned up by another hit() call for that *same* key -- without a
+    # bound, a flood of distinct keys (e.g. one per attacker-controlled
+    # email/IP, exactly the key pattern throttle()'s own docstring
+    # suggests) would grow the limiter's internal dict without limit,
+    # one abandoned entry per attempt.
+    limiter = InMemoryRateLimiter(clock=_FakeClock(), max_tracked_keys=10)
+
+    for i in range(1000):
+        await limiter.hit(f"attacker-key-{i}", limit=5, window=60)
+
+    assert len(limiter._hits) <= 10
+
+
+async def test_eviction_under_the_cap_does_not_break_an_active_keys_limit() -> None:
+    limiter = InMemoryRateLimiter(clock=_FakeClock(), max_tracked_keys=2)
+
+    await limiter.hit("keep-me", limit=3, window=60)
+    # Push "keep-me" out of the cap by touching two other keys.
+    await limiter.hit("other-1", limit=3, window=60)
+    await limiter.hit("other-2", limit=3, window=60)
+
+    # "keep-me" was evicted, so it now starts a fresh window instead of
+    # continuing its old one -- the accepted trade-off, not a crash or a
+    # permanently-stuck limiter.
+    result = await limiter.hit("keep-me", limit=3, window=60)
+    assert result.allowed
+    assert result.remaining == 2
+
+
 async def test_different_keys_are_independent() -> None:
     limiter = InMemoryRateLimiter(clock=_FakeClock())
 
