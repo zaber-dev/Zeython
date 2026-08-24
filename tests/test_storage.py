@@ -152,6 +152,28 @@ async def test_signed_url_rejects_unknown_token_with_404(tmp_path: Path) -> None
     assert response.status_code == 404
 
 
+async def test_signed_url_forces_download_for_browser_renderable_content(tmp_path: Path) -> None:
+    # Defense in depth for a file that reached storage some other way than
+    # store_upload()'s own extension check (a pre-existing file, an
+    # explicit allowed_extensions opt-in) -- the signed-download endpoint
+    # must never let a browser render stored content as HTML/SVG/JS
+    # directly in this app's origin.
+    (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
+    app = Application(Config.load(tmp_path))
+    app.register(StorageServiceProvider)
+
+    storage: Storage = app.container.make(Storage)
+    await storage.put("uploaded.html", b"<script>alert(document.cookie)</script>")
+
+    async with client(app) as http:
+        url = storage.temporary_url("uploaded.html")  # type: ignore[union-attr]
+        response = await http.get(url)
+
+    assert response.status_code == 200
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["content-disposition"].startswith("attachment")
+
+
 async def test_signed_url_route_is_not_shadowed_by_static_mount(tmp_path: Path) -> None:
     """The plain StaticFiles mount at /storage/* must not intercept /storage/signed/*."""
     (tmp_path / ".env").write_text(f"STORAGE_PATH={tmp_path / 'storage'}\nAPP_SECRET_KEY=test-secret\n")
@@ -211,6 +233,29 @@ async def test_store_upload_rejects_disallowed_extension(tmp_path: Path) -> None
     with pytest.raises(ValidationException) as excinfo:
         await store_upload(storage, upload, allowed_extensions=("png", "jpg"))
     assert "file" in excinfo.value.errors
+
+
+async def test_store_upload_rejects_dangerous_extensions_even_with_no_allowlist(tmp_path: Path) -> None:
+    # Regression guard: allowed_extensions=None ("unrestricted") used to
+    # mean genuinely unrestricted, including .html/.svg/.js -- a stored
+    # XSS vector if the upload is ever served back and opened directly
+    # (the static mount, a signed URL, a CDN in front of the same bucket).
+    storage = LocalStorage(tmp_path)
+
+    for filename in ("payload.html", "payload.svg", "payload.js"):
+        upload = _FakeUpload(filename, b"<script>alert(1)</script>")
+        with pytest.raises(ValidationException) as excinfo:
+            await store_upload(storage, upload)
+        assert "file" in excinfo.value.errors
+
+
+async def test_store_upload_allows_a_dangerous_extension_when_explicitly_named(tmp_path: Path) -> None:
+    storage = LocalStorage(tmp_path)
+    upload = _FakeUpload("icon.svg", b"<svg></svg>")
+
+    stored = await store_upload(storage, upload, allowed_extensions=("svg",))
+
+    assert stored.key.endswith(".svg")
 
 
 async def test_store_upload_rejects_oversized_file(tmp_path: Path) -> None:
