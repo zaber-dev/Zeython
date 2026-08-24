@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from collections import defaultdict, deque
+from collections import OrderedDict, deque
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -48,17 +48,35 @@ class InMemoryRateLimiter(RateLimiter):
     than the window are dropped before counting. A single lock serializes
     hits — fine here since each check is a handful of in-memory operations,
     not I/O.
+
+    Bounded to ``max_tracked_keys`` distinct keys (default 100,000). An
+    idle key's now-empty bucket is only ever cleaned up by another
+    :meth:`hit` call for that *same* key -- without a bound, a key space
+    that includes request-supplied data (:func:`throttle`'s own docstring
+    suggests ``f"login:{email}"`` as an example key, precisely so distinct
+    accounts get separate limits) would let a flood of distinct
+    emails/IPs grow this process's memory without limit, one abandoned
+    entry per attempt. Past the cap, the least-recently-hit key is
+    evicted to make room for a new one -- the same "may reset a
+    rarely-used key's window a bit early under sustained load" trade-off
+    any bounded-memory rate limiter accepts, and a far safer failure mode
+    than unbounded growth.
     """
 
-    def __init__(self, *, clock: Callable[[], float] = time.monotonic) -> None:
-        self._hits: dict[str, deque[float]] = defaultdict(deque)
+    def __init__(self, *, clock: Callable[[], float] = time.monotonic, max_tracked_keys: int = 100_000) -> None:
+        self._hits: OrderedDict[str, deque[float]] = OrderedDict()
         self._lock = asyncio.Lock()
         self._clock = clock
+        self._max_tracked_keys = max_tracked_keys
 
     async def hit(self, key: str, *, limit: int, window: float) -> RateLimitResult:
         async with self._lock:
             now = self._clock()
-            bucket = self._hits[key]
+            bucket = self._hits.get(key)
+            if bucket is None:
+                bucket = deque()
+                self._hits[key] = bucket
+            self._hits.move_to_end(key)
             cutoff = now - window
 
             while bucket and bucket[0] <= cutoff:
@@ -66,19 +84,24 @@ class InMemoryRateLimiter(RateLimiter):
 
             if len(bucket) >= limit:
                 retry_after = max(bucket[0] + window - now, 0.0)
-                return RateLimitResult(
+                result = RateLimitResult(
                     allowed=False, limit=limit, remaining=0, retry_after=retry_after, reset_after=retry_after
                 )
+            else:
+                bucket.append(now)
+                reset_after = max(bucket[0] + window - now, 0.0)
+                result = RateLimitResult(
+                    allowed=True,
+                    limit=limit,
+                    remaining=max(limit - len(bucket), 0),
+                    retry_after=0.0,
+                    reset_after=reset_after,
+                )
 
-            bucket.append(now)
-            reset_after = max(bucket[0] + window - now, 0.0)
-            return RateLimitResult(
-                allowed=True,
-                limit=limit,
-                remaining=max(limit - len(bucket), 0),
-                retry_after=0.0,
-                reset_after=reset_after,
-            )
+            while len(self._hits) > self._max_tracked_keys:
+                self._hits.popitem(last=False)
+
+            return result
 
 
 class RedisRateLimiter(RateLimiter):
