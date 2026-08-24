@@ -76,9 +76,15 @@ class ValidationException(HTTPException):
     status_code = 422
     default_detail = "The given data was invalid."
 
-    def __init__(self, errors: dict[str, list[str]] | None = None, detail: str | None = None) -> None:
+    def __init__(
+        self,
+        errors: dict[str, list[str]] | None = None,
+        detail: str | None = None,
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         self.errors = errors or {}
-        super().__init__(detail)
+        super().__init__(detail, headers=headers)
 
 
 class TooManyRequestsException(HTTPException):
