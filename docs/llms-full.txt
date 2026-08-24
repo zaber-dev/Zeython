@@ -8071,6 +8071,8 @@ RateLimitMiddleware(
 
 Pure ASGI middleware applying a blanket per-IP limit to every request.
 
+Keyed under a `blanket:` prefix -- deliberately distinct from :func:`throttle`'s own default key (`f"ip:{client_ip(request)}"`), even though both are per-IP by default. Without that distinction, a request to a route also protected by :func:`throttle` (called with no explicit `key=`, so it uses that same default) would hit the exact same counter this middleware just hit for the same request -- double-counting a single request against one shared budget, and letting ordinary traffic to *other* routes eat into a route's own dedicated allowance (e.g. a login endpoint's brute-force protection silently sharing its counter with plain page views from the same IP).
+
 Source code in `src/zeython/rate_limit.py`
 
 ```python
