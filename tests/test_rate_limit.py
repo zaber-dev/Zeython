@@ -279,6 +279,46 @@ async def test_middleware_sets_ratelimit_headers_on_allowed_and_429_responses(tm
     assert denied.headers["X-RateLimit-Remaining"] == "0"
 
 
+async def test_blanket_middleware_and_throttle_do_not_share_a_counter(tmp_path: Path) -> None:
+    # Regression guard: the blanket middleware and throttle()'s own
+    # default key both used to be exactly f"ip:{ip}" -- identical, not
+    # just similarly shaped. A request to a throttle()-protected route
+    # would hit the same counter this middleware had just hit for that
+    # same request (double-counting one request against one shared
+    # budget), and unrelated traffic to *other* routes would eat into a
+    # route's own dedicated throttle() allowance.
+    # A high blanket limit -- deliberately not the thing under test here,
+    # only there so it never itself denies a request and muddy the result.
+    (tmp_path / ".env").write_text(
+        "RATE_LIMIT_ENABLED=true\nRATE_LIMIT_MAX_REQUESTS=100\nRATE_LIMIT_WINDOW_SECONDS=60\n"
+    )
+    app = _make_app(tmp_path)
+
+    @app.get("/other")
+    async def other(request):
+        return JSONResponse({"ok": True})
+
+    @app.get("/login")
+    async def login(request):
+        await throttle(request, limit=5, window=60)
+        return JSONResponse({"ok": True})
+
+    async with client(app) as http:
+        # Plain traffic to an unrelated route -- each of these still hits
+        # the blanket middleware's own counter.
+        await http.get("/other")
+        await http.get("/other")
+        await http.get("/other")
+
+        # /login's own throttle() counter must be untouched by that --
+        # its very first hit, reporting the full remaining budget.
+        login_response = await http.get("/login")
+
+    assert login_response.status_code == 200
+    assert login_response.headers["X-RateLimit-Limit"] == "5"
+    assert login_response.headers["X-RateLimit-Remaining"] == "4"
+
+
 async def test_rate_limiter_is_available_in_the_container(tmp_path: Path) -> None:
     app = _make_app(tmp_path)
     assert isinstance(app.container.make(RateLimiter), InMemoryRateLimiter)
