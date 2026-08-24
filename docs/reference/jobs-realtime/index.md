@@ -100,11 +100,25 @@ join() -> None
 
 Block until every job pushed so far has finished running. Mainly for tests.
 
+Includes a job pushed with `delay` -- `asyncio.Queue.join()` alone only tracks work already `put()` onto the queue, and a delayed push doesn't call `put()` until its wait elapses. This first waits for every currently-pending delayed push's own wait (however long that is) before falling through to the queue's own join, so this genuinely blocks for "as long as it takes", not just however long is already in flight.
+
 Source code in `src/zeython/queue.py`
 
 ```python
 async def join(self) -> None:
-    """Block until every job pushed so far has finished running. Mainly for tests."""
+    """Block until every job pushed so far has finished running. Mainly for tests.
+
+    Includes a job pushed with ``delay`` -- ``asyncio.Queue.join()``
+    alone only tracks work already ``put()`` onto the queue, and a
+    delayed push doesn't call ``put()`` until its wait elapses. This
+    first waits for every currently-pending delayed push's own wait
+    (however long that is) before falling through to the queue's own
+    join, so this genuinely blocks for "as long as it takes", not
+    just however long is already in flight.
+    """
+    delayed = list(self._delayed_tasks)
+    if delayed:
+        await asyncio.gather(*delayed, return_exceptions=True)
     await self._queue.join()
 ```
 
