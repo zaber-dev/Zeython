@@ -118,3 +118,51 @@ def test_a_required_dependency_still_resolves_by_its_real_bound_type() -> None:
 
     assert isinstance(car.engine, Engine)
     assert car.engine is container.make(Engine)
+
+
+class CircularA:
+    def __init__(self, b: CircularB) -> None:
+        self.b = b
+
+
+class CircularB:
+    def __init__(self, a: CircularA) -> None:
+        self.a = a
+
+
+def test_circular_dependency_raises_a_clear_error_instead_of_recursion_error() -> None:
+    container = Container()
+
+    with pytest.raises(BindingResolutionError, match="Circular dependency"):
+        container.make(CircularA)
+
+
+async def _make_engine_async() -> Engine:
+    return Engine()
+
+
+def test_an_async_factory_is_rejected_with_a_clear_error() -> None:
+    # Regression guard: Container.call() used to just do `fn(**kwargs)`
+    # with no check for a coroutine function -- registering an async
+    # factory silently produced a never-awaited coroutine object instead
+    # of a real instance. Worse for a singleton binding: that same dead
+    # coroutine got cached and handed back from every later make() call,
+    # and awaiting it anywhere else would raise "cannot reuse already
+    # awaited coroutine" the second time.
+    container = Container()
+    container.singleton(Engine, _make_engine_async)
+
+    with pytest.raises(BindingResolutionError, match="async factory"):
+        container.make(Engine)
+
+
+def test_a_factory_returning_an_awaitable_directly_is_also_rejected() -> None:
+    container = Container()
+
+    def factory() -> Engine:
+        return _make_engine_async()  # type: ignore[return-value]
+
+    container.singleton(Engine, factory)
+
+    with pytest.raises(BindingResolutionError, match="awaitable"):
+        container.make(Engine)
