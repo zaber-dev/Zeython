@@ -181,7 +181,14 @@ class NotificationServiceProvider(ServiceProvider):
     ``Notification`` example class, wired into a fresh project's
     ``app/Models/notification.py`` by default. Omit it if you only ever
     use the ``mail``/``broadcast`` channels; calling the ``database``
-    channel without one raises immediately, naming the fix.
+    channel without one raises a ``RuntimeError`` naming the fix -- but
+    :meth:`NotificationManager.notify` catches every channel's exception
+    for isolation (a down SMTP server shouldn't also swallow an unrelated
+    in-app notification), logging and reporting it rather than
+    propagating it to your caller. Check the logs (or Sentry, if
+    :mod:`zeython.error_monitoring` is configured) if a notification
+    silently doesn't show up, rather than expecting `notify()` itself to
+    raise.
     """
 
     def __init__(self, app: Any, *, record_model: type[Model] | None = None) -> None:

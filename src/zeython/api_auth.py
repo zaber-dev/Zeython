@@ -43,7 +43,16 @@ class TokenManager:
         self._serializer = URLSafeTimedSerializer(secret_key, salt=_SALT)
 
     def issue(self, user: Model) -> str:
-        """A signed token encoding ``user.id``. Opaque to the client -- don't parse it."""
+        """A signed token encoding ``user.id``.
+
+        Signed, not encrypted: ``itsdangerous`` protects against
+        *tampering* (a client can't forge or edit a valid token without
+        the secret key) but not against *reading* -- the payload is only
+        base64-encoded, trivially decodable by anyone holding the token,
+        the client it was issued to included. Fine for ``user_id`` alone;
+        don't extend this to encode anything that shouldn't be readable
+        by whoever holds the token.
+        """
         return self._serializer.dumps({"user_id": user.id})
 
     async def verify(self, token: str) -> Model | None:
