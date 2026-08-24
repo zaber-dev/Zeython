@@ -110,6 +110,48 @@ async def test_current_queries_is_empty_outside_a_request() -> None:
     assert current_queries() == []
 
 
+async def test_a_crashed_requests_queries_do_not_leak_into_later_requests(tmp_path: Path) -> None:
+    # Regression guard: a crash used to leave the contextvar bound to that
+    # request's query list forever (deliberately, so the crash handler
+    # could still read it) -- but since a later successful request's own
+    # reset() just unwinds back to that same stale binding instead of
+    # clearing it, the leaked list would keep reappearing indefinitely.
+    # An inline ASGITransport call has no per-request asyncio Task
+    # boundary, so this is directly observable within one test -- the same
+    # reason this uses raise_app_exceptions=False directly rather than
+    # zeython.testing.client(): Starlette's ServerErrorMiddleware always
+    # re-raises after sending its response (so a real server can log it,
+    # or a test client can opt into seeing it), which httpx would
+    # otherwise turn into a raised exception here instead of a response.
+    import httpx
+
+    app = await _make_app(tmp_path)
+
+    @app.get("/boom")
+    async def boom(request):
+        async with app.container.make(Database).session():
+            await ProfilerWidget.create(name="a")
+        raise RuntimeError("kaboom")
+
+    @app.get("/ok")
+    async def ok(request):
+        return JSONResponse({"ok": True})
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        crash_response = await http.get("/boom")
+        assert crash_response.status_code == 500
+        assert crash_response.json().get("queries")  # the crash's own queries, still reported
+
+        await http.get("/ok")
+        await http.get("/ok")
+
+    # Back in the ambient context (this test function's own asyncio Task,
+    # the same one the client ran every request on above) -- must not
+    # still see the crashed request's queries two clean requests later.
+    assert current_queries() == []
+
+
 async def test_query_count_is_scoped_per_request_not_cumulative(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
