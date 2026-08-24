@@ -207,7 +207,20 @@ async def throttle(request: Request, *, key: str | None = None, limit: int, wind
 
 
 class RateLimitMiddleware:
-    """Pure ASGI middleware applying a blanket per-IP limit to every request."""
+    """Pure ASGI middleware applying a blanket per-IP limit to every request.
+
+    Keyed under a ``blanket:`` prefix -- deliberately distinct from
+    :func:`throttle`'s own default key (``f"ip:{client_ip(request)}"``),
+    even though both are per-IP by default. Without that distinction, a
+    request to a route also protected by :func:`throttle` (called with
+    no explicit ``key=``, so it uses that same default) would hit the
+    exact same counter this middleware just hit for the same request --
+    double-counting a single request against one shared budget, and
+    letting ordinary traffic to *other* routes eat into a route's own
+    dedicated allowance (e.g. a login endpoint's brute-force protection
+    silently sharing its counter with plain page views from the same
+    IP).
+    """
 
     def __init__(self, app: object, *, limiter: RateLimiter, limit: int, window: float) -> None:
         self.app = app
@@ -221,7 +234,7 @@ class RateLimitMiddleware:
             return
 
         client = scope.get("client")
-        key = f"ip:{client[0]}" if client else "ip:unknown"
+        key = f"blanket:{client[0]}" if client else "blanket:unknown"
         result = await self.limiter.hit(key, limit=self.limit, window=self.window)
 
         if not result.allowed:
