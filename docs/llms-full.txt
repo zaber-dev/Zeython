@@ -5787,6 +5787,8 @@ Bases: `Exception`
 
 Base class for exceptions that should be rendered as HTTP responses.
 
+Only works as intended when `raise`\\ d from *inside routing* -- a route handler, or code it calls. Starlette's own `ExceptionMiddleware` (which owns the per-class handlers :func:`default_exception_handlers` registers for this hierarchy) sits *inside* every `add_middleware()` layer, wrapping only the router. Raising an `HTTPException` directly from a custom pure-ASGI middleware's `__call__` -- rather than a route handler -- skips that layer entirely: the exception propagates to `ServerErrorMiddleware` instead (outside everything), which has no per-class handler for it, so it's treated as a genuine unhandled error -- the intended status code and `headers=` are lost, and the caller gets a generic 500 instead. Call the handler directly and return/send its response instead of raising -- :class:`~zeython.csrf.CsrfMiddleware` does exactly this (see its `__call__`) specifically to avoid this trap.
+
 Source code in `src/zeython/exceptions.py`
 
 ```python
