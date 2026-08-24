@@ -28,14 +28,13 @@ def _isolate_loader_global_state(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(loader_module, "_current_project_root", None)
     monkeypatch.delitem(sys.modules, "main", raising=False)
-    # load_app() inserts each project root into sys.path and never removes
-    # it (harmless for its real callers -- a one-shot CLI process, or an
-    # MCP server that only ever points at one project) -- but across many
-    # short-lived tmp_path projects in this file, a later project with no
-    # main.py of its own can otherwise pick up an earlier test's leftover
-    # main.py from sys.path. Reset to the pristine, pre-any-test baseline
-    # (not just "whatever sys.path looked like when this test started") so
-    # earlier tests in this same file can't leak into later ones either.
+    # load_app() now removes the *previous* project's root from sys.path
+    # when switching to a new one (see test_load_app_raises_module_not_found_
+    # for_a_project_with_no_main_py_after_a_different_project_was_loaded
+    # below) -- but this fixture still resets to the pristine, pre-any-test
+    # baseline (not just "whatever sys.path looked like when this test
+    # started") as a belt-and-suspenders guard against any test in this
+    # file leaking sys.path state into a later one for an unrelated reason.
     monkeypatch.setattr(sys, "path", list(_PRISTINE_SYS_PATH))
 
 
@@ -80,6 +79,28 @@ def test_load_app_restores_the_working_directory_even_if_main_fails_to_import(
 def test_load_app_raises_module_not_found_without_a_main_py(tmp_path: Path) -> None:
     with pytest.raises(ModuleNotFoundError):
         load_app(tmp_path)
+
+
+def test_load_app_raises_module_not_found_for_a_project_with_no_main_py_after_a_different_project_was_loaded(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> None:
+    # Regression guard: "main" wasn't among sync_project_modules()'s
+    # tracked packages, and load_app() never removed a previous project's
+    # root from sys.path either -- so after successfully loading project
+    # A, asking to load project B (which has no main.py of its own) hit
+    # _import_main()'s "main" in sys.modules branch, which just reloaded
+    # A's already-cached module (still resolvable via A's leftover
+    # sys.path entry) instead of raising. load_app(B) would silently
+    # return A's Application -- a completely different, stale project --
+    # with no error at all.
+    project_a = tmp_path_factory.mktemp("loader_project_a")
+    _make_minimal_project(project_a, "Project A")
+    load_app(project_a)
+
+    project_b = tmp_path_factory.mktemp("loader_project_b")  # deliberately no main.py
+
+    with pytest.raises(ModuleNotFoundError):
+        load_app(project_b)
 
 
 def test_load_app_raises_attribute_error_when_main_has_no_app(tmp_path: Path) -> None:
