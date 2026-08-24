@@ -69,11 +69,20 @@ class MaintenanceModeMiddleware:
     the very next request, not after a process restart, and the read
     itself is cheap -- a single ``Path.exists()`` call is the entire cost
     once the app isn't down.
+
+    The bypass cookie is a bearer credential -- holding it skips
+    maintenance mode entirely for as long as the cookie lives -- so
+    ``secure`` should be set once the app is served over HTTPS (matches
+    :class:`~zeython.csrf.CsrfMiddleware`/the session cookie's own
+    ``secure=`` convention); left ``False`` by default only because a
+    plain local ``http://`` dev server can't set a ``Secure`` cookie at
+    all.
     """
 
-    def __init__(self, app: Any, *, store_path: Path) -> None:
+    def __init__(self, app: Any, *, store_path: Path, secure: bool = False) -> None:
         self.app = app
         self.store_path = store_path
+        self.secure = secure
 
     async def __call__(self, scope: dict, receive: Any, send: Any) -> None:
         if scope["type"] != "http" or not self.store_path.exists():
@@ -93,7 +102,9 @@ class MaintenanceModeMiddleware:
 
         if secret and request.url.path == f"/{secret}":
             response = RedirectResponse("/")
-            response.set_cookie(BYPASS_COOKIE_NAME, secret, httponly=True, samesite="lax")
+            response.set_cookie(
+                BYPASS_COOKIE_NAME, secret, httponly=True, samesite="lax", secure=self.secure
+            )
             await response(scope, receive, send)
             return
 
@@ -136,13 +147,20 @@ class MaintenanceModeServiceProvider(ServiceProvider):
 
     - ``MAINTENANCE_STORE_PATH`` -- default ``storage/framework/down.json``,
       relative to the project root.
+    - ``MAINTENANCE_SECURE_COOKIE`` -- default ``false``; set ``true`` once
+      you're serving over HTTPS, the same convention
+      ``SESSION_HTTPS_ONLY``/``session.https_only`` uses for the session
+      cookie (see :class:`~zeython.auth.AuthServiceProvider`) -- set this
+      independently since maintenance mode works without auth registered
+      at all.
     """
 
     def boot(self) -> None:
         store_path = maintenance_store_path(
             self.app.base_path, self.config.get("maintenance.store_path")
         )
-        self.app.add_middleware(MaintenanceModeMiddleware, store_path=store_path)
+        secure = bool(self.config.get("maintenance.secure_cookie", False))
+        self.app.add_middleware(MaintenanceModeMiddleware, store_path=store_path, secure=secure)
 
 
 __all__ = [
