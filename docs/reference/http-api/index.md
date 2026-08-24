@@ -36,7 +36,9 @@ async def hit(self, key: str, *, limit: int, window: float) -> RateLimitResult:
 
 ```python
 InMemoryRateLimiter(
-    *, clock: Callable[[], float] = time.monotonic
+    *,
+    clock: Callable[[], float] = time.monotonic,
+    max_tracked_keys: int = 100000,
 )
 ```
 
@@ -46,13 +48,16 @@ A sliding-window-log limiter, correct and simple, scoped to one process.
 
 Each key keeps a deque of hit timestamps; on every call, timestamps older than the window are dropped before counting. A single lock serializes hits — fine here since each check is a handful of in-memory operations, not I/O.
 
+Bounded to `max_tracked_keys` distinct keys (default 100,000). An idle key's now-empty bucket is only ever cleaned up by another :meth:`hit` call for that *same* key -- without a bound, a key space that includes request-supplied data (:func:`throttle`'s own docstring suggests `f"login:{email}"` as an example key, precisely so distinct accounts get separate limits) would let a flood of distinct emails/IPs grow this process's memory without limit, one abandoned entry per attempt. Past the cap, the least-recently-hit key is evicted to make room for a new one -- the same "may reset a rarely-used key's window a bit early under sustained load" trade-off any bounded-memory rate limiter accepts, and a far safer failure mode than unbounded growth.
+
 Source code in `src/zeython/rate_limit.py`
 
 ```python
-def __init__(self, *, clock: Callable[[], float] = time.monotonic) -> None:
-    self._hits: dict[str, deque[float]] = defaultdict(deque)
+def __init__(self, *, clock: Callable[[], float] = time.monotonic, max_tracked_keys: int = 100_000) -> None:
+    self._hits: OrderedDict[str, deque[float]] = OrderedDict()
     self._lock = asyncio.Lock()
     self._clock = clock
+    self._max_tracked_keys = max_tracked_keys
 ```
 
 ### RedisRateLimiter
