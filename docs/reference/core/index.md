@@ -1024,22 +1024,22 @@ def resource(self, path: str, controller_cls: type[Controller], *, only: Iterabl
     update->PUT/PATCH path/{id}, destroy->DELETE path/{id}.
     """
     controller = controller_cls()
-    action_map: dict[str, tuple[str, str]] = {
-        "index": ("GET", ""),
-        "store": ("POST", ""),
-        "show": ("GET", "/{id}"),
-        "update": ("PUT", "/{id}"),
-        "destroy": ("DELETE", "/{id}"),
+    action_map: dict[str, tuple[tuple[str, ...], str]] = {
+        "index": (("GET",), ""),
+        "store": (("POST",), ""),
+        "show": (("GET",), "/{id}"),
+        "update": (("PUT", "PATCH"), "/{id}"),
+        "destroy": (("DELETE",), "/{id}"),
     }
     allowed = set(only) if only is not None else set(action_map)
 
-    for action, (method, suffix) in action_map.items():
+    for action, (methods, suffix) in action_map.items():
         if action not in allowed or not hasattr(controller, action):
             continue
         handler = getattr(controller, action)
         route_path = self._full_path(f"{path.rstrip('/')}{suffix}")
         self.routes.append(
-            Route(route_path, handler, methods=[method], name=f"{path.strip('/')}.{action}")
+            Route(route_path, handler, methods=list(methods), name=f"{path.strip('/')}.{action}")
         )
 ```
 
