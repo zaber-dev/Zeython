@@ -79,6 +79,7 @@ class Application:
         self._providers: list[ServiceProvider] = []
         self._middleware: list[Middleware] = []
         self._booted = False
+        self._booted_provider_count = 0
         self._asgi: Starlette | None = None
 
     # -- Providers ------------------------------------------------------------------
@@ -110,10 +111,24 @@ class Application:
         self._middleware.insert(0, Middleware(middleware_class, **options))
 
     def boot(self) -> Application:
+        """Boot every registered provider, in registration order.
+
+        Resumable, not just idempotent: if a provider's ``boot()`` raises
+        (e.g. a transient "database not reachable yet" at the very first
+        request), providers before it in registration order are not
+        re-booted on the next call -- only the one that failed and any
+        after it. Without this, a naive "retry every provider" replay
+        would call an already-succeeded provider's ``boot()`` a second
+        time, and for a provider like ``DatabaseServiceProvider`` that
+        calls ``add_middleware()`` in ``boot()``, that means a second,
+        duplicate middleware layer added for the remaining life of the
+        process.
+        """
         if self._booted:
             return self
-        for provider in self._providers:
+        for provider in self._providers[self._booted_provider_count :]:
             provider.boot()
+            self._booted_provider_count += 1
         self._booted = True
         return self
 
