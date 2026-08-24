@@ -156,12 +156,15 @@ Container()
 
 A small service container supporting binding, singletons, and autowiring.
 
+Fully synchronous by design (bindings resolve at boot, well before an event loop is necessarily running) -- an async factory is rejected with a clear error rather than silently returning an unawaited, never-usable coroutine that a shared/singleton binding would then cache and hand out forever. A circular dependency (`A` needing `B` needing `A`) is likewise rejected with a clear error instead of recursing until Python's own `RecursionError`.
+
 Source code in `src/zeython/container.py`
 
 ```python
 def __init__(self) -> None:
     self._bindings: dict[Abstract, _Binding] = {}
     self._instances: dict[Abstract, Any] = {}
+    self._resolving: list[Abstract] = []
 ```
 
 #### bind
@@ -240,6 +243,10 @@ def make(self, abstract: Abstract, **overrides: Any) -> Any:
     if abstract in self._instances:
         return self._instances[abstract]
 
+    if abstract in self._resolving:
+        chain = " -> ".join(str(a) for a in (*self._resolving, abstract))
+        raise BindingResolutionError(f"Circular dependency detected: {chain}")
+
     binding = self._bindings.get(abstract)
     factory = binding.factory if binding else abstract
 
@@ -248,7 +255,35 @@ def make(self, abstract: Abstract, **overrides: Any) -> Any:
             f"Cannot resolve unbound abstract type {abstract!r}"
         )
 
-    instance = self.call(factory, **overrides)
+    # Unlike call() (also used to autowire an async handler's
+    # arguments -- e.g. Queue._invoke's `await container.call(job.handle)`
+    # -- where returning a coroutine for the caller to await is
+    # completely normal), make() promises a ready-to-use instance
+    # *right now*. An async factory can't deliver that: it would
+    # silently hand back a never-awaited coroutine instead, and for a
+    # shared/singleton binding, cache that same dead coroutine and
+    # return it from every future make() call.
+    if inspect.iscoroutinefunction(factory):
+        raise BindingResolutionError(
+            f"{factory!r} is an async factory bound for {abstract!r} -- make() needs a "
+            "ready instance synchronously and can't await it. Bind a synchronous factory, "
+            "or construct the instance yourself in an async context and register it with "
+            "container.instance(...)."
+        )
+
+    self._resolving.append(abstract)
+    try:
+        instance = self.call(factory, **overrides)
+    finally:
+        self._resolving.pop()
+
+    if inspect.isawaitable(instance):
+        raise BindingResolutionError(
+            f"The factory bound for {abstract!r} returned an awaitable instead of a real "
+            "instance -- make() needs a ready instance synchronously and can't await it. "
+            "Bind a synchronous factory, or construct the instance yourself in an async "
+            "context and register it with container.instance(...)."
+        )
 
     if binding is not None and binding.shared:
         self._instances[abstract] = instance
