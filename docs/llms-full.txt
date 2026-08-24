@@ -9790,19 +9790,24 @@ Maintenance mode: take the whole app offline for a deploy or a risky migration w
 ### MaintenanceModeMiddleware
 
 ```python
-MaintenanceModeMiddleware(app: Any, *, store_path: Path)
+MaintenanceModeMiddleware(
+    app: Any, *, store_path: Path, secure: bool = False
+)
 ```
 
 Pure ASGI middleware: while the flag file is present, every request gets a `503` -- except one from an allowed IP, or one carrying a valid bypass (a cookie set by visiting `/<secret>` once).
 
 Reads the flag file fresh on every request rather than caching its contents in memory: `zeython up` removing the file must take effect on the very next request, not after a process restart, and the read itself is cheap -- a single `Path.exists()` call is the entire cost once the app isn't down.
 
+The bypass cookie is a bearer credential -- holding it skips maintenance mode entirely for as long as the cookie lives -- so `secure` should be set once the app is served over HTTPS (matches :class:`~zeython.csrf.CsrfMiddleware`/the session cookie's own `secure=` convention); left `False` by default only because a plain local `http://` dev server can't set a `Secure` cookie at all.
+
 Source code in `src/zeython/maintenance.py`
 
 ```python
-def __init__(self, app: Any, *, store_path: Path) -> None:
+def __init__(self, app: Any, *, store_path: Path, secure: bool = False) -> None:
     self.app = app
     self.store_path = store_path
+    self.secure = secure
 ```
 
 ### MaintenanceModeServiceProvider
@@ -9820,6 +9825,7 @@ Safe to always register, the same reasoning :class:`~zeython.request_id.RequestI
 Register this **last**, after every other provider that adds middleware (`DatabaseServiceProvider` included) -- the most recently registered middleware wraps outermost, and maintenance mode needs to intercept a request before anything else runs, including opening a database session. That matters most exactly when this feature is useful: a migration in progress, a database that's briefly down.
 
 - `MAINTENANCE_STORE_PATH` -- default `storage/framework/down.json`, relative to the project root.
+- `MAINTENANCE_SECURE_COOKIE` -- default `false`; set `true` once you're serving over HTTPS, the same convention `SESSION_HTTPS_ONLY`/`session.https_only` uses for the session cookie (see :class:`~zeython.auth.AuthServiceProvider`) -- set this independently since maintenance mode works without auth registered at all.
 
 Source code in `src/zeython/providers.py`
 

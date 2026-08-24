@@ -3756,7 +3756,9 @@ mechanism for checking the site while it's "down" for everyone else.</p>
 
 
 <a href="#zeython.maintenance.MaintenanceModeMiddleware" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MaintenanceModeMiddleware</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MaintenanceModeMiddleware</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">secure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3771,6 +3773,13 @@ contents in memory: <code>zeython up</code> removing the file must take effect o
 the very next request, not after a process restart, and the read
 itself is cheap -- a single <code>Path.exists()</code> call is the entire cost
 once the app isn't down.</p>
+<p>The bypass cookie is a bearer credential -- holding it skips
+maintenance mode entirely for as long as the cookie lives -- so
+<code>secure</code> should be set once the app is served over HTTPS (matches
+:class:<code>~zeython.csrf.CsrfMiddleware</code>/the session cookie's own
+<code>secure=</code> convention); left <code>False</code> by default only because a
+plain local <code>http://</code> dev server can't set a <code>Secure</code> cookie at
+all.</p>
 
 
 
@@ -3781,11 +3790,13 @@ once the app isn't down.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>src/zeython/maintenance.py</code></summary>
-                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-74">74</a></span>
-<span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
-</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">store_path</span> <span class="o">=</span> <span class="n">store_path</span>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-82">82</a></span>
+<span class="normal"><a href="#__codelineno-0-83">83</a></span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span>
+<span class="normal"><a href="#__codelineno-0-85">85</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">secure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">store_path</span> <span class="o">=</span> <span class="n">store_path</span>
+</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">secure</span> <span class="o">=</span> <span class="n">secure</span>
 </span></code></pre></div></td></tr></table></div>
                   </details>
 
@@ -3844,6 +3855,12 @@ useful: a migration in progress, a database that's briefly down.</p>
 <ul>
 <li><code>MAINTENANCE_STORE_PATH</code> -- default <code>storage/framework/down.json</code>,
   relative to the project root.</li>
+<li><code>MAINTENANCE_SECURE_COOKIE</code> -- default <code>false</code>; set <code>true</code> once
+  you're serving over HTTPS, the same convention
+  <code>SESSION_HTTPS_ONLY</code>/<code>session.https_only</code> uses for the session
+  cookie (see :class:<code>~zeython.auth.AuthServiceProvider</code>) -- set this
+  independently since maintenance mode works without auth registered
+  at all.</li>
 </ul>
 
 
