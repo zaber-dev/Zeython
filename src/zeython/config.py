@@ -11,8 +11,20 @@ from dotenv import dotenv_values
 _TRUE_VALUES = {"1", "true", "yes", "on"}
 _FALSE_VALUES = {"0", "false", "no", "off"}
 
+# A key ending in one of these is never type-coerced, regardless of what
+# its value looks like -- kept as the exact raw string. Without this, an
+# all-digit secret (a plausible, if sloppy, dev value like
+# APP_SECRET_KEY=12345678) silently becomes a Python int instead of a
+# str, and the same for a secret that happens to spell "true"/"false"/
+# "yes"/"no"/"on"/"off". Both crash the first time anything tries to use
+# it as a string (signing a session cookie, an API token, a storage URL).
+_NEVER_COERCE_KEY_SUFFIXES = ("_KEY", "_SECRET", "_TOKEN", "_PASSWORD", "_HASH")
 
-def _coerce(value: str) -> Any:
+
+def _coerce(key: str, value: str) -> Any:
+    if any(key.endswith(suffix) for suffix in _NEVER_COERCE_KEY_SUFFIXES):
+        return value
+
     lowered = value.lower()
     if lowered in _TRUE_VALUES:
         return True
@@ -47,10 +59,10 @@ class Config:
         if env_path.exists():
             for key, raw in dotenv_values(env_path).items():
                 if raw is not None:
-                    values[key] = _coerce(raw)
+                    values[key] = _coerce(key, raw)
 
         for key, raw in os.environ.items():
-            values[key] = _coerce(raw)
+            values[key] = _coerce(key, raw)
 
         return cls(values, base)
 
