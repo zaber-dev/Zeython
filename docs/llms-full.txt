@@ -4879,7 +4879,23 @@ Source code in `src/zeython/container.py`
 ```python
 def call(self, fn: Callable[..., T], **overrides: Any) -> T:
     """Call ``fn``, resolving any missing arguments from the container."""
-    signature = inspect.signature(fn)
+    # eval_str=True resolves PEP 563 postponed annotations (`from
+    # __future__ import annotations`, used throughout zeython's own
+    # source) back into real objects. Without it, every annotation
+    # inspected below is the literal *string* "SomeClass" rather than
+    # the class itself -- self.has()/inspect.isclass() then silently
+    # fail on every parameter, either raising a misleading "no binding
+    # registered" for a required dependency that *is* bound (just not
+    # under a string key), or silently skipping an optional one
+    # (falling back to its default instead of an autowired instance).
+    # No-op for a function whose annotations were never stringified.
+    try:
+        signature = inspect.signature(fn, eval_str=True)
+    except NameError as exc:
+        raise BindingResolutionError(
+            f"Cannot resolve type hints for {fn!r}: {exc}. A forward-referenced "
+            "annotation must be resolvable from the function's own module globals."
+        ) from exc
     kwargs: dict[str, Any] = {}
 
     for name, param in signature.parameters.items():
