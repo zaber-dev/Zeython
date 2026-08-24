@@ -100,7 +100,9 @@ class MaintenanceModeMiddleware:
         secret = payload.get("secret")
         request = Request(scope, receive)
 
-        if secret and request.url.path == f"/{secret}":
+        # Constant-time, matching the bypass-cookie check just below --
+        # both compare a request-supplied value against the same secret.
+        if secret and secrets.compare_digest(request.url.path, f"/{secret}"):
             response = RedirectResponse("/")
             response.set_cookie(
                 BYPASS_COOKIE_NAME, secret, httponly=True, samesite="lax", secure=self.secure

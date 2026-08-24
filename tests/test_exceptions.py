@@ -99,6 +99,15 @@ def test_validation_exception_stores_field_errors() -> None:
     assert exc.errors == {"email": ["is required"]}
 
 
+def test_validation_exception_accepts_headers_like_its_base_class() -> None:
+    # Regression guard: unlike its base HTTPException, ValidationException's
+    # __init__ didn't accept headers=, so a 422 couldn't carry a custom
+    # header (e.g. Retry-After on a rate-limited validation failure).
+    exc = ValidationException({"email": ["is required"]}, headers={"Retry-After": "30"})
+    assert exc.errors == {"email": ["is required"]}
+    assert exc.headers == {"Retry-After": "30"}
+
+
 # -- http_exception_handler --------------------------------------------------------------
 
 
