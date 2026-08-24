@@ -1,4 +1,5 @@
 import httpx
+import pytest
 from starlette.responses import JSONResponse, PlainTextResponse
 
 from zeython.application import Application
@@ -128,6 +129,41 @@ async def test_the_most_recently_added_middleware_wraps_outermost(tmp_path) -> N
         "added-first:after",
         "added-last:after",
     ]
+
+
+def test_a_retried_boot_after_a_mid_boot_failure_does_not_reboot_earlier_providers(tmp_path) -> None:
+    # Regression guard: boot() must be resumable, not just idempotent. A
+    # naive "if self._booted: return; else re-run every provider" would
+    # re-boot an already-succeeded provider a second time after a later
+    # provider's boot() raises -- for a provider that calls
+    # add_middleware() in boot() (DatabaseServiceProvider, etc.), that
+    # means a duplicate middleware layer for the rest of the process.
+    from zeython.providers import ServiceProvider
+
+    boot_calls: list[str] = []
+    attempts = {"count": 0}
+
+    class AlreadySucceeds(ServiceProvider):
+        def boot(self) -> None:
+            boot_calls.append("already-succeeds")
+
+    class FlakyOnFirstAttempt(ServiceProvider):
+        def boot(self) -> None:
+            attempts["count"] += 1
+            if attempts["count"] == 1:
+                raise RuntimeError("transient failure")
+            boot_calls.append("flaky")
+
+    app = _make_app(tmp_path)
+    app.register(AlreadySucceeds)
+    app.register(FlakyOnFirstAttempt)
+
+    with pytest.raises(RuntimeError, match="transient failure"):
+        app.boot()
+    assert boot_calls == ["already-succeeds"]
+
+    app.boot()
+    assert boot_calls == ["already-succeeds", "flaky"]
 
 
 def test_container_exposes_config_and_router(tmp_path) -> None:
