@@ -4971,6 +4971,16 @@ def __init__(self, values: dict[str, Any], base_path: Path) -> None:
     self.base_path = base_path
 ```
 
+#### debug
+
+```python
+debug: bool
+```
+
+`APP_DEBUG` -- `False` unless explicitly set to true.
+
+Deliberately *not* inferred from :attr:`environment` (e.g. `environment != "production"`): that would make debug mode -- full tracebacks, executed SQL, and (for a browser request) an HTML page with source snippets, all in the response body -- the default the moment `APP_ENV` is merely left unset, which is exactly the kind of thing that's easy to forget on a real deployment (`DATABASE_URL`/`APP_SECRET_KEY` tend to get remembered; `APP_ENV` doesn't always). Debug output now requires an affirmative `APP_DEBUG=true` -- which is exactly what `zeython new`'s generated `.env.example` already sets for local development, so this doesn't change the default local dev experience at all.
+
 #### get
 
 ```python
