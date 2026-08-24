@@ -108,23 +108,26 @@ class RequestProfilerMiddleware:
 
         try:
             await self.app(scope, receive, send_with_debug_headers)
-        except BaseException:
-            # Deliberately no reset here. Starlette's ServerErrorMiddleware
-            # sits *outside* every user-added middleware (including this
-            # one) -- the registered Exception handler, and the debug
-            # page/body it builds (see zeython.exceptions), only runs
-            # after this exception has already propagated past us. A
-            # naive try/finally would reset the contextvar right here,
-            # wiping this request's query log before that handler ever
-            # gets to read it -- exactly when it's most useful: a request
-            # that crashed. Nothing leaks from skipping it: the
-            # contextvar doesn't outlive the request in a real deployment
-            # (each gets its own asyncio Task), and the very next request
-            # always replaces this binding with a fresh, empty list via
-            # its own set() call regardless.
+        except BaseException as exc:
+            # Starlette's ServerErrorMiddleware sits *outside* every
+            # user-added middleware (including this one) -- the registered
+            # Exception handler, and the debug page/body it builds (see
+            # zeython.exceptions), only runs after this exception has
+            # already propagated past us, by which point this middleware's
+            # own __call__ frame (and the reset below) has already run. So
+            # the query list can't be handed off via the contextvar alone
+            # -- it's stashed directly on the exception instead, which
+            # zeython.exceptions reads back off `exc` if present. Without
+            # this, leaving the contextvar bound past this request (the
+            # previous approach) so that handler *could* still read it
+            # would leak this crashed request's queries into whatever
+            # later code shares this asyncio Task -- harmless under a real
+            # server's one-Task-per-connection model, but not under
+            # zeython.testing.client()'s inline ASGI calls, which reuse
+            # one Task across many requests in the same test.
+            exc._zeython_profiler_queries = list(queries)  # type: ignore[attr-defined]  # noqa: SLF001
             raise
         else:
-            _current_queries.reset(token)
             path = scope.get("path", "?")
             for query in queries:
                 if query.duration_ms >= self.slow_query_threshold_ms:
@@ -134,6 +137,8 @@ class RequestProfilerMiddleware:
                         query.duration_ms,
                         " ".join(query.statement.split()),
                     )
+        finally:
+            _current_queries.reset(token)
 
 
 class RequestProfilerServiceProvider(ServiceProvider):

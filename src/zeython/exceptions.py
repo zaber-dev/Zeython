@@ -91,9 +91,22 @@ def _format_traceback(exc: BaseException) -> list[str]:
     return traceback.format_exception(type(exc), exc, exc.__traceback__)
 
 
-def _debug_queries() -> list[Any]:
-    """The current request's executed SQL queries (see
+def _debug_queries(exc: BaseException | None = None) -> list[Any]:
+    """The crashed request's executed SQL queries (see
     :mod:`zeython.profiler`), or ``[]`` if that provider isn't registered.
+
+    Prefers queries stashed directly on ``exc`` (by
+    ``RequestProfilerMiddleware``'s ``except`` clause) over the
+    :mod:`zeython.profiler` contextvar: by the time a crash reaches this
+    handler, the middleware has already reset that contextvar, since
+    leaving it bound past the request that crashed -- purely so this
+    function could read it -- would leak a stale query list into
+    whatever else shares the same asyncio Task afterward (harmless under
+    a real server's one-Task-per-connection model, but not under
+    ``zeython.testing.client()``'s inline ASGI calls, which reuse one
+    Task across many requests in the same test). Falls back to the
+    contextvar for the handful of callers with no exception object to
+    hand in (e.g. an HTML debug page rendered outside a crash).
 
     A lazy, in-function import rather than a module-level one: this module
     is foundational (``zeython.db.model`` imports ``ValidationException``
@@ -104,6 +117,10 @@ def _debug_queries() -> list[Any]:
     runs (inside a request), every module involved has already finished
     loading, so the same import here is completely safe.
     """
+    if exc is not None:
+        stashed = getattr(exc, "_zeython_profiler_queries", None)
+        if stashed is not None:
+            return list(stashed)
     try:
         from zeython.profiler import current_queries
     except ImportError:
@@ -111,8 +128,8 @@ def _debug_queries() -> list[Any]:
     return list(current_queries())
 
 
-def _debug_queries_for_json() -> list[dict[str, Any]] | None:
-    queries = _debug_queries()
+def _debug_queries_for_json(exc: BaseException | None = None) -> list[dict[str, Any]] | None:
+    queries = _debug_queries(exc)
     if not queries:
         return None
     return [{"sql": " ".join(query.statement.split()), "duration_ms": query.duration_ms} for query in queries]
@@ -226,7 +243,7 @@ def _render_debug_html(request: Request, exc: BaseException) -> str:
     method = getattr(request, "method", "")
     path = getattr(getattr(request, "url", None), "path", "")
 
-    queries = _debug_queries()
+    queries = _debug_queries(exc)
     queries_section = ""
     if queries:
         rows = "".join(
@@ -345,7 +362,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Respo
     if _wants_problem_json(request):
         exception_detail = f"{type(exc).__name__}: {exc}" if debug else None
         exc_traceback = _format_traceback(exc) if debug else None
-        queries = _debug_queries_for_json() if debug else None
+        queries = _debug_queries_for_json(exc) if debug else None
         return _problem_response(
             500,
             "An unexpected error occurred.",
@@ -365,7 +382,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Respo
     if debug:
         payload["exception"] = f"{type(exc).__name__}: {exc}"
         payload["traceback"] = _format_traceback(exc)
-        queries = _debug_queries_for_json()
+        queries = _debug_queries_for_json(exc)
         if queries:
             payload["queries"] = queries
     return JSONResponse(payload, status_code=500)
