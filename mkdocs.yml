@@ -45,6 +45,7 @@ nav:
       - Localization: localization.md
       - Events: events.md
       - Notifications: notifications.md
+      - Audit Logging: audit-log.md
       - Feature Flags: feature-flags.md
       - Background Jobs: queues.md
       - Scheduling: scheduling.md
@@ -200,6 +201,7 @@ plugins:
           - localization.md
           - events.md
           - notifications.md
+          - audit-log.md
           - feature-flags.md
           - queues.md
           - scheduling.md

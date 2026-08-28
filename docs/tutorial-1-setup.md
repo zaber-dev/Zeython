@@ -71,10 +71,18 @@ rest of this tutorial.
 A generated project ships with a working `User` model and session
 authentication out of the box (see [Authentication](authentication.md)
 for the full picture later) — you get to use it for free instead of
-building login from scratch:
+building login from scratch. One thing to know before the very first
+request: every unsafe method (`POST`/`PUT`/`PATCH`/`DELETE`) needs a CSRF
+token back via a header, even this one — see [CSRF Protection](csrf.md)
+for why. A safe `GET` hands you that token as a cookie, so grab it once
+and pass it back:
 
 ```bash
-curl -sS -c cookies.txt -X POST http://127.0.0.1:8000/register \
+curl -sS -c cookies.txt http://127.0.0.1:8000/ > /dev/null
+CSRF=$(grep csrf_token cookies.txt | awk '{print $NF}')
+
+curl -sS -b cookies.txt -c cookies.txt -H "X-CSRF-Token: $CSRF" \
+  -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'
 ```
@@ -83,9 +91,12 @@ curl -sS -c cookies.txt -X POST http://127.0.0.1:8000/register \
 {"name":"Ada","email":"ada@example.com","id":1,"created_at":"...","updated_at":"...","is_deleted":false,"deleted_at":null}
 ```
 
-`-c cookies.txt` saves the session cookie `/register` sets — you're now
-logged in as Ada, and every following `curl` in this tutorial that
-passes `-b cookies.txt` will be authenticated as her. Confirm it:
+`cookies.txt` now holds that CSRF cookie plus the session cookie
+`/register` set — you're logged in as Ada, and every following `curl` in
+this tutorial that passes `-b cookies.txt` will be authenticated as her
+(and, for unsafe methods, needs `-H "X-CSRF-Token: $CSRF"` alongside it —
+recompute `$CSRF` from `cookies.txt` if you're picking this up in a fresh
+terminal). Confirm it:
 
 ```bash
 curl -sS -b cookies.txt http://127.0.0.1:8000/me
@@ -97,9 +108,9 @@ curl -sS -b cookies.txt http://127.0.0.1:8000/me
 
 That's the whole account system you'd otherwise hand-roll — password
 hashing, a signed session cookie, CSRF protection on every unsafe
-request from here on (you'll deal with that directly in
-[Part 5](tutorial-5-auth.md), when it's TaskFlow's own routes that need
-protecting) — already wired up, already tested, already documented.
+request (Parts 2-4 reuse the same `$CSRF` this way; [Part 5](tutorial-5-auth.md)
+adds actual login *requirements* to TaskFlow's own routes) — already
+wired up, already tested, already documented.
 
 Next: [Part 2 — Models](tutorial-2-models.md), where TaskFlow actually
 starts.

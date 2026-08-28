@@ -45,9 +45,11 @@ def test_new_project_creates_the_full_directory_layout(tmp_path: Path) -> None:
         "app/Controllers/__init__.py",
         "app/Models/__init__.py",
         "app/Models/notification.py",
+        "app/Models/audit_log.py",
         "app/Notifications/__init__.py",
         "app/Notifications/welcome_notification.py",
         "app/Providers/app_feature_service_provider.py",
+        "app/Providers/app_audit_service_provider.py",
         "app/Middleware/__init__.py",
         "app/Jobs/__init__.py",
         "app/Providers/__init__.py",
@@ -287,6 +289,21 @@ def test_new_project_migrations_env_enables_sqlite_batch_mode(tmp_path: Path) ->
 
     env_py = (destination / "migrations" / "env.py").read_text()
     assert env_py.count("render_as_batch=True") == 2
+
+
+def test_new_project_models_init_imports_audit_log(tmp_path: Path) -> None:
+    # migrations/env.py does `from app.Models import *` to register every
+    # model's table on Base.metadata before autogenerate runs -- a model
+    # module that exists on disk but isn't imported from app/Models/__init__.py
+    # is invisible to `alembic revision --autogenerate`, so a generated
+    # project would migrate every table except audit_logs and silently drop
+    # every audit entry with "no such table: audit_logs". Regression guard
+    # for exactly that gap.
+    destination = tmp_path / "my_blog"
+    scaffold.new_project("My Blog", destination)
+
+    init_contents = (destination / "app" / "Models" / "__init__.py").read_text()
+    assert "from app.Models.audit_log import AuditLog" in init_contents
 
 
 def test_new_project_conftest_isolates_tests_from_the_dev_database(tmp_path: Path) -> None:
