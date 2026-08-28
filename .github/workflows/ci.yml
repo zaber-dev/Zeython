@@ -45,6 +45,31 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: pytest -v
 
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      # A floor, not a target -- currently ~94%. Set well below that so
+      # ordinary fluctuation doesn't break CI, but high enough to catch a
+      # real drop (a new module landing with no tests at all, say).
+      - run: pytest --cov=zeython --cov-report=term-missing --cov-fail-under=90
+
   scaffold-smoke-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -57,6 +82,14 @@ jobs:
       - run: pip install -e .
       - name: Build a local zeython wheel (not on a real index yet, for the Docker step below)
         run: pip wheel . --no-deps -w /tmp/zeython-wheel
+      - name: Confirm the wheel ships its PEP 561 py.typed marker
+        # The "Typing :: Typed" classifier in pyproject.toml is a lie unless
+        # this file actually reaches the built package -- mypy/pyright then
+        # treat installed zeython as untyped with no obvious error pointing
+        # back here. Checked against the real wheel, not just that the file
+        # exists in the source tree, so a future packaging change that drops
+        # it can't pass silently.
+        run: unzip -l /tmp/zeython-wheel/*.whl | grep -q "zeython/py.typed"
       - name: Generate a project and run its test suite
         run: |
           zeython new "CI Smoke Test" --path /tmp/ci-smoke-test

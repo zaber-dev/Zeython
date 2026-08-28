@@ -53,6 +53,8 @@ docs/                     # mkdocs source
 - Keep the core small and typed. Every public function/method should have type
   hints; `mypy src/zeython` must pass clean.
 - Add tests for anything you change in `src/zeython/` — `pytest` must pass.
+  CI also enforces a coverage floor (`pytest --cov=zeython --cov-fail-under=90`,
+  currently sitting around 94% — see the `coverage` job).
 - Run `ruff check src tests` before opening a PR; CI enforces it.
 - If you change `src/zeython/cli/templates/starter/`, regenerate a project with
   `zeython new` and confirm it boots (`zeython serve`) and its own `pytest`
