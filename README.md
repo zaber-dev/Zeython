@@ -45,8 +45,15 @@ scaffolding on every project. Zeython does that assembly once:
   container for your own routes and jobs to call, zero-config by default
   (`EchoAI`, no credentials needed) and one line to switch to a real
   Anthropic-backed client. See [docs/ai.md](docs/ai.md).
+- **Enterprise-grade security and compliance, out of the box** — RBAC-style
+  authorization (`Gate`/Policies), row-level multi-tenancy, TOTP two-factor
+  auth with recovery codes, and an automatic per-field audit trail on any
+  model — the features most frameworks leave you to bolt on yourself. See
+  [Authorization](docs/authorization.md), [Multi-Tenancy](docs/multi-tenancy.md),
+  [MFA](docs/mfa.md), [Audit Logging](docs/audit-log.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
-  and a pytest suite; it is not scaffolding wrapped around unfinished features.
+  ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
+  suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
 
 ## Quick start
 

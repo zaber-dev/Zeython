@@ -136,9 +136,13 @@ GPL-3.0 to MIT.
 - Published benchmarks: Zeython vs. raw Starlette vs. FastAPI, with
   methodology and caveats disclosed.
 - CI: lint (ruff), type-check (mypy), tests across Python 3.11–3.13
-  (with a live Redis service container), and a scaffold smoke test that
-  generates a project, migrates it, and runs its own test suite.
+  (with a live Redis service container), a coverage floor (~94% actual,
+  enforced at 90%), and a scaffold smoke test that generates a project,
+  migrates it, and runs its own test suite.
 - `AGENTS.md` for AI coding agents working in Zeython codebases.
+- A `py.typed` marker (PEP 561), actually shipped in the built wheel and
+  verified there in CI — the `"Typing :: Typed"` classifier was previously
+  aspirational only.
 
 ### Removed
 
