@@ -2861,25 +2861,36 @@ rest of this tutorial.</p>
 <p>A generated project ships with a working <code>User</code> model and session
 authentication out of the box (see <a href="../authentication/">Authentication</a>
 for the full picture later) — you get to use it for free instead of
-building login from scratch:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-c<span class="w"> </span>cookies.txt<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'</span>
+building login from scratch. One thing to know before the very first
+request: every unsafe method (<code>POST</code>/<code>PUT</code>/<code>PATCH</code>/<code>DELETE</code>) needs a CSRF
+token back via a header, even this one — see <a href="../csrf/">CSRF Protection</a>
+for why. A safe <code>GET</code> hands you that token as a cookie, so grab it once
+and pass it back:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-c<span class="w"> </span>cookies.txt<span class="w"> </span>http://127.0.0.1:8000/<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">CSRF</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>csrf_token<span class="w"> </span>cookies.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{print $NF}'</span><span class="k">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>-c<span class="w"> </span>cookies.txt<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: </span><span class="nv">$CSRF</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/register<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'</span>
 </span></code></pre></div>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
 </span></code></pre></div>
-<p><code>-c cookies.txt</code> saves the session cookie <code>/register</code> sets — you're now
-logged in as Ada, and every following <code>curl</code> in this tutorial that
-passes <code>-b cookies.txt</code> will be authenticated as her. Confirm it:</p>
+<p><code>cookies.txt</code> now holds that CSRF cookie plus the session cookie
+<code>/register</code> set — you're logged in as Ada, and every following <code>curl</code> in
+this tutorial that passes <code>-b cookies.txt</code> will be authenticated as her
+(and, for unsafe methods, needs <code>-H "X-CSRF-Token: $CSRF"</code> alongside it —
+recompute <code>$CSRF</code> from <code>cookies.txt</code> if you're picking this up in a fresh
+terminal). Confirm it:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>http://127.0.0.1:8000/me
 </span></code></pre></div>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="s2">"Ada"</span><span class="p">,</span><span class="nt">"email"</span><span class="p">:</span><span class="s2">"ada@example.com"</span><span class="p">,</span><span class="nt">"id"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nt">"created_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"updated_at"</span><span class="p">:</span><span class="s2">"..."</span><span class="p">,</span><span class="nt">"is_deleted"</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span><span class="nt">"deleted_at"</span><span class="p">:</span><span class="kc">null</span><span class="p">}</span>
 </span></code></pre></div>
 <p>That's the whole account system you'd otherwise hand-roll — password
 hashing, a signed session cookie, CSRF protection on every unsafe
-request from here on (you'll deal with that directly in
-<a href="../tutorial-5-auth/">Part 5</a>, when it's TaskFlow's own routes that need
-protecting) — already wired up, already tested, already documented.</p>
+request (Parts 2-4 reuse the same <code>$CSRF</code> this way; <a href="../tutorial-5-auth/">Part 5</a>
+adds actual login <em>requirements</em> to TaskFlow's own routes) — already
+wired up, already tested, already documented.</p>
 <p>Next: <a href="../tutorial-2-models/">Part 2 — Models</a>, where TaskFlow actually
 starts.</p>
 

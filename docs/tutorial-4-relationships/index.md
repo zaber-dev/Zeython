@@ -88,10 +88,10 @@ async def store(self, request):
 
 (`store` re-fetches with `include=` after creating, rather than trying to load the relationship onto the just-saved instance — simpler than juggling two different code paths for "freshly created" vs. "loaded from the database," and one extra indexed lookup is cheap.)
 
-Try it:
+Try it (same `cookies.txt`/`$CSRF` as the earlier parts):
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/tasks \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/tasks \
   -H 'Content-Type: application/json' \
   -d '{"title": "Design the new homepage", "project_id": 1}'
 ```

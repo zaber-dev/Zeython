@@ -2860,8 +2860,10 @@ against the database and writes the migration for you:</p>
 </span></code></pre></div>
 <p>The first command writes a new file under <code>migrations/versions/</code> (open
 it — it's plain, readable Alembic code, not a black box); the second
-actually applies it. Confirm the tables exist by creating one directly:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/projects<span class="w"> </span><span class="se">\</span>
+actually applies it. Confirm the tables exist by creating one directly
+(reusing <code>cookies.txt</code>/<code>$CSRF</code> from <a href="../tutorial-1-setup/#try-the-auth-thats-already-there">Part 1</a> --
+every unsafe request needs that header, not just the auth ones):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sS<span class="w"> </span>-b<span class="w"> </span>cookies.txt<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-CSRF-Token: </span><span class="nv">$CSRF</span><span class="s2">"</span><span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://127.0.0.1:8000/projects<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"name": "Website Redesign"}'</span>
 </span></code></pre></div>

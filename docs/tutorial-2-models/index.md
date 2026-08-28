@@ -76,10 +76,10 @@ zeython db revision -m "add projects and tasks"
 zeython db migrate
 ```
 
-The first command writes a new file under `migrations/versions/` (open it — it's plain, readable Alembic code, not a black box); the second actually applies it. Confirm the tables exist by creating one directly:
+The first command writes a new file under `migrations/versions/` (open it — it's plain, readable Alembic code, not a black box); the second actually applies it. Confirm the tables exist by creating one directly (reusing `cookies.txt`/`$CSRF` from [Part 1](https://zeython.zaber.dev/docs/tutorial-1-setup/#try-the-auth-thats-already-there) -- every unsafe request needs that header, not just the auth ones):
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/projects \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/projects \
   -H 'Content-Type: application/json' \
   -d '{"name": "Website Redesign"}'
 ```

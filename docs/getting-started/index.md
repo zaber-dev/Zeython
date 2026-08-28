@@ -44,10 +44,13 @@ my_blog/
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try registering a user and listing them:
+Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try registering a user and listing them. CSRF protection is on by default and needs its token back via a header on every unsafe request, even the very first one — a plain `GET` hands you that token as a cookie (see [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)):
 
 ```bash
-curl -X POST http://127.0.0.1:8000/register \
+curl -c cookies.txt http://127.0.0.1:8000/ -o /dev/null
+CSRF=$(grep csrf_token cookies.txt | awk '{print $NF}')
+
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Ada", "email": "ada@example.com", "password": "hunter2"}'
 

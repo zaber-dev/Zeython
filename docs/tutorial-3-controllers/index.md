@@ -119,10 +119,10 @@ Pass `only=("index", "show")` if you only want a subset — the generated `UserC
 
 ## Try it
 
-`zeython serve` picked up the changes automatically. Create a project, then a task:
+`zeython serve` picked up the changes automatically. Create a project, then a task -- every unsafe request here still needs `-H "X-CSRF-Token: $CSRF"` (`cookies.txt`/`$CSRF` from [Part 1](https://zeython.zaber.dev/docs/tutorial-1-setup/#try-the-auth-thats-already-there)), even though none of these routes require login yet:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/projects \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/projects \
   -H 'Content-Type: application/json' \
   -d '{"name": "Website Redesign"}'
 ```
@@ -132,18 +132,18 @@ curl -sS -X POST http://127.0.0.1:8000/projects \
 ```
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/tasks \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/tasks \
   -H 'Content-Type: application/json' \
   -d '{"title": "Design the new homepage"}'
 
 curl -sS http://127.0.0.1:8000/tasks
 curl -sS http://127.0.0.1:8000/tasks/1
 
-curl -sS -X PUT http://127.0.0.1:8000/tasks/1 \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X PUT http://127.0.0.1:8000/tasks/1 \
   -H 'Content-Type: application/json' \
   -d '{"done": true}'
 
-curl -sS -X DELETE http://127.0.0.1:8000/tasks/1 -o /dev/null -w '%{http_code}\n'
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X DELETE http://127.0.0.1:8000/tasks/1 -o /dev/null -w '%{http_code}\n'
 ```
 
 The last command prints `204` — a successful delete with no body.

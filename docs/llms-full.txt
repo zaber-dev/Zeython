@@ -105,10 +105,13 @@ my_blog/
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try registering a user and listing them:
+Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try registering a user and listing them. CSRF protection is on by default and needs its token back via a header on every unsafe request, even the very first one — a plain `GET` hands you that token as a cookie (see [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)):
 
 ```bash
-curl -X POST http://127.0.0.1:8000/register \
+curl -c cookies.txt http://127.0.0.1:8000/ -o /dev/null
+CSRF=$(grep csrf_token cookies.txt | awk '{print $NF}')
+
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Ada", "email": "ada@example.com", "password": "hunter2"}'
 
@@ -319,10 +322,14 @@ Visit `http://127.0.0.1:8000` — you'll get a small JSON welcome payload. `zeyt
 
 ## Try the auth that's already there
 
-A generated project ships with a working `User` model and session authentication out of the box (see [Authentication](https://zeython.zaber.dev/docs/authentication/index.md) for the full picture later) — you get to use it for free instead of building login from scratch:
+A generated project ships with a working `User` model and session authentication out of the box (see [Authentication](https://zeython.zaber.dev/docs/authentication/index.md) for the full picture later) — you get to use it for free instead of building login from scratch. One thing to know before the very first request: every unsafe method (`POST`/`PUT`/`PATCH`/`DELETE`) needs a CSRF token back via a header, even this one — see [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md) for why. A safe `GET` hands you that token as a cookie, so grab it once and pass it back:
 
 ```bash
-curl -sS -c cookies.txt -X POST http://127.0.0.1:8000/register \
+curl -sS -c cookies.txt http://127.0.0.1:8000/ > /dev/null
+CSRF=$(grep csrf_token cookies.txt | awk '{print $NF}')
+
+curl -sS -b cookies.txt -c cookies.txt -H "X-CSRF-Token: $CSRF" \
+  -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Ada", "email": "ada@example.com", "password": "hunter2222"}'
 ```
@@ -331,7 +338,7 @@ curl -sS -c cookies.txt -X POST http://127.0.0.1:8000/register \
 {"name":"Ada","email":"ada@example.com","id":1,"created_at":"...","updated_at":"...","is_deleted":false,"deleted_at":null}
 ```
 
-`-c cookies.txt` saves the session cookie `/register` sets — you're now logged in as Ada, and every following `curl` in this tutorial that passes `-b cookies.txt` will be authenticated as her. Confirm it:
+`cookies.txt` now holds that CSRF cookie plus the session cookie `/register` set — you're logged in as Ada, and every following `curl` in this tutorial that passes `-b cookies.txt` will be authenticated as her (and, for unsafe methods, needs `-H "X-CSRF-Token: $CSRF"` alongside it — recompute `$CSRF` from `cookies.txt` if you're picking this up in a fresh terminal). Confirm it:
 
 ```bash
 curl -sS -b cookies.txt http://127.0.0.1:8000/me
@@ -341,7 +348,7 @@ curl -sS -b cookies.txt http://127.0.0.1:8000/me
 {"name":"Ada","email":"ada@example.com","id":1,"created_at":"...","updated_at":"...","is_deleted":false,"deleted_at":null}
 ```
 
-That's the whole account system you'd otherwise hand-roll — password hashing, a signed session cookie, CSRF protection on every unsafe request from here on (you'll deal with that directly in [Part 5](https://zeython.zaber.dev/docs/tutorial-5-auth/index.md), when it's TaskFlow's own routes that need protecting) — already wired up, already tested, already documented.
+That's the whole account system you'd otherwise hand-roll — password hashing, a signed session cookie, CSRF protection on every unsafe request (Parts 2-4 reuse the same `$CSRF` this way; [Part 5](https://zeython.zaber.dev/docs/tutorial-5-auth/index.md) adds actual login *requirements* to TaskFlow's own routes) — already wired up, already tested, already documented.
 
 Next: [Part 2 — Models](https://zeython.zaber.dev/docs/tutorial-2-models/index.md), where TaskFlow actually starts.
 
@@ -423,10 +430,10 @@ zeython db revision -m "add projects and tasks"
 zeython db migrate
 ```
 
-The first command writes a new file under `migrations/versions/` (open it — it's plain, readable Alembic code, not a black box); the second actually applies it. Confirm the tables exist by creating one directly:
+The first command writes a new file under `migrations/versions/` (open it — it's plain, readable Alembic code, not a black box); the second actually applies it. Confirm the tables exist by creating one directly (reusing `cookies.txt`/`$CSRF` from [Part 1](https://zeython.zaber.dev/docs/tutorial-1-setup/#try-the-auth-thats-already-there) -- every unsafe request needs that header, not just the auth ones):
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/projects \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/projects \
   -H 'Content-Type: application/json' \
   -d '{"name": "Website Redesign"}'
 ```
@@ -556,10 +563,10 @@ Pass `only=("index", "show")` if you only want a subset — the generated `UserC
 
 ## Try it
 
-`zeython serve` picked up the changes automatically. Create a project, then a task:
+`zeython serve` picked up the changes automatically. Create a project, then a task -- every unsafe request here still needs `-H "X-CSRF-Token: $CSRF"` (`cookies.txt`/`$CSRF` from [Part 1](https://zeython.zaber.dev/docs/tutorial-1-setup/#try-the-auth-thats-already-there)), even though none of these routes require login yet:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/projects \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/projects \
   -H 'Content-Type: application/json' \
   -d '{"name": "Website Redesign"}'
 ```
@@ -569,18 +576,18 @@ curl -sS -X POST http://127.0.0.1:8000/projects \
 ```
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/tasks \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/tasks \
   -H 'Content-Type: application/json' \
   -d '{"title": "Design the new homepage"}'
 
 curl -sS http://127.0.0.1:8000/tasks
 curl -sS http://127.0.0.1:8000/tasks/1
 
-curl -sS -X PUT http://127.0.0.1:8000/tasks/1 \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X PUT http://127.0.0.1:8000/tasks/1 \
   -H 'Content-Type: application/json' \
   -d '{"done": true}'
 
-curl -sS -X DELETE http://127.0.0.1:8000/tasks/1 -o /dev/null -w '%{http_code}\n'
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X DELETE http://127.0.0.1:8000/tasks/1 -o /dev/null -w '%{http_code}\n'
 ```
 
 The last command prints `204` — a successful delete with no body.
@@ -677,10 +684,10 @@ async def store(self, request):
 
 (`store` re-fetches with `include=` after creating, rather than trying to load the relationship onto the just-saved instance — simpler than juggling two different code paths for "freshly created" vs. "loaded from the database," and one extra indexed lookup is cheap.)
 
-Try it:
+Try it (same `cookies.txt`/`$CSRF` as the earlier parts):
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/tasks \
+curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/tasks \
   -H 'Content-Type: application/json' \
   -d '{"title": "Design the new homepage", "project_id": 1}'
 ```
@@ -830,11 +837,12 @@ curl -sS -b cookies.txt -H "X-CSRF-Token: $CSRF" -X POST http://127.0.0.1:8000/t
 That succeeds — you're logged in as Ada. Now register a second user and try to delete Ada's task as them:
 
 ```bash
-curl -sS -c cookies2.txt -X POST http://127.0.0.1:8000/register \
+curl -sS -c cookies2.txt http://127.0.0.1:8000/ -o /dev/null
+CSRF2=$(grep csrf_token cookies2.txt | awk '{print $NF}')
+
+curl -sS -b cookies2.txt -c cookies2.txt -H "X-CSRF-Token: $CSRF2" -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Bob", "email": "bob@example.com", "password": "hunter2222"}'
-
-CSRF2=$(grep csrf_token cookies2.txt | awk '{print $NF}')
 
 curl -sS -b cookies2.txt -H "X-CSRF-Token: $CSRF2" -X DELETE http://127.0.0.1:8000/tasks/2 \
   -o /dev/null -w '%{http_code}\n'
