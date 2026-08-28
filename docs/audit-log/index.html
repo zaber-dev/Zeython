@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/caching/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/audit-log/">
       
       
-        <link rel="prev" href="../mail/">
+        <link rel="prev" href="../notifications/">
       
       
-        <link rel="next" href="../redis/">
+        <link rel="next" href="../feature-flags/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Caching - Zeython Docs</title>
+        <title>Audit Logging - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#caching" class="md-skip">
+        <a href="#audit-logging" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Caching
+              Audit Logging
             
           </span>
         </div>
@@ -1706,10 +1706,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../audit-log/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Logging
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1725,6 +1752,109 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-own-auditlog-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your own AuditLog model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auditing-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auditing a model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#who-did-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who did it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the trail
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1874,37 +2004,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Caching
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../caching/" class="md-nav__link">
         
   
   
@@ -1920,59 +2023,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-basics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The basics
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#remember-the-common-case" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        remember(): the common case
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-default-cache-is-process-local" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The default cache is process-local
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2745,10 +2795,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-basics" class="md-nav__link">
+  <a href="#why-this-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The basics
+        Why this exists
       
     </span>
   </a>
@@ -2756,10 +2806,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#remember-the-common-case" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        remember(): the common case
+        Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-own-auditlog-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your own AuditLog model
       
     </span>
   </a>
@@ -2767,10 +2845,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-default-cache-is-process-local" class="md-nav__link">
+  <a href="#auditing-a-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The default cache is process-local
+        Auditing a model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#who-did-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who did it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the trail
       
     </span>
   </a>
@@ -2794,7 +2894,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/caching.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/audit-log.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2802,55 +2902,137 @@
   
 
 
-<h1 id="caching">Caching<a class="headerlink" href="#caching" title="Permanent link">&para;</a></h1>
-<p><code>zeython.cache</code> gives you a <code>Cache</code> bound in the container — an in-memory
-TTL cache by default — with <code>get</code>/<code>put</code>/<code>forget</code>/<code>has</code>/<code>flush</code>, plus
-<code>remember()</code> for the common "check the cache, else compute and store"
-pattern.</p>
-<h2 id="the-basics">The basics<a class="headerlink" href="#the-basics" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">cache</span><span class="p">:</span> <span class="n">Cache</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Cache</span><span class="p">)</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">,</span> <span class="s2">"hello"</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># expires in 60 seconds</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>                    <span class="c1"># "hello"</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"missing"</span><span class="p">,</span> <span class="s2">"default"</span><span class="p">)</span>           <span class="c1"># "default"</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>                     <span class="c1"># True</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">forget</span><span class="p">(</span><span class="s2">"greeting"</span><span class="p">)</span>
+<h1 id="audit-logging">Audit Logging<a class="headerlink" href="#audit-logging" title="Permanent link">&para;</a></h1>
+<p><code>zeython.audit_log</code> gives you an automatic changelog of who created,
+updated, or deleted which model records, and what changed -- attach one
+<code>AuditObserver</code> per model you want tracked, and every write from then on
+gets its own row in a table you own.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>"Who changed this customer's plan, and what did it used to be?" is a
+question every app accumulating real users eventually needs to answer --
+for a support ticket, a billing dispute, or a compliance audit (SOC 2,
+GDPR). Bolting this on later usually means scattering manual logging
+calls through every place a record can change, and missing a few. Built
+on the existing <a href="../model-events/#observers">Model Observer</a> system
+instead: attach <code>AuditObserver</code> once per model, and every <code>save()</code>/<code>delete()</code>
+call -- from a controller, a console command, a background job, anywhere
+-- gets recorded, with no per-call-site code to remember.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">AuditLogServiceProvider</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Registered *first*, before DatabaseServiceProvider/AuthServiceProvider/</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># ApiAuthServiceProvider -- see "Registration order" below.</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AuditLogServiceProvider</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
 </span></code></pre></div>
-<p><code>ttl</code> is in seconds; omit it (or pass <code>None</code>) for an entry that never
-expires on its own. There's no proactive sweep — an expired entry is
-evicted the next time it's read, not the moment it expires.</p>
-<h2 id="remember-the-common-case"><code>remember()</code>: the common case<a class="headerlink" href="#remember-the-common-case" title="Permanent link">&para;</a></h2>
-<p>Most caching is "check the cache; on a miss, compute the value and store
-it" — <code>remember()</code> is that in one call:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remember</span><span class="p">(</span><span class="s2">"posts:recent"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">fetch_recent_posts</span><span class="p">())</span>
+<p>A generated project already has this wired up -- see
+<code>app/Models/audit_log.py</code> and <code>app/Providers/app_audit_service_provider.py</code>.</p>
+<h3 id="registration-order">Registration order<a class="headerlink" href="#registration-order" title="Permanent link">&para;</a></h3>
+<p><code>AuditLogServiceProvider</code> only adds <code>AuditActorMiddleware</code>, which resolves
+<em>who</em> made a change from whichever authentication scheme handled the
+request. Resolving that needs a database session already open (to query
+your user model) and, for cookie auth, <code>SessionMiddleware</code> to have already
+parsed the session cookie -- both come from middleware that has to sit
+<em>outside</em> this one. Since <code>add_middleware()</code> prepends (the most recently
+registered middleware wraps outermost), that means registering
+<code>AuditLogServiceProvider</code> <strong>before</strong> any other middleware-adding provider,
+not after. Get the order backward and every audited entry silently ends up
+with no actor recorded, even for an authenticated request -- the same
+class of subtle ordering trap <a href="../maintenance-mode/#setup">maintenance mode's setup</a>
+warns about (there, for the opposite reason: it needs to be registered
+<em>last</em> to end up outermost).</p>
+<h2 id="your-own-auditlog-model">Your own AuditLog model<a class="headerlink" href="#your-own-auditlog-model" title="Permanent link">&para;</a></h2>
+<p><code>AuditObserver</code> writes to a <code>record_model</code> you provide -- the same pattern
+<a href="../notifications/">Notifications</a>' <code>database</code> channel uses -- so each
+project owns its own migration for the table instead of the framework
+mandating one:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Models/audit_log.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSON</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">AuditLog</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"audit_logs"</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">auditable_type</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">auditable_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">event</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">changes</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">JSON</span><span class="p">)</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">actor_type</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">actor_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
-<p>The callback only runs on a miss. <code>zeython new</code> wires this into the
-generated <code>PostController.index</code> — the post list is cached for 30 seconds
-and invalidated (<code>cache.forget(...)</code>) whenever a post is created, so reads
-stay fast without serving stale data past a create:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">cache</span><span class="p">:</span> <span class="n">Cache</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Cache</span><span class="p">)</span>
+<p>Already generated for you as part of <code>zeython new</code> -- run
+<code>zeython db revision --autogenerate -m "add audit_logs"</code> once you're ready
+to migrate it.</p>
+<h2 id="auditing-a-model">Auditing a model<a class="headerlink" href="#auditing-a-model" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># app/Providers/app_audit_service_provider.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditObserver</span><span class="p">,</span> <span class="n">ServiceProvider</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">():</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="k">return</span> <span class="p">[</span><span class="n">post</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">(</span><span class="s2">"author"</span><span class="p">,))</span> <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">]</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.audit_log</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.post</span><span class="w"> </span><span class="kn">import</span> <span class="n">Post</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remember</span><span class="p">(</span><span class="s2">"posts:index"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">fetch</span><span class="p">))</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">AppAuditServiceProvider</span><span class="p">(</span><span class="n">ServiceProvider</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">boot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">Post</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">AuditObserver</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">))</span>
 </span></code></pre></div>
-<h2 id="the-default-cache-is-process-local">The default cache is process-local<a class="headerlink" href="#the-default-cache-is-process-local" title="Permanent link">&para;</a></h2>
-<p><code>InMemoryCache</code> lives in this process's memory — correct and fast for a
-single worker, and a real limitation once you run multiple worker
-processes or machines: each caches independently, so a <code>put</code> in one worker
-isn't visible to a request served by another. Same trade-off as
-<code>RateLimiter</code> and the default <code>Queue</code>. For a shared cache, implement
-<code>Cache</code> against a real backend (Redis is the usual choice) and bind it in
-place of the default:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span>
+<p>From then on, every <code>Post.create()</code>, <code>.update()</code>, and <code>.delete()</code> writes a
+row to <code>AuditLog</code>:</p>
+<ul>
+<li><strong>created</strong> -- every non-hidden field, as <code>{"old": None, "new": &lt;value&gt;}</code>.</li>
+<li><strong>updated</strong> -- only the fields that actually changed, as
+  <code>{"old": &lt;before&gt;, "new": &lt;after&gt;}</code>; nothing written if nothing did.</li>
+<li><strong>deleted</strong> -- every non-hidden field's last known value, as
+  <code>{"old": &lt;value&gt;, "new": None}</code> -- captured <em>before</em> the row is gone, so
+  a hard delete's trail still shows what was deleted, not just that
+  something was.</li>
+</ul>
+<p>Fields named in the audited model's own <code>__hidden__</code> (the same convention
+<a href="../model-events/"><code>to_dict()</code></a> uses to keep password hashes etc. out of
+serialized output) are never recorded, in either direction. Model-owned
+bookkeeping columns (<code>id</code>, <code>created_at</code>, <code>updated_at</code>, <code>is_deleted</code>,
+<code>deleted_at</code>) are excluded too -- <code>id</code> is already carried as
+<code>auditable_id</code>, and the rest are either pure noise (<code>updated_at</code> changes
+on every single update) or already implied by the event itself.</p>
+<p>Never attach <code>AuditObserver</code> to <code>record_model</code> itself --
+<code>AuditLog.observe(AuditObserver(AuditLog))</code> would make every audit
+entry's own creation write another one, without end. <code>AuditObserver</code>
+raises immediately if you do.</p>
+<h2 id="who-did-it">Who did it<a class="headerlink" href="#who-did-it" title="Permanent link">&para;</a></h2>
+<p>Every audited entry is attributed to the <em>actor</em> -- who made the change --
+via <code>current_actor()</code>, a contextvar <code>AuditActorMiddleware</code> sets
+automatically per request from whichever authentication scheme resolves a
+user first: <a href="../authentication/"><code>current_user()</code></a> (session cookie), then
+<a href="../api-authentication/"><code>current_api_user()</code></a> (bearer token). No wiring
+needed beyond registering the provider in the right order (above).</p>
+<p>Outside a request -- a background job, a console command, a scheduled
+task -- there's no middleware to infer it from, so set it yourself before
+making the change:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_actor</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">Cache</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyRedisCache</span><span class="p">(</span><span class="n">redis_client</span><span class="p">))</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">ShipOrderJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="n">set_actor</span><span class="p">(</span><span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performed_by_id</span><span class="p">))</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">"shipped"</span><span class="p">)</span>
 </span></code></pre></div>
+<p>Pass <code>None</code> to explicitly record subsequent changes as anonymous/system,
+overriding an actor the middleware already set -- for a change your own
+code makes on the user's behalf that isn't really <em>their</em> action.</p>
+<h2 id="reading-the-trail">Reading the trail<a class="headerlink" href="#reading-the-trail" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">audit_trail</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">history</span> <span class="o">=</span> <span class="k">await</span> <span class="n">audit_trail</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">event</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">actor_type</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">actor_id</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">changes</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>audit_trail()</code> returns every entry for one record, oldest first. Query
+<code>AuditLog</code> directly (<code>AuditLog.find_by(actor_id=user.id)</code>, <code>AuditLog.all()</code>
+with your own filters) for anything broader -- "everything this user did,"
+"everything that happened today."</p>
 
 
 
@@ -2886,7 +3068,7 @@ place of the default:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../mail/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Mail">
+          <a href="../notifications/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Notifications">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2896,20 +3078,20 @@ place of the default:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Mail
+                Notifications
               </div>
             </div>
           </a>
         
         
           
-          <a href="../redis/" class="md-footer__link md-footer__link--next" aria-label="Next: Redis (Distributed)">
+          <a href="../feature-flags/" class="md-footer__link md-footer__link--next" aria-label="Next: Feature Flags">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Redis (Distributed)
+                Feature Flags
               </div>
             </div>
             <div class="md-footer__button md-icon">

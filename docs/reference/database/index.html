@@ -1704,6 +1704,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../audit-log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../feature-flags/" class="md-nav__link">
         
   
@@ -2884,6 +2912,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zeython.audit_log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        audit_log
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="audit_log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditActorMiddleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditActorMiddleware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditObserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditObserver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditLogServiceProvider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditLogServiceProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.current_actor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_actor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.set_actor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set_actor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.audit_trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        audit_trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#zeython.database" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3654,6 +3765,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zeython.audit_log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        audit_log
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="audit_log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditActorMiddleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditActorMiddleware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditObserver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditObserver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.AuditLogServiceProvider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditLogServiceProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.current_actor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_actor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.set_actor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set_actor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zeython.audit_log.audit_trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        audit_trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#zeython.database" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3886,8 +4080,8 @@
 
 <h1 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h1>
 <p>The async SQLAlchemy-backed <code>Model</code> base class, session/transaction
-management, N+1 query detection, a request/query profiler, and factories
-&amp; seeders for tests and local data.</p>
+management, audit logging, N+1 query detection, a request/query profiler,
+and factories &amp; seeders for tests and local data.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -5439,6 +5633,452 @@ chunk's partial writes kept.</p>
 </span><span id="__span-0-176"><a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">session</span> <span class="o">=</span> <span class="n">current_session</span><span class="p">()</span>
 </span><span id="__span-0-177"><a id="__codelineno-0-177" name="__codelineno-0-177"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">begin_nested</span><span class="p">():</span>
 </span><span id="__span-0-178"><a id="__codelineno-0-178" name="__codelineno-0-178"></a>        <span class="k">yield</span> <span class="n">session</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="zeython.audit_log" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">audit_log</span>
+
+
+<a href="#zeython.audit_log" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Audit logging: an automatic changelog of who created, updated, or
+deleted which model records, and what changed.</p>
+<p>Built entirely on the existing :class:<code>~zeython.db.model.Observer</code> system
+rather than a new mechanism -- :class:<code>AuditObserver</code> is an <code>Observer</code>
+you attach to whichever models need a paper trail::</p>
+<div class="language-text highlight"><pre><span></span><code>Post.observe(AuditObserver(AuditLog))
+</code></pre></div>
+<p><code>AuditLog</code> is your own :class:<code>~zeython.db.Model</code> subclass (columns:
+<code>auditable_type</code>, <code>auditable_id</code>, <code>event</code>, <code>changes</code>, <code>actor_type</code>,
+<code>actor_id</code>) -- the same <code>record_model</code> pattern
+:mod:<code>zeython.notifications</code>'s <code>database</code> channel uses, so each project
+owns its own migration for the table instead of the framework mandating
+one. Generated for you by <code>zeython new</code> under
+<code>app/Models/audit_log.py</code>.</p>
+<p>Every audited write and its audit-log row share the same database session
+and therefore the same transaction: :class:<code>~zeython.db.session.DatabaseSessionMiddleware</code>
+commits or rolls back both together, so an audit entry can never exist
+without the change it describes actually landing, or vice versa.</p>
+<p>The <em>actor</em> attributed to each entry -- who did this -- comes from
+:func:<code>current_actor</code>, a contextvar :class:<code>AuditActorMiddleware</code> sets
+automatically per request from whichever authentication scheme is
+active. Outside a request (a background job, a console command), call
+:func:<code>set_actor</code> yourself before making the change.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zeython.audit_log.AuditActorMiddleware" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AuditActorMiddleware</span>
+
+
+<a href="#zeython.audit_log.AuditActorMiddleware" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">AuditActorMiddleware</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Pure ASGI middleware: sets :func:<code>current_actor</code> for the duration of
+the request from whichever authentication scheme resolves a user first
+-- :func:<code>zeython.auth.current_user</code> (session cookie), then
+:func:<code>zeython.api_auth.current_api_user</code> (bearer token). Leaves the
+actor anonymous (<code>None</code>) if neither resolves one, or if neither
+module's middleware is registered at all -- both are tried
+best-effort, so this works whether an app uses cookie auth, token
+auth, both, or neither.</p>
+<p>Registered by default in a generated project, the same reasoning
+:class:<code>~zeython.request_id.RequestIdServiceProvider</code> relies on: with
+no model actually being audited (nothing calls <code>Model.observe(AuditObserver(...))</code>),
+this only sets a contextvar nothing reads, so there's nothing to get
+wrong by always registering it.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/zeython/audit_log.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-98">98</a></span>
+<span class="normal"><a href="#__codelineno-0-99">99</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-98"><a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+</span></code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zeython.audit_log.AuditObserver" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AuditObserver</span>
+
+
+<a href="#zeython.audit_log.AuditObserver" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">AuditObserver</span><span class="p">(</span><span class="n">record_model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Model</span><span class="p">])</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="Observer (zeython.db.model.Observer)" href="#zeython.db.Observer">Observer</a></code></p>
+
+
+
+        <p>Writes one row to <code>record_model</code> for every create/update/delete of
+whatever model this is attached to, via :meth:<code>~zeython.db.model.Model.observe</code>::</p>
+<div class="language-text highlight"><pre><span></span><code>Post.observe(AuditObserver(AuditLog))
+</code></pre></div>
+<p><code>changes</code> records: every non-hidden field's value for <code>created</code>;
+only the fields that actually changed, as <code>{"old": ..., "new": ...}</code>
+pairs, for <code>updated</code> (nothing recorded if nothing did); every
+non-hidden field's last known value (as <code>"old"</code>, <code>"new"</code> left
+<code>None</code>) for <code>deleted</code> -- captured before the row is gone, so a hard
+delete's audit trail still shows what was deleted, not just that
+something was. Fields named in the audited model's own <code>__hidden__</code>
+(the same convention :meth:<code>~zeython.db.model.Model.to_dict</code> uses to
+keep password hashes etc. out of serialized output) are never
+recorded, in either direction.</p>
+<p>Never attach this to <code>record_model</code> itself -- <code>AuditLog.observe(AuditObserver(AuditLog))</code>
+-- each audit-log row's own creation would trigger another one,
+without end.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/zeython/audit_log.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-165">165</a></span>
+<span class="normal"><a href="#__codelineno-0-166">166</a></span>
+<span class="normal"><a href="#__codelineno-0-167">167</a></span>
+<span class="normal"><a href="#__codelineno-0-168">168</a></span>
+<span class="normal"><a href="#__codelineno-0-169">169</a></span>
+<span class="normal"><a href="#__codelineno-0-170">170</a></span>
+<span class="normal"><a href="#__codelineno-0-171">171</a></span>
+<span class="normal"><a href="#__codelineno-0-172">172</a></span>
+<span class="normal"><a href="#__codelineno-0-173">173</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-165"><a id="__codelineno-0-165" name="__codelineno-0-165"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Model</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-166"><a id="__codelineno-0-166" name="__codelineno-0-166"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">record_model</span> <span class="o">=</span> <span class="n">record_model</span>
+</span><span id="__span-0-167"><a id="__codelineno-0-167" name="__codelineno-0-167"></a>    <span class="c1"># Keyed by the model instance itself (not e.g. its id, which is</span>
+</span><span id="__span-0-168"><a id="__codelineno-0-168" name="__codelineno-0-168"></a>    <span class="c1"># None for a not-yet-flushed record) so an aborted save (updating()</span>
+</span><span id="__span-0-169"><a id="__codelineno-0-169" name="__codelineno-0-169"></a>    <span class="c1"># ran, but a later step -- validate_or_raise(), the flush itself --</span>
+</span><span id="__span-0-170"><a id="__codelineno-0-170" name="__codelineno-0-170"></a>    <span class="c1"># raised before updated() ever ran) can't accumulate an entry</span>
+</span><span id="__span-0-171"><a id="__codelineno-0-171" name="__codelineno-0-171"></a>    <span class="c1"># nothing will ever pop: once the instance itself is no longer</span>
+</span><span id="__span-0-172"><a id="__codelineno-0-172" name="__codelineno-0-172"></a>    <span class="c1"># referenced elsewhere, this reclaims automatically.</span>
+</span><span id="__span-0-173"><a id="__codelineno-0-173" name="__codelineno-0-173"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_pending_diff</span><span class="p">:</span> <span class="n">WeakKeyDictionary</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">WeakKeyDictionary</span><span class="p">()</span>
+</span></code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="zeython.audit_log.AuditLogServiceProvider" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AuditLogServiceProvider</span>
+
+
+<a href="#zeython.audit_log.AuditLogServiceProvider" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">AuditLogServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Application</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ServiceProvider (zeython.providers.ServiceProvider)" href="../core/#zeython.providers.ServiceProvider">ServiceProvider</a></code></p>
+
+
+
+        <p>Registers :class:<code>AuditActorMiddleware</code>, so :func:<code>current_actor</code> is
+set automatically from whichever authentication scheme handled the
+current request::</p>
+<div class="language-text highlight"><pre><span></span><code>app.register(AuditLogServiceProvider)
+</code></pre></div>
+<p>Register this <strong>first</strong> -- before <code>DatabaseServiceProvider</code>,
+<code>AuthServiceProvider</code>, <code>ApiAuthServiceProvider</code>, before anything
+else that calls <code>add_middleware()</code>. <code>add_middleware()</code> prepends,
+so the most recently registered middleware wraps outermost; every
+middleware-adding provider registered <em>after</em> this one then wraps
+<em>around</em> <code>AuditActorMiddleware</code>, pushing it further inward no
+matter how many more get added later. It needs to end up innermost:
+resolving the actor needs a database session already open (a query
+against your user model) and, for cookie auth, <code>SessionMiddleware</code>
+to have already parsed the session cookie -- both are provided by
+middleware layers that must therefore sit <em>outside</em> this one.
+Registered too late (anywhere after <code>DatabaseServiceProvider</code>),
+<code>current_user()</code>/<code>current_api_user()</code> both fail silently from
+inside :meth:<code>AuditActorMiddleware._resolve_actor</code>'s broad <code>except</code>,
+and every audited entry ends up anonymous even for an authenticated
+request -- the same class of subtle ordering trap documented on
+:class:<code>~zeython.maintenance.MaintenanceModeServiceProvider</code>.</p>
+<p>Doesn't attach auditing to any model on its own -- that needs your own
+<code>record_model</code> (see :mod:<code>zeython.audit_log</code>'s own docstring) and at
+least one <code>SomeModel.observe(AuditObserver(YourAuditLog))</code> call,
+typically in another service provider's <code>boot()</code> once your models
+are all defined. See docs/audit-log.md.</p>
+
+
+
+
+
+
+
+
+                  <details class="mkdocstrings-source">
+                    <summary>Source code in <code>src/zeython/providers.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Application</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span>
+</span></code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="zeython.audit_log.current_actor" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">current_actor</span>
+
+
+<a href="#zeython.audit_log.current_actor" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">current_actor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>The <code>(actor_type, actor_id)</code> attributed to audit log entries written
+from here on in the current context, or <code>None</code> for an anonymous/system
+action. <code>actor_type</code> is the actor model's class name (e.g. <code>"User"</code>).</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/zeython/audit_log.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-56">56</a></span>
+<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="k">def</span><span class="w"> </span><span class="nf">current_actor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="w">    </span><span class="sd">"""The ``(actor_type, actor_id)`` attributed to audit log entries written</span>
+</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    from here on in the current context, or ``None`` for an anonymous/system</span>
+</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    action. ``actor_type`` is the actor model's class name (e.g. ``"User"``).</span>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">    """</span>
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="k">return</span> <span class="n">_current_actor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="zeython.audit_log.set_actor" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">set_actor</span>
+
+
+<a href="#zeython.audit_log.set_actor" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">set_actor</span><span class="p">(</span><span class="n">actor</span><span class="p">:</span> <span class="n">Model</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Attribute audit log entries written from here on (in this async
+context) to <code>actor</code> -- for code with no request/middleware to infer
+it from (a background job, a console command, a scheduled task)::</p>
+<div class="language-text highlight"><pre><span></span><code>async def handle(self) -&gt; None:
+    set_actor(await User.find(self.performed_by_id))
+    await order.update(status="shipped")
+</code></pre></div>
+<p>Pass <code>None</code> to explicitly record subsequent changes as anonymous/system
+-- e.g. to override an actor :class:<code>AuditActorMiddleware</code> already set,
+for a change your own code makes on the user's behalf but that isn't
+really <em>their</em> action.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/zeython/audit_log.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span>
+<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+<span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span>
+<span class="normal"><a href="#__codelineno-0-74">74</a></span>
+<span class="normal"><a href="#__codelineno-0-75">75</a></span>
+<span class="normal"><a href="#__codelineno-0-76">76</a></span>
+<span class="normal"><a href="#__codelineno-0-77">77</a></span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_actor</span><span class="p">(</span><span class="n">actor</span><span class="p">:</span> <span class="n">Model</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="w">    </span><span class="sd">"""Attribute audit log entries written from here on (in this async</span>
+</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    context) to ``actor`` -- for code with no request/middleware to infer</span>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    it from (a background job, a console command, a scheduled task)::</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        async def handle(self) -&gt; None:</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">            set_actor(await User.find(self.performed_by_id))</span>
+</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">            await order.update(status="shipped")</span>
+</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>
+</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    Pass ``None`` to explicitly record subsequent changes as anonymous/system</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    -- e.g. to override an actor :class:`AuditActorMiddleware` already set,</span>
+</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    for a change your own code makes on the user's behalf but that isn't</span>
+</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    really *their* action.</span>
+</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    """</span>
+</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="n">_current_actor</span><span class="o">.</span><span class="n">set</span><span class="p">((</span><span class="nb">type</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">actor</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="k">if</span> <span class="n">actor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="zeython.audit_log.audit_trail" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">audit_trail</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+<a href="#zeython.audit_log.audit_trail" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">audit_trail</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">record_model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Every audit log entry for <code>model</code>, oldest first::</p>
+<p>history = await audit_trail(AuditLog, post)</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/zeython/audit_log.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-232">232</a></span>
+<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span>
+<span class="normal"><a href="#__codelineno-0-235">235</a></span>
+<span class="normal"><a href="#__codelineno-0-236">236</a></span>
+<span class="normal"><a href="#__codelineno-0-237">237</a></span>
+<span class="normal"><a href="#__codelineno-0-238">238</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">audit_trail</span><span class="p">(</span><span class="n">record_model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Model</span><span class="p">]:</span>
+</span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="w">    </span><span class="sd">"""Every audit log entry for ``model``, oldest first::</span>
+</span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a>
+</span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="sd">        history = await audit_trail(AuditLog, post)</span>
+</span><span id="__span-0-236"><a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="sd">    """</span>
+</span><span id="__span-0-237"><a id="__codelineno-0-237" name="__codelineno-0-237"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="k">await</span> <span class="n">record_model</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">auditable_type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">auditable_id</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</span><span id="__span-0-238"><a id="__codelineno-0-238" name="__codelineno-0-238"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">created_at</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>

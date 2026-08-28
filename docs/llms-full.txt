@@ -5855,7 +5855,7 @@ def validate(data: dict[str, Any], rules: dict[str, list[Rule]]) -> dict[str, li
 
 # Database
 
-The async SQLAlchemy-backed `Model` base class, session/transaction management, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
+The async SQLAlchemy-backed `Model` base class, session/transaction management, audit logging, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
 
 ## db
 
@@ -6530,6 +6530,177 @@ async def transaction() -> AsyncIterator[AsyncSession]:
     session = current_session()
     async with session.begin_nested():
         yield session
+```
+
+## audit_log
+
+Audit logging: an automatic changelog of who created, updated, or deleted which model records, and what changed.
+
+Built entirely on the existing :class:`~zeython.db.model.Observer` system rather than a new mechanism -- :class:`AuditObserver` is an `Observer` you attach to whichever models need a paper trail::
+
+```text
+Post.observe(AuditObserver(AuditLog))
+```
+
+`AuditLog` is your own :class:`~zeython.db.Model` subclass (columns: `auditable_type`, `auditable_id`, `event`, `changes`, `actor_type`, `actor_id`) -- the same `record_model` pattern :mod:`zeython.notifications`'s `database` channel uses, so each project owns its own migration for the table instead of the framework mandating one. Generated for you by `zeython new` under `app/Models/audit_log.py`.
+
+Every audited write and its audit-log row share the same database session and therefore the same transaction: :class:`~zeython.db.session.DatabaseSessionMiddleware` commits or rolls back both together, so an audit entry can never exist without the change it describes actually landing, or vice versa.
+
+The *actor* attributed to each entry -- who did this -- comes from :func:`current_actor`, a contextvar :class:`AuditActorMiddleware` sets automatically per request from whichever authentication scheme is active. Outside a request (a background job, a console command), call :func:`set_actor` yourself before making the change.
+
+### AuditActorMiddleware
+
+```python
+AuditActorMiddleware(app: Any)
+```
+
+Pure ASGI middleware: sets :func:`current_actor` for the duration of the request from whichever authentication scheme resolves a user first -- :func:`zeython.auth.current_user` (session cookie), then :func:`zeython.api_auth.current_api_user` (bearer token). Leaves the actor anonymous (`None`) if neither resolves one, or if neither module's middleware is registered at all -- both are tried best-effort, so this works whether an app uses cookie auth, token auth, both, or neither.
+
+Registered by default in a generated project, the same reasoning :class:`~zeython.request_id.RequestIdServiceProvider` relies on: with no model actually being audited (nothing calls `Model.observe(AuditObserver(...))`), this only sets a contextvar nothing reads, so there's nothing to get wrong by always registering it.
+
+Source code in `src/zeython/audit_log.py`
+
+```python
+def __init__(self, app: Any) -> None:
+    self.app = app
+```
+
+### AuditObserver
+
+```python
+AuditObserver(record_model: type[Model])
+```
+
+Bases: `Observer`
+
+Writes one row to `record_model` for every create/update/delete of whatever model this is attached to, via :meth:`~zeython.db.model.Model.observe`::
+
+```text
+Post.observe(AuditObserver(AuditLog))
+```
+
+`changes` records: every non-hidden field's value for `created`; only the fields that actually changed, as `{"old": ..., "new": ...}` pairs, for `updated` (nothing recorded if nothing did); every non-hidden field's last known value (as `"old"`, `"new"` left `None`) for `deleted` -- captured before the row is gone, so a hard delete's audit trail still shows what was deleted, not just that something was. Fields named in the audited model's own `__hidden__` (the same convention :meth:`~zeython.db.model.Model.to_dict` uses to keep password hashes etc. out of serialized output) are never recorded, in either direction.
+
+Never attach this to `record_model` itself -- `AuditLog.observe(AuditObserver(AuditLog))` -- each audit-log row's own creation would trigger another one, without end.
+
+Source code in `src/zeython/audit_log.py`
+
+```python
+def __init__(self, record_model: type[Model]) -> None:
+    self.record_model = record_model
+    # Keyed by the model instance itself (not e.g. its id, which is
+    # None for a not-yet-flushed record) so an aborted save (updating()
+    # ran, but a later step -- validate_or_raise(), the flush itself --
+    # raised before updated() ever ran) can't accumulate an entry
+    # nothing will ever pop: once the instance itself is no longer
+    # referenced elsewhere, this reclaims automatically.
+    self._pending_diff: WeakKeyDictionary[Model, dict[str, dict[str, Any]]] = WeakKeyDictionary()
+```
+
+### AuditLogServiceProvider
+
+```python
+AuditLogServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Registers :class:`AuditActorMiddleware`, so :func:`current_actor` is set automatically from whichever authentication scheme handled the current request::
+
+```text
+app.register(AuditLogServiceProvider)
+```
+
+Register this **first** -- before `DatabaseServiceProvider`, `AuthServiceProvider`, `ApiAuthServiceProvider`, before anything else that calls `add_middleware()`. `add_middleware()` prepends, so the most recently registered middleware wraps outermost; every middleware-adding provider registered *after* this one then wraps *around* `AuditActorMiddleware`, pushing it further inward no matter how many more get added later. It needs to end up innermost: resolving the actor needs a database session already open (a query against your user model) and, for cookie auth, `SessionMiddleware` to have already parsed the session cookie -- both are provided by middleware layers that must therefore sit *outside* this one. Registered too late (anywhere after `DatabaseServiceProvider`), `current_user()`/`current_api_user()` both fail silently from inside :meth:`AuditActorMiddleware._resolve_actor`'s broad `except`, and every audited entry ends up anonymous even for an authenticated request -- the same class of subtle ordering trap documented on :class:`~zeython.maintenance.MaintenanceModeServiceProvider`.
+
+Doesn't attach auditing to any model on its own -- that needs your own `record_model` (see :mod:`zeython.audit_log`'s own docstring) and at least one `SomeModel.observe(AuditObserver(YourAuditLog))` call, typically in another service provider's `boot()` once your models are all defined. See docs/audit-log.md.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+### current_actor
+
+```python
+current_actor() -> tuple[str, int] | None
+```
+
+The `(actor_type, actor_id)` attributed to audit log entries written from here on in the current context, or `None` for an anonymous/system action. `actor_type` is the actor model's class name (e.g. `"User"`).
+
+Source code in `src/zeython/audit_log.py`
+
+```python
+def current_actor() -> tuple[str, int] | None:
+    """The ``(actor_type, actor_id)`` attributed to audit log entries written
+    from here on in the current context, or ``None`` for an anonymous/system
+    action. ``actor_type`` is the actor model's class name (e.g. ``"User"``).
+    """
+    return _current_actor.get()
+```
+
+### set_actor
+
+```python
+set_actor(actor: Model | None) -> None
+```
+
+Attribute audit log entries written from here on (in this async context) to `actor` -- for code with no request/middleware to infer it from (a background job, a console command, a scheduled task)::
+
+```text
+async def handle(self) -> None:
+    set_actor(await User.find(self.performed_by_id))
+    await order.update(status="shipped")
+```
+
+Pass `None` to explicitly record subsequent changes as anonymous/system -- e.g. to override an actor :class:`AuditActorMiddleware` already set, for a change your own code makes on the user's behalf but that isn't really *their* action.
+
+Source code in `src/zeython/audit_log.py`
+
+```python
+def set_actor(actor: Model | None) -> None:
+    """Attribute audit log entries written from here on (in this async
+    context) to ``actor`` -- for code with no request/middleware to infer
+    it from (a background job, a console command, a scheduled task)::
+
+        async def handle(self) -> None:
+            set_actor(await User.find(self.performed_by_id))
+            await order.update(status="shipped")
+
+    Pass ``None`` to explicitly record subsequent changes as anonymous/system
+    -- e.g. to override an actor :class:`AuditActorMiddleware` already set,
+    for a change your own code makes on the user's behalf but that isn't
+    really *their* action.
+    """
+    _current_actor.set((type(actor).__name__, actor.id) if actor is not None else None)
+```
+
+### audit_trail
+
+```python
+audit_trail(
+    record_model: type[Model], model: Model
+) -> list[Model]
+```
+
+Every audit log entry for `model`, oldest first::
+
+history = await audit_trail(AuditLog, post)
+
+Source code in `src/zeython/audit_log.py`
+
+```python
+async def audit_trail(record_model: type[Model], model: Model) -> list[Model]:
+    """Every audit log entry for ``model``, oldest first::
+
+        history = await audit_trail(AuditLog, post)
+    """
+    rows = await record_model.find_by(auditable_type=type(model).__name__, auditable_id=model.id)
+    return sorted(rows, key=lambda row: row.created_at)
 ```
 
 ## database
