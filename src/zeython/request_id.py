@@ -82,18 +82,26 @@ class RequestIdMiddleware:
 
         try:
             await self.app(scope, receive, send_with_header)
-        except BaseException:
-            # Deliberately no reset here -- see the identical note in
-            # zeython.profiler.RequestProfilerMiddleware. Starlette's
-            # ServerErrorMiddleware sits *outside* every user-added
-            # middleware (including this one), so unhandled_exception_handler
-            # (zeython.exceptions) -- which reads request_id() to tag the
-            # error report -- only runs after this exception has already
-            # propagated past us. Resetting here would blank the request ID
-            # right before the one call that most needs it: correlating a
-            # crash report back to this request's other log lines.
+        except BaseException as exc:
+            # Starlette's ServerErrorMiddleware sits *outside* every
+            # user-added middleware (including this one) --
+            # unhandled_exception_handler (zeython.exceptions), which reads
+            # request_id() to tag the error report, only runs after this
+            # exception has already propagated past us, by which point this
+            # middleware's own __call__ frame (and the reset below) has
+            # already run. So the ID can't be handed off via the contextvar
+            # alone -- it's stashed directly on the exception instead, which
+            # zeython.exceptions reads back off `exc` if present. Without
+            # this, leaving the contextvar bound past this request (the
+            # previous approach) so that handler *could* still read it would
+            # leak this crashed request's ID into whatever later code shares
+            # this asyncio Task -- harmless under a real server's
+            # one-Task-per-connection model, but not under
+            # zeython.testing.client()'s inline ASGI calls, which reuse one
+            # Task across many requests in the same test.
+            exc._zeython_request_id = current_id  # type: ignore[attr-defined]  # noqa: SLF001
             raise
-        else:
+        finally:
             _current_request_id.reset(token)
 
 

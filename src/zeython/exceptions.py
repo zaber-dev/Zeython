@@ -149,6 +149,27 @@ def _debug_queries(exc: BaseException | None = None) -> list[Any]:
     return list(current_queries())
 
 
+def _request_id_for(exc: BaseException | None = None) -> str | None:
+    """The crashed request's correlation ID (see :mod:`zeython.request_id`).
+
+    Prefers the ID stashed directly on ``exc`` (by ``RequestIdMiddleware``'s
+    ``except`` clause) over the :mod:`zeython.request_id` contextvar: by the
+    time a crash reaches this handler, the middleware has already reset that
+    contextvar, since leaving it bound past the request that crashed --
+    purely so this function could read it -- would leak a stale ID into
+    whatever else shares the same asyncio Task afterward (harmless under a
+    real server's one-Task-per-connection model, but not under
+    ``zeython.testing.client()``'s inline ASGI calls, which reuse one Task
+    across many requests in the same test). Falls back to the contextvar for
+    callers with no exception object to hand in.
+    """
+    if exc is not None:
+        stashed = getattr(exc, "_zeython_request_id", None)
+        if stashed is not None:
+            return stashed
+    return request_id()
+
+
 def _debug_queries_for_json(exc: BaseException | None = None) -> list[dict[str, Any]] | None:
     queries = _debug_queries(exc)
     if not queries:
@@ -372,7 +393,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Respo
     # directly in tests against minimal request doubles.
     report_exception(
         exc,
-        request_id=request_id(),
+        request_id=_request_id_for(exc),
         path=getattr(getattr(request, "url", None), "path", None),
         method=getattr(request, "method", None),
     )
