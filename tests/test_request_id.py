@@ -76,16 +76,16 @@ async def test_request_id_is_none_outside_of_a_request() -> None:
 async def test_request_id_still_visible_to_the_unhandled_exception_handler(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Regression: RequestIdMiddleware must not reset its contextvar on the
-    exception path. Starlette's ServerErrorMiddleware sits *outside* every
-    user-added middleware, so unhandled_exception_handler -- which reads
-    request_id() to tag the error report -- only runs after the exception
-    has already propagated past RequestIdMiddleware's own try block. A
-    naive try/finally reset there would blank the ID before that handler
-    (and report_exception) ever saw it, silently losing request
-    correlation for every crash report. Caught by testing the real
-    zeython.exceptions integration end-to-end, not RequestIdMiddleware in
-    isolation.
+    """Regression: a crash report must still be tagged with its request's
+    correlation ID. Starlette's ServerErrorMiddleware sits *outside* every
+    user-added middleware, so unhandled_exception_handler -- which tags the
+    error report with a request ID -- only runs after the exception has
+    already propagated past RequestIdMiddleware's own try block, by which
+    point its contextvar has already been reset in its finally. The ID
+    survives the trip because RequestIdMiddleware stashes it directly on the
+    propagating exception, and zeython.exceptions._request_id_for reads it
+    back off there. Caught by testing the real zeython.exceptions
+    integration end-to-end, not RequestIdMiddleware in isolation.
     """
     import zeython.exceptions as exceptions_module
 
@@ -118,6 +118,46 @@ async def test_request_id_still_visible_to_the_unhandled_exception_handler(
     # report_exception always saw None for a crash, no matter what.
     assert captured_request_ids
     assert captured_request_ids[0] is not None
+
+
+async def test_a_crashed_requests_id_does_not_leak_into_later_requests(tmp_path: Path) -> None:
+    # Regression guard: a crash used to leave the contextvar bound to that
+    # request's ID forever (deliberately, so the crash handler could still
+    # read it) -- but since a later successful request's own reset() just
+    # unwinds back to that same stale binding instead of clearing it, the
+    # leaked ID would keep reappearing indefinitely. An inline ASGITransport
+    # call has no per-request asyncio Task boundary, so this is directly
+    # observable within one test -- the same reason this uses
+    # raise_app_exceptions=False directly rather than zeython.testing.client():
+    # Starlette's ServerErrorMiddleware always re-raises after sending its
+    # response (so a real server can log it, or a test client can opt into
+    # seeing it), which httpx would otherwise turn into a raised exception
+    # here instead of a response.
+    import httpx
+
+    app = _make_app(tmp_path)
+
+    @app.get("/boom")
+    async def boom(request):
+        request_id()  # touch it, same as a real crashed handler would
+        raise RuntimeError("kaboom")
+
+    @app.get("/ok")
+    async def ok(request):
+        return JSONResponse({"ok": True})
+
+    transport = httpx.ASGITransport(app=app.asgi, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as http:
+        crash_response = await http.get("/boom")
+        assert crash_response.status_code == 500
+
+        await http.get("/ok")
+        await http.get("/ok")
+
+    # Back in the ambient context (this test function's own asyncio Task,
+    # the same one the client ran every request on above) -- must not still
+    # see the crashed request's ID two clean requests later.
+    assert request_id() is None
 
 
 # -- Wired via RequestIdServiceProvider ------------------------------------------------------
