@@ -7,6 +7,8 @@ from zeython.auth import login as auth_login
 from zeython.auth import logout as auth_logout
 from zeython.events import emit
 from zeython.feature_flags import feature
+from zeython.mfa import complete_challenge, confirm, disable, enroll
+from zeython.mfa import start_challenge as start_mfa_challenge
 from zeython.notifications import notify
 from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
@@ -18,7 +20,8 @@ from app.Notifications.welcome_notification import WelcomeNotification
 
 
 class AuthController(Controller):
-    """Registration, login, logout, and the current-user endpoint.
+    """Registration, login, logout, the current-user endpoint, and
+    two-factor auth (TOTP) enrollment -- see docs/mfa.md.
 
     Session-based: a successful register/login sets a signed cookie (see
     AuthServiceProvider in main.py); logout clears it. See docs/authentication.md.
@@ -73,12 +76,54 @@ class AuthController(Controller):
         if user is None:
             raise UnauthorizedException("Invalid email or password.")
 
+        if user.mfa_enabled:
+            # Password alone isn't enough -- see docs/mfa.md. No session
+            # cookie yet; current_user()/require_auth() still return
+            # nothing until POST /mfa/challenge succeeds.
+            start_mfa_challenge(request, user)
+            return JSONResponse({"mfa_required": True})
+
         auth_login(request, user)
         return JSONResponse(user.to_dict())
 
     async def logout(self, request):
         auth_logout(request)
         return JSONResponse({"message": "Logged out."})
+
+    async def mfa_challenge(self, request):
+        await throttle(request, key=f"mfa-challenge:{client_ip(request)}", limit=5, window=60)
+
+        data = await request.json()
+        user = await complete_challenge(request, data.get("code", ""))
+        if user is None:
+            raise UnauthorizedException("Invalid or expired code.")
+        return JSONResponse(user.to_dict())
+
+    async def mfa_enroll(self, request):
+        user = await current_user(request)
+        if user is None:
+            raise UnauthorizedException("Authentication required.")
+
+        enrollment = await enroll(user, account_name=user.email)
+        return JSONResponse({"secret": enrollment.secret, "uri": enrollment.uri})
+
+    async def mfa_confirm(self, request):
+        user = await current_user(request)
+        if user is None:
+            raise UnauthorizedException("Authentication required.")
+
+        data = await request.json()
+        recovery_codes = await confirm(user, data.get("code", ""))
+        # The only time these are ever visible in plaintext -- see docs/mfa.md.
+        return JSONResponse({"recovery_codes": recovery_codes})
+
+    async def mfa_disable(self, request):
+        user = await current_user(request)
+        if user is None:
+            raise UnauthorizedException("Authentication required.")
+
+        await disable(user)
+        return JSONResponse({"message": "Two-factor authentication disabled."})
 
     async def me(self, request):
         user = await current_user(request)
