@@ -201,6 +201,7 @@ plugins:
           - localization.md
           - events.md
           - notifications.md
+          - audit-log.md
           - feature-flags.md
           - queues.md
           - scheduling.md
