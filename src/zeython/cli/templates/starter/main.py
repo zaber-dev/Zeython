@@ -1,6 +1,7 @@
 from zeython import (
     ApiAuthServiceProvider,
     Application,
+    AuditLogServiceProvider,
     AuthorizationServiceProvider,
     AuthServiceProvider,
     CacheServiceProvider,
@@ -22,6 +23,7 @@ from zeython import (
 
 from app.Models.notification import Notification
 from app.Models.user import User
+from app.Providers.app_audit_service_provider import AppAuditServiceProvider
 from app.Providers.app_event_service_provider import AppEventServiceProvider
 from app.Providers.app_feature_service_provider import AppFeatureServiceProvider
 from app.Providers.post_policy_service_provider import PostPolicyServiceProvider
@@ -31,6 +33,16 @@ app.register(HealthCheckServiceProvider)
 # Stamps every request/response with an X-Request-ID and threads it into
 # the logs -- see docs/observability.md.
 app.register(RequestIdServiceProvider)
+# Registered before DatabaseServiceProvider deliberately: add_middleware()
+# prepends (most recently registered wraps outermost), and resolving the
+# current actor needs a database session already open -- see
+# AuditLogServiceProvider's own docstring for why this one has to come
+# first among middleware-adding providers, not last like maintenance mode
+# below. Its own boot() only adds a middleware that sets a contextvar
+# nothing reads until a model actually calls Model.observe(AuditObserver(...))
+# (see AppAuditServiceProvider below), so it's safe to always register --
+# see docs/audit-log.md.
+app.register(AuditLogServiceProvider)
 app.register(DatabaseServiceProvider)
 # X-Debug-Duration-Ms/X-Debug-Query-Count/X-Debug-Query-Time-Ms on every
 # response, plus the queries a crashed request ran shown on its debug
@@ -61,6 +73,10 @@ app.register(AuthServiceProvider(app, user_model=User))
 app.register(ApiAuthServiceProvider(app, user_model=User))
 app.register(AuthorizationServiceProvider)
 app.register(PostPolicyServiceProvider(app))
+# Automatic create/update/delete changelog for the models named here --
+# see docs/audit-log.md. AppAuditServiceProvider (app/Providers/) is where
+# this app's own audited models are declared.
+app.register(AppAuditServiceProvider(app))
 app.register(RouteServiceProvider(app, modules=("routes.web",)))
 # Live at /docs (Swagger UI) and /openapi.json -- see docs/openapi.md.
 # OPENAPI_ENABLED=false in .env turns both off, e.g. in production.
