@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/observability/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/mfa/">
       
       
-        <link rel="prev" href="../maintenance-mode/">
+        <link rel="prev" href="../authentication/">
       
       
-        <link rel="next" href="../profiling/">
+        <link rel="next" href="../csrf/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Observability - Zeython Docs</title>
+        <title>Two-Factor Auth (MFA) - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#observability" class="md-skip">
+        <a href="#two-factor-authentication-totp" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Observability
+              Two-Factor Auth (MFA)
             
           </span>
         </div>
@@ -287,10 +287,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../authentication/" class="md-tabs__link">
           
   
@@ -366,12 +368,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../health-check/" class="md-tabs__link">
           
   
@@ -1111,26 +1111,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -1148,7 +1153,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1191,10 +1196,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../mfa/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Two-Factor Auth (MFA)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1210,6 +1242,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enrolling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enrolling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gating-login-behind-the-second-factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gating login behind the second factor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recovery-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disabling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disabling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clock-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clock drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2099,31 +2239,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -2141,7 +2276,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2212,37 +2347,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Observability
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../observability/" class="md-nav__link">
         
   
   
@@ -2258,159 +2366,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requestcorrelation-ids" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Request/Correlation IDs
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Request/Correlation IDs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-it-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What it does
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#reading-it-in-a-handler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reading it in a handler
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#in-your-own-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In your own logging
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-the-middleware-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using the middleware directly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#verifying-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verifying it
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#structured-json-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Structured (JSON) logging
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Structured (JSON) logging">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-it-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using it directly
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2873,29 +2828,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requestcorrelation-ids" class="md-nav__link">
+  <a href="#why-this-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Request/Correlation IDs
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Request/Correlation IDs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-it-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What it does
+        Why this exists
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2905,103 +2848,70 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#reading-it-in-a-handler" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#enrolling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading it in a handler
+        Enrolling
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#in-your-own-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In your own logging
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-the-middleware-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using the middleware directly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#verifying-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verifying it
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#structured-json-logging" class="md-nav__link">
+  <a href="#gating-login-behind-the-second-factor" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Structured (JSON) logging
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Structured (JSON) logging">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setup_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
+        Gating login behind the second factor
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#fields" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#recovery-codes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fields
+        Recovery codes
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#using-it-directly" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#disabling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it directly
+        Disabling
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#clock-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clock drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3022,7 +2932,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/observability.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/mfa.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -3030,127 +2940,153 @@
   
 
 
-<h1 id="observability">Observability<a class="headerlink" href="#observability" title="Permanent link">&para;</a></h1>
-<h2 id="requestcorrelation-ids">Request/Correlation IDs<a class="headerlink" href="#requestcorrelation-ids" title="Permanent link">&para;</a></h2>
-<p>A production server handles many requests concurrently; its log stream is
-every one of them interleaved. Without something tying a group of log
-lines back to the single request that produced them, "what actually
-happened for this one request" becomes archaeology — grepping timestamps
-and hoping nothing else logged in that same window. <code>RequestIdMiddleware</code>
-gives every request a correlation ID and threads it through both the
-response and the logs.</p>
-<h3 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Reads the caller's own <code>X-Request-ID</code> request header, if it sent one —
-  so a request can be traced end-to-end across multiple services that all
-  honor the same header (a gateway, this app, a downstream call it makes).</li>
-<li>Otherwise generates a fresh UUID4.</li>
-<li>Echoes it back as a response header, so the client can correlate its own
-  logs (or just paste the ID back to you) with the server's.</li>
-<li>Makes it available to any code running while handling that request via
-  <code>request_id()</code> — and to every log line, via <code>%(request_id)s</code> in a
-  formatter.</li>
-</ul>
-<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">RequestIdServiceProvider</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RequestIdServiceProvider</span><span class="p">)</span>
+<h1 id="two-factor-authentication-totp">Two-Factor Authentication (TOTP)<a class="headerlink" href="#two-factor-authentication-totp" title="Permanent link">&para;</a></h1>
+<p><code>zeython.mfa</code> adds a second factor to the session login you already have
+(see <a href="../authentication/">Authentication</a>): a user enrolls an authenticator
+app (Google Authenticator, 1Password, Authy, ...), confirms it with a live
+code, and from then on a correct password alone isn't enough to log in.</p>
+<p>No new dependency — RFC 6238 TOTP only needs HMAC-SHA1 and base32, both
+already in the standard library.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>A leaked or guessed password shouldn't be enough to take over an account.
+TOTP is the standard second factor every major provider offers: a
+30-second, 6-digit code derived from a shared secret and the current time,
+generated by an app the user already has installed, no SMS or third-party
+service required.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<p>Add the columns to your user model — the same convention
+<a href="../authentication/"><code>Authenticatable</code></a> uses for <code>password_hash</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Models/user.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSON</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">String</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authenticatable</span><span class="p">,</span> <span class="n">MfaEnrollable</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">required</span><span class="p">,</span> <span class="n">email</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">Authenticatable</span><span class="p">,</span> <span class="n">MfaEnrollable</span><span class="p">):</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"users"</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">__hidden__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"password_hash"</span><span class="p">,</span> <span class="s2">"mfa_secret"</span><span class="p">,</span> <span class="s2">"mfa_recovery_codes"</span><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">__rules__</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">()],</span> <span class="s2">"email"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">(),</span> <span class="n">email</span><span class="p">()]}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">email</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">password_hash</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">mfa_secret</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">mfa_enabled</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">mfa_recovery_codes</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">JSON</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Registered by default in a generated project. Unlike
-<a href="../security-headers/">Security Headers</a>, there's no application-specific
-default to get wrong here — it only adds a response header and a piece of
-log context, never changes what a request is allowed to do.</p>
-<p>Configurable via <code>.env</code>:</p>
-<ul>
-<li><code>REQUEST_ID_HEADER</code> — default <code>X-Request-ID</code>.</li>
-</ul>
-<h3 id="reading-it-in-a-handler">Reading it in a handler<a class="headerlink" href="#reading-it-in-a-handler" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">request_id</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/whoami"</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">whoami</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"request_id"</span><span class="p">:</span> <span class="n">request_id</span><span class="p">()}</span>
+<p><code>mfa_secret</code> and <code>mfa_recovery_codes</code> belong in <code>__hidden__</code> — they're as
+sensitive as <code>password_hash</code> and must never round-trip through <code>to_dict()</code>.</p>
+<p>No service provider or middleware to register: unlike auth itself, MFA is
+just a set of functions operating on your user model and the existing
+session — <code>AuthServiceProvider</code> (for the session cookie and CSRF
+protection it needs) is the only prerequisite. A generated project already
+has all of this wired up — see <code>app/Controllers/auth_controller.py</code>.</p>
+<h2 id="enrolling">Enrolling<a class="headerlink" href="#enrolling" title="Permanent link">&para;</a></h2>
+<p>Enrollment is two steps, both requiring the user to already be logged in:
+generate a secret, then confirm it with a live code from the app that just
+scanned it — proving the user actually finished setting it up before MFA
+starts gating their login.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Controllers/auth_controller.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.mfa</span><span class="w"> </span><span class="kn">import</span> <span class="n">confirm</span><span class="p">,</span> <span class="n">enroll</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mfa_enroll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">current_user</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="k">raise</span> <span class="n">UnauthorizedException</span><span class="p">(</span><span class="s2">"Authentication required."</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">enrollment</span> <span class="o">=</span> <span class="k">await</span> <span class="n">enroll</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"secret"</span><span class="p">:</span> <span class="n">enrollment</span><span class="o">.</span><span class="n">secret</span><span class="p">,</span> <span class="s2">"uri"</span><span class="p">:</span> <span class="n">enrollment</span><span class="o">.</span><span class="n">uri</span><span class="p">})</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mfa_confirm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">current_user</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="k">raise</span> <span class="n">UnauthorizedException</span><span class="p">(</span><span class="s2">"Authentication required."</span><span class="p">)</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">recovery_codes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">confirm</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"code"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"recovery_codes"</span><span class="p">:</span> <span class="n">recovery_codes</span><span class="p">})</span>
 </span></code></pre></div>
-<h3 id="in-your-own-logging">In your own logging<a class="headerlink" href="#in-your-own-logging" title="Permanent link">&para;</a></h3>
-<p>Registering <code>RequestIdServiceProvider</code> also installs a <code>logging.Filter</code>
-on the root logger, so every <code>LogRecord</code> gets a <code>request_id</code> attribute —
-<code>"-"</code> for anything logged outside of a request (startup, a scheduled
-job). If your app hasn't customized <code>logging.basicConfig()</code> yet (the
-framework's own default format from <code>Application.__init__</code>), the provider
-folds <code>%(request_id)s</code> into it automatically:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>2026-08-17 10:22:03 INFO     app.controllers.posts [3f2a9e1c-...]: created post 42
+<p><code>enrollment.uri</code> is an <code>otpauth://totp/...</code> URI — render it as a QR code
+client-side (any JS QR library) for the user to scan, or show
+<code>enrollment.secret</code> directly for manual entry. Nothing here pulls in an
+image-processing dependency; that choice is left to your frontend.</p>
+<p><code>confirm()</code> raises <code>ValidationException</code> (a 422) if the code doesn't
+verify or there's no enrollment in progress, turns <code>mfa_enabled</code> on, and
+returns 8 recovery codes in plaintext — <strong>the only time they're ever
+visible</strong>. Only their hash is stored, the same way a password is. Show
+them to the user once and tell them to save them somewhere safe; there's
+no way to retrieve them again short of disabling and re-enrolling.</p>
+<p>Calling <code>enroll()</code> again before <code>confirm()</code> replaces the pending secret,
+so an abandoned enrollment can't be confirmed later with a stale one.</p>
+<h2 id="gating-login-behind-the-second-factor">Gating login behind the second factor<a class="headerlink" href="#gating-login-behind-the-second-factor" title="Permanent link">&para;</a></h2>
+<p>Once <code>mfa_enabled</code> is true, a correct password moves the user into a
+<em>pending</em> state instead of logging them in outright:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># app/Controllers/auth_controller.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.mfa</span><span class="w"> </span><span class="kn">import</span> <span class="n">complete_challenge</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.mfa</span><span class="w"> </span><span class="kn">import</span> <span class="n">start_challenge</span> <span class="k">as</span> <span class="n">start_mfa_challenge</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">manager</span><span class="o">.</span><span class="n">attempt</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"password"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="k">raise</span> <span class="n">UnauthorizedException</span><span class="p">(</span><span class="s2">"Invalid email or password."</span><span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">mfa_enabled</span><span class="p">:</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="n">start_mfa_challenge</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"mfa_required"</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">auth_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mfa_challenge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">complete_challenge</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"code"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="k">raise</span> <span class="n">UnauthorizedException</span><span class="p">(</span><span class="s2">"Invalid or expired code."</span><span class="p">)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
 </span></code></pre></div>
-<p>Configured your own formatter already? The provider leaves it alone —
-<code>record.request_id</code> is still there to build <code>%(request_id)s</code> into it
-yourself, or to pull directly in a handler:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<p><code>start_challenge()</code> stashes the user's id in the session under its own
+key — a <em>different</em> key than the one <code>zeython.auth.login()</code> uses — so
+<a href="../authentication/"><code>current_user()</code></a>/<code>require_auth()</code> keep returning
+nothing until <code>complete_challenge()</code> succeeds. A client that never
+finishes the second step never gets treated as logged in, even though the
+password check already passed.</p>
+<p><code>complete_challenge()</code> accepts either a live TOTP code or an unused
+recovery code, and on success calls <code>zeython.auth.login()</code> for you — no
+separate step needed. On failure it returns <code>None</code> and leaves the pending
+challenge in place, so the client can retry (throttle the endpoint the
+same way you'd throttle <code>/login</code> — see <a href="../rate-limiting/">Rate Limiting</a>).</p>
+<h2 id="recovery-codes">Recovery codes<a class="headerlink" href="#recovery-codes" title="Permanent link">&para;</a></h2>
+<p>Each of the 8 codes <code>confirm()</code> returns works exactly once — passing one
+to <code>complete_challenge()</code> (or <code>verify_and_consume()</code> directly) removes it
+from storage on success, so a captured or reused code can't be replayed.
+They exist for the case an authenticator app is lost or a phone is wiped;
+without them, a locked-out user has no way back into their own account
+short of a manual database fix.</p>
+<h2 id="disabling">Disabling<a class="headerlink" href="#disabling" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.mfa</span><span class="w"> </span><span class="kn">import</span> <span class="n">disable</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">RequestIdFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">pass</span>  <span class="c1"># add %(request_id)s to your own fmt string</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"processing order </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># record.request_id is set automatically</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mfa_disable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">current_user</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="k">raise</span> <span class="n">UnauthorizedException</span><span class="p">(</span><span class="s2">"Authentication required."</span><span class="p">)</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="k">await</span> <span class="n">disable</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Two-factor authentication disabled."</span><span class="p">})</span>
 </span></code></pre></div>
-<h3 id="using-the-middleware-directly">Using the middleware directly<a class="headerlink" href="#using-the-middleware-directly" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.request_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestIdMiddleware</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">RequestIdMiddleware</span><span class="p">,</span> <span class="n">header_name</span><span class="o">=</span><span class="s2">"X-Correlation-ID"</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="verifying-it">Verifying it<a class="headerlink" href="#verifying-it" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/up<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-Request-ID: my-own-id"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-request-id
-</span></code></pre></div>
-<p>The second call gets back exactly <code>my-own-id</code> — the middleware never
-overwrites a caller-supplied value.</p>
-<h2 id="structured-json-logging">Structured (JSON) logging<a class="headerlink" href="#structured-json-logging" title="Permanent link">&para;</a></h2>
-<p>The framework's default log line (<code>Application.__init__</code> calls this if
-nothing else configured <code>logging</code> first) is a human-readable text line:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>2026-08-17 10:22:03 INFO     app.controllers.posts [3f2a9e1c-...]: created post 42
-</span></code></pre></div>
-<p>Fine to read in a terminal, painful for a log shipper (Datadog, ELK/Logstash,
-CloudWatch Logs Insights, Splunk) that wants structured fields to filter and
-query on rather than a regex over free text. <code>LOG_FORMAT=json</code> switches the
-same default handler to one JSON object per line instead:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>{"timestamp": "2026-08-17 10:22:03,041", "level": "INFO", "logger": "app.controllers.posts", "message": "created post 42", "request_id": "3f2a9e1c-..."}
-</span></code></pre></div>
-<h3 id="setup_1">Setup<a class="headerlink" href="#setup_1" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># .env</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">LOG_FORMAT</span><span class="o">=</span>json
-</span></code></pre></div>
-<p>Nothing else changes — same loggers, same levels, same <code>RequestIdServiceProvider</code>
-integration (<code>request_id</code> is present whenever that provider is registered,
-<code>"-"</code> outside a request, same as the text format). Only takes effect
-through the framework's own default logging setup: like the text format,
-it's skipped entirely if the root logger already has a handler (you called
-<code>logging.basicConfig()</code> yourself, or your deployment platform did).</p>
-<h3 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">&para;</a></h3>
-<p>Every line carries <code>timestamp</code>, <code>level</code>, <code>logger</code>, <code>message</code>, and
-<code>request_id</code> (when <code>RequestIdServiceProvider</code> is registered). A record with
-exception info (<code>logger.exception(...)</code>, or <code>exc_info=True</code>) additionally
-gets <code>exception</code> — the formatted traceback as a single string. Anything
-passed via <code>extra=</code> is included as its own top-level field:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"order placed"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"order_id"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"total"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">total</span><span class="p">})</span>
-</span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>{"timestamp": "...", "level": "INFO", "logger": "app.jobs", "message": "order placed", "order_id": 42, "total": 19.99}
-</span></code></pre></div>
-<p>A field that isn't natively JSON-serializable (a <code>Decimal</code>, a <code>datetime</code>, a
-dataclass) degrades to its <code>str()</code> rather than raising and losing the whole
-log line.</p>
-<h3 id="using-it-directly">Using it directly<a class="headerlink" href="#using-it-directly" title="Permanent link">&para;</a></h3>
-<p><code>zeython.logging.JsonFormatter</code> is a plain <code>logging.Formatter</code> — attach it
-to your own handler if you need something LOG_FORMAT=json's all-or-nothing
-default doesn't cover (a second handler with a different format, non-default
-log setup):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonFormatter</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">JsonFormatter</span><span class="p">())</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"app.audit"</span><span class="p">)</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
-</span></code></pre></div>
+<p>Clears the secret, the enabled flag, and every recovery code. A real app
+should require re-entering the password (or a fresh TOTP code) before
+calling this — an attacker who's already hijacked a session shouldn't be
+able to turn off the account's own second factor.</p>
+<h2 id="clock-drift">Clock drift<a class="headerlink" href="#clock-drift" title="Permanent link">&para;</a></h2>
+<p><code>verify_totp()</code> tolerates ±1 time step (30 seconds either side) by
+default, via its <code>valid_window</code> parameter — enough for ordinary clock
+drift between the server and the authenticator app's device without
+meaningfully widening the guessing window an attacker gets per code.</p>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<p>See <a href="../reference/security/"><code>zeython.mfa</code></a> for the full function list —
+<code>generate_secret()</code>, <code>provisioning_uri()</code>, and <code>verify_totp()</code> if you need
+the TOTP primitives directly instead of the enroll/confirm/challenge
+flow above.</p>
 
 
 
@@ -3186,7 +3122,7 @@ log setup):</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../maintenance-mode/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Maintenance Mode">
+          <a href="../authentication/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Authentication">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3196,20 +3132,20 @@ log setup):</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Maintenance Mode
+                Authentication
               </div>
             </div>
           </a>
         
         
           
-          <a href="../profiling/" class="md-footer__link md-footer__link--next" aria-label="Next: Profiling">
+          <a href="../csrf/" class="md-footer__link md-footer__link--next" aria-label="Next: CSRF Protection">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Profiling
+                CSRF Protection
               </div>
             </div>
             <div class="md-footer__button md-icon">
