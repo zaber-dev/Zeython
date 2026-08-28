@@ -70,19 +70,22 @@ jobs:
         run: |
           cd /tmp/ci-smoke-test
           zeython serve --port 8000 --no-reload &
-          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8000/ && break || sleep 0.5; done
+          for i in $(seq 1 20); do curl -sf -c /tmp/cookies.txt http://127.0.0.1:8000/ && break || sleep 0.5; done
           curl -sf http://127.0.0.1:8000/ | grep -q "CI Smoke Test"
           curl -sf http://127.0.0.1:8000/welcome | grep -q "Rendered by Jinja2"
-          REGISTER_STATUS=$(curl -s -o /tmp/register.json -w '%{http_code}' -c /tmp/cookies.txt \
+          # CSRF is on by default and protects every unsafe request regardless
+          # of whether a session cookie exists yet -- closing a login-CSRF hole
+          # means even this very first POST needs the token cookie the health
+          # check above already got us back via the header. See docs/csrf.md.
+          CSRF_TOKEN=$(grep csrf_token /tmp/cookies.txt | awk '{print $NF}')
+          test -n "$CSRF_TOKEN"
+          REGISTER_STATUS=$(curl -s -o /tmp/register.json -w '%{http_code}' -b /tmp/cookies.txt -c /tmp/cookies.txt \
+            -H "X-CSRF-Token: $CSRF_TOKEN" \
             -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
             -d '{"name":"Ada","email":"ada@example.com","password":"hunter2"}')
           test "$REGISTER_STATUS" = "201"
           ME_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies.txt http://127.0.0.1:8000/me)
           test "$ME_STATUS" = "200"
-          # A session cookie now exists, so every further unsafe request on
-          # it needs the matching CSRF header too -- see docs/csrf.md.
-          CSRF_TOKEN=$(grep csrf_token /tmp/cookies.txt | awk '{print $NF}')
-          test -n "$CSRF_TOKEN"
           echo "upload me" > /tmp/upload.png
           UPLOAD_STATUS=$(curl -s -o /tmp/upload.json -w '%{http_code}' -b /tmp/cookies.txt \
             -H "X-CSRF-Token: $CSRF_TOKEN" -F "file=@/tmp/upload.png" http://127.0.0.1:8000/uploads)
@@ -92,10 +95,12 @@ jobs:
           POST_JSON=$(curl -s -b /tmp/cookies.txt -H "X-CSRF-Token: $CSRF_TOKEN" -X POST http://127.0.0.1:8000/posts \
             -H 'Content-Type: application/json' -d '{"title":"t","body":"b"}')
           POST_ID=$(python3 -c "import json; print(json.loads('''$POST_JSON''')['id'])")
-          curl -s -c /tmp/cookies2.txt -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
-            -d '{"name":"Bea","email":"bea@example.com","password":"hunter2"}' -o /dev/null
+          curl -s -c /tmp/cookies2.txt http://127.0.0.1:8000/ -o /dev/null
           CSRF_TOKEN2=$(grep csrf_token /tmp/cookies2.txt | awk '{print $NF}')
           test -n "$CSRF_TOKEN2"
+          curl -s -b /tmp/cookies2.txt -c /tmp/cookies2.txt -H "X-CSRF-Token: $CSRF_TOKEN2" \
+            -X POST http://127.0.0.1:8000/register -H 'Content-Type: application/json' \
+            -d '{"name":"Bea","email":"bea@example.com","password":"hunter2"}' -o /dev/null
           STRANGER_DELETE_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/cookies2.txt \
             -H "X-CSRF-Token: $CSRF_TOKEN2" -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
           test "$STRANGER_DELETE_STATUS" = "403"
@@ -103,7 +108,8 @@ jobs:
             -H "X-CSRF-Token: $CSRF_TOKEN" -X DELETE "http://127.0.0.1:8000/posts/$POST_ID")
           test "$OWNER_DELETE" = "204"
           test ! -s /tmp/delete.out  # a 204 must have an empty body
-          TOKEN_JSON=$(curl -s -X POST http://127.0.0.1:8000/api/token -H 'Content-Type: application/json' \
+          TOKEN_JSON=$(curl -s -b /tmp/cookies.txt -H "X-CSRF-Token: $CSRF_TOKEN" \
+            -X POST http://127.0.0.1:8000/api/token -H 'Content-Type: application/json' \
             -d '{"email":"ada@example.com","password":"hunter2"}')
           TOKEN=$(python3 -c "import json; print(json.loads('''$TOKEN_JSON''')['token'])")
           API_ME_STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
