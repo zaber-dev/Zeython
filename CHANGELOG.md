@@ -51,6 +51,11 @@ end-to-end tutorial. Licensed under MIT.
 - Row-level multi-tenancy (`TenancyServiceProvider`, `as_tenant()`,
   `current_tenant_id()`) — a model opts in with a `tenant_id` column, no
   mixin required.
+- Audit logging (`zeython.audit_log`) — `AuditObserver` records every
+  create/update/delete of an attached model, with a per-field before/after
+  diff, to a `record_model` you own; `AuditActorMiddleware` attributes each
+  entry to whichever authentication scheme resolved the request's user,
+  with `set_actor()` for background jobs and console commands.
 - `SECURITY.md` documenting the vulnerability-reporting process.
 
 ### Data & background work

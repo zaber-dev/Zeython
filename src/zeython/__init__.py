@@ -9,6 +9,14 @@ from zeython.api_auth import (
     require_api_auth,
 )
 from zeython.application import Application
+from zeython.audit_log import (
+    AuditActorMiddleware,
+    AuditLogServiceProvider,
+    AuditObserver,
+    audit_trail,
+    current_actor,
+    set_actor,
+)
 from zeython.auth import (
     Authenticatable,
     AuthManager,
@@ -122,6 +130,12 @@ __version__ = "1.0.0"
 
 __all__ = [
     "AdminServiceProvider",
+    "AuditActorMiddleware",
+    "AuditLogServiceProvider",
+    "AuditObserver",
+    "audit_trail",
+    "current_actor",
+    "set_actor",
     "AI",
     "AIResponse",
     "AnthropicAI",
