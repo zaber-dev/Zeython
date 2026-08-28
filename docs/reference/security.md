@@ -1,9 +1,12 @@
 # Security
 
-Session-based web auth, API token auth, RBAC-style authorization, CSRF
-protection, security response headers, password hashing, and multi-tenancy.
+Session-based web auth, two-factor auth (TOTP), API token auth, RBAC-style
+authorization, CSRF protection, security response headers, password
+hashing, and multi-tenancy.
 
 ::: zeython.auth
+
+::: zeython.mfa
 
 ::: zeython.api_auth
 

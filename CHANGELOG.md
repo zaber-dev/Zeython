@@ -43,6 +43,9 @@ GPL-3.0 to MIT.
 
 - Session-based authentication (`AuthServiceProvider`, `login`/`logout`,
   `require_auth`, `current_user`), plus bearer-token API authentication.
+- Two-factor authentication (`zeython.mfa`) — RFC 6238 TOTP with no new
+  dependency, one-time recovery codes, and a login-time challenge that
+  gates `zeython.auth.login()` behind a second factor once a user enrolls.
 - Authorization: `Gate`, `authorize()`, Policy classes, a global
   `before()` hook, and role/permission checks (RBAC).
 - CSRF protection, on by default with session auth.

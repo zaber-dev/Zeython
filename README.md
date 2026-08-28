@@ -162,6 +162,7 @@ empty scaffold to a tested, authenticated API
 
 **Security**
 [Authentication](docs/authentication.md) ·
+[Two-Factor Auth (MFA)](docs/mfa.md) ·
 [CSRF Protection](docs/csrf.md) ·
 [Authorization](docs/authorization.md) ·
 [API Authentication](docs/api-authentication.md) ·

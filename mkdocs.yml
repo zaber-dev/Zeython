@@ -29,6 +29,7 @@ nav:
       - Frontend & CSS: frontend.md
   - Security:
       - Authentication: authentication.md
+      - Two-Factor Auth (MFA): mfa.md
       - CSRF Protection: csrf.md
       - Authorization: authorization.md
       - API Authentication: api-authentication.md
@@ -185,6 +186,7 @@ plugins:
           - frontend.md
         Security:
           - authentication.md
+          - mfa.md
           - csrf.md
           - authorization.md
           - api-authentication.md
