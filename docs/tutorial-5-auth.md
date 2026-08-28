@@ -162,11 +162,12 @@ That succeeds — you're logged in as Ada. Now register a second user and
 try to delete Ada's task as them:
 
 ```bash
-curl -sS -c cookies2.txt -X POST http://127.0.0.1:8000/register \
+curl -sS -c cookies2.txt http://127.0.0.1:8000/ -o /dev/null
+CSRF2=$(grep csrf_token cookies2.txt | awk '{print $NF}')
+
+curl -sS -b cookies2.txt -c cookies2.txt -H "X-CSRF-Token: $CSRF2" -X POST http://127.0.0.1:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"name": "Bob", "email": "bob@example.com", "password": "hunter2222"}'
-
-CSRF2=$(grep csrf_token cookies2.txt | awk '{print $NF}')
 
 curl -sS -b cookies2.txt -H "X-CSRF-Token: $CSRF2" -X DELETE http://127.0.0.1:8000/tasks/2 \
   -o /dev/null -w '%{http_code}\n'
