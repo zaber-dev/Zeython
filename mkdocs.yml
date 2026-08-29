@@ -65,6 +65,8 @@ nav:
       - Health Check: health-check.md
       - Maintenance Mode: maintenance-mode.md
       - Observability: observability.md
+      - Metrics: metrics.md
+      - Tracing: tracing.md
       - Profiling: profiling.md
       - Error Monitoring: error-monitoring.md
       - Docker: docker.md
@@ -225,6 +227,8 @@ plugins:
           - health-check.md
           - maintenance-mode.md
           - observability.md
+          - metrics.md
+          - tracing.md
           - profiling.md
           - error-monitoring.md
           - docker.md

@@ -67,6 +67,14 @@ from zeython.maintenance import (
     disable_maintenance_mode,
     enable_maintenance_mode,
 )
+from zeython.metrics import (
+    Counter,
+    Gauge,
+    Histogram,
+    MetricsMiddleware,
+    MetricsRegistry,
+    MetricsServiceProvider,
+)
 from zeython.mfa import (
     Enrollment,
     MfaEnrollable,
@@ -160,6 +168,7 @@ from zeython.storage import (
     store_upload,
 )
 from zeython.tenancy import TenancyServiceProvider, TenantMiddleware, as_tenant, current_tenant_id
+from zeython.tracing import TracingMiddleware, TracingServiceProvider, init_tracing
 from zeython.validation import Rule, email, matches, max_length, min_length, one_of, required
 from zeython.views import Views, render
 from zeython.webhooks import (
@@ -274,6 +283,12 @@ __all__ = [
     "logout",
     "current_user",
     "require_auth",
+    "Counter",
+    "Gauge",
+    "Histogram",
+    "MetricsMiddleware",
+    "MetricsRegistry",
+    "MetricsServiceProvider",
     "Enrollment",
     "MfaEnrollable",
     "enroll_mfa",
@@ -354,6 +369,9 @@ __all__ = [
     "TenantMiddleware",
     "as_tenant",
     "current_tenant_id",
+    "TracingMiddleware",
+    "TracingServiceProvider",
+    "init_tracing",
     "Rule",
     "required",
     "email",

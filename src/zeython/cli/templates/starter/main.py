@@ -9,6 +9,7 @@ from zeython import (
     HealthCheckServiceProvider,
     MailServiceProvider,
     MaintenanceModeServiceProvider,
+    MetricsServiceProvider,
     NotificationServiceProvider,
     OpenApiServiceProvider,
     QueueServiceProvider,
@@ -124,6 +125,15 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # `from zeython import ErrorMonitoringServiceProvider` above). See
 # docs/error-monitoring.md.
 # app.register(ErrorMonitoringServiceProvider(app))
+# Distributed tracing (OpenTelemetry): one span per request, propagated
+# across service calls via the standard W3C traceparent header -- not
+# registered by default since it needs `pip install zeython[otel]` and a
+# decision about where spans go (a real collector like Jaeger/Tempo/an
+# OTLP endpoint; omit `exporter` and spans print to the console instead,
+# useful for confirming this is wired up before you've picked one).
+# Uncomment (and `from zeython import TracingServiceProvider` above) once
+# you're ready. See docs/tracing.md.
+# app.register(TracingServiceProvider(app, service_name=app.config.app_name))
 # Dev-only warning when a request fires the same query shape suspiciously
 # many times -- catches a forgotten include=(...) before it ships. Its
 # own boot() is a no-op unless APP_DEBUG is true, so it's safe to always
@@ -160,6 +170,16 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # guess. Uncomment, pick a real resolver, and add
 # `from zeython import TenancyServiceProvider` above. See docs/multi-tenancy.md.
 # app.register(TenancyServiceProvider(app, resolver=lambda request: request.headers.get("X-Tenant-ID")))
+
+# Prometheus-format metrics (request counts, latency histograms) at
+# /metrics -- see docs/metrics.md. Registered here, right before
+# maintenance mode, so it wraps as close to the whole request pipeline as
+# it can (most recently registered wraps outermost) without counting a
+# maintenance-mode 503 as a real request. Zero-config and safe to always
+# register, same as HealthCheckServiceProvider above -- no cardinality
+# risk (grouped by route path template, not literal URL) and no database
+# dependency of its own.
+app.register(MetricsServiceProvider(app))
 
 # `zeython down`/`zeython up` -- see docs/maintenance-mode.md. Kept as the
 # very last registration in this file deliberately: the most recently
