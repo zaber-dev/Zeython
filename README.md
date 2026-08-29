@@ -65,6 +65,10 @@ scaffolding on every project. Zeython does that assembly once:
   custom counters/gauges), with zero new dependency, plus opt-in
   OpenTelemetry distributed tracing with W3C `traceparent` propagation.
   See [Metrics](docs/metrics.md), [Tracing](docs/tracing.md).
+- **Real full-text search, no new service** — `Model.search()` queries
+  SQLite's FTS5 or Postgres's `tsvector`/GIN, whichever your database
+  already ships, ranked most relevant first, kept in sync by the database
+  itself. See [Full-Text Search](docs/search.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
   suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
@@ -174,6 +178,7 @@ empty scaffold to a tested, authenticated API
 
 **The Basics**
 [Database & Migrations](docs/database.md) ·
+[Full-Text Search](docs/search.md) ·
 [Relationships](docs/relationships.md) ·
 [Validation](docs/validation.md) ·
 [Model Events](docs/model-events.md) ·

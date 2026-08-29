@@ -166,6 +166,12 @@ from zeython.rate_limit import (
 from zeython.request_id import RequestIdMiddleware, RequestIdServiceProvider, request_id
 from zeython.routing import Controller, Router
 from zeython.schedule import Schedule, ScheduledEvent, ScheduleServiceProvider
+from zeython.search import (
+    create_fts5_index,
+    create_tsvector_index,
+    drop_fts5_index,
+    drop_tsvector_index,
+)
 from zeython.security_headers import SecurityHeadersMiddleware, SecurityHeadersServiceProvider
 from zeython.storage import (
     LocalStorage,
@@ -366,6 +372,10 @@ __all__ = [
     "Schedule",
     "ScheduledEvent",
     "ScheduleServiceProvider",
+    "create_fts5_index",
+    "drop_fts5_index",
+    "create_tsvector_index",
+    "drop_tsvector_index",
     "SecurityHeadersMiddleware",
     "SecurityHeadersServiceProvider",
     "RequestIdMiddleware",
