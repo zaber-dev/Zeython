@@ -220,35 +220,53 @@ class SyncQueue(Queue):
         await self._invoke(job)
 
 
-def _serialize_job(job: Job) -> str:
+def _job_to_spec(job: Job, *, purpose: str = "RedisQueue") -> dict[str, Any]:
+    """A JSON-safe ``{job_class, payload, max_attempts}`` description of
+    ``job``, reconstructible via :func:`_job_from_spec` -- shared by
+    :class:`RedisQueue`'s own wire format and by :func:`chain`/
+    :func:`dispatch_batch`, which both need to hand a job off to a *later*,
+    independent dispatch (the next link, a batch member's retry, the
+    ``then`` callback) rather than run it inline.
+    """
     if not dataclasses.is_dataclass(job):
         raise TypeError(
-            f"{type(job).__name__} must be a @dataclass to use with RedisQueue -- a durable queue has "
-            "to serialize a job to survive a process restart, and dataclasses.asdict() is how it does "
-            "that. Every constructor field must be JSON-safe (str/int/float/bool/None/list/dict)."
+            f"{type(job).__name__} must be a @dataclass to use with {purpose} -- it has to be "
+            "serialized to hand off to a later, independent dispatch, and dataclasses.asdict() is "
+            "how that happens. Every constructor field must be JSON-safe (str/int/float/bool/None/list/dict)."
         )
+    return {
+        "job_class": f"{type(job).__module__}.{type(job).__qualname__}",
+        "payload": dataclasses.asdict(job),
+        "max_attempts": job.max_attempts,
+    }
+
+
+def _job_from_spec(spec: dict[str, Any]) -> Job:
+    module_name, _, class_name = spec["job_class"].rpartition(".")
+    module = importlib.import_module(module_name)
+    job_cls = getattr(module, class_name)
+    job = job_cls(**spec["payload"])
+    job.max_attempts = spec["max_attempts"]
+    return job
+
+
+def _serialize_job(job: Job) -> str:
+    spec = _job_to_spec(job)
     return json.dumps(
         {
             # A per-push unique id, unused by _deserialize_job itself but
             # carried through every re-serialization (retry, requeue) --
             # see RedisQueue.push()'s use of it for why this has to be here.
             "_id": uuid.uuid4().hex,
-            "job_class": f"{type(job).__module__}.{type(job).__qualname__}",
-            "payload": dataclasses.asdict(job),
             "attempts": 0,
-            "max_attempts": job.max_attempts,
+            **spec,
         }
     )
 
 
 def _deserialize_job(raw: str) -> tuple[Job, dict[str, Any]]:
     data = json.loads(raw)
-    module_name, _, class_name = data["job_class"].rpartition(".")
-    module = importlib.import_module(module_name)
-    job_cls = getattr(module, class_name)
-    job = job_cls(**data["payload"])
-    job.max_attempts = data["max_attempts"]
-    return job, data
+    return _job_from_spec(data), data
 
 
 class RedisQueue(Queue):
@@ -401,8 +419,310 @@ async def dispatch(request: Request, job: Job, *, delay: float = 0.0) -> None:
     await queue.push(job, delay=delay)
 
 
+@dataclasses.dataclass
+class _ChainedJob(Job):
+    """Runs the job described by ``spec``, then (only on success) dispatches
+    the next link back onto whichever queue is running this one -- returned
+    by :func:`chain`, not constructed directly.
+
+    A failing link is retried like any other job (its own ``max_attempts``,
+    via ``__post_init__`` below), by the underlying queue's own existing
+    retry mechanism -- ``handle()`` itself has no retry logic of its own,
+    it just re-raises. Once a link exhausts its retries, the chain simply
+    stops there: nothing pushes the remaining links, and the failure is
+    logged/reported exactly the way any other exhausted job's is.
+    """
+
+    spec: dict[str, Any]
+    remaining: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.max_attempts = self.spec["max_attempts"]
+
+    async def handle(self, container: Container, queue: Queue) -> None:
+        job = _job_from_spec(self.spec)
+        await container.call(job.handle)
+        if self.remaining:
+            next_spec, *rest = self.remaining
+            await queue.push(_ChainedJob(spec=next_spec, remaining=rest))
+
+
+def chain(jobs: list[Job]) -> Job:
+    """Wrap ``jobs`` so they run strictly one after another — the next link
+    only starts once the previous one finishes successfully::
+
+        await dispatch(request, chain([DownloadReport(), EmailReport(), CleanupTempFiles()]))
+
+    Returns a single ``Job`` — dispatch it exactly like any other. If a
+    link exhausts its own ``max_attempts``, the rest of the chain never
+    runs (logged and reported the same way any other exhausted job is,
+    not raised somewhere nothing is watching).
+
+    Every job in the chain must be a ``@dataclass`` — a chain has to
+    serialize its remaining links to hand off to a later, independent
+    dispatch (the next link), the same requirement :class:`RedisQueue` has
+    for any job it runs. To run something once a *group* of independent
+    jobs all finish, use :func:`dispatch_batch` instead — nesting one
+    inside the other isn't supported: a chain link only waits for the
+    wrapped job's own ``handle()``, not any further dispatch it makes, so
+    a batch placed inside a chain link wouldn't actually block the next
+    link, and a chain placed inside a batch would only count that batch
+    member done once the chain's *first* link finishes.
+    """
+    if not jobs:
+        raise ValueError("chain() needs at least one job")
+    specs = [_job_to_spec(job, purpose="chain()") for job in jobs]
+    first, *rest = specs
+    return _ChainedJob(spec=first, remaining=rest)
+
+
+@dataclasses.dataclass(frozen=True)
+class BatchProgress:
+    """A snapshot of a batch's progress — see :func:`dispatch_batch`."""
+
+    total: int
+    pending: int
+    failed: int
+
+    @property
+    def finished(self) -> bool:
+        """Whether every job in the batch has run (successfully or not)."""
+        return self.pending == 0
+
+    @property
+    def succeeded(self) -> int:
+        """How many jobs have finished without exhausting their retries."""
+        return self.total - self.pending - self.failed
+
+
+class BatchTracker(ABC):
+    """Tracks how many jobs in a batch are still pending — the shared state
+    :func:`dispatch_batch` needs to know when the *last* one finishes.
+    Bound automatically by :class:`QueueServiceProvider`, matching whichever
+    ``Queue`` driver is active; not meant to be used directly.
+    """
+
+    @abstractmethod
+    async def create(self, batch_id: str, total: int, *, then: dict[str, Any] | None = None) -> None:
+        """Register a new batch of ``total`` jobs, optionally with a
+        serialized ``then`` job spec to hand back via :meth:`get_then` once it finishes.
+        """
+
+    @abstractmethod
+    async def record_completion(self, batch_id: str, *, failed: bool) -> BatchProgress:
+        """Record that one job in ``batch_id`` finished, and return the batch's progress so far."""
+
+    @abstractmethod
+    async def progress(self, batch_id: str) -> BatchProgress | None:
+        """The current progress of ``batch_id``, or ``None`` if unknown."""
+
+    @abstractmethod
+    async def get_then(self, batch_id: str) -> dict[str, Any] | None:
+        """The batch's ``then`` job spec, if it was given one."""
+
+
+class InMemoryBatchTracker(BatchTracker):
+    """Process-local batch progress — correct for :class:`InMemoryQueue` and
+    :class:`SyncQueue`, which only ever run in this same process.
+
+    A finished batch's state is kept for the life of the process (so
+    :func:`batch_progress` keeps answering after ``then`` fires) — like
+    :class:`~zeython.cache.InMemoryCache`, fine for typical usage, not a
+    fit for creating unboundedly many batches over a long-running
+    process's lifetime.
+    """
+
+    def __init__(self) -> None:
+        self._batches: dict[str, dict[str, Any]] = {}
+        self._lock = asyncio.Lock()
+
+    async def create(self, batch_id: str, total: int, *, then: dict[str, Any] | None = None) -> None:
+        async with self._lock:
+            self._batches[batch_id] = {"total": total, "pending": total, "failed": 0, "then": then}
+
+    async def record_completion(self, batch_id: str, *, failed: bool) -> BatchProgress:
+        async with self._lock:
+            state = self._batches[batch_id]
+            state["pending"] -= 1
+            if failed:
+                state["failed"] += 1
+            return BatchProgress(total=state["total"], pending=state["pending"], failed=state["failed"])
+
+    async def progress(self, batch_id: str) -> BatchProgress | None:
+        state = self._batches.get(batch_id)
+        if state is None:
+            return None
+        return BatchProgress(total=state["total"], pending=state["pending"], failed=state["failed"])
+
+    async def get_then(self, batch_id: str) -> dict[str, Any] | None:
+        state = self._batches.get(batch_id)
+        return state["then"] if state else None
+
+
+class RedisBatchTracker(BatchTracker):
+    """A Redis-backed :class:`BatchTracker`, correct across every worker
+    process draining a :class:`RedisQueue` — :class:`InMemoryBatchTracker`'s
+    limitation. Requires the ``redis`` extra (``pip install zeython[redis]``).
+
+    Batch state expires after ``ttl`` seconds (default 24h) so completed
+    bookkeeping doesn't accumulate in Redis forever; every completion
+    refreshes it, so only a genuinely abandoned batch id is ever actually lost.
+    """
+
+    def __init__(self, url: str, *, prefix: str = "zeython:batch:", ttl: float = 86400.0) -> None:
+        try:
+            from redis.asyncio import Redis
+        except ImportError as exc:
+            raise ImportError(
+                "RedisBatchTracker requires the redis package. Install it with: pip install zeython[redis]"
+            ) from exc
+
+        self._client = Redis.from_url(url)
+        self._prefix = prefix
+        self._ttl = ttl
+
+    def _key(self, batch_id: str, field: str) -> str:
+        return f"{self._prefix}{batch_id}:{field}"
+
+    async def create(self, batch_id: str, total: int, *, then: dict[str, Any] | None = None) -> None:
+        ttl = int(self._ttl)
+        async with self._client.pipeline(transaction=True) as pipe:
+            pipe.set(self._key(batch_id, "total"), total, ex=ttl)
+            pipe.set(self._key(batch_id, "pending"), total, ex=ttl)
+            pipe.set(self._key(batch_id, "failed"), 0, ex=ttl)
+            if then is not None:
+                pipe.set(self._key(batch_id, "then"), json.dumps(then), ex=ttl)
+            await pipe.execute()
+
+    async def record_completion(self, batch_id: str, *, failed: bool) -> BatchProgress:
+        ttl = int(self._ttl)
+        pending = await self._client.decr(self._key(batch_id, "pending"))
+        if failed:
+            failed_count = await self._client.incr(self._key(batch_id, "failed"))
+        else:
+            failed_count = int(await self._client.get(self._key(batch_id, "failed")) or 0)
+        total = int(await self._client.get(self._key(batch_id, "total")) or 0)
+        # Refresh the TTL on every completion so a long-running batch's
+        # bookkeeping doesn't expire mid-flight -- only a batch that's
+        # truly been abandoned (no completions at all for a full `ttl`) is
+        # ever actually lost.
+        await self._client.expire(self._key(batch_id, "pending"), ttl)
+        await self._client.expire(self._key(batch_id, "failed"), ttl)
+        return BatchProgress(total=total, pending=pending, failed=failed_count)
+
+    async def progress(self, batch_id: str) -> BatchProgress | None:
+        total = await self._client.get(self._key(batch_id, "total"))
+        if total is None:
+            return None
+        pending = await self._client.get(self._key(batch_id, "pending"))
+        failed_count = await self._client.get(self._key(batch_id, "failed"))
+        return BatchProgress(total=int(total), pending=int(pending or 0), failed=int(failed_count or 0))
+
+    async def get_then(self, batch_id: str) -> dict[str, Any] | None:
+        raw = await self._client.get(self._key(batch_id, "then"))
+        return json.loads(raw) if raw is not None else None
+
+    async def close(self) -> None:
+        await self._client.aclose()
+
+
+@dataclasses.dataclass
+class _BatchedJob(Job):
+    """Runs the job described by ``spec`` — retrying it internally, up to
+    its own ``max_attempts``, rather than letting the underlying queue's
+    own retry mechanism retry this wrapper — then records the outcome with
+    ``batch_id``'s :class:`BatchTracker` exactly once, and fires the
+    batch's ``then`` job (if any) the moment that recording reveals every
+    job in the batch has finished. Returned by :func:`dispatch_batch`, not
+    constructed directly.
+
+    Retrying internally (rather than via the wrapper's own ``max_attempts``,
+    fixed at 1) is what keeps that recording to exactly once per job
+    regardless of how many attempts it took -- the outer queue only ever
+    sees a single pass over this wrapper, succeeding or raising once.
+    """
+
+    spec: dict[str, Any]
+    batch_id: str
+    max_attempts: int = 1
+
+    async def handle(self, container: Container, queue: Queue) -> None:
+        job = _job_from_spec(self.spec)
+        job_class = self.spec["job_class"]
+        own_max_attempts = self.spec["max_attempts"]
+        exc: Exception | None = None
+        for attempt in range(1, own_max_attempts + 1):
+            try:
+                await container.call(job.handle)
+                exc = None
+                break
+            except Exception as caught:
+                exc = caught
+                logger.exception("Batched job %s failed (attempt %d/%d)", job_class, attempt, own_max_attempts)
+
+        tracker: BatchTracker = container.make(BatchTracker)
+        progress = await tracker.record_completion(self.batch_id, failed=exc is not None)
+        if progress.finished:
+            then_spec = await tracker.get_then(self.batch_id)
+            if then_spec is not None:
+                await queue.push(_job_from_spec(then_spec))
+
+        if exc is not None:
+            # The wrapper's own max_attempts is fixed at 1, so this is the
+            # underlying queue's *only* pass over this wrapper -- its usual
+            # exhausted-job handling (logging, report_exception, RedisQueue's
+            # failed-jobs list) runs exactly as it would for any other job
+            # that ran out of retries, without us duplicating any of it here.
+            raise exc
+
+
+async def dispatch_batch(request: Request, jobs: list[Job], *, then: Job | None = None, batch_id: str | None = None) -> str:
+    """Dispatch every job in ``jobs`` independently — for strict order, use
+    :func:`chain` instead — and track their combined progress under a
+    batch id this returns::
+
+        batch_id = await dispatch_batch(request, [ResizeImage(p) for p in photos], then=NotifyGalleryReady(album.id))
+
+    Pass ``then=`` a job to dispatch automatically, exactly once, the
+    moment every job in the batch has finished — whether it succeeded or
+    exhausted its own retries. ``then``'s own ``handle()`` can call
+    :func:`batch_progress` to see how many failed; since the batch id isn't
+    known until this call returns (after ``then`` has already been
+    constructed), pass your own via ``batch_id=`` if ``then`` needs it::
+
+        batch_id = str(uuid.uuid4())
+        await dispatch_batch(request, jobs, then=NotifyGalleryReady(batch_id=batch_id), batch_id=batch_id)
+
+    Every job (and ``then``, if given) must be a ``@dataclass`` — see
+    :func:`chain`.
+    """
+    if not jobs:
+        raise ValueError("dispatch_batch() needs at least one job")
+    container: Container = request.app.state.container
+    tracker: BatchTracker = container.make(BatchTracker)
+    queue: Queue = container.make(Queue)
+
+    batch_id = batch_id or uuid.uuid4().hex
+    then_spec = _job_to_spec(then, purpose="dispatch_batch()'s then=") if then is not None else None
+    await tracker.create(batch_id, total=len(jobs), then=then_spec)
+    for job in jobs:
+        await queue.push(_BatchedJob(spec=_job_to_spec(job, purpose="dispatch_batch()"), batch_id=batch_id))
+    return batch_id
+
+
+async def batch_progress(request: Request, batch_id: str) -> BatchProgress | None:
+    """The current progress of the batch ``batch_id`` (from
+    :func:`dispatch_batch`), or ``None`` if unknown — never existed, or,
+    for :class:`RedisBatchTracker` only, expired (see its docstring).
+    """
+    tracker: BatchTracker = request.app.state.container.make(BatchTracker)
+    return await tracker.progress(batch_id)
+
+
 class QueueServiceProvider(ServiceProvider):
-    """Binds a :class:`Queue` into the container.
+    """Binds a :class:`Queue` into the container, plus the matching
+    :class:`BatchTracker` :func:`dispatch_batch` needs (:class:`RedisBatchTracker`
+    for the ``redis`` driver, :class:`InMemoryBatchTracker` for the others).
 
     ``.env``: ``QUEUE_DRIVER`` —
 
@@ -420,25 +740,37 @@ class QueueServiceProvider(ServiceProvider):
     def register(self) -> None:
         driver = self.config.get("queue.driver", "memory")
         queue: Queue
+        tracker: BatchTracker
         if driver == "redis":
             queue = RedisQueue(
                 self.config.get("redis.url"),
                 container=self.container,
                 queue_name=self.config.get("queue.name", "default"),
             )
+            tracker = RedisBatchTracker(self.config.get("redis.url"))
         elif driver == "sync":
             queue = SyncQueue(container=self.container)
+            tracker = InMemoryBatchTracker()
         else:
             queue = InMemoryQueue(container=self.container)
+            tracker = InMemoryBatchTracker()
         self.container.singleton(Queue, lambda: queue)
+        self.container.singleton(BatchTracker, lambda: tracker)
 
 
 __all__ = [
+    "BatchProgress",
+    "BatchTracker",
+    "InMemoryBatchTracker",
+    "InMemoryQueue",
     "Job",
     "Queue",
-    "InMemoryQueue",
-    "SyncQueue",
-    "RedisQueue",
-    "dispatch",
     "QueueServiceProvider",
+    "RedisBatchTracker",
+    "RedisQueue",
+    "SyncQueue",
+    "batch_progress",
+    "chain",
+    "dispatch",
+    "dispatch_batch",
 ]

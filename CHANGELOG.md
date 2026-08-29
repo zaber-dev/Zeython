@@ -79,6 +79,11 @@ GPL-3.0 to MIT.
   `Job.handle()`. A job that touches the database runs in its own
   session, opened and committed the same way a request's is -- not
   whatever session happened to be live wherever the job was pushed from.
+- Job chaining and batching (`chain()`, `dispatch_batch()`) — run jobs
+  strictly in order, or dispatch a group independently and fire a `then`
+  job the moment they've all finished, on any queue driver
+  (`InMemoryBatchTracker`/`RedisBatchTracker` picked automatically to
+  match `QUEUE_DRIVER`).
 - In-app task scheduler (`zeython.schedule`) — recurring jobs defined in
   code, no separate cron entry needed.
 - Outbound mail (`zeython.mail`: `LogMailer`, `SmtpMailer`).

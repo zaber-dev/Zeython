@@ -56,6 +56,10 @@ scaffolding on every project. Zeython does that assembly once:
   third party's URL to an event, and delivery, retry-with-backoff, and a
   per-attempt audit trail all ride on the same background-job queue every
   other job uses. See [Webhooks](docs/webhooks.md).
+- **Job chaining and batching, not just a queue** — run jobs strictly in
+  order with `chain()`, or dispatch a group independently and fire a
+  callback the moment they've all finished with `dispatch_batch()`, on
+  any queue driver. See [Background Jobs](docs/queues.md).
 - **Production observability, not just logs** — Prometheus-compatible
   metrics at `/metrics` (request counts, latency histograms, your own
   custom counters/gauges), with zero new dependency, plus opt-in
