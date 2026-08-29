@@ -109,6 +109,10 @@
          <lastmod>2026-08-29</lastmod>
     </url>
     <url>
+         <loc>https://zeython.zaber.dev/docs/metrics/</loc>
+         <lastmod>2026-08-29</lastmod>
+    </url>
+    <url>
          <loc>https://zeython.zaber.dev/docs/mfa/</loc>
          <lastmod>2026-08-29</lastmod>
     </url>
@@ -178,6 +182,10 @@
     </url>
     <url>
          <loc>https://zeython.zaber.dev/docs/testing/</loc>
+         <lastmod>2026-08-29</lastmod>
+    </url>
+    <url>
+         <loc>https://zeython.zaber.dev/docs/tracing/</loc>
          <lastmod>2026-08-29</lastmod>
     </url>
     <url>

@@ -1,6 +1,6 @@
 # Operations
 
-Health checks, maintenance mode, structured logging, error monitoring (Sentry), caching, and file storage.
+Health checks, maintenance mode, structured logging, error monitoring (Sentry), metrics, tracing, caching, and file storage.
 
 ## health
 
@@ -283,6 +283,291 @@ def report_exception(exc: BaseException, **tags: Any) -> None:
             if value is not None:
                 scope.set_tag(key, value)
         sentry_sdk.capture_exception(exc)
+```
+
+## metrics
+
+Prometheus-compatible metrics: HTTP request counts, latency histograms, and custom counters/gauges/histograms your own code defines, all exposed at `/metrics` in the Prometheus text exposition format -- scraped directly by Prometheus itself, or anything speaking the same format (Grafana Agent, VictoriaMetrics, Datadog's OpenMetrics ingestion).
+
+No new dependency -- the exposition format is a small, stable, documented text format (see https://github.com/prometheus/docs/blob/main/content/docs/instrumenting/exposition_formats.md), and implementing it directly avoids pulling in the full `prometheus_client` package for what's fundamentally a handful of counters this framework already knows how to compute from the request/response objects it sees. For distributed tracing (spans, not counters), see :mod:`zeython.tracing` instead -- correctly implementing *that* wire protocol is not something worth re-deriving from scratch, unlike this one.
+
+### Counter
+
+```python
+Counter(
+    name: str, help: str, *, labelnames: Iterable[str] = ()
+)
+```
+
+A value that only ever goes up -- request counts, jobs processed, errors seen. Construct via :meth:`MetricsRegistry.counter`, not directly.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def __init__(self, name: str, help: str, *, labelnames: Iterable[str] = ()) -> None:
+    self.name = name
+    self.help = help
+    self.labelnames = tuple(labelnames)
+    self._values: dict[tuple[str, ...], float] = defaultdict(float)
+```
+
+### Gauge
+
+```python
+Gauge(
+    name: str, help: str, *, labelnames: Iterable[str] = ()
+)
+```
+
+A value that can go up or down -- in-flight requests, queue depth, connections open right now. Construct via :meth:`MetricsRegistry.gauge`.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def __init__(self, name: str, help: str, *, labelnames: Iterable[str] = ()) -> None:
+    self.name = name
+    self.help = help
+    self.labelnames = tuple(labelnames)
+    self._values: dict[tuple[str, ...], float] = defaultdict(float)
+```
+
+### Histogram
+
+```python
+Histogram(
+    name: str,
+    help: str,
+    *,
+    buckets: Iterable[float] = DEFAULT_BUCKETS,
+    labelnames: Iterable[str] = (),
+)
+```
+
+A distribution of observed values, bucketed by upper bound -- request durations, payload sizes. Construct via :meth:`MetricsRegistry.histogram`.
+
+Renders as Prometheus expects: one cumulative `_bucket` sample per bound (each includes every observation at or below it, plus a final `le="+Inf"` bucket equal to the total count), plus `_sum`/`_count`.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def __init__(self, name: str, help: str, *, buckets: Iterable[float] = DEFAULT_BUCKETS, labelnames: Iterable[str] = ()) -> None:
+    self.name = name
+    self.help = help
+    self.buckets: tuple[float, ...] = (*sorted(buckets), float("inf"))
+    self.labelnames = tuple(labelnames)
+    self._bucket_counts: dict[tuple[str, ...], list[int]] = {}
+    self._sums: dict[tuple[str, ...], float] = defaultdict(float)
+    self._counts: dict[tuple[str, ...], int] = defaultdict(int)
+```
+
+### MetricsRegistry
+
+```python
+MetricsRegistry()
+```
+
+Owns every metric an app defines and renders them all to the Prometheus text format. Bound in the container by :class:`MetricsServiceProvider` -- resolve it to define your own metrics alongside the built-in HTTP ones::
+
+```text
+registry: MetricsRegistry = request.app.state.container.make(MetricsRegistry)
+ORDERS_PLACED = registry.counter("orders_placed_total", "Orders placed.")
+ORDERS_PLACED.inc()
+```
+
+`counter`/`gauge`/`histogram` are idempotent by name: calling one again with the same name returns the *same* metric object rather than registering a duplicate (which would otherwise render as two conflicting blocks under one name -- invalid Prometheus output) -- safe to call from inside a request handler on every request rather than only once at startup, though defining it once at module level and reusing the object is both more efficient and how these are conventionally used.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def __init__(self) -> None:
+    self._metrics: list[Metric] = []
+    self._by_name: dict[str, Metric] = {}
+```
+
+#### render
+
+```python
+render() -> str
+```
+
+Every registered metric, in the Prometheus text exposition format -- what :class:`MetricsServiceProvider`'s `/metrics` endpoint returns verbatim.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def render(self) -> str:
+    """Every registered metric, in the Prometheus text exposition
+    format -- what :class:`MetricsServiceProvider`'s ``/metrics``
+    endpoint returns verbatim.
+    """
+    lines: list[str] = []
+    for metric in self._metrics:
+        lines.append(f"# HELP {metric.name} {metric.help}")
+        lines.append(f"# TYPE {metric.name} {metric.metric_type}")
+        lines.extend(metric.render_samples())
+    return ("\n".join(lines) + "\n") if lines else ""
+```
+
+### MetricsMiddleware
+
+```python
+MetricsMiddleware(
+    app: Any,
+    *,
+    registry: MetricsRegistry,
+    exclude_path: str | None = None,
+)
+```
+
+Pure ASGI middleware: records `http_requests_total`, `http_request_duration_seconds`, and `http_requests_in_progress` for every request, grouped by the route's own path *template* (`/posts/{id}`, not `/posts/42`) rather than the literal URL -- a per-ID label would mean an ever-growing, unbounded set of label combinations for anything with a numeric or UUID path parameter. A request that matched no route at all (a 404, or a probing bot) is grouped under `"unmatched"` for the same reason.
+
+Source code in `src/zeython/metrics.py`
+
+```python
+def __init__(self, app: Any, *, registry: MetricsRegistry, exclude_path: str | None = None) -> None:
+    self.app = app
+    self.exclude_path = exclude_path
+    self._path_by_endpoint: dict[Any, str] | None = None
+    self.requests_total = registry.counter(
+        "http_requests_total", "Total HTTP requests.", labelnames=("method", "path", "status")
+    )
+    self.request_duration = registry.histogram(
+        "http_request_duration_seconds", "HTTP request duration in seconds.", labelnames=("method", "path")
+    )
+    self.requests_in_progress = registry.gauge(
+        "http_requests_in_progress", "HTTP requests currently being processed.", labelnames=("method",)
+    )
+```
+
+### MetricsServiceProvider
+
+```python
+MetricsServiceProvider(app: Application)
+```
+
+Bases: `ServiceProvider`
+
+Binds a :class:`MetricsRegistry` into the container, instruments every request via :class:`MetricsMiddleware`, and serves the result at `/metrics` (Prometheus text format)::
+
+```text
+app.register(MetricsServiceProvider(app))
+```
+
+Zero-config and safe to always register -- the built-in HTTP metrics have no cardinality risk (see :class:`MetricsMiddleware`) and add a single dict lookup and a few increments per request. Configurable via `.env`:
+
+- `METRICS_ENABLED` -- default `true`.
+- `METRICS_PATH` -- default `/metrics`.
+
+Source code in `src/zeython/providers.py`
+
+```python
+def __init__(self, app: Application) -> None:
+    self.app = app
+    self.container = app.container
+    self.config = app.config
+```
+
+## tracing
+
+Optional distributed tracing (OpenTelemetry): one span per request, W3C `traceparent` propagation across service calls, and exception recording on the active span -- exported wherever you point it (a local console for development, or a real collector like Jaeger, Tempo, or an OTLP-speaking vendor backend in production). Requires the `otel` extra: `pip install zeython[otel]`. See docs/tracing.md.
+
+For request counts and latency histograms (metrics, not spans), see :mod:`zeython.metrics` instead -- the two are complementary and commonly run together, but answer different questions ("how many/how slow, in aggregate" vs. "what exactly happened on this one request").
+
+Deliberately not a hard dependency, and deliberately does not depend on any specific exporter package: :func:`init_tracing` takes any `SpanExporter` you already have configured (an OTLP exporter, a vendor's own, or the SDK's own `ConsoleSpanExporter` if you pass none), so the required `otel` extra is just the API + SDK, never a specific backend's client library.
+
+### TracingMiddleware
+
+```python
+TracingMiddleware(app: Any)
+```
+
+Pure ASGI middleware: wraps every HTTP request in a server span named `"{method} {path}"`, extracting any incoming W3C `traceparent` header so a span started upstream (another service, a load balancer) continues as this request's parent rather than starting a new trace.
+
+Sets the conventional `http.method`/`http.target`/ `http.status_code` span attributes, and on an unhandled exception records it on the span and marks the span's status as an error before re-raising -- the exception still propagates to Zeython's own error handling unchanged, this only annotates the trace.
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def __init__(self, app: Any) -> None:
+    self.app = app
+```
+
+### TracingServiceProvider
+
+```python
+TracingServiceProvider(
+    app: Any,
+    *,
+    service_name: str,
+    exporter: SpanExporter | None = None,
+)
+```
+
+Bases: `ServiceProvider`
+
+Initializes OpenTelemetry tracing and instruments every request via :class:`TracingMiddleware`::
+
+```text
+app.register(TracingServiceProvider(app, service_name="my-blog"))
+```
+
+Pass `exporter` for a real backend (an OTLP exporter you've installed and configured separately); without one, spans print to the console -- useful for confirming tracing is wired up before you've picked a backend. Requires the `otel` extra: `pip install zeython[otel]`.
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def __init__(self, app: Any, *, service_name: str, exporter: SpanExporter | None = None) -> None:
+    super().__init__(app)
+    self.service_name = service_name
+    self.exporter = exporter
+```
+
+### init_tracing
+
+```python
+init_tracing(
+    *,
+    service_name: str,
+    exporter: SpanExporter | None = None,
+) -> TracerProvider
+```
+
+Initialize the OpenTelemetry SDK with a single `BatchSpanProcessor` exporting to `exporter` (a `ConsoleSpanExporter` -- printing spans to stdout -- if none is given, so tracing is inspectable with zero configuration before you've wired up a real collector). Raises `ImportError` with an install hint if the `otel` extra isn't installed.
+
+Registers the returned provider as the global tracer provider, so application code can also do `from opentelemetry import trace; trace.get_tracer(__name__)` directly rather than going through this module.
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def init_tracing(*, service_name: str, exporter: SpanExporter | None = None) -> TracerProvider:
+    """Initialize the OpenTelemetry SDK with a single ``BatchSpanProcessor``
+    exporting to ``exporter`` (a ``ConsoleSpanExporter`` -- printing spans to
+    stdout -- if none is given, so tracing is inspectable with zero
+    configuration before you've wired up a real collector). Raises
+    ``ImportError`` with an install hint if the ``otel`` extra isn't
+    installed.
+
+    Registers the returned provider as the global tracer provider, so
+    application code can also do ``from opentelemetry import trace;
+    trace.get_tracer(__name__)`` directly rather than going through this
+    module.
+    """
+    global _tracer_provider
+    try:
+        from opentelemetry import trace
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+    except ImportError as exc:
+        raise ImportError(
+            "Tracing requires the OpenTelemetry SDK. Install it with: pip install zeython[otel]"
+        ) from exc
+
+    provider = TracerProvider(resource=Resource.create({"service.name": service_name}))
+    provider.add_span_processor(BatchSpanProcessor(exporter or ConsoleSpanExporter()))
+    trace.set_tracer_provider(provider)
+    _tracer_provider = provider
+    return provider
 ```
 
 ## cache
