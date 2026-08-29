@@ -69,6 +69,10 @@ scaffolding on every project. Zeython does that assembly once:
   `current_api_version()`, and flag an old one for removal with standard
   `Deprecation`/`Sunset` headers via `deprecated()`. See
   [API Standards](docs/api-standards.md#api-versioning).
+- **GraphQL alongside your REST routes** — one `GraphQLServiceProvider`
+  serves a schema you build with `graphql-core`, with an interactive
+  GraphiQL UI in debug mode and every resolver's `info.context` carrying
+  the request and the DI container. See [GraphQL](docs/graphql.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
   suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
@@ -199,7 +203,8 @@ empty scaffold to a tested, authenticated API
 
 **Building APIs**
 [OpenAPI & API Docs](docs/openapi.md) ·
-[API Standards](docs/api-standards.md)
+[API Standards](docs/api-standards.md) ·
+[GraphQL](docs/graphql.md)
 
 **Digging Deeper**
 [CLI Reference](docs/cli.md) ·

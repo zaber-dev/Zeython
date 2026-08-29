@@ -110,6 +110,10 @@ end-to-end tutorial. Licensed under MIT.
 ### Building APIs & real-time
 
 - OpenAPI spec generation and a Swagger UI (`zeython.openapi`).
+- A GraphQL endpoint (`zeython.graphql`, `pip install zeython[graphql]`) —
+  executes a `graphql-core` schema you build, with an interactive GraphiQL
+  UI in debug mode and every resolver's `info.context` carrying the
+  request and the DI container.
 - WebSocket support: real-time handlers, a broadcast hub
   (`WebSocketHub`), and per-IP connection limiting.
 - `RedisWebSocketHub` — distributed broadcast across every process/container

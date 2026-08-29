@@ -41,6 +41,7 @@ nav:
   - Building APIs:
       - OpenAPI & API Docs: openapi.md
       - API Standards: api-standards.md
+      - GraphQL: graphql.md
   - Digging Deeper:
       - CLI Reference: cli.md
       - Console Commands: console-commands.md
@@ -203,6 +204,7 @@ plugins:
         Building APIs:
           - openapi.md
           - api-standards.md
+          - graphql.md
         Digging Deeper:
           - cli.md
           - console-commands.md

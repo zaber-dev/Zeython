@@ -49,6 +49,7 @@ from zeython.exceptions import (
     ValidationException,
 )
 from zeython.feature_flags import FeatureManager, FeatureServiceProvider, feature
+from zeython.graphql import GraphQLServiceProvider, execute_graphql
 from zeython.gzip import GzipServiceProvider
 from zeython.hashing import hash_password, verify_password
 from zeython.health import HealthCheckServiceProvider
@@ -351,6 +352,8 @@ __all__ = [
     "FeatureManager",
     "FeatureServiceProvider",
     "feature",
+    "GraphQLServiceProvider",
+    "execute_graphql",
     "DeliverWebhookJob",
     "WebhookManager",
     "WebhookServiceProvider",
