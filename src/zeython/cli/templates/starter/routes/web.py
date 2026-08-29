@@ -41,6 +41,13 @@ app.post("/mfa/disable", name="auth.mfa_disable")(auth.mfa_disable)
 app.post("/api/token", name="auth.token")(auth.token)
 app.get("/api/me", name="auth.api_me")(auth.api_me)
 
+# "Sign in with Google/GitHub/Microsoft" -- see docs/oauth.md. Commented
+# out along with OAuthServiceProvider's registration in main.py until you
+# have real provider credentials; `{provider}` matches whatever `name=`
+# you gave the provider there (e.g. "google").
+# app.get("/auth/{provider}/redirect", name="auth.oauth_redirect")(auth.oauth_redirect)
+# app.get("/auth/{provider}/callback", name="auth.oauth_callback")(auth.oauth_callback)
+
 app.post("/uploads", name="uploads.store")(UploadController().store)
 
 

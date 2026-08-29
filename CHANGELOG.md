@@ -41,6 +41,12 @@ end-to-end tutorial. Licensed under MIT.
 
 - Session-based authentication (`AuthServiceProvider`, `login`/`logout`,
   `require_auth`, `current_user`), plus bearer-token API authentication.
+- OAuth2/OIDC login (`zeython.oauth`) — "Sign in with Google/GitHub/
+  Microsoft", or any standards-compliant OIDC provider (Okta, Auth0,
+  Keycloak) via `generic_oidc()`. Handles the CSRF-protected `state`
+  round-trip and the code-for-token exchange; hands your app a normalized
+  identity to find-or-create a user from, the same way Laravel Socialite
+  does.
 - Two-factor authentication (`zeython.mfa`) — RFC 6238 TOTP with no new
   dependency, one-time recovery codes, and a login-time challenge that
   gates `zeython.auth.login()` behind a second factor once a user enrolls.

@@ -108,6 +108,18 @@ from zeython.notifications import (
     notify,
     unread_notifications,
 )
+from zeython.oauth import (
+    OAuthManager,
+    OAuthProvider,
+    OAuthServiceProvider,
+    OAuthUser,
+    oauth_callback,
+    oauth_redirect,
+)
+from zeython.oauth import generic_oidc as oauth_generic_oidc
+from zeython.oauth import github as oauth_github
+from zeython.oauth import google as oauth_google
+from zeython.oauth import microsoft as oauth_microsoft
 from zeython.openapi import OpenApiServiceProvider, describe, generate_openapi, model_schema
 from zeython.plugins import PluginServiceProvider, discover_plugins
 from zeython.profiler import QueryRecord, RequestProfilerServiceProvider, current_queries
@@ -239,6 +251,16 @@ __all__ = [
     "QueryRecord",
     "current_queries",
     "RequestProfilerServiceProvider",
+    "OAuthManager",
+    "OAuthProvider",
+    "OAuthServiceProvider",
+    "OAuthUser",
+    "oauth_generic_oidc",
+    "oauth_github",
+    "oauth_google",
+    "oauth_microsoft",
+    "oauth_callback",
+    "oauth_redirect",
     "describe",
     "model_schema",
     "generate_openapi",
