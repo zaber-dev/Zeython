@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/scheduling/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/oauth/">
       
       
-        <link rel="prev" href="../queues/">
+        <link rel="prev" href="../authentication/">
       
       
-        <link rel="next" href="../websockets/">
+        <link rel="next" href="../mfa/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Scheduling - Zeython Docs</title>
+        <title>OAuth2 / OIDC Login (SSO) - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#scheduling" class="md-skip">
+        <a href="#oauth2-oidc-login-sso" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Scheduling
+              OAuth2 / OIDC Login (SSO)
             
           </span>
         </div>
@@ -287,10 +287,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../authentication/" class="md-tabs__link">
           
   
@@ -327,12 +329,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../cli/" class="md-tabs__link">
           
   
@@ -1111,26 +1111,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -1148,7 +1153,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1191,10 +1196,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../oauth/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth2 / OIDC Login (SSO)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1210,6 +1242,120 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enterprise-sso-generic_oidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enterprise SSO: generic_oidc()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-each-provider-gives-you-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each provider gives you back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1537,31 +1683,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -1579,7 +1720,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1874,37 +2015,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Scheduling
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../scheduling/" class="md-nav__link">
         
   
   
@@ -1920,103 +2034,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#defining-a-schedule" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Defining a schedule
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running it
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dependency-injection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dependency injection
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#preventing-overlapping-runs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preventing overlapping runs
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#handling-failures" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Handling failures
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2873,10 +2890,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#defining-a-schedule" class="md-nav__link">
+  <a href="#why-this-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Defining a schedule
+        Why this exists
       
     </span>
   </a>
@@ -2895,10 +2912,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-it" class="md-nav__link">
+  <a href="#routes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running it
+        Routes
       
     </span>
   </a>
@@ -2906,10 +2923,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dependency-injection" class="md-nav__link">
+  <a href="#supported-providers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dependency injection
+        Supported providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enterprise-sso-generic_oidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enterprise SSO: generic_oidc()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-each-provider-gives-you-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each provider gives you back
       
     </span>
   </a>
@@ -2917,10 +2962,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#preventing-overlapping-runs" class="md-nav__link">
+  <a href="#errors" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Preventing overlapping runs
+        Errors
       
     </span>
   </a>
@@ -2928,21 +2973,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#handling-failures" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Handling failures
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
+        API reference
       
     </span>
   </a>
@@ -2966,7 +3000,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/scheduling.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/oauth.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2974,119 +3008,164 @@
   
 
 
-<h1 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h1>
-<p>Every project ends up with recurring tasks: prune old records nightly, send
-a digest email every Monday, refresh a cache every five minutes. Pointing
-<code>cron</code> straight at a shell command works, but the schedule itself then
-lives outside the app — on a server, in nobody's memory, never reviewed
-with the code it runs, drifting out of sync with what's actually deployed.
-<code>zeython.schedule</code> keeps it in code instead: one cron entry, total,
-regardless of how many tasks you actually schedule.</p>
-<h2 id="defining-a-schedule">Defining a schedule<a class="headerlink" href="#defining-a-schedule" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># schedule.py</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">schedule</span><span class="p">:</span> <span class="n">Schedule</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Schedule</span><span class="p">)</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="o">...</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_daily_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
-</span></code></pre></div>
-<p><code>schedule.py</code> lives at the project root, imported for its side effect of
-registering events — the same convention <code>routes/web.py</code> uses for routes.
-<code>schedule.call(callback)</code> returns a <code>ScheduledEvent</code>; chain a frequency
-method to set when it's due:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_reminder</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">sync_inventory</span><span class="p">)</span><span class="o">.</span><span class="n">every_five_minutes</span><span class="p">()</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">refresh_cache</span><span class="p">)</span><span class="o">.</span><span class="n">hourly</span><span class="p">()</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily</span><span class="p">()</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">send_digest</span><span class="p">)</span><span class="o">.</span><span class="n">daily_at</span><span class="p">(</span><span class="s2">"07:00"</span><span class="p">)</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">weekly_report</span><span class="p">)</span><span class="o">.</span><span class="n">weekly</span><span class="p">()</span>          <span class="c1"># Sunday at midnight</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">monthly_invoice</span><span class="p">)</span><span class="o">.</span><span class="n">monthly</span><span class="p">()</span>       <span class="c1"># 1st of the month at midnight</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">custom</span><span class="p">)</span><span class="o">.</span><span class="n">cron</span><span class="p">(</span><span class="s2">"*/10 8-17 * * 1-5"</span><span class="p">)</span>  <span class="c1"># any raw 5-field expression</span>
-</span></code></pre></div>
-<p><code>cron()</code> supports <code>*</code>, single values, comma lists (<code>1,3,5</code>), ranges
-(<code>1-5</code>), and step values (<code>*/15</code>, <code>1-10/2</code>) across all five fields
-(<code>minute hour day month weekday</code>). The weekday field is <code>0</code>-<code>6</code>
-(<code>0</code> = Sunday) — unlike some cron implementations, <code>7</code> isn't accepted as
-an alias for Sunday.</p>
+<h1 id="oauth2-oidc-login-sso">OAuth2 / OIDC Login (SSO)<a class="headerlink" href="#oauth2-oidc-login-sso" title="Permanent link">&para;</a></h1>
+<p><code>zeython.oauth</code> adds "Sign in with Google/GitHub/Microsoft/your own
+identity provider" alongside (or instead of) the password-based session
+login you already have (see <a href="../authentication/">Authentication</a>): a user
+is sent to the provider's own login page, comes back with proof of who
+they are, and your app decides what to do with that -- create an account,
+log into an existing one, or reject it.</p>
+<p>No new dependency — the framework already ships <code>httpx</code> (used for
+<a href="../webhooks/">webhook delivery</a>), reused here for the same two-request
+job: exchange a code for a token, then fetch a profile.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>Enterprise customers expect to sign in with the identity provider their
+organization already manages (Okta, Azure AD, a custom OIDC provider),
+and everyone else increasingly expects "Continue with Google" over yet
+another password to remember. Both are the same protocol underneath —
+OAuth2's authorization code flow, OIDC just standardizing what the
+profile response looks like — so one module covers both.</p>
+<p>Built for confidential (server-side) clients only: your app holds a
+client secret the browser never sees, so there's no PKCE dance here —
+that exists to protect a client that <em>can't</em> keep a secret (a mobile app,
+a browser-only SPA), which a Zeython app isn't. The security control that
+does apply is the <code>state</code> parameter, and it's mandatory: a random token
+stashed in the session before the redirect, checked (then discarded, so
+it can't be replayed) when the provider calls back. Skip it and a
+malicious site can trick a victim's browser into completing <em>your</em> login
+flow with <em>the attacker's</em> account — a real, named class of OAuth
+vulnerability (login CSRF), not a theoretical one.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">ScheduleServiceProvider</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ScheduleServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">AuthServiceProvider</span><span class="p">,</span> <span class="n">OAuthServiceProvider</span><span class="p">,</span> <span class="n">oauth_google</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>  <span class="c1"># the session `state` lives in</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">OAuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">providers</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">oauth_google</span><span class="p">(</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">client_id</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"oauth.google.client_id"</span><span class="p">),</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="n">client_secret</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"oauth.google.client_secret"</span><span class="p">),</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="n">redirect_uri</span><span class="o">=</span><span class="s2">"https://app.example.com/auth/google/callback"</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">),</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">]))</span>
 </span></code></pre></div>
-<p>Not registered by default. <code>ScheduleServiceProvider</code> binds a <code>Schedule</code>
-singleton into the container and imports <code>schedule.py</code> for its side
-effect — register it once you actually have recurring tasks to define.</p>
-<h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>run
+<p>A generated project already has this wired up but commented out (both
+here and in <code>routes/web.py</code>) -- it needs real credentials before it can do
+anything, so there's no safe zero-config default the way
+<a href="../mfa/">MFA</a> has. Uncomment once you've registered an app with the
+provider and have a <code>client_id</code>/<code>client_secret</code>.</p>
+<p><code>redirect_uri</code> must <strong>exactly</strong> match what's registered in the provider's
+own console -- not derived from the incoming request's <code>Host</code> header,
+deliberately: trusting that would let a spoofed header redirect a stolen
+authorization code somewhere else entirely.</p>
+<h2 id="routes">Routes<a class="headerlink" href="#routes" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># routes/web.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/auth/</span><span class="si">{provider}</span><span class="s2">/redirect"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"auth.oauth_redirect"</span><span class="p">)(</span><span class="n">auth</span><span class="o">.</span><span class="n">oauth_redirect</span><span class="p">)</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/auth/</span><span class="si">{provider}</span><span class="s2">/callback"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"auth.oauth_callback"</span><span class="p">)(</span><span class="n">auth</span><span class="o">.</span><span class="n">oauth_callback</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Checks every registered event against the current minute and runs the
-ones that are due — that's it, no daemon, no loop. Wire it up to fire once
-a minute:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># crontab -e
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>* * * * * cd /path/to/project &amp;&amp; /path/to/.venv/bin/zeython schedule run &gt;&gt; /var/log/schedule.log 2&gt;&amp;1
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># app/Controllers/auth_controller.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.oauth</span><span class="w"> </span><span class="kn">import</span> <span class="n">oauth_callback</span> <span class="k">as</span> <span class="n">complete_oauth_login</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.oauth</span><span class="w"> </span><span class="kn">import</span> <span class="n">oauth_redirect</span> <span class="k">as</span> <span class="n">start_oauth_redirect</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">oauth_redirect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">return</span> <span class="n">start_oauth_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"provider"</span><span class="p">])</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">oauth_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">identity</span> <span class="o">=</span> <span class="k">await</span> <span class="n">complete_oauth_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"provider"</span><span class="p">])</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="k">raise</span> <span class="n">BadRequestException</span><span class="p">(</span><span class="s2">"This provider did not share an email address."</span><span class="p">)</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">first_where</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">secrets</span><span class="o">.</span><span class="n">token_urlsafe</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>  <span class="c1"># unusable -- this account only logs in via OAuth</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
 </span></code></pre></div>
-<p>This is the entire point: <strong>one</strong> cron entry, ever, regardless of how many
-tasks <code>schedule.py</code> grows to define — add a new recurring task by adding a
-line to <code>schedule.py</code>, not by editing a crontab on a server somewhere.</p>
-<p>In a container deployment without host cron, run a sidecar loop instead —
-see <a href="../docker/#scheduled-tasks">Docker</a>.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zeython<span class="w"> </span>schedule<span class="w"> </span>list<span class="w">    </span><span class="c1"># every registered task and its cron expression</span>
+<p>That's the whole integration: <code>{provider}</code> in the URL is whichever
+<code>name=</code> you gave a provider in <code>OAuthServiceProvider(providers=[...])</code>
+(<code>"google"</code>, <code>"github"</code>, or whatever you passed to
+<a href="#enterprise-sso-generic_oidc"><code>generic_oidc()</code></a>). Like Laravel
+Socialite, the module hands you a normalized identity and stops there --
+finding or creating your own <code>User</code> from it is two lines you write once,
+not a schema the framework imposes on you. Linking several providers to
+one account, requiring an existing password-based account before OAuth
+can attach to it, denying sign-up entirely and only allowing OAuth
+<em>login</em> -- all of that is a few lines' difference in this same handler,
+not a framework limitation.</p>
+<h2 id="supported-providers">Supported providers<a class="headerlink" href="#supported-providers" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">oauth_generic_oidc</span><span class="p">,</span> <span class="n">oauth_github</span><span class="p">,</span> <span class="n">oauth_google</span><span class="p">,</span> <span class="n">oauth_microsoft</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">oauth_google</span><span class="p">(</span><span class="n">client_id</span><span class="o">=...</span><span class="p">,</span> <span class="n">client_secret</span><span class="o">=...</span><span class="p">,</span> <span class="n">redirect_uri</span><span class="o">=...</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">oauth_github</span><span class="p">(</span><span class="n">client_id</span><span class="o">=...</span><span class="p">,</span> <span class="n">client_secret</span><span class="o">=...</span><span class="p">,</span> <span class="n">redirect_uri</span><span class="o">=...</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">oauth_microsoft</span><span class="p">(</span><span class="n">client_id</span><span class="o">=...</span><span class="p">,</span> <span class="n">client_secret</span><span class="o">=...</span><span class="p">,</span> <span class="n">redirect_uri</span><span class="o">=...</span><span class="p">,</span> <span class="n">tenant</span><span class="o">=</span><span class="s2">"common"</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="dependency-injection">Dependency injection<a class="headerlink" href="#dependency-injection" title="Permanent link">&para;</a></h2>
-<p>A scheduled callback works exactly like a <code>Job</code>'s <code>handle()</code>: beyond the
-arguments you pass, any type-hinted parameter is autowired from the
-container.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nd">@schedule</span><span class="o">.</span><span class="n">call</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_daily_digest</span><span class="p">(</span><span class="n">mailer</span><span class="p">:</span> <span class="n">Mailer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="k">await</span> <span class="n">mailer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<ul>
+<li><strong>Google</strong> — <a href="https://console.cloud.google.com/apis/credentials">Google Cloud Console</a>.
+  Default scope <code>openid email profile</code>.</li>
+<li><strong>GitHub</strong> — <a href="https://github.com/settings/developers">OAuth Apps</a>. Default
+  scope <code>read:user user:email</code>. GitHub only shares an email if the user has
+  a public one <em>or</em> granted <code>user:email</code>; if the profile response has none,
+  the module transparently falls back to <code>/user/emails</code> and picks the
+  primary one -- you don't need to handle that yourself.</li>
+<li><strong>Microsoft (Azure AD)</strong> — an
+  <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc">app registration</a>.
+  <code>tenant</code> scopes who can sign in: <code>"common"</code> (default -- personal <em>and</em>
+  work/school accounts), <code>"organizations"</code> (work/school only), or a
+  specific tenant ID/domain to restrict sign-in to one organization.</li>
+</ul>
+<h3 id="enterprise-sso-generic_oidc">Enterprise SSO: <code>generic_oidc()</code><a class="headerlink" href="#enterprise-sso-generic_oidc" title="Permanent link">&para;</a></h3>
+<p>Any standards-compliant OIDC provider -- Okta, Auth0, Keycloak, or an
+enterprise customer's own identity provider -- exposing the usual
+<code>sub</code>/<code>email</code>/<code>name</code>/<code>picture</code> userinfo claims:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">oauth_generic_oidc</span><span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"okta"</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">client_id</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">client_secret</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">authorize_url</span><span class="o">=</span><span class="s2">"https://your-org.okta.com/oauth2/v1/authorize"</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">token_url</span><span class="o">=</span><span class="s2">"https://your-org.okta.com/oauth2/v1/token"</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">userinfo_url</span><span class="o">=</span><span class="s2">"https://your-org.okta.com/oauth2/v1/userinfo"</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">redirect_uri</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="preventing-overlapping-runs">Preventing overlapping runs<a class="headerlink" href="#preventing-overlapping-runs" title="Permanent link">&para;</a></h2>
-<p>A task that occasionally runs longer than its own interval (a report that
-usually takes seconds but sometimes minutes, scheduled every minute) can
-end up with two copies running against each other. <code>without_overlapping()</code>
-guards against that:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">schedule</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">generate_report</span><span class="p">)</span><span class="o">.</span><span class="n">every_minute</span><span class="p">()</span><span class="o">.</span><span class="n">without_overlapping</span><span class="p">(</span><span class="n">for_seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-</span></code></pre></div>
-<p>Implemented via the container's bound <code>RateLimiter</code> as a "run at most once
-per window" gate, keyed by the event's name — a time-based lock, same
-trade-off Laravel's own <code>withoutOverlapping()</code> makes: it expires after
-<code>for_seconds</code> regardless of whether the previous run actually finished,
-rather than tracking "is it still running" directly.</p>
-<p><strong>Bind <code>RedisRateLimiter</code> (see <a href="../redis/">Redis</a>) for this to do anything
-at all in the normal case.</strong> <code>zeython schedule run</code> is a fresh CLI process
-every time cron (or the sidecar loop) invokes it — the default
-<code>InMemoryRateLimiter</code>'s lock lives in that process's memory and is gone
-the moment it exits, so back-to-back invocations never see each other's
-lock and <code>without_overlapping()</code> silently has zero effect. Verified by
-running <code>zeython schedule run</code> twice in a row against the in-memory
-default: the "overlapping" task ran both times. It only helps in-process
-(two events racing within one <code>run_due()</code> call, or a custom long-lived
-runner that doesn't shell out per invocation) without a shared backend.</p>
-<h2 id="handling-failures">Handling failures<a class="headerlink" href="#handling-failures" title="Permanent link">&para;</a></h2>
-<p>An event that raises is logged (<code>zeython.schedule</code>, at <code>ERROR</code>, with the
-full traceback) and doesn't stop the rest of that run's due events from
-executing. There's no retry — a scheduled task either ran (successfully or
-not) this minute, or it'll be due again next time its cron expression
-matches; build retry logic into the callback itself if a task needs it.</p>
-<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p><code>Schedule</code> and <code>ScheduledEvent</code> are plain objects — test a callback
-directly, or exercise the cron matching with a fixed time:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">cron_matches</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_runs_at_seven_am</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">assert</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">assert</span> <span class="ow">not</span> <span class="n">cron_matches</span><span class="p">(</span><span class="s2">"0 7 * * *"</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span></code></pre></div>
+<p>Look these three URLs up once, by hand, from the provider's own
+<code>/.well-known/openid-configuration</code> discovery document when you set this
+up -- not fetched at request time, so a provider's discovery endpoint
+being slow or down never affects your login flow.</p>
+<h2 id="what-each-provider-gives-you-back">What each provider gives you back<a class="headerlink" href="#what-each-provider-gives-you-back" title="Permanent link">&para;</a></h2>
+<p><code>oauth_callback()</code>/<code>OAuthManager.handle_callback()</code> return an <code>OAuthUser</code>:
+<code>provider</code>, <code>provider_user_id</code>, <code>email</code>, <code>name</code>, <code>avatar_url</code>,
+<code>access_token</code>, and <code>raw</code> (the provider's full userinfo response, for
+anything not already surfaced). Every provider is reached through its
+<strong>userinfo endpoint</strong> (an authenticated HTTPS request), not by decoding an
+OIDC <code>id_token</code> -- that avoids needing a JWT/JWKS-verification dependency
+for information the userinfo endpoint already hands over just as
+reliably.</p>
+<p><code>email</code> can be <code>None</code> -- decide for yourself whether that's acceptable
+(the worked example above rejects it with a 400; you might instead let
+the user pick a local email on first login).</p>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Unknown provider</strong> in the URL -- <code>NotFoundException</code> (404). The
+  <code>{provider}</code> path segment is checked against exactly what you registered.</li>
+<li><strong>Missing or mismatched <code>state</code></strong> -- <code>ForbiddenException</code> (403): either
+  a CSRF attempt, or the login simply took too long and the session-stored
+  state expired along with the session. State is popped from the session
+  on first use, so replaying an old, already-completed callback URL fails
+  the same way.</li>
+<li><strong>No authorization code</strong> in the callback -- <code>BadRequestException</code>
+  (400), with the provider's own <code>error</code>/<code>error_description</code> in the
+  message (most commonly: the user clicked "Deny" on the consent screen).</li>
+</ul>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<p>See <a href="../reference/security/"><code>zeython.oauth</code></a> for the full class/function
+list, including <code>OAuthManager</code>/<code>OAuthProvider</code>/<code>OAuthUser</code> if you need to
+resolve or construct these directly outside of a request (a script that
+refreshes cached profile data, say).</p>
 
 
 
@@ -3122,7 +3201,7 @@ directly, or exercise the cron matching with a fixed time:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../queues/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Background Jobs">
+          <a href="../authentication/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Authentication">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3132,20 +3211,20 @@ directly, or exercise the cron matching with a fixed time:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Background Jobs
+                Authentication
               </div>
             </div>
           </a>
         
         
           
-          <a href="../websockets/" class="md-footer__link md-footer__link--next" aria-label="Next: WebSockets">
+          <a href="../mfa/" class="md-footer__link md-footer__link--next" aria-label="Next: Two-Factor Auth (MFA)">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                WebSockets
+                Two-Factor Auth (MFA)
               </div>
             </div>
             <div class="md-footer__button md-icon">
