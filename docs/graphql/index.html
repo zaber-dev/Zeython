@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/production-checklist/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/graphql/">
       
       
-        <link rel="prev" href="../docker/">
+        <link rel="prev" href="../api-standards/">
       
       
-        <link rel="next" href="../benchmarks/">
+        <link rel="next" href="../cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Production Checklist - Zeython Docs</title>
+        <title>GraphQL - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#production-readiness-checklist" class="md-skip">
+        <a href="#graphql" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Production Checklist
+              GraphQL
             
           </span>
         </div>
@@ -307,10 +307,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../openapi/" class="md-tabs__link">
           
   
@@ -366,12 +368,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../health-check/" class="md-tabs__link">
           
   
@@ -1450,26 +1450,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1487,7 +1492,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1558,10 +1563,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../graphql/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GraphQL
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1577,6 +1609,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-is-and-what-it-deliberately-isnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this is, and what it deliberately isn't
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reaching-your-apps-services-from-a-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reaching your app's services from a resolver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-graphiql-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The GraphiQL UI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2211,31 +2351,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -2253,7 +2388,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2492,37 +2627,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Production Checklist
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../production-checklist/" class="md-nav__link">
         
   
   
@@ -2538,114 +2646,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Security
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#observability" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Observability
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#background-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Background work
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-standards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API standards
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-this-deliberately-doesnt-cover" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What this deliberately doesn't cover
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2996,6 +2996,50 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-this-is-and-what-it-deliberately-isnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this is, and what it deliberately isn't
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reaching-your-apps-services-from-a-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reaching your app's services from a resolver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-graphiql-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The GraphiQL UI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3007,10 +3051,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security" class="md-nav__link">
+  <a href="#errors" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security
+        Errors
       
     </span>
   </a>
@@ -3018,10 +3062,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#database" class="md-nav__link">
+  <a href="#scope-limits" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database
+        Scope limits
       
     </span>
   </a>
@@ -3029,54 +3073,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#observability" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Observability
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#background-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Background work
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-standards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API standards
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-this-deliberately-doesnt-cover" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What this deliberately doesn't cover
+        API reference
       
     </span>
   </a>
@@ -3100,7 +3100,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/production-checklist.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/graphql.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -3108,152 +3108,114 @@
   
 
 
-<h1 id="production-readiness-checklist">Production Readiness Checklist<a class="headerlink" href="#production-readiness-checklist" title="Permanent link">&para;</a></h1>
-<p>Everything below is documented in its own page already -- this is the
-one-page index for "am I actually ready to deploy this," pointing at the
-real docs instead of repeating them. Go through it once before a first
-production deploy, and again whenever you add something (a queue, a
-second replica, a new external API) that changes the answer.</p>
+<h1 id="graphql">GraphQL<a class="headerlink" href="#graphql" title="Permanent link">&para;</a></h1>
+<p><code>zeython.graphql</code> serves a GraphQL endpoint built on
+<a href="https://graphql-core-3.readthedocs.io/"><code>graphql-core</code></a>, the pure-Python
+reference GraphQL implementation. Zeython owns the transport — the
+endpoint, request parsing, error formatting, and an optional interactive
+GraphiQL UI. You own the schema.</p>
+<p>Not registered by default, and <code>graphql-core</code> is an optional dependency —
+install it with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>graphql<span class="o">]</span>
+</span></code></pre></div>
+<h2 id="what-this-is-and-what-it-deliberately-isnt">What this is, and what it deliberately isn't<a class="headerlink" href="#what-this-is-and-what-it-deliberately-isnt" title="Permanent link">&para;</a></h2>
+<p>This is <strong>not</strong> Strawberry- or Ariadne-style automatic schema generation
+from type-hinted Python classes — the same reasoning
+<a href="../openapi/"><code>zeython.openapi</code></a> gives for not auto-generating request
+models from type hints applies here too. You build a <code>graphql.GraphQLSchema</code>
+however <code>graphql-core</code> lets you: programmatically with <code>GraphQLObjectType</code>/
+<code>GraphQLField</code>, or from an SDL string via <code>graphql.build_schema()</code> with
+resolvers attached afterward. Zeython just executes queries against
+whichever one you hand it.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/graphql/schema.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">graphql</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLField</span><span class="p">,</span> <span class="n">GraphQLObjectType</span><span class="p">,</span> <span class="n">GraphQLSchema</span><span class="p">,</span> <span class="n">GraphQLString</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">resolve_hello</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"World"</span><span class="p">):</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">query_type</span> <span class="o">=</span> <span class="n">GraphQLObjectType</span><span class="p">(</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"Query"</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">{</span><span class="s2">"hello"</span><span class="p">:</span> <span class="n">GraphQLField</span><span class="p">(</span><span class="n">GraphQLString</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">GraphQLString</span><span class="p">},</span> <span class="n">resolve</span><span class="o">=</span><span class="n">resolve_hello</span><span class="p">)},</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">GraphQLSchema</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">query_type</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">GraphQLServiceProvider</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.graphql.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphQLServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">))</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/graphql<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"query": "{ hello(name: \"Ada\") }"}'</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># {"data": {"hello": "Hello, Ada!"}}</span>
+</span></code></pre></div>
+<p>A single route (default <code>/graphql</code>) handles both verbs: <code>POST</code> executes a
+query/mutation from a JSON body (<code>query</code>, optional <code>variables</code>/
+<code>operationName</code>); <code>GET</code> serves the interactive GraphiQL UI, when enabled.</p>
+<h2 id="reaching-your-apps-services-from-a-resolver">Reaching your app's services from a resolver<a class="headerlink" href="#reaching-your-apps-services-from-a-resolver" title="Permanent link">&para;</a></h2>
+<p>Every resolver's <code>info.context</code> is a dict with <code>request</code> (the current
+<code>starlette.requests.Request</code>) and <code>container</code> (the app's
+<a href="../architecture/"><code>Container</code></a>) — the same things a plain HTTP handler
+already has, just handed to resolvers instead of read off the request
+directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">resolve_me</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">request</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">"request"</span><span class="p">]</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">return</span> <span class="n">current_user</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">resolve_posts</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>  <span class="c1"># a Model query works the same as anywhere else --</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                              <span class="c1"># the request-scoped session is already open</span>
+</span></code></pre></div>
+<h2 id="the-graphiql-ui">The GraphiQL UI<a class="headerlink" href="#the-graphiql-ui" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">GraphQLServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> <span class="n">graphiql</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>graphiql</code> defaults to <code>app.config.debug</code> — visible locally, off in
+production, the same default <a href="../openapi/">Swagger UI</a> and the
+<a href="../api-standards/#debug-mode-a-browsable-html-error-page">HTML debug error page</a>
+use, since it exposes your whole schema and lets anyone run arbitrary
+queries against it. Pass <code>graphiql=True</code>/<code>False</code> explicitly to override
+that default in either direction. Loads React and GraphiQL from a CDN,
+same zero-setup approach as Swagger UI — a static asset bundle, not
+something recompiled per request.</p>
+<p>With <code>graphiql</code> off (the production default), a <code>GET</code> request to the
+endpoint gets a <code>405</code> instead of the UI.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>.</strong> Debug mode leaks
-  stack traces and internals into error responses -- a browser hitting a
-  broken page gets a full source-level debug page (see
-  <a href="../api-standards/">API Standards</a>), an API client gets the equivalent in
-  the JSON body. Fine locally, a disclosure bug in production. <code>zeython new</code>
-  scaffolds both as development-friendly defaults; flip them in your
-  deployment's <code>.env</code> or environment variables, not in the repo.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>APP_SECRET_KEY</code> is a real, unique secret</strong>, not the value
-  <code>zeython new</code> generated for local dev committed into version control.
-  It signs the session cookie -- see <a href="../authentication/">Authentication</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>DATABASE_URL</code> points at a real database</strong>, not the default
-  SQLite file. SQLite is fine for a single-container demo; anything with
-  more than one app replica needs Postgres/MySQL so writes are visible
-  across processes. See <a href="../database/">Database &amp; Migrations</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Migrations are applied</strong>, not just written --
-  <code>alembic upgrade head</code> (the generated Docker image's <code>CMD</code> does this
-  for you on a single-container deploy; see <a href="../docker/">Docker</a>).</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A risky migration or deploy goes through <code>zeython down</code>/<code>up</code></strong>,
-  not straight into production traffic against a half-migrated schema --
-  see <a href="../maintenance-mode/">Maintenance Mode</a>.</li>
-</ul>
-<h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CSRF protection is on</strong> -- it is by default for session auth, see
-  <a href="../csrf/">CSRF Protection</a>. Don't disable it on a route just because a
-  test was inconvenient.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Rate limiting is configured</strong> on auth endpoints (on by default,
-  see <a href="../rate-limiting/">Rate Limiting</a>) and, if this is a public API,
-  blanket-enabled across the rest of it too
-  (<code>RATE_LIMIT_ENABLED=true</code>).</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Security headers are registered</strong> -- <code>SecurityHeadersServiceProvider</code>
-  is opt-in, not on by default, because a wrong CSP silently breaks a
-  real app. Decide your policy and register it; see
-  <a href="../security-headers/">Security Headers</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CORS is scoped to real origins</strong>, not <code>*</code>, if <code>CorsServiceProvider</code>
-  is registered at all. Wildcard origins on an authenticated API mean any
-  site can read the response.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>WebSocket origin checking</strong> is on if you're not the only expected
-  client -- see the Origin-check note in
-  <a href="../websockets/">WebSockets</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>RBAC/authorization is actually enforced</strong> on every route that
-  needs it -- an undefined ability is a bug, not a silent deny (see
-  <a href="../authorization/">Authorization</a>), so audit routes for a missing
-  <code>authorize()</code>/<code>Gate.allows()</code> call rather than trusting that one exists.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>You've read <a href="https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md">SECURITY.md</a></strong>
-  -- supported versions and how to report a vulnerability privately, for
-  your own app as much as for the framework.</li>
-</ul>
-<h2 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Connection pooling is sized for your deployment</strong>, not left at
-  SQLAlchemy's defaults if you're running multiple app processes against
-  one database -- see <a href="../database/#connection-pooling">Connection pooling</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A read replica is wired up</strong> (<code>DATABASE_READ_URL</code> +
-  <code>Database.read_replica()</code>) if read load is the bottleneck, not before
-  -- see <a href="../database/#read-replicas">Read replicas</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>N+1 query detection has actually been run</strong> against real traffic
-  paths in dev (<code>APP_DEBUG=true</code>, <code>N1QueryDetectionServiceProvider</code>) at
-  least once before shipping a new list/index endpoint -- see
-  <a href="../relationships/#detecting-n1s-automatically">Detecting N+1s automatically</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Multi-step writes that must succeed or fail together use
-  <code>transaction()</code></strong> (a <code>SAVEPOINT</code>-scoped nested transaction), not
-  several unguarded writes hoping nothing fails in between -- see
-  <a href="../database/#transactions">Transactions</a>.</li>
-</ul>
-<h2 id="observability">Observability<a class="headerlink" href="#observability" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Structured logging is on</strong> if you ship to a log aggregator
-  (Datadog, ELK, CloudWatch Logs Insights, Splunk) -- <code>LOG_FORMAT=json</code>,
-  see <a href="../observability/#structured-json-logging">Structured (JSON) logging</a>.
-  Plain text is fine if a human is the only consumer.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>X-Request-ID</code> correlation is working end to end</strong> -- it's on by
-  default (<code>RequestIdServiceProvider</code>), but confirm your proxy/load
-  balancer isn't stripping the header before it reaches the app. See
-  <a href="../observability/#requestcorrelation-ids">Request/Correlation IDs</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error monitoring is wired up</strong> (Sentry via
-  <code>ErrorMonitoringServiceProvider</code> + <code>SENTRY_DSN</code>) so an unhandled
-  exception, an exhausted job retry, or a raising scheduled task reaches
-  you instead of only a log line nobody's watching. See
-  <a href="../error-monitoring/">Error Monitoring</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>/up</code> is actually wired into your infrastructure's health
-  check</strong> -- a load balancer target group, a Kubernetes probe, an uptime
-  monitor -- not just reachable by hand. See <a href="../health-check/">Health Check</a>.</li>
-</ul>
-<h2 id="background-work">Background work<a class="headerlink" href="#background-work" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>QUEUE_DRIVER=redis</code>, not <code>memory</code></strong>, for any job whose loss on a
-  crash or restart you can't tolerate (payment capture, anything with a
-  side effect outside your database) -- see
-  <a href="../queues/">Background Jobs</a>. The in-memory driver is fine for
-  low-stakes work and local dev.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A <code>queue-worker</code> process is actually running</strong> if you switched to
-  the Redis driver -- jobs pushed to a durable queue with nothing
-  consuming them just pile up. <code>docker-compose.yml</code> includes a
-  commented-out service for this; see <a href="../docker/#postgres-redis">Docker</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>A scheduler process is running</strong> if <code>schedule.py</code> defines
-  anything -- a host crontab entry, or the commented-out <code>scheduler</code>
-  sidecar in <code>docker-compose.yml</code>. See
-  <a href="../scheduling/">Scheduling</a> and <a href="../docker/#scheduled-tasks">Docker</a>.</li>
-</ul>
-<h2 id="api-standards">API standards<a class="headerlink" href="#api-standards" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Response compression is on</strong> for a JSON API with non-trivial
-  payloads (<code>GzipServiceProvider</code>) -- opt-in, not registered by default.
-  See <a href="../api-standards/#compression-gzip">Compression (gzip)</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Conditional GETs are on</strong> if clients re-fetch the same resources
-  often (<code>ETagServiceProvider</code>) -- know the memory trade-off (it buffers
-  the full response body) before turning it on for large or streamed
-  responses. See <a href="../api-standards/#conditional-requests-etags">Conditional requests (ETags)</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error response shape matches what your clients expect</strong> -- the
-  default <code>{"error": ..., "status": ...}</code> shape, or RFC 7807
-  <code>application/problem+json</code> (<code>API_PROBLEM_JSON=true</code>) if you're
-  integrating with tooling that expects the standard. Decide once, not
-  per route. See <a href="../api-standards/#rfc-7807-error-responses-applicationproblemjson">RFC 7807 error responses</a>.</li>
-</ul>
-<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Tests that touch the database roll back between runs</strong>, not
-  leaving state for the next test to trip over -- see
-  <a href="../testing/#rolling-back-writes-between-tests">Rolling back writes between tests</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Routes that require login are tested as an authenticated user</strong>,
-  not skipped because wiring up a real login flow in a test felt like
-  too much -- see <a href="../testing/#logging-a-test-client-in-directly">Logging a test client in directly</a>.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CI is actually green</strong> on the branch you're deploying, not
-  "green last time I looked."</li>
-</ul>
-<h2 id="what-this-deliberately-doesnt-cover">What this deliberately doesn't cover<a class="headerlink" href="#what-this-deliberately-doesnt-cover" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">This isn't a substitute for your own judgment</p>
-<p>This checklist is about configuring and wiring up features the
-framework already ships -- it is not a substitute for your own
-judgment about your specific deployment: infrastructure choice, TLS
-termination, backup strategy, secrets management (a real secrets
-manager, not <code>.env</code> in production), and load testing are all yours to
-own. If a section above doesn't apply to your app (no background
-jobs, no public API), skip it -- this is a checklist to consult, not
-a form to fill out completely.</p>
-</div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">GraphQLServiceProvider</span><span class="p">(</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">app</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">path</span><span class="o">=</span><span class="s2">"/graphql"</span><span class="p">,</span>   <span class="c1"># default</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">graphiql</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>     <span class="c1"># default: falls back to app.config.debug</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
+<p><code>execute_graphql()</code> — the function the service provider calls, also usable
+directly (e.g. from a console command, or a test) — always returns <code>200</code>
+from the HTTP endpoint, with the GraphQL-over-HTTP-standard body shape:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hello"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">},</span><span class="w"> </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span><span class="w"> </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"hello"</span><span class="p">],</span><span class="w"> </span><span class="nt">"locations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]}]}</span>
+</span></code></pre></div>
+<p><code>errors</code> is only present when at least one occurred — a query syntax error,
+a resolver that raised, or a value that failed the schema's own
+validation. This is GraphQL convention, not a Zeython choice: a GraphQL
+request can partially succeed (some fields resolved, one didn't), which a
+single HTTP status code can't represent — the client always reads
+<code>errors</code>, the same way it always reads <code>data</code>.</p>
+<p>A request with a body that isn't valid JSON, or is JSON but has no
+<code>query</code> field, gets a <code>400</code> — that's malformed at the transport level,
+before GraphQL execution ever starts.</p>
+<h2 id="scope-limits">Scope limits<a class="headerlink" href="#scope-limits" title="Permanent link">&para;</a></h2>
+<p>Single-schema, single-endpoint, query/mutation execution — no schema
+stitching or federation across services, no subscriptions (GraphQL's
+WebSocket-based push model; see <a href="../websockets/">WebSockets</a> for Zeython's
+own real-time primitives if you need push today), and no response-level
+query cost limiting. For an API with those requirements, or a schema
+large enough to want to split across teams/services, a dedicated GraphQL
+gateway is a better fit than growing this module to match it.</p>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<p>See <a href="../reference/http-api/"><code>zeython.graphql</code></a> for the full API.</p>
 
 
 
@@ -3289,7 +3251,7 @@ a form to fill out completely.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../docker/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker">
+          <a href="../api-standards/" class="md-footer__link md-footer__link--prev" aria-label="Previous: API Standards">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3299,20 +3261,20 @@ a form to fill out completely.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Docker
+                API Standards
               </div>
             </div>
           </a>
         
         
           
-          <a href="../benchmarks/" class="md-footer__link md-footer__link--next" aria-label="Next: Benchmarks">
+          <a href="../cli/" class="md-footer__link md-footer__link--next" aria-label="Next: CLI Reference">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Benchmarks
+                CLI Reference
               </div>
             </div>
             <div class="md-footer__button md-icon">

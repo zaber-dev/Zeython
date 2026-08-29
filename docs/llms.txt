@@ -47,6 +47,7 @@ Zeython is an async-first, batteries-included MVC framework for Python: a depend
 
 - [OpenAPI & API Docs](https://zeython.zaber.dev/docs/openapi/index.md)
 - [API Standards](https://zeython.zaber.dev/docs/api-standards/index.md)
+- [GraphQL](https://zeython.zaber.dev/docs/graphql/index.md)
 
 ## Digging Deeper
 

@@ -1,6 +1,6 @@
 # HTTP & APIs
 
-Rate limiting, ETags, gzip compression, request correlation IDs, and OpenAPI schema generation.
+Rate limiting, ETags, gzip compression, request correlation IDs, OpenAPI schema generation, and a GraphQL endpoint.
 
 ## rate_limit
 
@@ -614,4 +614,119 @@ def generate_openapi(
         info["description"] = description
 
     return {"openapi": "3.0.3", "info": info, "paths": paths}
+```
+
+## graphql
+
+A GraphQL endpoint built on graphql-core, the pure-Python reference GraphQL implementation.
+
+Zeython owns the transport: the `/graphql` endpoint, request parsing, error formatting, and an optional interactive GraphiQL UI in debug mode. Your app owns the schema -- built however `graphql-core` lets you build one (programmatically with `GraphQLObjectType`, or from SDL via `graphql.build_schema()` with resolvers attached afterward). There's no FastAPI/Strawberry-style automatic type-hint-to-schema generation here, for the same reason `zeython.openapi` doesn't auto-generate request models: it would fight the framework's existing conventions rather than describe them.
+
+`graphql-core` is an optional dependency (`pip install zeython[graphql]`), not a default one -- most apps don't need a GraphQL API alongside their REST one.
+
+### GraphQLServiceProvider
+
+```python
+GraphQLServiceProvider(
+    app: Application,
+    *,
+    schema: GraphQLSchema,
+    path: str = "/graphql",
+    graphiql: bool | None = None,
+)
+```
+
+Bases: `ServiceProvider`
+
+Serves a GraphQL endpoint for a schema you provide.
+
+```python
+# main.py
+from zeython import Application, GraphQLServiceProvider
+from app.graphql.schema import schema  # a graphql.GraphQLSchema you build
+
+app = Application()
+app.register(GraphQLServiceProvider(app, schema=schema))
+```
+
+A single route (default `/graphql`) handles both verbs: `POST` executes a query/mutation from a JSON body (`query`, optional `variables`/`operationName`); `GET` serves an interactive GraphiQL UI, when enabled.
+
+Every resolver's `info.context` is a dict with `request` (the current `starlette.requests.Request`) and `container` (the app's :class:`~zeython.container.Container`, for pulling out anything else a resolver needs -- a service, `current_user()`, the database session) -- the same shape a request handler already has, just handed to resolvers instead of read off the request directly.
+
+`graphiql` defaults to `self.config.debug` -- on locally, off in production, the same default `zeython.openapi`'s Swagger UI and the HTML debug error page use, since it exposes your full schema and lets anyone run arbitrary queries against it.
+
+Source code in `src/zeython/graphql.py`
+
+```python
+def __init__(
+    self,
+    app: Application,
+    *,
+    schema: GraphQLSchema,
+    path: str = "/graphql",
+    graphiql: bool | None = None,
+) -> None:
+    super().__init__(app)
+    self.schema = schema
+    self.path = path
+    self._graphiql = graphiql
+```
+
+### execute_graphql
+
+```python
+execute_graphql(
+    schema: GraphQLSchema,
+    *,
+    query: str,
+    variables: dict[str, Any] | None = None,
+    operation_name: str | None = None,
+    context_value: Any = None,
+) -> dict[str, Any]
+```
+
+Execute a single GraphQL query/mutation against `schema`.
+
+Returns a `{"data": ..., "errors": [...]}` body per the GraphQL-over-HTTP spec -- `errors` is only present when at least one occurred.
+
+Raises `ImportError` with a `pip install zeython[graphql]` hint if `graphql-core` isn't installed.
+
+Source code in `src/zeython/graphql.py`
+
+```python
+async def execute_graphql(
+    schema: GraphQLSchema,
+    *,
+    query: str,
+    variables: dict[str, Any] | None = None,
+    operation_name: str | None = None,
+    context_value: Any = None,
+) -> dict[str, Any]:
+    """Execute a single GraphQL query/mutation against ``schema``.
+
+    Returns a ``{"data": ..., "errors": [...]}`` body per the GraphQL-over-HTTP
+    spec -- ``errors`` is only present when at least one occurred.
+
+    Raises ``ImportError`` with a ``pip install zeython[graphql]`` hint if
+    ``graphql-core`` isn't installed.
+    """
+    try:
+        from graphql import graphql
+    except ImportError as exc:
+        raise ImportError(
+            "zeython.graphql requires graphql-core -- install it with `pip install zeython[graphql]`."
+        ) from exc
+
+    result = await graphql(
+        schema,
+        source=query,
+        variable_values=variables,
+        operation_name=operation_name,
+        context_value=context_value,
+    )
+
+    body: dict[str, Any] = {"data": result.data}
+    if result.errors:
+        body["errors"] = [error.formatted for error in result.errors]
+    return body
 ```
