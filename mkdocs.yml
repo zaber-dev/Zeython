@@ -47,6 +47,7 @@ nav:
       - Events: events.md
       - Notifications: notifications.md
       - Audit Logging: audit-log.md
+      - Webhooks: webhooks.md
       - Feature Flags: feature-flags.md
       - Background Jobs: queues.md
       - Scheduling: scheduling.md
@@ -204,6 +205,7 @@ plugins:
           - events.md
           - notifications.md
           - audit-log.md
+          - webhooks.md
           - feature-flags.md
           - queues.md
           - scheduling.md

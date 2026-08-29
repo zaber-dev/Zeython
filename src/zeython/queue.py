@@ -29,6 +29,7 @@ from typing import Any
 from starlette.requests import Request
 
 from zeython.container import Container
+from zeython.db.session import Database
 from zeython.error_monitoring import report_exception
 from zeython.providers import ServiceProvider
 
@@ -62,7 +63,15 @@ class Job(ABC):
     max_attempts: int = 1
 
     @abstractmethod
-    async def handle(self) -> None: ...
+    async def handle(self, *args: Any, **kwargs: Any) -> None: ...
+    # ^ Typed to accept anything, not because handle() ever actually
+    # receives positional/keyword args at the call site -- Queue._invoke()
+    # always calls it via Container.call(job.handle), autowiring by
+    # parameter name, or with no args at all -- but because a subclass
+    # narrowing this to its own concrete, container-resolved parameters
+    # (see the docstring above) would otherwise be an LSP-incompatible
+    # override under mypy's stricter checking of *args/**kwargs-free
+    # signatures.
 
 
 class Queue(ABC):
@@ -77,10 +86,29 @@ class Queue(ABC):
         self.container = container
 
     async def _invoke(self, job: Job) -> None:
-        if self.container is not None:
-            await self.container.call(job.handle)
-        else:
+        if self.container is None:
             await job.handle()
+            return
+
+        if self.container.has(Database):
+            # A job's `handle()` doesn't run inside the request that pushed
+            # it -- InMemoryQueue's worker task, RedisQueue's separate
+            # `zeython queue work` process, and even SyncQueue's own retry
+            # path all outlive or sit outside the request/response cycle
+            # DatabaseSessionMiddleware scopes its session to. Reusing that
+            # request's session here would mean either a `RuntimeError` (a
+            # fresh RedisQueue worker process never had one) or, worse,
+            # silently reusing a session the middleware already committed
+            # and closed -- further writes on it would flush but never get
+            # committed again, vanishing invisibly. A dedicated session per
+            # job, opened and committed the same way a request's is, is the
+            # fix -- mirroring the one-session-per-unit-of-work rule this
+            # framework applies everywhere else.
+            database: Database = self.container.make(Database)
+            async with database.session():
+                await self.container.call(job.handle)
+        else:
+            await self.container.call(job.handle)
 
     @abstractmethod
     async def push(self, job: Job, *, delay: float = 0.0) -> None:
