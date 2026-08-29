@@ -153,9 +153,13 @@ end-to-end tutorial. Licensed under MIT.
   `MetricsRegistry` for your own counters/gauges/histograms, grouped by
   route path template to keep label cardinality bounded.
 - Optional OpenTelemetry distributed tracing (`zeython.tracing`,
-  `pip install zeython[otel]`) — one span per request, W3C `traceparent`
-  propagation, exception recording; bring your own exporter or use the
-  console one to start.
+  `pip install zeython[otel]`) — one span per request, W3C
+  `traceparent`/`baggage` propagation, exception recording; bring your
+  own exporter or use the console one to start. Configurable sampling
+  (`sample_ratio`, or a custom `Sampler`) for high-traffic services, and
+  `current_baggage()`/`set_baggage()`/`inject_headers()` for passing
+  context (a tenant ID, a request ID) across service calls alongside the
+  trace itself.
 - A consolidated production-readiness checklist (`docs/production-checklist.md`).
 
 ### Extensibility & i18n

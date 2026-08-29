@@ -75,6 +75,37 @@ def test_init_tracing_returns_a_tracer_provider_and_sets_it_globally() -> None:
     assert trace.get_tracer_provider() is provider
 
 
+# -- sampling -------------------------------------------------------------------------
+
+
+def test_sample_ratio_is_wrapped_in_parent_based() -> None:
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
+
+    provider = init_tracing(service_name="test-app", exporter=InMemorySpanExporter(), sample_ratio=0.25)
+
+    assert isinstance(provider.sampler, ParentBased)
+    assert isinstance(provider.sampler._root, TraceIdRatioBased)
+    assert provider.sampler._root._rate == 0.25
+
+
+@pytest.mark.parametrize("bad_ratio", [-0.1, 1.1, 2.0])
+def test_init_tracing_rejects_an_out_of_range_sample_ratio(bad_ratio: float) -> None:
+    with pytest.raises(ValueError, match="sample_ratio must be between 0.0 and 1.0"):
+        init_tracing(service_name="test-app", sample_ratio=bad_ratio)
+
+
+def test_an_explicit_sampler_takes_precedence_over_sample_ratio() -> None:
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry.sdk.trace.sampling import ALWAYS_OFF
+
+    provider = init_tracing(
+        service_name="test-app", exporter=InMemorySpanExporter(), sample_ratio=1.0, sampler=ALWAYS_OFF
+    )
+
+    assert provider.sampler is ALWAYS_OFF
+
+
 # -- TracingMiddleware / TracingServiceProvider --------------------------------------
 
 
@@ -140,3 +171,101 @@ async def test_an_unhandled_exception_is_recorded_on_the_span(tmp_path: Path) ->
     span = spans[0]
     assert span.status.status_code == StatusCode.ERROR
     assert any(event.name == "exception" for event in span.events)
+
+
+# -- baggage / inject_headers ----------------------------------------------------------
+
+
+def test_current_baggage_returns_none_when_unset() -> None:
+    from zeython.tracing import current_baggage
+
+    assert current_baggage("tenant_id") is None
+
+
+async def test_set_baggage_is_readable_within_the_same_request(tmp_path: Path) -> None:
+    from zeython.tracing import current_baggage, set_baggage
+
+    app, _ = await _make_app(tmp_path)
+    seen = {}
+
+    @app.get("/whoami")
+    async def whoami(request):
+        set_baggage("tenant_id", "42")
+        seen["tenant_id"] = current_baggage("tenant_id")
+        return JSONResponse({"tenant_id": seen["tenant_id"]})
+
+    async with client(app) as http:
+        response = await http.get("/whoami")
+
+    assert response.json() == {"tenant_id": "42"}
+    assert seen["tenant_id"] == "42"
+
+
+async def test_incoming_baggage_header_is_readable_via_current_baggage(tmp_path: Path) -> None:
+    from zeython.tracing import current_baggage
+
+    app, _ = await _make_app(tmp_path)
+    seen = {}
+
+    @app.get("/whoami")
+    async def whoami(request):
+        seen["tenant_id"] = current_baggage("tenant_id")
+        return JSONResponse({})
+
+    async with client(app) as http:
+        await http.get("/whoami", headers={"baggage": "tenant_id=99"})
+
+    assert seen["tenant_id"] == "99"
+
+
+async def test_baggage_does_not_leak_across_requests(tmp_path: Path) -> None:
+    from zeython.tracing import current_baggage, set_baggage
+
+    app, _ = await _make_app(tmp_path)
+    seen = []
+
+    @app.get("/set")
+    async def set_it(request):
+        set_baggage("tenant_id", "42")
+        return JSONResponse({})
+
+    @app.get("/read")
+    async def read_it(request):
+        seen.append(current_baggage("tenant_id"))
+        return JSONResponse({})
+
+    async with client(app) as http:
+        await http.get("/set")
+        await http.get("/read")
+
+    assert seen == [None]
+
+
+async def test_inject_headers_includes_traceparent_and_baggage(tmp_path: Path) -> None:
+    from zeython.tracing import inject_headers, set_baggage
+
+    app, _ = await _make_app(tmp_path)
+    seen = {}
+
+    @app.get("/call-downstream")
+    async def call_downstream(request):
+        set_baggage("tenant_id", "42")
+        seen["headers"] = inject_headers({"Authorization": "Bearer secret"})
+        return JSONResponse({})
+
+    async with client(app) as http:
+        await http.get("/call-downstream")
+
+    headers = seen["headers"]
+    assert "traceparent" in headers
+    assert headers["baggage"] == "tenant_id=42"
+    assert headers["Authorization"] == "Bearer secret"  # merged in, not clobbered
+
+
+def test_inject_headers_works_outside_a_request_too() -> None:
+    from zeython.tracing import inject_headers
+
+    # No active span at all -- still returns a dict (an empty/default
+    # traceparent for "no trace in progress"), never raises.
+    headers = inject_headers()
+    assert isinstance(headers, dict)
