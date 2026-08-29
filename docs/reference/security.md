@@ -1,12 +1,14 @@
 # Security
 
-Session-based web auth, OAuth2/OIDC login, two-factor auth (TOTP), API
-token auth, RBAC-style authorization, CSRF protection, security response
-headers, password hashing, and multi-tenancy.
+Session-based web auth, OAuth2/OIDC login, SAML SSO, two-factor auth
+(TOTP), API token auth, RBAC-style authorization, CSRF protection,
+security response headers, password hashing, and multi-tenancy.
 
 ::: zeython.auth
 
 ::: zeython.oauth
+
+::: zeython.saml
 
 ::: zeython.mfa
 

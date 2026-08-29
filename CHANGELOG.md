@@ -57,6 +57,12 @@ end-to-end tutorial. Licensed under MIT.
   round-trip and the code-for-token exchange; hands your app a normalized
   identity to find-or-create a user from, the same way Laravel Socialite
   does.
+- SAML 2.0 SSO login (`zeython.saml`, `pip install zeython[saml]`) — for
+  the enterprise IdPs (Okta, Azure AD, ADFS) that specifically require
+  SAML over OIDC. Built on python3-saml: verifies the IdP's signed
+  response (XML signature, expiry, audience, recipient), serves SP
+  metadata for the IdP admin, and hands back the same kind of normalized
+  identity `zeython.oauth` does.
 - Two-factor authentication (`zeython.mfa`) — RFC 6238 TOTP with no new
   dependency, one-time recovery codes, and a login-time challenge that
   gates `zeython.auth.login()` behind a second factor once a user enrolls.

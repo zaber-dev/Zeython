@@ -31,6 +31,7 @@ nav:
   - Security:
       - Authentication: authentication.md
       - OAuth2 / OIDC Login (SSO): oauth.md
+      - SAML SSO: saml.md
       - Two-Factor Auth (MFA): mfa.md
       - CSRF Protection: csrf.md
       - Authorization: authorization.md
@@ -194,6 +195,7 @@ plugins:
         Security:
           - authentication.md
           - oauth.md
+          - saml.md
           - mfa.md
           - csrf.md
           - authorization.md
