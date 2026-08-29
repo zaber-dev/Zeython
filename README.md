@@ -48,10 +48,12 @@ scaffolding on every project. Zeython does that assembly once:
 - **Enterprise-grade security and compliance, out of the box** — RBAC-style
   authorization (`Gate`/Policies), row-level multi-tenancy, TOTP two-factor
   auth with recovery codes, "Sign in with Google/GitHub/Microsoft" or your
-  own OIDC identity provider, and an automatic per-field audit trail on any
+  own OIDC identity provider, SAML SSO for the enterprise IdPs that
+  specifically require it, and an automatic per-field audit trail on any
   model — the features most frameworks leave you to bolt on yourself. See
   [Authorization](docs/authorization.md), [Multi-Tenancy](docs/multi-tenancy.md),
-  [MFA](docs/mfa.md), [OAuth/SSO Login](docs/oauth.md), [Audit Logging](docs/audit-log.md).
+  [MFA](docs/mfa.md), [OAuth/SSO Login](docs/oauth.md), [SAML SSO](docs/saml.md),
+  [Audit Logging](docs/audit-log.md).
 - **Outbound webhooks with retries and HMAC signing, built in** — subscribe a
   third party's URL to an event, and delivery, retry-with-backoff, and a
   per-attempt audit trail all ride on the same background-job queue every
@@ -198,6 +200,7 @@ empty scaffold to a tested, authenticated API
 **Security**
 [Authentication](docs/authentication.md) ·
 [OAuth/SSO Login](docs/oauth.md) ·
+[SAML SSO](docs/saml.md) ·
 [Two-Factor Auth (MFA)](docs/mfa.md) ·
 [CSRF Protection](docs/csrf.md) ·
 [Authorization](docs/authorization.md) ·

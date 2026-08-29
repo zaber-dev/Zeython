@@ -50,6 +50,7 @@ redis = ["redis>=5.0"]
 sentry = ["sentry-sdk>=2.0"]
 otel = ["opentelemetry-api>=1.24", "opentelemetry-sdk>=1.24"]
 graphql = ["graphql-core>=3.2"]
+saml = ["python3-saml>=1.16"]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
@@ -65,6 +66,7 @@ dev = [
     "opentelemetry-api>=1.24",
     "opentelemetry-sdk>=1.24",
     "graphql-core>=3.2",
+    "python3-saml>=1.16",
 ]
 
 [project.urls]

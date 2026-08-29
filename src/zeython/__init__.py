@@ -166,6 +166,16 @@ from zeython.rate_limit import (
 )
 from zeython.request_id import RequestIdMiddleware, RequestIdServiceProvider, request_id
 from zeython.routing import Controller, Router, current_api_version, deprecated
+from zeython.saml import (
+    SamlManager,
+    SamlProvider,
+    SamlServiceProvider,
+    SamlUser,
+    saml_acs,
+    saml_login,
+    saml_metadata,
+    saml_provider,
+)
 from zeython.schedule import Schedule, ScheduledEvent, ScheduleServiceProvider
 from zeython.search import (
     create_fts5_index,
@@ -295,6 +305,14 @@ __all__ = [
     "oauth_microsoft",
     "oauth_callback",
     "oauth_redirect",
+    "SamlManager",
+    "SamlProvider",
+    "SamlServiceProvider",
+    "SamlUser",
+    "saml_provider",
+    "saml_login",
+    "saml_acs",
+    "saml_metadata",
     "describe",
     "model_schema",
     "generate_openapi",
