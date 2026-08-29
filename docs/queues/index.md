@@ -150,6 +150,71 @@ Each entry keeps the job's class path, its original payload, the final exception
 
 `QUEUE_NAME` (default `default`) picks which named queue `QueueServiceProvider` binds — everything is namespaced under `zeython:queue:<name>:` in Redis. Run a dedicated `zeython queue work` process per queue name (each pointed at its own `.env`/`QUEUE_NAME`) for a priority lane — emails on one, report generation on another — so a slow queue never starves a fast one.
 
+## Chaining jobs
+
+`chain()` wraps a sequence of jobs so they run strictly one after another — the next link only starts once the previous one finishes successfully:
+
+```python
+from zeython.queue import chain
+
+await dispatch(request, chain([
+    DownloadReportJob(report_id=report.id),
+    EmailReportJob(report_id=report.id, to_email=user.email),
+    CleanupTempFilesJob(report_id=report.id),
+]))
+```
+
+`chain()` returns a single `Job` — dispatch it exactly like any other, with `dispatch()` or `queue.push()`, on any driver. If a link exhausts its own `max_attempts`, the chain simply stops there: the rest never runs, and the failure is logged/reported the same way any other exhausted job's is, not raised somewhere nothing is watching.
+
+Every job in the chain must be a `@dataclass` — a chain has to serialize its remaining links to hand off to a later, independent dispatch (the next link), the same requirement `RedisQueue` has for any job (see above), and for the same reason: instance state doesn't carry over between links or across a retried link's attempts, only what's in the job's own constructor fields.
+
+## Batching jobs
+
+`dispatch_batch()` runs a group of jobs independently — not in order, use `chain()` for that — and tracks their combined progress:
+
+```python
+from zeython.queue import dispatch_batch
+
+batch_id = await dispatch_batch(
+    request,
+    [ResizeImageJob(photo_id=p.id) for p in album.photos],
+    then=NotifyGalleryReadyJob(album_id=album.id),
+)
+```
+
+`then=` is a job dispatched automatically, exactly once, the moment every job in the batch has finished — whether it succeeded or exhausted its own retries. Its own `handle()` can call `batch_progress()` to see how many failed — since the batch id isn't known until `dispatch_batch()` returns (after `then` has already been constructed), pass your own via `batch_id=` if `then` needs it:
+
+```python
+import uuid
+from zeython.queue import batch_progress
+
+@dataclass
+class NotifyGalleryReadyJob(Job):
+    batch_id: str
+
+    async def handle(self, request: Request) -> None:
+        progress = await batch_progress(request, self.batch_id)
+        ...
+
+batch_id = str(uuid.uuid4())
+await dispatch_batch(
+    request,
+    [ResizeImageJob(photo_id=p.id) for p in album.photos],
+    then=NotifyGalleryReadyJob(batch_id=batch_id),
+    batch_id=batch_id,
+)
+```
+
+Both `dispatch_batch()`'s own jobs and its `then=` job must be `@dataclass`, for the same reason as `chain()`'s links.
+
+### Where batch progress is tracked
+
+`QueueServiceProvider` also binds a matching `BatchTracker`: `InMemoryBatchTracker` (process-local, correct for `InMemoryQueue`/ `SyncQueue`) or `RedisBatchTracker` (correct across every worker process draining a `RedisQueue`) — picked automatically from `QUEUE_DRIVER`, no separate configuration. A finished batch's progress is kept around afterward (so `batch_progress()` keeps answering once `then` has already fired) — `InMemoryBatchTracker` for the life of the process, like `InMemoryCache`; `RedisBatchTracker` for 24 hours, refreshed on every completion so a long-running batch's own bookkeeping never expires mid-flight.
+
+### Combining chain() and dispatch_batch()
+
+A batch member can be a `chain()` — a batch job that itself has to run a few things in order. The other direction isn't supported: a chain link only waits for its own wrapped job's `handle()`, not any further dispatch it makes, so a batch placed inside a chain link wouldn't actually block the next link from starting, and the batch's own completion wouldn't be what advances the chain. To run something once a whole batch finishes, use `dispatch_batch()`'s own `then=` — not by nesting the batch inside a chain.
+
 ## Logging
 
 Job failures are only visible if something is actually printing INFO/ERROR logs. `Application()` configures a sensible default for you (see the note in `zeython.application._configure_default_logging`) unless you've already set up logging yourself — you don't need to do anything for `logger.info(...)` calls in your own jobs to show up during development.

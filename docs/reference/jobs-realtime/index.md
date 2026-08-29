@@ -265,6 +265,162 @@ async def run_worker(
         await self._process(raw.decode() if isinstance(raw, bytes) else raw)
 ```
 
+### BatchProgress
+
+```python
+BatchProgress(total: int, pending: int, failed: int)
+```
+
+A snapshot of a batch's progress — see :func:`dispatch_batch`.
+
+#### finished
+
+```python
+finished: bool
+```
+
+Whether every job in the batch has run (successfully or not).
+
+#### succeeded
+
+```python
+succeeded: int
+```
+
+How many jobs have finished without exhausting their retries.
+
+### BatchTracker
+
+Bases: `ABC`
+
+Tracks how many jobs in a batch are still pending — the shared state :func:`dispatch_batch` needs to know when the *last* one finishes. Bound automatically by :class:`QueueServiceProvider`, matching whichever `Queue` driver is active; not meant to be used directly.
+
+#### create
+
+```python
+create(
+    batch_id: str,
+    total: int,
+    *,
+    then: dict[str, Any] | None = None,
+) -> None
+```
+
+Register a new batch of `total` jobs, optionally with a serialized `then` job spec to hand back via :meth:`get_then` once it finishes.
+
+Source code in `src/zeython/queue.py`
+
+```python
+@abstractmethod
+async def create(self, batch_id: str, total: int, *, then: dict[str, Any] | None = None) -> None:
+    """Register a new batch of ``total`` jobs, optionally with a
+    serialized ``then`` job spec to hand back via :meth:`get_then` once it finishes.
+    """
+```
+
+#### record_completion
+
+```python
+record_completion(
+    batch_id: str, *, failed: bool
+) -> BatchProgress
+```
+
+Record that one job in `batch_id` finished, and return the batch's progress so far.
+
+Source code in `src/zeython/queue.py`
+
+```python
+@abstractmethod
+async def record_completion(self, batch_id: str, *, failed: bool) -> BatchProgress:
+    """Record that one job in ``batch_id`` finished, and return the batch's progress so far."""
+```
+
+#### progress
+
+```python
+progress(batch_id: str) -> BatchProgress | None
+```
+
+The current progress of `batch_id`, or `None` if unknown.
+
+Source code in `src/zeython/queue.py`
+
+```python
+@abstractmethod
+async def progress(self, batch_id: str) -> BatchProgress | None:
+    """The current progress of ``batch_id``, or ``None`` if unknown."""
+```
+
+#### get_then
+
+```python
+get_then(batch_id: str) -> dict[str, Any] | None
+```
+
+The batch's `then` job spec, if it was given one.
+
+Source code in `src/zeython/queue.py`
+
+```python
+@abstractmethod
+async def get_then(self, batch_id: str) -> dict[str, Any] | None:
+    """The batch's ``then`` job spec, if it was given one."""
+```
+
+### InMemoryBatchTracker
+
+```python
+InMemoryBatchTracker()
+```
+
+Bases: `BatchTracker`
+
+Process-local batch progress — correct for :class:`InMemoryQueue` and :class:`SyncQueue`, which only ever run in this same process.
+
+A finished batch's state is kept for the life of the process (so :func:`batch_progress` keeps answering after `then` fires) — like :class:`~zeython.cache.InMemoryCache`, fine for typical usage, not a fit for creating unboundedly many batches over a long-running process's lifetime.
+
+Source code in `src/zeython/queue.py`
+
+```python
+def __init__(self) -> None:
+    self._batches: dict[str, dict[str, Any]] = {}
+    self._lock = asyncio.Lock()
+```
+
+### RedisBatchTracker
+
+```python
+RedisBatchTracker(
+    url: str,
+    *,
+    prefix: str = "zeython:batch:",
+    ttl: float = 86400.0,
+)
+```
+
+Bases: `BatchTracker`
+
+A Redis-backed :class:`BatchTracker`, correct across every worker process draining a :class:`RedisQueue` — :class:`InMemoryBatchTracker`'s limitation. Requires the `redis` extra (`pip install zeython[redis]`).
+
+Batch state expires after `ttl` seconds (default 24h) so completed bookkeeping doesn't accumulate in Redis forever; every completion refreshes it, so only a genuinely abandoned batch id is ever actually lost.
+
+Source code in `src/zeython/queue.py`
+
+```python
+def __init__(self, url: str, *, prefix: str = "zeython:batch:", ttl: float = 86400.0) -> None:
+    try:
+        from redis.asyncio import Redis
+    except ImportError as exc:
+        raise ImportError(
+            "RedisBatchTracker requires the redis package. Install it with: pip install zeython[redis]"
+        ) from exc
+
+    self._client = Redis.from_url(url)
+    self._prefix = prefix
+    self._ttl = ttl
+```
+
 ### QueueServiceProvider
 
 ```python
@@ -273,7 +429,7 @@ QueueServiceProvider(app: Application)
 
 Bases: `ServiceProvider`
 
-Binds a :class:`Queue` into the container.
+Binds a :class:`Queue` into the container, plus the matching :class:`BatchTracker` :func:`dispatch_batch` needs (:class:`RedisBatchTracker` for the `redis` driver, :class:`InMemoryBatchTracker` for the others).
 
 `.env`: `QUEUE_DRIVER` —
 
@@ -317,6 +473,140 @@ async def dispatch(request: Request, job: Job, *, delay: float = 0.0) -> None:
     """
     queue: Queue = request.app.state.container.make(Queue)
     await queue.push(job, delay=delay)
+```
+
+### chain
+
+```python
+chain(jobs: list[Job]) -> Job
+```
+
+Wrap `jobs` so they run strictly one after another — the next link only starts once the previous one finishes successfully::
+
+```text
+await dispatch(request, chain([DownloadReport(), EmailReport(), CleanupTempFiles()]))
+```
+
+Returns a single `Job` — dispatch it exactly like any other. If a link exhausts its own `max_attempts`, the rest of the chain never runs (logged and reported the same way any other exhausted job is, not raised somewhere nothing is watching).
+
+Every job in the chain must be a `@dataclass` — a chain has to serialize its remaining links to hand off to a later, independent dispatch (the next link), the same requirement :class:`RedisQueue` has for any job it runs. To run something once a *group* of independent jobs all finish, use :func:`dispatch_batch` instead — nesting one inside the other isn't supported: a chain link only waits for the wrapped job's own `handle()`, not any further dispatch it makes, so a batch placed inside a chain link wouldn't actually block the next link, and a chain placed inside a batch would only count that batch member done once the chain's *first* link finishes.
+
+Source code in `src/zeython/queue.py`
+
+```python
+def chain(jobs: list[Job]) -> Job:
+    """Wrap ``jobs`` so they run strictly one after another — the next link
+    only starts once the previous one finishes successfully::
+
+        await dispatch(request, chain([DownloadReport(), EmailReport(), CleanupTempFiles()]))
+
+    Returns a single ``Job`` — dispatch it exactly like any other. If a
+    link exhausts its own ``max_attempts``, the rest of the chain never
+    runs (logged and reported the same way any other exhausted job is,
+    not raised somewhere nothing is watching).
+
+    Every job in the chain must be a ``@dataclass`` — a chain has to
+    serialize its remaining links to hand off to a later, independent
+    dispatch (the next link), the same requirement :class:`RedisQueue` has
+    for any job it runs. To run something once a *group* of independent
+    jobs all finish, use :func:`dispatch_batch` instead — nesting one
+    inside the other isn't supported: a chain link only waits for the
+    wrapped job's own ``handle()``, not any further dispatch it makes, so
+    a batch placed inside a chain link wouldn't actually block the next
+    link, and a chain placed inside a batch would only count that batch
+    member done once the chain's *first* link finishes.
+    """
+    if not jobs:
+        raise ValueError("chain() needs at least one job")
+    specs = [_job_to_spec(job, purpose="chain()") for job in jobs]
+    first, *rest = specs
+    return _ChainedJob(spec=first, remaining=rest)
+```
+
+### dispatch_batch
+
+```python
+dispatch_batch(
+    request: Request,
+    jobs: list[Job],
+    *,
+    then: Job | None = None,
+    batch_id: str | None = None,
+) -> str
+```
+
+Dispatch every job in `jobs` independently — for strict order, use :func:`chain` instead — and track their combined progress under a batch id this returns::
+
+```text
+batch_id = await dispatch_batch(request, [ResizeImage(p) for p in photos], then=NotifyGalleryReady(album.id))
+```
+
+Pass `then=` a job to dispatch automatically, exactly once, the moment every job in the batch has finished — whether it succeeded or exhausted its own retries. `then`'s own `handle()` can call :func:`batch_progress` to see how many failed; since the batch id isn't known until this call returns (after `then` has already been constructed), pass your own via `batch_id=` if `then` needs it::
+
+```text
+batch_id = str(uuid.uuid4())
+await dispatch_batch(request, jobs, then=NotifyGalleryReady(batch_id=batch_id), batch_id=batch_id)
+```
+
+Every job (and `then`, if given) must be a `@dataclass` — see :func:`chain`.
+
+Source code in `src/zeython/queue.py`
+
+```python
+async def dispatch_batch(request: Request, jobs: list[Job], *, then: Job | None = None, batch_id: str | None = None) -> str:
+    """Dispatch every job in ``jobs`` independently — for strict order, use
+    :func:`chain` instead — and track their combined progress under a
+    batch id this returns::
+
+        batch_id = await dispatch_batch(request, [ResizeImage(p) for p in photos], then=NotifyGalleryReady(album.id))
+
+    Pass ``then=`` a job to dispatch automatically, exactly once, the
+    moment every job in the batch has finished — whether it succeeded or
+    exhausted its own retries. ``then``'s own ``handle()`` can call
+    :func:`batch_progress` to see how many failed; since the batch id isn't
+    known until this call returns (after ``then`` has already been
+    constructed), pass your own via ``batch_id=`` if ``then`` needs it::
+
+        batch_id = str(uuid.uuid4())
+        await dispatch_batch(request, jobs, then=NotifyGalleryReady(batch_id=batch_id), batch_id=batch_id)
+
+    Every job (and ``then``, if given) must be a ``@dataclass`` — see
+    :func:`chain`.
+    """
+    if not jobs:
+        raise ValueError("dispatch_batch() needs at least one job")
+    container: Container = request.app.state.container
+    tracker: BatchTracker = container.make(BatchTracker)
+    queue: Queue = container.make(Queue)
+
+    batch_id = batch_id or uuid.uuid4().hex
+    then_spec = _job_to_spec(then, purpose="dispatch_batch()'s then=") if then is not None else None
+    await tracker.create(batch_id, total=len(jobs), then=then_spec)
+    for job in jobs:
+        await queue.push(_BatchedJob(spec=_job_to_spec(job, purpose="dispatch_batch()"), batch_id=batch_id))
+    return batch_id
+```
+
+### batch_progress
+
+```python
+batch_progress(
+    request: Request, batch_id: str
+) -> BatchProgress | None
+```
+
+The current progress of the batch `batch_id` (from :func:`dispatch_batch`), or `None` if unknown — never existed, or, for :class:`RedisBatchTracker` only, expired (see its docstring).
+
+Source code in `src/zeython/queue.py`
+
+```python
+async def batch_progress(request: Request, batch_id: str) -> BatchProgress | None:
+    """The current progress of the batch ``batch_id`` (from
+    :func:`dispatch_batch`), or ``None`` if unknown — never existed, or,
+    for :class:`RedisBatchTracker` only, expired (see its docstring).
+    """
+    tracker: BatchTracker = request.app.state.container.make(BatchTracker)
+    return await tracker.progress(batch_id)
 ```
 
 ## schedule
