@@ -28,6 +28,19 @@ Jobs are plain Python objects — the default queue never serializes them, so co
 
 Beyond `self`, `handle()` can declare any type-hinted parameter bound in the container — `mailer: Mailer` above is resolved automatically when the queue runs the job, the same autowiring `Container.call` uses everywhere else in the framework. This is how `QueueServiceProvider` wires things up; if you construct a `Queue` yourself without a container, `handle()` is called with no extra arguments, so any declared params must be resolvable or the call fails with a plain `TypeError` — loud, not silently ignored.
 
+### Database access inside `handle()`
+
+A job doesn't run inside the request that dispatched it — `InMemoryQueue`'s background task, a separate `zeython queue work` process for `RedisQueue`, even a retried `SyncQueue` attempt all outlive or sit outside whatever request/response cycle pushed the job. So if `DatabaseServiceProvider` is registered, every job gets its own fresh database session for the duration of `handle()` — opened and committed the same way a request's is via `DatabaseSessionMiddleware` — rather than reusing whatever session happened to be live wherever `dispatch()`/`push()` was called. `Model.find()`, `.create()`, and friends all work inside `handle()` exactly as they do in a controller, with no extra wiring:
+
+```python
+@dataclass
+class DeactivateStaleAccountsJob(Job):
+    async def handle(self) -> None:
+        stale = await User.find_by(last_seen_before=cutoff())
+        for user in stale:
+            await user.update(active=False)
+```
+
 ## Dispatching from a request
 
 ```python

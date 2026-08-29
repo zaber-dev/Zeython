@@ -1765,6 +1765,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Webhooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../feature-flags/" class="md-nav__link">
         
   
@@ -1869,6 +1897,17 @@
     <span class="md-ellipsis">
       
         Injecting dependencies into handle()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-access-inside-handle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database access inside handle()
       
     </span>
   </a>
@@ -2928,6 +2967,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#database-access-inside-handle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database access inside handle()
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3128,13 +3178,31 @@ the framework. This is how <code>QueueServiceProvider</code> wires things up; if
 construct a <code>Queue</code> yourself without a container, <code>handle()</code> is called with
 no extra arguments, so any declared params must be resolvable or the call
 fails with a plain <code>TypeError</code> — loud, not silently ignored.</p>
+<h3 id="database-access-inside-handle">Database access inside <code>handle()</code><a class="headerlink" href="#database-access-inside-handle" title="Permanent link">&para;</a></h3>
+<p>A job doesn't run inside the request that dispatched it — <code>InMemoryQueue</code>'s
+background task, a separate <code>zeython queue work</code> process for <code>RedisQueue</code>,
+even a retried <code>SyncQueue</code> attempt all outlive or sit outside whatever
+request/response cycle pushed the job. So if <code>DatabaseServiceProvider</code> is
+registered, every job gets its own fresh database session for the duration
+of <code>handle()</code> — opened and committed the same way a request's is via
+<code>DatabaseSessionMiddleware</code> — rather than reusing whatever session happened
+to be live wherever <code>dispatch()</code>/<code>push()</code> was called. <code>Model.find()</code>,
+<code>.create()</code>, and friends all work inside <code>handle()</code> exactly as they do in a
+controller, with no extra wiring:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@dataclass</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">DeactivateStaleAccountsJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="n">stale</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="n">last_seen_before</span><span class="o">=</span><span class="n">cutoff</span><span class="p">())</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">stale</span><span class="p">:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>            <span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">active</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></code></pre></div>
 <h2 id="dispatching-from-a-request">Dispatching from a request<a class="headerlink" href="#dispatching-from-a-request" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">dispatch</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">to_email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">201</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">dispatch</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">to_email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">201</span><span class="p">)</span>
 </span></code></pre></div>
 <p><code>dispatch()</code> returns as soon as the job is queued — <code>handle()</code> runs
 afterward, on a background task, so the response isn't held up by whatever
@@ -3142,22 +3210,22 @@ sending an email actually involves.</p>
 <p>Outside a request (a script, another job), push directly to a resolved
 queue: <code>await app.container.make(Queue).push(job)</code>.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">QueueServiceProvider</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">QueueServiceProvider</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">QueueServiceProvider</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">QueueServiceProvider</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="failure-handling">Failure handling<a class="headerlink" href="#failure-handling" title="Permanent link">&para;</a></h2>
 <p>Set <code>max_attempts</code> on a job to retry it on failure:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@dataclass</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">to_email</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="o">...</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@dataclass</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">SendWelcomeEmailJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">to_email</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="o">...</span>
 </span></code></pre></div>
 <p>Each failed attempt is logged (<code>zeython.queue</code>, at <code>ERROR</code>); once
 <code>max_attempts</code> is exhausted, the job is dropped and a final "giving up" line
@@ -3165,7 +3233,7 @@ is logged. There's no dead-letter queue or alerting built in — that's
 usually deployment-specific (log aggregation, an error tracker); wire your
 job's <code>handle()</code> to report however you already do that.</p>
 <h2 id="delaying-a-job">Delaying a job<a class="headerlink" href="#delaying-a-job" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendReminderEmailJob</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">delay</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>  <span class="c1"># in an hour</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">await</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">SendReminderEmailJob</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">delay</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>  <span class="c1"># in an hour</span>
 </span></code></pre></div>
 <p>Works the same on every driver — <code>InMemoryQueue</code> schedules it via a
 background task; <code>RedisQueue</code> scores it into a delayed set and picks it up
@@ -3173,7 +3241,7 @@ once the wait elapses (see below). <code>SyncQueue</code> ignores <code>delay</c
 runs the job immediately — it exists for tests/local dev, where "immediate"
 is the whole point.</p>
 <h2 id="queue_driversync-for-tests-and-local-dev"><code>QUEUE_DRIVER=sync</code> for tests and local dev<a class="headerlink" href="#queue_driversync-for-tests-and-local-dev" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>QUEUE_DRIVER=sync
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>QUEUE_DRIVER=sync
 </span></code></pre></div>
 <p>Runs jobs immediately, in-line, with no background task — and, unlike the
 default driver, doesn't catch and log exceptions; a failing job raises
@@ -3187,15 +3255,15 @@ anything you'd be upset to silently lose (payment capture, anything that
 must survive a crash). <code>RedisQueue</code> is the durable, opt-in alternative —
 see below.</p>
 <h2 id="queue_driverredis-a-durable-queue"><code>QUEUE_DRIVER=redis</code>: a durable queue<a class="headerlink" href="#queue_driverredis-a-durable-queue" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>QUEUE_DRIVER=redis
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>REDIS_URL=redis://localhost:6379/0
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>QUEUE_DRIVER=redis
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>REDIS_URL=redis://localhost:6379/0
 </span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>redis<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>redis<span class="o">]</span>
 </span></code></pre></div>
 <p>A job pushed to <code>RedisQueue</code> survives a crash or restart of whatever
 process pushed it — it lives in Redis until a <strong>separate worker process</strong>
 picks it up and runs it:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>zeython<span class="w"> </span>queue<span class="w"> </span>work
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>zeython<span class="w"> </span>queue<span class="w"> </span>work
 </span></code></pre></div>
 <p>This is the real architectural difference from <code>InMemoryQueue</code>: jobs no
 longer run inside your web server's own process. Run <code>zeython queue work</code>
@@ -3225,11 +3293,11 @@ rather than three attempts in the same second.</p>
 <h3 id="failed-jobs">Failed jobs<a class="headerlink" href="#failed-jobs" title="Permanent link">&para;</a></h3>
 <p>A job that exhausts <code>max_attempts</code> isn't dropped — it's moved to a
 <strong>failed-jobs list</strong>, inspectable from code:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">RedisQueue</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">queue</span><span class="p">:</span> <span class="n">RedisQueue</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Queue</span><span class="p">)</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">failed_jobs</span><span class="p">():</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"job_class"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"error"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"failed_at"</span><span class="p">])</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">RedisQueue</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">queue</span><span class="p">:</span> <span class="n">RedisQueue</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Queue</span><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">failed_jobs</span><span class="p">():</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"job_class"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"error"</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"failed_at"</span><span class="p">])</span>
 </span></code></pre></div>
 <p>Each entry keeps the job's class path, its original payload, the final
 exception (<code>repr()</code>), and a <code>failed_at</code> timestamp — everything needed to

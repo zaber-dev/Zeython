@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/profiling/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/webhooks/">
       
       
-        <link rel="prev" href="../observability/">
+        <link rel="prev" href="../audit-log/">
       
       
-        <link rel="next" href="../error-monitoring/">
+        <link rel="next" href="../feature-flags/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Profiling - Zeython Docs</title>
+        <title>Webhooks - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#request-query-profiling" class="md-skip">
+        <a href="#webhooks" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Profiling
+              Webhooks
             
           </span>
         </div>
@@ -327,10 +327,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../cli/" class="md-tabs__link">
           
   
@@ -366,12 +368,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../health-check/" class="md-tabs__link">
           
   
@@ -1509,26 +1509,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1546,7 +1551,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1757,10 +1762,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../webhooks/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Webhooks
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1776,6 +1808,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-own-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your own models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firing-an-event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firing an event
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gets-sent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What gets sent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-a-signature-you-receive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying a signature you receive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retries-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retries and isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#re-fetching-before-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fetching before delivery
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2127,31 +2267,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -2169,7 +2304,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2268,37 +2403,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Profiling
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
         
   
   
@@ -2314,81 +2422,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#response-headers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Response headers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#slow-query-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Slow query logging
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inspecting-the-current-requests-queries-yourself" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inspecting the current request's queries yourself
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#queries-on-a-crashed-request" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Queries on a crashed request
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2823,6 +2856,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#why-this-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2834,10 +2878,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#response-headers" class="md-nav__link">
+  <a href="#your-own-models" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Response headers
+        Your own models
       
     </span>
   </a>
@@ -2845,10 +2889,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#slow-query-logging" class="md-nav__link">
+  <a href="#firing-an-event" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Slow query logging
+        Firing an event
       
     </span>
   </a>
@@ -2856,10 +2900,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspecting-the-current-requests-queries-yourself" class="md-nav__link">
+  <a href="#what-gets-sent" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspecting the current request's queries yourself
+        What gets sent
       
     </span>
   </a>
@@ -2867,10 +2911,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#queries-on-a-crashed-request" class="md-nav__link">
+  <a href="#verifying-a-signature-you-receive" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Queries on a crashed request
+        Verifying a signature you receive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retries-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retries and isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#re-fetching-before-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fetching before delivery
       
     </span>
   </a>
@@ -2894,7 +2960,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/profiling.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/webhooks.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2902,98 +2968,161 @@
   
 
 
-<h1 id="request-query-profiling">Request &amp; Query Profiling<a class="headerlink" href="#request-query-profiling" title="Permanent link">&para;</a></h1>
-<p><code>zeython.profiler</code> answers the question Laravel Telescope and Django
-Debug Toolbar exist for -- "how many queries did this request run, and
-how long did they take" -- without a bundled UI, since most of what this
-framework serves is a JSON API rather than server-rendered HTML pages a
-toolbar overlay could attach to. Every response gets the numbers as
-headers instead, inspectable from any HTTP client, a browser's network
-tab, or a test assertion.</p>
-<p>Deliberately separate from <a href="../relationships/#detecting-n1s-automatically">N+1 query detection</a>,
-which answers a narrower question (the same statement shape repeated
-suspiciously many times) -- register either independently of the other.</p>
+<h1 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">&para;</a></h1>
+<p><code>zeython.webhooks</code> sends an HMAC-signed HTTP POST to a third party's URL
+whenever something happens in your app -- the mirror image of
+<a href="../notifications/">Notifications</a>, which notify a recipient <em>inside</em> your
+own app instead.</p>
+<h2 id="why-this-exists">Why this exists<a class="headerlink" href="#why-this-exists" title="Permanent link">&para;</a></h2>
+<p>Once your app has integrations, "tell Slack/Zapier/a customer's own
+backend the moment an order ships" stops being optional -- and building
+it well means more than a bare <code>httpx.post()</code> at the call site: delivery
+has to survive a flaky receiver (retries with backoff), a receiver has to
+be able to trust the payload actually came from you (a signature), and one
+subscriber's outage can't be allowed to slow down or break the request
+that triggered the event. <code>zeython.webhooks</code> hands all three off to
+infrastructure the framework already has and has already tested --
+<a href="../queues/">the background job queue</a> for delivery/retries, HMAC-SHA256
+for the signature -- rather than reinventing them.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RequestProfilerServiceProvider</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">QueueServiceProvider</span><span class="p">,</span> <span class="n">WebhookServiceProvider</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>             <span class="c1"># must run first -- binds Database</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RequestProfilerServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.webhook_endpoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebhookEndpoint</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.webhook_delivery</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebhookDelivery</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">QueueServiceProvider</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">WebhookServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">endpoint_model</span><span class="o">=</span><span class="n">WebhookEndpoint</span><span class="p">,</span> <span class="n">delivery_model</span><span class="o">=</span><span class="n">WebhookDelivery</span><span class="p">))</span>
 </span></code></pre></div>
-<p>A generated project already has this registered (see <code>main.py</code>) --
-unlike <code>N1QueryDetectionServiceProvider</code>, there's no application-specific
-default to get wrong: its <code>boot()</code> is a no-op unless <code>APP_DEBUG</code> is true,
-so it's safe to always register, the same reasoning
-<code>RequestIdServiceProvider</code> already relies on.</p>
-<h2 id="response-headers">Response headers<a class="headerlink" href="#response-headers" title="Permanent link">&para;</a></h2>
-<p>Every response carries:</p>
-<table>
-<thead>
-<tr>
-<th>Header</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>X-Debug-Duration-Ms</code></td>
-<td>Total time spent handling the request.</td>
-</tr>
-<tr>
-<td><code>X-Debug-Query-Count</code></td>
-<td>Number of SQL queries the request ran.</td>
-</tr>
-<tr>
-<td><code>X-Debug-Query-Time-Ms</code></td>
-<td>Total time spent inside those queries.</td>
-</tr>
-</tbody>
-</table>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-sI<span class="w"> </span>http://localhost:8000/posts<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>x-debug
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># X-Debug-Duration-Ms: 12.40</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># X-Debug-Query-Count: 3</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># X-Debug-Query-Time-Ms: 2.91</span>
+<p>A generated project already has this wired up -- see
+<code>app/Models/webhook_endpoint.py</code>, <code>app/Models/webhook_delivery.py</code>, and
+<code>main.py</code>. <code>QueueServiceProvider</code> has to be registered too: every delivery
+goes through whichever <code>Queue</code> it binds (see <a href="../queues/">Background Jobs</a>).</p>
+<h2 id="your-own-models">Your own models<a class="headerlink" href="#your-own-models" title="Permanent link">&para;</a></h2>
+<p>Neither model is mandated by the framework -- the same <code>record_model</code>
+pattern <a href="../audit-log/">Audit Logging</a> and <a href="../notifications/">Notifications</a>
+use -- so each project owns its own migration instead of the framework
+dictating a fixed schema.</p>
+<p><code>endpoint_model</code> is <em>who's subscribed to what</em> -- one row per (url, event)
+pair, so a single receiving URL that wants several event types just gets
+several rows:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># app/Models/webhook_endpoint.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">String</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">WebhookEndpoint</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"webhook_endpoints"</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">url</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">2048</span><span class="p">))</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">event</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">secret</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">active</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
-<p>A large gap between duration and query time points at time spent
-somewhere else -- template rendering, an outgoing HTTP call, plain
-Python work -- not the database.</p>
-<h2 id="slow-query-logging">Slow query logging<a class="headerlink" href="#slow-query-logging" title="Permanent link">&para;</a></h2>
-<p>Any single query at or past <code>PROFILER_SLOW_QUERY_MS</code> (default <code>100</code>) logs
-a warning naming the route and the query:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>WARNING zeython.profiler: Slow query on /posts: 340.12 ms -- SELECT posts.*, ...
+<p><code>delivery_model</code> is optional: if given, every delivery <em>attempt</em> --
+including retries -- is logged there, an audit trail of what was sent and
+whether it arrived, mirroring what Stripe/GitHub show in their own webhook
+dashboards. Omit it in <code>WebhookServiceProvider(...)</code> if you don't need one.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># app/Models/webhook_delivery.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">WebhookDelivery</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"webhook_deliveries"</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">endpoint_id</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">"webhook_endpoints.id"</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">event</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">status_code</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">success</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">)</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">error</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">2000</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Only logged for a request that completes normally -- see
-<a href="#queries-on-a-crashed-request">"Queries on a crashed request"</a> below for
-why a request that raises doesn't go through this path, and how you still
-see its queries.</p>
-<h2 id="inspecting-the-current-requests-queries-yourself">Inspecting the current request's queries yourself<a class="headerlink" href="#inspecting-the-current-requests-queries-yourself" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.profiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_queries</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">some_handler</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="o">...</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">current_queries</span><span class="p">():</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">statement</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">duration_ms</span><span class="p">)</span>
+<p>Already generated for you as part of <code>zeython new</code> -- run
+<code>zeython db revision --autogenerate -m "add webhook tables"</code> once you're
+ready to migrate them.</p>
+<p>There's no admin UI or API for creating a subscription yet -- add one
+yourself via <code>zeython tinker</code> or a seeder:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.webhook_endpoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebhookEndpoint</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">await</span> <span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">"https://example.com/hooks/zeython"</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">event</span><span class="o">=</span><span class="s2">"user.registered"</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">secret</span><span class="o">=</span><span class="n">secrets</span><span class="o">.</span><span class="n">token_hex</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>Empty if <code>RequestProfilerServiceProvider</code> isn't registered (or
-<code>APP_DEBUG</code> is false), or called outside a request.</p>
-<h2 id="queries-on-a-crashed-request">Queries on a crashed request<a class="headerlink" href="#queries-on-a-crashed-request" title="Permanent link">&para;</a></h2>
-<p>The queries a request ran before it crashed show up on the <a href="../api-standards/#debug-mode-a-browsable-html-error-page">debug error
-page/body</a> too --
-often the fastest way to see <em>why</em> it crashed (a query that returned
-nothing an <code>include=</code> expected, one that ran against the wrong table).
-The HTML debug page gets a "Queries" panel above the stack trace; the
-JSON/<code>problem+json</code> debug bodies get a <code>queries</code> array, each entry
-<code>{"sql": ..., "duration_ms": ...}</code>.</p>
-<p>This only works because <code>RequestProfilerMiddleware</code> deliberately doesn't
-reset its internal state while an exception is still propagating --
-Starlette's own error-handling middleware sits <em>outside</em> every
-user-added middleware (this one included), so the debug page is built
-after the crash has already unwound past this middleware's own code. A
-naive cleanup-in-<code>finally</code> would erase the query log at exactly the
-moment it's most useful. Nothing leaks from skipping that cleanup: each
-request gets a fresh, empty query list the moment it starts, regardless
-of how the previous one ended.</p>
+<h2 id="firing-an-event">Firing an event<a class="headerlink" href="#firing-an-event" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.webhooks</span><span class="w"> </span><span class="kn">import</span> <span class="n">fire_webhook</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">await</span> <span class="n">fire_webhook</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"order.shipped"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"order_id"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"tracking_number"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">tracking_number</span><span class="p">})</span>
+</span></code></pre></div>
+<p>Every active <code>WebhookEndpoint</code> subscribed to <code>"order.shipped"</code> gets a
+<code>DeliverWebhookJob</code> pushed onto the queue -- the request returns
+immediately, delivery happens in the background. Outside of a request --
+a scheduled task, a console command -- resolve the manager directly
+instead:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">WebhookManager</span><span class="p">)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">await</span> <span class="n">manager</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="s2">"order.shipped"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"order_id"</span><span class="p">:</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+</span></code></pre></div>
+<p>A generated project fires <code>"user.registered"</code> from
+<code>app/Listeners/notify_webhooks_of_registration.py</code>, a listener on the same
+<code>UserRegistered</code> event <a href="../events/">Events</a> already dispatches -- add your
+own listener the same way for any other event you want to notify
+subscribers about, without touching the code that raises it.</p>
+<h2 id="what-gets-sent">What gets sent<a class="headerlink" href="#what-gets-sent" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>POST https://example.com/hooks/zeython
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Content-Type: application/json
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>X-Webhook-Event: order.shipped
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>X-Webhook-Signature: 5d41402abc4b2a76b9719d911017c59...
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>{"event":"order.shipped","data":{"order_id":42,"tracking_number":"1Z..."}}
+</span></code></pre></div>
+<p><code>X-Webhook-Signature</code> is the hex-encoded HMAC-SHA256 of the exact request
+body under the endpoint's own <code>secret</code> -- proof the payload came from you,
+not from whoever guessed the URL. An endpoint with no <code>secret</code> set still
+gets delivered to, unsigned, with a warning logged; set one for anything
+you'd be upset to see spoofed.</p>
+<h2 id="verifying-a-signature-you-receive">Verifying a signature you receive<a class="headerlink" href="#verifying-a-signature-you-receive" title="Permanent link">&para;</a></h2>
+<p>If your own app is on the <em>receiving</em> end of someone else's webhook (or
+another Zeython app's), verify it the same way before trusting the body:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">ForbiddenException</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.webhooks</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_signature</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">receive_webhook</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">signature</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"X-Webhook-Signature"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify_signature</span><span class="p">(</span><span class="n">known_secret</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">):</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="k">raise</span> <span class="n">ForbiddenException</span><span class="p">(</span><span class="s2">"Bad webhook signature."</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p><code>verify_signature()</code> uses <code>hmac.compare_digest</code> rather than <code>==</code> -- a naive
+string comparison leaks how many leading bytes matched through response
+timing, letting an attacker recover the correct signature one byte at a
+time.</p>
+<h2 id="retries-and-isolation">Retries and isolation<a class="headerlink" href="#retries-and-isolation" title="Permanent link">&para;</a></h2>
+<p>Delivery failures (a non-2xx response, a connection error, a timeout) are
+retried by the queue up to <code>DeliverWebhookJob.max_attempts</code> (default <code>5</code>)
+-- under <code>RedisQueue</code>, with the same capped exponential backoff every other
+job gets (see <a href="../queues/#retries-and-backoff">Background Jobs</a>). If <code>delivery_model</code>
+is set, every attempt writes its own row, so you can see exactly when a
+subscriber started failing and whether it eventually came back.</p>
+<p>One subscriber's failure never affects another's: <code>fire()</code> queues a
+separate job per endpoint, and a queuing failure for one endpoint (only
+possible under <code>SyncQueue</code>, which runs a job inline rather than truly
+queuing it) is logged and reported, not raised -- the same isolation
+<a href="../notifications/">Notifications</a> applies per channel.</p>
+<h2 id="re-fetching-before-delivery">Re-fetching before delivery<a class="headerlink" href="#re-fetching-before-delivery" title="Permanent link">&para;</a></h2>
+<p><code>WebhookManager.deliver()</code> re-fetches the endpoint from the database
+rather than trusting the state <code>fire()</code> saw -- an endpoint disabled or
+deleted in the time a retried delivery sat in the queue is skipped instead
+of delivered to.</p>
 
 
 
@@ -3029,7 +3158,7 @@ of how the previous one ended.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../observability/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Observability">
+          <a href="../audit-log/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Audit Logging">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3039,20 +3168,20 @@ of how the previous one ended.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Observability
+                Audit Logging
               </div>
             </div>
           </a>
         
         
           
-          <a href="../error-monitoring/" class="md-footer__link md-footer__link--next" aria-label="Next: Error Monitoring">
+          <a href="../feature-flags/" class="md-footer__link md-footer__link--next" aria-label="Next: Feature Flags">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Error Monitoring
+                Feature Flags
               </div>
             </div>
             <div class="md-footer__button md-icon">
