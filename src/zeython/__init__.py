@@ -53,6 +53,7 @@ from zeython.graphql import GraphQLServiceProvider, execute_graphql
 from zeython.gzip import GzipServiceProvider
 from zeython.hashing import hash_password, verify_password
 from zeython.health import HealthCheckServiceProvider
+from zeython.idempotency import IdempotencyMiddleware, IdempotencyServiceProvider
 from zeython.localization import (
     LocaleMiddleware,
     LocalizationServiceProvider,
@@ -357,6 +358,8 @@ __all__ = [
     "hash_password",
     "verify_password",
     "HealthCheckServiceProvider",
+    "IdempotencyMiddleware",
+    "IdempotencyServiceProvider",
     "JsonFormatter",
     "ErrorMonitoringServiceProvider",
     "init_sentry",

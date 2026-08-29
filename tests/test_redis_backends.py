@@ -6,14 +6,20 @@ anything else that might be using db 0).
 
 import asyncio
 import os
+import tempfile
 
 import pytest
 import pytest_asyncio
+from starlette.responses import JSONResponse
 
 pytest.importorskip("redis")
 
+from zeython.application import Application  # noqa: E402
 from zeython.cache import RedisCache  # noqa: E402
+from zeython.config import Config  # noqa: E402
+from zeython.idempotency import IdempotencyServiceProvider  # noqa: E402
 from zeython.rate_limit import RedisRateLimiter  # noqa: E402
+from zeython.testing import client  # noqa: E402
 
 REDIS_URL = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
 
@@ -178,3 +184,39 @@ async def test_two_limiter_instances_share_the_same_backend(limiter: RedisRateLi
     # InMemoryRateLimiter cannot do across processes.
     denied = await other.hit("shared", limit=3, window=60)
     assert not denied.allowed
+
+
+# -- IdempotencyMiddleware against RedisCache ------------------------------------------
+
+
+async def test_idempotency_middleware_replays_across_a_shared_redis_cache(cache: RedisCache) -> None:
+    # The point of RedisCache over InMemoryCache here: a record written by
+    # processing a request through one Application instance is visible to
+    # a *different* Application instance backed by the same Redis -- the
+    # thing InMemoryCache can't do across processes.
+    calls: list[int] = []
+
+    def _build_app(tmp_path):
+        app = Application(Config.load(tmp_path))
+        app.register(IdempotencyServiceProvider(app, cache=cache))
+
+        @app.post("/orders")
+        async def create_order(request):
+            calls.append(len(calls) + 1)
+            return JSONResponse({"call": len(calls)}, status_code=201)
+
+        return app
+
+    with tempfile.TemporaryDirectory() as tmp_path:
+        first_app = _build_app(tmp_path)
+        second_app = _build_app(tmp_path)
+
+        async with client(first_app) as http:
+            first = await http.post("/orders", json={}, headers={"Idempotency-Key": "shared-key"})
+
+        async with client(second_app) as http:
+            second = await http.post("/orders", json={}, headers={"Idempotency-Key": "shared-key"})
+
+    assert len(calls) == 1
+    assert first.json() == second.json() == {"call": 1}
+    assert second.headers["Idempotency-Replayed"] == "true"

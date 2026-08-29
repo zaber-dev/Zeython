@@ -122,6 +122,13 @@ GPL-3.0 to MIT.
   executes a `graphql-core` schema you build, with an interactive GraphiQL
   UI in debug mode and every resolver's `info.context` carrying the
   request and the DI container.
+- Idempotency keys (`zeython.idempotency`) — an `Idempotency-Key` header
+  on a `POST`/`PUT`/`PATCH`/`DELETE` replays that request's first response
+  instead of running it again, with a request that reuses a key against a
+  different body rejected as a conflict and a genuinely concurrent retry
+  serialized rather than double-processed; built on the same `Cache`
+  abstraction (`InMemoryCache`/`RedisCache`) the rest of the framework
+  already uses.
 - WebSocket support: real-time handlers, a broadcast hub
   (`WebSocketHub`), and per-IP connection limiting.
 - `RedisWebSocketHub` — distributed broadcast across every process/container
