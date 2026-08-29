@@ -51,6 +51,10 @@ scaffolding on every project. Zeython does that assembly once:
   model — the features most frameworks leave you to bolt on yourself. See
   [Authorization](docs/authorization.md), [Multi-Tenancy](docs/multi-tenancy.md),
   [MFA](docs/mfa.md), [Audit Logging](docs/audit-log.md).
+- **Outbound webhooks with retries and HMAC signing, built in** — subscribe a
+  third party's URL to an event, and delivery, retry-with-backoff, and a
+  per-attempt audit trail all ride on the same background-job queue every
+  other job uses. See [Webhooks](docs/webhooks.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
   suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
@@ -189,6 +193,7 @@ empty scaffold to a tested, authenticated API
 [Events](docs/events.md) ·
 [Notifications](docs/notifications.md) ·
 [Audit Logging](docs/audit-log.md) ·
+[Webhooks](docs/webhooks.md) ·
 [Feature Flags](docs/feature-flags.md) ·
 [Background Jobs](docs/queues.md) ·
 [Scheduling](docs/scheduling.md) ·

@@ -3,12 +3,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import pytest
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
 from starlette.responses import JSONResponse
 
 import zeython.queue as queue_module
 from zeython.application import Application
 from zeython.config import Config
 from zeython.container import Container
+from zeython.db import Model
+from zeython.db.session import Database
 from zeython.queue import InMemoryQueue, Job, Queue, QueueServiceProvider, SyncQueue, dispatch
 from zeython.testing import client
 
@@ -332,3 +336,73 @@ async def test_queue_without_container_cannot_resolve_extra_handle_params() -> N
 
     with pytest.raises(TypeError):
         await queue.push(InjectedJob(log=[]))
+
+
+# -- A job's own database session -----------------------------------------------------
+
+
+class QueueTestNote(Model):
+    __tablename__ = "queue_test_notes"
+
+    text: Mapped[str] = mapped_column(String(255))
+
+
+@dataclass
+class WriteNoteJob(Job):
+    """A job that actually touches the database from inside `handle()` --
+    the scenario `Queue._invoke()`'s per-job session exists for.
+    """
+
+    text: str
+
+    async def handle(self) -> None:
+        await QueueTestNote.create(text=self.text)
+
+
+def _make_db_app(tmp_path: Path) -> Application:
+    (tmp_path / ".env").write_text(
+        "APP_SECRET_KEY=test\nDATABASE_URL=sqlite+aiosqlite:///:memory:\n"
+    )
+    app = Application(Config.load(tmp_path))
+    from zeython.providers import DatabaseServiceProvider
+
+    app.register(DatabaseServiceProvider)
+    app.register(QueueServiceProvider)
+    return app
+
+
+async def test_in_memory_queue_job_gets_its_own_committed_database_session(tmp_path: Path) -> None:
+    """Regression guard: InMemoryQueue's worker runs on a background task
+    created once (on the first push) and reused for every later job. That
+    task used to permanently inherit whatever database session happened to
+    be live at the exact moment it was spawned -- almost always a request's
+    own, already committed and closed by the time a later job actually
+    runs. A write inside `handle()` would flush without error (a closed
+    AsyncSession quietly reopens a transaction on next use) but nothing
+    ever committed it again, so it vanished -- invisible to any other
+    connection, silently. `Queue._invoke()` now opens a dedicated session
+    per job instead.
+    """
+    app = _make_db_app(tmp_path)
+    database = app.container.make(Database)
+    async with database.engine.begin() as connection:
+        await connection.run_sync(Model.metadata.create_all)
+
+    @app.post("/notes")
+    async def create_note(request):
+        await dispatch(request, WriteNoteJob(text="queued write"))
+        return JSONResponse({"ok": True}, status_code=201)
+
+    async with client(app) as http:
+        response = await http.post("/notes")
+    assert response.status_code == 201
+
+    queue = app.container.make(Queue)
+    await queue.join()
+
+    # A brand-new session, opened well after the request's own has closed --
+    # before the fix, this saw nothing.
+    async with database.session():
+        notes = await QueueTestNote.all()
+
+    assert [n.text for n in notes] == ["queued write"]

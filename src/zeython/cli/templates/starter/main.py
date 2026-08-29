@@ -18,11 +18,14 @@ from zeython import (
     RouteServiceProvider,
     StorageServiceProvider,
     ViewServiceProvider,
+    WebhookServiceProvider,
     WebSocketHubServiceProvider,
 )
 
 from app.Models.notification import Notification
 from app.Models.user import User
+from app.Models.webhook_delivery import WebhookDelivery
+from app.Models.webhook_endpoint import WebhookEndpoint
 from app.Providers.app_audit_service_provider import AppAuditServiceProvider
 from app.Providers.app_event_service_provider import AppEventServiceProvider
 from app.Providers.app_feature_service_provider import AppFeatureServiceProvider
@@ -62,6 +65,14 @@ app.register(WebSocketHubServiceProvider)
 # channel writes to (app/Models/notification.py); omit it if you only
 # ever use "mail"/"broadcast".
 app.register(NotificationServiceProvider(app, record_model=Notification))
+# Outbound webhooks: notify a third party's URL when something happens in
+# this app -- see docs/webhooks.md. `endpoint_model` is who's subscribed to
+# what (app/Models/webhook_endpoint.py); `delivery_model` is optional, an
+# audit trail of every attempt (app/Models/webhook_delivery.py). Fired from
+# a listener below, the same way notifications above are fired from a
+# controller -- neither table has an admin UI yet, see webhook_endpoint.py's
+# own docstring for how to create one.
+app.register(WebhookServiceProvider(app, endpoint_model=WebhookEndpoint, delivery_model=WebhookDelivery))
 # Decoupled listeners reacting to app-defined events (UserRegistered, ...)
 # -- see docs/events.md. AppEventServiceProvider (app/Providers/) is where
 # this app's own listeners are registered.

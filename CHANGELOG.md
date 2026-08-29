@@ -70,7 +70,9 @@ GPL-3.0 to MIT.
 - Background jobs: `InMemoryQueue`/`SyncQueue` plus a durable
   `RedisQueue` with retries, capped exponential backoff, and a
   failed-jobs list; `dispatch()` with real container-based DI for
-  `Job.handle()`.
+  `Job.handle()`. A job that touches the database runs in its own
+  session, opened and committed the same way a request's is -- not
+  whatever session happened to be live wherever the job was pushed from.
 - In-app task scheduler (`zeython.schedule`) — recurring jobs defined in
   code, no separate cron entry needed.
 - Outbound mail (`zeython.mail`: `LogMailer`, `SmtpMailer`).
@@ -79,6 +81,10 @@ GPL-3.0 to MIT.
   recipient; `notify()` fires whichever channels it asks for. A failing
   channel is logged and reported, not raised, so one down channel doesn't
   block another.
+- Outbound webhooks (`zeython.webhooks`) — subscribe a third party's URL to
+  an event; `fire_webhook()` delivers an HMAC-SHA256-signed POST to every
+  active subscriber through the existing job queue, with the queue's own
+  retries/backoff and an optional per-attempt delivery log you own.
 - A caching layer (`zeython.cache`) plus `RedisCache` for distributed
   deployments.
 
