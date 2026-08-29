@@ -98,6 +98,21 @@ app.register(OpenApiServiceProvider(app, title=app.config.app_name))
 # above) once you've decided on your own policy, then set it via
 # SECURITY_HEADERS_CSP in .env. See docs/security-headers.md.
 # app.register(SecurityHeadersServiceProvider)
+# "Sign in with Google/GitHub/Microsoft" instead of your own password
+# check -- not registered by default since it needs real provider
+# credentials (client_id/client_secret) and a redirect_uri exactly
+# matching what's registered in that provider's own console. Uncomment
+# (and `from zeython import OAuthServiceProvider, oauth_google` above,
+# swapping in `oauth_github`/`oauth_microsoft`/`oauth_generic_oidc` for
+# another provider) once you have them, and uncomment the matching two
+# routes in routes/web.py. See docs/oauth.md.
+# app.register(OAuthServiceProvider(app, providers=[
+#     oauth_google(
+#         client_id=app.config.get("oauth.google.client_id"),
+#         client_secret=app.config.get("oauth.google.client_secret"),
+#         redirect_uri="http://localhost:8000/auth/google/callback",
+#     ),
+# ]))
 # Recurring tasks defined in code, run via `zeython schedule run` -- not
 # registered by default since there's no schedule.py until you create one
 # (and `from zeython import ScheduleServiceProvider` above). See

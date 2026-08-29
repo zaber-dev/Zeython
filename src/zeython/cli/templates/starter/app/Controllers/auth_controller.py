@@ -1,6 +1,8 @@
+import secrets
+
 from starlette.responses import JSONResponse
 
-from zeython import AuthManager, Controller, UnauthorizedException, ValidationException
+from zeython import AuthManager, BadRequestException, Controller, UnauthorizedException, ValidationException
 from zeython.api_auth import TokenManager, require_api_auth
 from zeython.auth import current_user
 from zeython.auth import login as auth_login
@@ -10,6 +12,8 @@ from zeython.feature_flags import feature
 from zeython.mfa import complete_challenge, confirm, disable, enroll
 from zeython.mfa import start_challenge as start_mfa_challenge
 from zeython.notifications import notify
+from zeython.oauth import oauth_callback as complete_oauth_login
+from zeython.oauth import oauth_redirect as start_oauth_redirect
 from zeython.queue import dispatch
 from zeython.rate_limit import client_ip, throttle
 
@@ -20,8 +24,12 @@ from app.Notifications.welcome_notification import WelcomeNotification
 
 
 class AuthController(Controller):
-    """Registration, login, logout, the current-user endpoint, and
-    two-factor auth (TOTP) enrollment -- see docs/mfa.md.
+    """Registration, login, logout, the current-user endpoint, two-factor
+    auth (TOTP) enrollment (see docs/mfa.md), and "Sign in with Google/
+    GitHub/Microsoft" (see docs/oauth.md -- `oauth_redirect`/`oauth_callback`
+    below only work once OAuthServiceProvider is registered with real
+    provider credentials; both the registration in main.py and their two
+    routes in routes/web.py are commented out until then).
 
     Session-based: a successful register/login sets a signed cookie (see
     AuthServiceProvider in main.py); logout clears it. See docs/authentication.md.
@@ -124,6 +132,25 @@ class AuthController(Controller):
 
         await disable(user)
         return JSONResponse({"message": "Two-factor authentication disabled."})
+
+    async def oauth_redirect(self, request):
+        return start_oauth_redirect(request, request.path_params["provider"])
+
+    async def oauth_callback(self, request):
+        identity = await complete_oauth_login(request, request.path_params["provider"])
+        if not identity.email:
+            raise BadRequestException("This provider did not share an email address.")
+
+        user = await User.first_where(email=identity.email)
+        if user is None:
+            user = User(email=identity.email, name=identity.name or identity.email)
+            # A random, never-typed password -- this account only ever logs
+            # in via OAuth, but User.password_hash still isn't nullable.
+            user.set_password(secrets.token_urlsafe(32))
+            await user.save()
+
+        auth_login(request, user)
+        return JSONResponse(user.to_dict())
 
     async def me(self, request):
         user = await current_user(request)
