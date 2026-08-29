@@ -65,7 +65,8 @@ scaffolding on every project. Zeython does that assembly once:
 - **Production observability, not just logs** — Prometheus-compatible
   metrics at `/metrics` (request counts, latency histograms, your own
   custom counters/gauges), with zero new dependency, plus opt-in
-  OpenTelemetry distributed tracing with W3C `traceparent` propagation.
+  OpenTelemetry distributed tracing with W3C `traceparent`/`baggage`
+  propagation and configurable sampling for high-traffic services.
   See [Metrics](docs/metrics.md), [Tracing](docs/tracing.md).
 - **Real full-text search, no new service** — `Model.search()` queries
   SQLite's FTS5 or Postgres's `tsvector`/GIN, whichever your database

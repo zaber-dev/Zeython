@@ -194,7 +194,14 @@ from zeython.storage import (
     store_upload,
 )
 from zeython.tenancy import TenancyServiceProvider, TenantMiddleware, as_tenant, current_tenant_id
-from zeython.tracing import TracingMiddleware, TracingServiceProvider, init_tracing
+from zeython.tracing import (
+    TracingMiddleware,
+    TracingServiceProvider,
+    current_baggage,
+    init_tracing,
+    inject_headers,
+    set_baggage,
+)
 from zeython.validation import Rule, email, matches, max_length, min_length, one_of, required
 from zeython.views import Views, render
 from zeython.webhooks import (
@@ -424,6 +431,9 @@ __all__ = [
     "TracingMiddleware",
     "TracingServiceProvider",
     "init_tracing",
+    "current_baggage",
+    "set_baggage",
+    "inject_headers",
     "Rule",
     "required",
     "email",
