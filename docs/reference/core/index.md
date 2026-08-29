@@ -967,7 +967,7 @@ Marker base class for class-based controllers used with :meth:`Router.resource`.
 ### Router
 
 ```python
-Router(prefix: str = '')
+Router(prefix: str = '', *, api_version: str | None = None)
 ```
 
 Collects routes and exposes Laravel/FastAPI-style decorator sugar.
@@ -977,9 +977,10 @@ A `Router` compiles down to a plain list of Starlette `BaseRoute` objects, so ne
 Source code in `src/zeython/routing.py`
 
 ```python
-def __init__(self, prefix: str = "") -> None:
+def __init__(self, prefix: str = "", *, api_version: str | None = None) -> None:
     self.prefix = prefix.rstrip("/")
     self.routes: list[BaseRoute] = []
+    self._api_version = api_version
 ```
 
 #### websocket
@@ -1004,7 +1005,9 @@ def websocket(self, path: str, *, name: str | None = None) -> Callable[[Endpoint
     """
 
     def decorator(endpoint: Endpoint) -> Endpoint:
-        self.routes.append(WebSocketRoute(self._full_path(path), endpoint, name=name or endpoint.__name__))
+        self.routes.append(
+            WebSocketRoute(self._full_path(path), self._versioned(endpoint), name=name or endpoint.__name__)
+        )
         return endpoint
 
     return decorator
@@ -1024,6 +1027,56 @@ Source code in `src/zeython/routing.py`
 def include(self, router: Router, *, prefix: str = "") -> None:
     """Mount another router's routes under an optional additional prefix."""
     self.routes.append(Mount(prefix or "/", routes=router.routes))
+```
+
+#### version
+
+```python
+version(
+    version: str, *, prefix: str | None = None
+) -> Iterator[Router]
+```
+
+Group routes under a version prefix, with :func:`current_api_version` set during each call.
+
+Yields a sub-:class:`Router` to register routes on; it's mounted onto this router only once the `with` block finishes, so build it up fully inside the block::
+
+```text
+with app.router.version("v1") as v1:
+    v1.resource("/posts", PostControllerV1)
+```
+
+Defaults `prefix` to `/{version}` (so `"v1"` mounts at `/v1`); pass `prefix=""` to version routes without changing their path.
+
+Source code in `src/zeython/routing.py`
+
+```python
+@contextmanager
+def version(self, version: str, *, prefix: str | None = None) -> Iterator[Router]:
+    """Group routes under a version prefix, with :func:`current_api_version` set during each call.
+
+    Yields a sub-:class:`Router` to register routes on; it's mounted
+    onto this router only once the ``with`` block finishes, so build it
+    up fully inside the block::
+
+        with app.router.version("v1") as v1:
+            v1.resource("/posts", PostControllerV1)
+
+    Defaults ``prefix`` to ``/{version}`` (so ``"v1"`` mounts at
+    ``/v1``); pass ``prefix=""`` to version routes without changing
+    their path.
+    """
+    sub_prefix = self.prefix + (prefix if prefix is not None else f"/{version}")
+    sub = Router(sub_prefix, api_version=version)
+    yield sub
+    # Not routed through include()/Mount: the sub-router already bakes
+    # its full prefix into every route it registers, so mounting it
+    # under another prefix would double it up -- and mounting several
+    # versions each at "/" would have every one of them match (and
+    # claim) every request, since a Mount's own prefix strips to "" at
+    # "/". Flattening its already-fully-pathed routes in directly
+    # avoids both problems.
+    self.routes.extend(sub.routes)
 ```
 
 #### mount
@@ -1084,8 +1137,83 @@ def resource(self, path: str, controller_cls: type[Controller], *, only: Iterabl
         handler = getattr(controller, action)
         route_path = self._full_path(f"{path.rstrip('/')}{suffix}")
         self.routes.append(
-            Route(route_path, handler, methods=list(methods), name=f"{path.strip('/')}.{action}")
+            Route(
+                route_path,
+                self._versioned(handler),
+                methods=list(methods),
+                name=f"{path.strip('/')}.{action}",
+            )
         )
+```
+
+### current_api_version
+
+```python
+current_api_version() -> str | None
+```
+
+The version label (e.g. `"v1"`) the current request was routed under.
+
+`None` outside a request, or inside one routed through a plain (non-versioned) :class:`Router`. Set for the duration of an endpoint call registered via :meth:`Router.version`.
+
+Source code in `src/zeython/routing.py`
+
+```python
+def current_api_version() -> str | None:
+    """The version label (e.g. ``"v1"``) the current request was routed under.
+
+    ``None`` outside a request, or inside one routed through a plain
+    (non-versioned) :class:`Router`. Set for the duration of an endpoint
+    call registered via :meth:`Router.version`.
+    """
+    return _current_api_version.get()
+```
+
+### deprecated
+
+```python
+deprecated(
+    *, sunset: str | None = None
+) -> Callable[[Endpoint], Endpoint]
+```
+
+Mark an endpoint deprecated, signaling it with standard HTTP headers.
+
+Sets `Deprecation: true` (per the IETF draft) on every response, and `Sunset: <sunset>` (an RFC 8594 HTTP-date, per RFC 7231 section 7.1.1.1) when a removal date is known::
+
+```text
+@app.router.get("/v1/reports")
+@deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+async def old_reports(request: Request) -> Response: ...
+```
+
+Source code in `src/zeython/routing.py`
+
+```python
+def deprecated(*, sunset: str | None = None) -> Callable[[Endpoint], Endpoint]:
+    """Mark an endpoint deprecated, signaling it with standard HTTP headers.
+
+    Sets ``Deprecation: true`` (per the IETF draft) on every response, and
+    ``Sunset: <sunset>`` (an RFC 8594 HTTP-date, per RFC 7231 section 7.1.1.1)
+    when a removal date is known::
+
+        @app.router.get("/v1/reports")
+        @deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+        async def old_reports(request: Request) -> Response: ...
+    """
+
+    def decorator(endpoint: Endpoint) -> Endpoint:
+        @functools.wraps(endpoint)
+        async def wrapper(*args: Any, **kwargs: Any) -> Response:
+            response: Response = await endpoint(*args, **kwargs)
+            response.headers["Deprecation"] = "true"
+            if sunset is not None:
+                response.headers["Sunset"] = sunset
+            return response
+
+        return wrapper
+
+    return decorator
 ```
 
 ## views

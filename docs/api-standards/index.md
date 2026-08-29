@@ -96,3 +96,63 @@ Only ever shown for a genuine unhandled exception (a bug), never for an `HTTPExc
 Like every other debug-mode behavior, this leaks source code and file paths — see the [production checklist](https://zeython.zaber.dev/docs/production-checklist/index.md) for why `APP_DEBUG=false` is non-negotiable in production.
 
 If [`RequestProfilerServiceProvider`](https://zeython.zaber.dev/docs/profiling/index.md) is registered, both the HTML page and the JSON/`problem+json` bodies also show the queries the crashed request ran before it failed — often the fastest way to see *why*.
+
+## API versioning
+
+`Router.version()` groups a set of routes under a version prefix, so you can change an endpoint's behavior without breaking clients still calling the old one:
+
+```python
+# main.py
+from zeython import Application, current_api_version
+from app.Controllers.post_controller_v1 import PostControllerV1
+from app.Controllers.post_controller_v2 import PostControllerV2
+
+app = Application()
+
+with app.router.version("v1") as v1:
+    v1.resource("/posts", PostControllerV1)
+
+with app.router.version("v2") as v2:
+    v2.resource("/posts", PostControllerV2)
+```
+
+`"v1"` mounts routes at `/v1` by default — pass `prefix=` to use something else (`app.router.version("v1", prefix="/api/v1")`), or `prefix=""` to version routes without changing their path at all (useful if the version is instead read from an `Accept` header or a path param your own code inspects).
+
+**Build the whole group inside the `with` block** — `version()` folds the sub-router's routes into the parent only once the block exits, so a route registered after the block closes is never picked up:
+
+```python
+with app.router.version("v1") as v1:
+    v1.get("/reports")(list_reports)
+# too late -- v1 has already been folded into app.router by here
+v1.get("/exports")(list_exports)  # never registered, don't do this
+```
+
+Inside a handler routed through a version group, `current_api_version()` returns the version label — `None` outside one, so existing unversioned routes and application code that doesn't care about versioning are unaffected:
+
+```python
+from zeython import current_api_version
+
+async def index(request):
+    if current_api_version() == "v1":
+        ...  # the old response shape, kept for existing v1 clients
+    return JSONResponse([...])
+```
+
+This also works for `resource()` and `websocket()`, not just `get()`/ `post()`/etc. — every registration method on a versioned `Router` wraps its handler the same way.
+
+### Deprecating an old version
+
+`deprecated()` marks a single endpoint deprecated with the standard [`Deprecation`](https://datatracker.ietf.org/doc/html/draft-dalal-deprecation-header) and [`Sunset`](https://www.rfc-editor.org/rfc/rfc8594) response headers, so well-behaved clients and API gateways can flag it automatically:
+
+```python
+from zeython import deprecated
+
+with app.router.version("v1") as v1:
+
+    @v1.get("/reports")
+    @deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+    async def list_reports(request):
+        return JSONResponse([...])
+```
+
+Every response from `list_reports` now carries `Deprecation: true`, and `Sunset: Wed, 01 Jan 2027 00:00:00 GMT` naming when it stops working entirely. `sunset` is optional — omit it to signal "deprecated, no removal date set yet."

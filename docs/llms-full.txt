@@ -145,7 +145,7 @@ zeython db migrate
 | `Application`                                 | `zeython.application`           | The ASGI entry point. Owns the container, config, and router; boots service providers; builds the underlying Starlette app lazily on first use.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `Container`                                   | `zeython.container`             | A type-hint-driven dependency injection container: `bind`, `singleton`, `instance`, `make`, and `call` (autowired function invocation).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `ServiceProvider`                             | `zeython.providers`             | The seam where cross-cutting concerns register bindings (`register()`) and wire themselves up (`boot()`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `Router`                                      | `zeython.routing`               | Decorator-based routing (`@app.get(...)`), route groups (`include`), and RESTful `resource()` registration — compiles to Starlette `Route`/`Mount` objects.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `Router`                                      | `zeython.routing`               | Decorator-based routing (`@app.get(...)`), route groups (`include`), RESTful `resource()` registration, and API versioning (`version()`, `current_api_version()`, `deprecated()`, see [API Standards](https://zeython.zaber.dev/docs/api-standards/#api-versioning)) — compiles to Starlette `Route`/`Mount` objects.                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `Model`                                       | `zeython.db.Model`              | An async Active-Record base class: `create`, `find`, `all`, `find_by`, `paginate` (see [Database & Migrations](https://zeython.zaber.dev/docs/database/#pagination)), `save`, `update`, `delete` (soft by default), `to_dict`, plus declarative validation via `__rules__` (see [Validation](https://zeython.zaber.dev/docs/validation/index.md)), overridable lifecycle hooks (`creating`/`created`/`updating`/`updated`/`deleting`/`deleted`) and `Observer` classes for cross-cutting reactions to them (see [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)), and safe relationship eager-loading via `include=` (see [Relationships](https://zeython.zaber.dev/docs/relationships/index.md)). |
 | `transaction`                                 | `zeython.db`                    | A `SAVEPOINT`-scoped nested transaction within the current session, for isolating part of a request's writes without ending it (see [Database & Migrations](https://zeython.zaber.dev/docs/database/#transactions)).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `Database.read_replica()`                     | `zeython.db.Database`           | Opens a session against a read replica (`DATABASE_READ_URL`) instead of the primary, for a read-heavy path that can tolerate lag -- falls back to the primary if no replica is configured (see [Database & Migrations](https://zeython.zaber.dev/docs/database/#read-replicas)).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -2793,6 +2793,66 @@ Only ever shown for a genuine unhandled exception (a bug), never for an `HTTPExc
 Like every other debug-mode behavior, this leaks source code and file paths — see the [production checklist](https://zeython.zaber.dev/docs/production-checklist/index.md) for why `APP_DEBUG=false` is non-negotiable in production.
 
 If [`RequestProfilerServiceProvider`](https://zeython.zaber.dev/docs/profiling/index.md) is registered, both the HTML page and the JSON/`problem+json` bodies also show the queries the crashed request ran before it failed — often the fastest way to see *why*.
+
+## API versioning
+
+`Router.version()` groups a set of routes under a version prefix, so you can change an endpoint's behavior without breaking clients still calling the old one:
+
+```python
+# main.py
+from zeython import Application, current_api_version
+from app.Controllers.post_controller_v1 import PostControllerV1
+from app.Controllers.post_controller_v2 import PostControllerV2
+
+app = Application()
+
+with app.router.version("v1") as v1:
+    v1.resource("/posts", PostControllerV1)
+
+with app.router.version("v2") as v2:
+    v2.resource("/posts", PostControllerV2)
+```
+
+`"v1"` mounts routes at `/v1` by default — pass `prefix=` to use something else (`app.router.version("v1", prefix="/api/v1")`), or `prefix=""` to version routes without changing their path at all (useful if the version is instead read from an `Accept` header or a path param your own code inspects).
+
+**Build the whole group inside the `with` block** — `version()` folds the sub-router's routes into the parent only once the block exits, so a route registered after the block closes is never picked up:
+
+```python
+with app.router.version("v1") as v1:
+    v1.get("/reports")(list_reports)
+# too late -- v1 has already been folded into app.router by here
+v1.get("/exports")(list_exports)  # never registered, don't do this
+```
+
+Inside a handler routed through a version group, `current_api_version()` returns the version label — `None` outside one, so existing unversioned routes and application code that doesn't care about versioning are unaffected:
+
+```python
+from zeython import current_api_version
+
+async def index(request):
+    if current_api_version() == "v1":
+        ...  # the old response shape, kept for existing v1 clients
+    return JSONResponse([...])
+```
+
+This also works for `resource()` and `websocket()`, not just `get()`/ `post()`/etc. — every registration method on a versioned `Router` wraps its handler the same way.
+
+### Deprecating an old version
+
+`deprecated()` marks a single endpoint deprecated with the standard [`Deprecation`](https://datatracker.ietf.org/doc/html/draft-dalal-deprecation-header) and [`Sunset`](https://www.rfc-editor.org/rfc/rfc8594) response headers, so well-behaved clients and API gateways can flag it automatically:
+
+```python
+from zeython import deprecated
+
+with app.router.version("v1") as v1:
+
+    @v1.get("/reports")
+    @deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+    async def list_reports(request):
+        return JSONResponse([...])
+```
+
+Every response from `list_reports` now carries `Deprecation: true`, and `Sunset: Wed, 01 Jan 2027 00:00:00 GMT` naming when it stops working entirely. `sunset` is optional — omit it to signal "deprecated, no removal date set yet."
 # Digging Deeper
 
 # CLI Reference
@@ -6454,7 +6514,7 @@ Marker base class for class-based controllers used with :meth:`Router.resource`.
 ### Router
 
 ```python
-Router(prefix: str = '')
+Router(prefix: str = '', *, api_version: str | None = None)
 ```
 
 Collects routes and exposes Laravel/FastAPI-style decorator sugar.
@@ -6464,9 +6524,10 @@ A `Router` compiles down to a plain list of Starlette `BaseRoute` objects, so ne
 Source code in `src/zeython/routing.py`
 
 ```python
-def __init__(self, prefix: str = "") -> None:
+def __init__(self, prefix: str = "", *, api_version: str | None = None) -> None:
     self.prefix = prefix.rstrip("/")
     self.routes: list[BaseRoute] = []
+    self._api_version = api_version
 ```
 
 #### websocket
@@ -6491,7 +6552,9 @@ def websocket(self, path: str, *, name: str | None = None) -> Callable[[Endpoint
     """
 
     def decorator(endpoint: Endpoint) -> Endpoint:
-        self.routes.append(WebSocketRoute(self._full_path(path), endpoint, name=name or endpoint.__name__))
+        self.routes.append(
+            WebSocketRoute(self._full_path(path), self._versioned(endpoint), name=name or endpoint.__name__)
+        )
         return endpoint
 
     return decorator
@@ -6511,6 +6574,56 @@ Source code in `src/zeython/routing.py`
 def include(self, router: Router, *, prefix: str = "") -> None:
     """Mount another router's routes under an optional additional prefix."""
     self.routes.append(Mount(prefix or "/", routes=router.routes))
+```
+
+#### version
+
+```python
+version(
+    version: str, *, prefix: str | None = None
+) -> Iterator[Router]
+```
+
+Group routes under a version prefix, with :func:`current_api_version` set during each call.
+
+Yields a sub-:class:`Router` to register routes on; it's mounted onto this router only once the `with` block finishes, so build it up fully inside the block::
+
+```text
+with app.router.version("v1") as v1:
+    v1.resource("/posts", PostControllerV1)
+```
+
+Defaults `prefix` to `/{version}` (so `"v1"` mounts at `/v1`); pass `prefix=""` to version routes without changing their path.
+
+Source code in `src/zeython/routing.py`
+
+```python
+@contextmanager
+def version(self, version: str, *, prefix: str | None = None) -> Iterator[Router]:
+    """Group routes under a version prefix, with :func:`current_api_version` set during each call.
+
+    Yields a sub-:class:`Router` to register routes on; it's mounted
+    onto this router only once the ``with`` block finishes, so build it
+    up fully inside the block::
+
+        with app.router.version("v1") as v1:
+            v1.resource("/posts", PostControllerV1)
+
+    Defaults ``prefix`` to ``/{version}`` (so ``"v1"`` mounts at
+    ``/v1``); pass ``prefix=""`` to version routes without changing
+    their path.
+    """
+    sub_prefix = self.prefix + (prefix if prefix is not None else f"/{version}")
+    sub = Router(sub_prefix, api_version=version)
+    yield sub
+    # Not routed through include()/Mount: the sub-router already bakes
+    # its full prefix into every route it registers, so mounting it
+    # under another prefix would double it up -- and mounting several
+    # versions each at "/" would have every one of them match (and
+    # claim) every request, since a Mount's own prefix strips to "" at
+    # "/". Flattening its already-fully-pathed routes in directly
+    # avoids both problems.
+    self.routes.extend(sub.routes)
 ```
 
 #### mount
@@ -6571,8 +6684,83 @@ def resource(self, path: str, controller_cls: type[Controller], *, only: Iterabl
         handler = getattr(controller, action)
         route_path = self._full_path(f"{path.rstrip('/')}{suffix}")
         self.routes.append(
-            Route(route_path, handler, methods=list(methods), name=f"{path.strip('/')}.{action}")
+            Route(
+                route_path,
+                self._versioned(handler),
+                methods=list(methods),
+                name=f"{path.strip('/')}.{action}",
+            )
         )
+```
+
+### current_api_version
+
+```python
+current_api_version() -> str | None
+```
+
+The version label (e.g. `"v1"`) the current request was routed under.
+
+`None` outside a request, or inside one routed through a plain (non-versioned) :class:`Router`. Set for the duration of an endpoint call registered via :meth:`Router.version`.
+
+Source code in `src/zeython/routing.py`
+
+```python
+def current_api_version() -> str | None:
+    """The version label (e.g. ``"v1"``) the current request was routed under.
+
+    ``None`` outside a request, or inside one routed through a plain
+    (non-versioned) :class:`Router`. Set for the duration of an endpoint
+    call registered via :meth:`Router.version`.
+    """
+    return _current_api_version.get()
+```
+
+### deprecated
+
+```python
+deprecated(
+    *, sunset: str | None = None
+) -> Callable[[Endpoint], Endpoint]
+```
+
+Mark an endpoint deprecated, signaling it with standard HTTP headers.
+
+Sets `Deprecation: true` (per the IETF draft) on every response, and `Sunset: <sunset>` (an RFC 8594 HTTP-date, per RFC 7231 section 7.1.1.1) when a removal date is known::
+
+```text
+@app.router.get("/v1/reports")
+@deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+async def old_reports(request: Request) -> Response: ...
+```
+
+Source code in `src/zeython/routing.py`
+
+```python
+def deprecated(*, sunset: str | None = None) -> Callable[[Endpoint], Endpoint]:
+    """Mark an endpoint deprecated, signaling it with standard HTTP headers.
+
+    Sets ``Deprecation: true`` (per the IETF draft) on every response, and
+    ``Sunset: <sunset>`` (an RFC 8594 HTTP-date, per RFC 7231 section 7.1.1.1)
+    when a removal date is known::
+
+        @app.router.get("/v1/reports")
+        @deprecated(sunset="Wed, 01 Jan 2027 00:00:00 GMT")
+        async def old_reports(request: Request) -> Response: ...
+    """
+
+    def decorator(endpoint: Endpoint) -> Endpoint:
+        @functools.wraps(endpoint)
+        async def wrapper(*args: Any, **kwargs: Any) -> Response:
+            response: Response = await endpoint(*args, **kwargs)
+            response.headers["Deprecation"] = "true"
+            if sunset is not None:
+                response.headers["Sunset"] = sunset
+            return response
+
+        return wrapper
+
+    return decorator
 ```
 
 ## views
