@@ -42,6 +42,10 @@ end-to-end tutorial. Licensed under MIT.
 - Feature flags (`zeython.feature_flags`) — static `.env`-driven toggles
   and deterministic percentage rollouts, no database or Redis required;
   `zeython features` lists every defined flag and its current resolution.
+- API versioning (`Router.version()`, `current_api_version()`,
+  `deprecated()`) — group routes under a version prefix, read the active
+  version from any handler, and flag an old one for removal with standard
+  `Deprecation`/`Sunset` response headers.
 
 ### Auth, authorization & security
 
