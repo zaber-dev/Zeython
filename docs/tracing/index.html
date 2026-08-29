@@ -2521,6 +2521,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sampling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sampling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#baggage-passing-context-across-service-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Baggage: passing context across service calls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#using-the-tracer-directly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3030,6 +3052,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sampling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sampling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#baggage-passing-context-across-service-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Baggage: passing context across service calls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#using-the-tracer-directly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3138,19 +3182,73 @@ disconnected trace — the whole point of <em>distributed</em> tracing.</p>
 and the span's status is marked as an error before the exception
 continues propagating unchanged to Zeython's own error handling — this
 only annotates the trace, it never changes what the client sees.</p>
+<h2 id="sampling">Sampling<a class="headerlink" href="#sampling" title="Permanent link">&para;</a></h2>
+<p>Every request is traced by default (<code>ParentBased(ALWAYS_ON)</code>, the SDK's
+own default) — the right choice while you're confirming tracing works,
+and fine at moderate traffic. Once request volume makes tracing
+<em>everything</em> too expensive to export and store, sample a fraction:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">TracingServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">service_name</span><span class="o">=</span><span class="s2">"my-blog"</span><span class="p">,</span> <span class="n">sample_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+</span></code></pre></div>
+<p><code>sample_ratio=0.1</code> traces roughly 10% of requests. It's wrapped in
+<code>ParentBased</code> automatically: a trace already sampled by an upstream
+service (its decision arrives on the incoming <code>traceparent</code> header) is
+always continued here regardless of this service's own ratio — a
+distributed trace should never have a gap in the middle because one hop
+independently decided not to sample.</p>
+<p>Pass a <code>sampler</code> instead for anything <code>sample_ratio</code> doesn't cover — a
+rate-limiting sampler, one driven by your own config, <code>ALWAYS_OFF</code> for a
+kill switch:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.sdk.trace.sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALWAYS_OFF</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">TracingServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">service_name</span><span class="o">=</span><span class="s2">"my-blog"</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">ALWAYS_OFF</span><span class="p">))</span>
+</span></code></pre></div>
+<p><code>sampler</code> takes precedence over <code>sample_ratio</code> when both are given.</p>
+<h2 id="baggage-passing-context-across-service-calls">Baggage: passing context across service calls<a class="headerlink" href="#baggage-passing-context-across-service-calls" title="Permanent link">&para;</a></h2>
+<p><a href="https://www.w3.org/TR/baggage/">W3C Baggage</a> carries key/value pairs
+<em>with</em> a trace across every service it touches — set once, readable
+anywhere downstream, unlike a span attribute which only lives on the one
+span it was set on. <code>TracingMiddleware</code> extracts an incoming <code>baggage</code>
+header the same way it extracts <code>traceparent</code> — nothing to configure.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_baggage</span><span class="p">,</span> <span class="n">set_baggage</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_order</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">set_baggage</span><span class="p">(</span><span class="s2">"tenant_id"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_tenant_id</span><span class="p">()))</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="o">...</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">somewhere_downstream_in_the_same_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">tenant_id</span> <span class="o">=</span> <span class="n">current_baggage</span><span class="p">(</span><span class="s2">"tenant_id"</span><span class="p">)</span>  <span class="c1"># "42", set upstream in this same request</span>
+</span></code></pre></div>
+<p>To actually reach another service, inject the current trace context (and
+any baggage) into the outbound request's headers — whatever HTTP client
+you use:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">inject_headers</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">http</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">"https://payments.internal/charge"</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">headers</span><span class="o">=</span><span class="n">inject_headers</span><span class="p">({</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">service_token</span><span class="si">}</span><span class="s2">"</span><span class="p">}),</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">)</span>
+</span></code></pre></div>
+<p><code>inject_headers()</code> merges <code>traceparent</code>/<code>baggage</code> into the headers you
+pass (or returns a fresh dict if you don't pass any) — the receiving
+service's own <code>TracingMiddleware</code> picks both up automatically, continuing
+the same trace and seeing the same baggage.</p>
+<p><strong>Don't put anything sensitive in baggage</strong> — it rides across the wire in
+plain-text headers, visible to every service and any intermediary the
+request passes through, the same caveat as any other request header.</p>
 <h2 id="using-the-tracer-directly">Using the tracer directly<a class="headerlink" href="#using-the-tracer-directly" title="Permanent link">&para;</a></h2>
 <p><code>init_tracing()</code> (called for you by <code>TracingServiceProvider.boot()</code>)
 registers the global tracer provider, so your own code can start
 additional spans the normal OpenTelemetry way, without going through this
 module again:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">tracer</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_tracer</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="k">with</span> <span class="n">tracer</span><span class="o">.</span><span class="n">start_as_current_span</span><span class="p">(</span><span class="s2">"process_order"</span><span class="p">)</span> <span class="k">as</span> <span class="n">span</span><span class="p">:</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">span</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">"order.id"</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="o">...</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">tracer</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_tracer</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">with</span> <span class="n">tracer</span><span class="o">.</span><span class="n">start_as_current_span</span><span class="p">(</span><span class="s2">"process_order"</span><span class="p">)</span> <span class="k">as</span> <span class="n">span</span><span class="p">:</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="n">span</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">"order.id"</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>        <span class="o">...</span>
 </span></code></pre></div>
 <p>These nest under whatever request span was already active, giving you a
 full picture of what a request actually did, not just how long the whole

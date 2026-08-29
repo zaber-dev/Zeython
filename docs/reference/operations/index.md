@@ -481,7 +481,7 @@ Deliberately not a hard dependency, and deliberately does not depend on any spec
 TracingMiddleware(app: Any)
 ```
 
-Pure ASGI middleware: wraps every HTTP request in a server span named `"{method} {path}"`, extracting any incoming W3C `traceparent` header so a span started upstream (another service, a load balancer) continues as this request's parent rather than starting a new trace.
+Pure ASGI middleware: wraps every HTTP request in a server span named `"{method} {path}"`, extracting any incoming W3C `traceparent` header so a span started upstream (another service, a load balancer) continues as this request's parent rather than starting a new trace -- and, in the same step, any incoming W3C `baggage` header, so :func:`current_baggage` sees whatever an upstream service attached, for the whole lifetime of this request.
 
 Sets the conventional `http.method`/`http.target`/ `http.status_code` span attributes, and on an unhandled exception records it on the span and marks the span's status as an error before re-raising -- the exception still propagates to Zeython's own error handling unchanged, this only annotates the trace.
 
@@ -500,6 +500,8 @@ TracingServiceProvider(
     *,
     service_name: str,
     exporter: SpanExporter | None = None,
+    sample_ratio: float | None = None,
+    sampler: Sampler | None = None,
 )
 ```
 
@@ -511,15 +513,25 @@ Initializes OpenTelemetry tracing and instruments every request via :class:`Trac
 app.register(TracingServiceProvider(app, service_name="my-blog"))
 ```
 
-Pass `exporter` for a real backend (an OTLP exporter you've installed and configured separately); without one, spans print to the console -- useful for confirming tracing is wired up before you've picked a backend. Requires the `otel` extra: `pip install zeython[otel]`.
+Pass `exporter` for a real backend (an OTLP exporter you've installed and configured separately); without one, spans print to the console -- useful for confirming tracing is wired up before you've picked a backend. `sample_ratio`/`sampler` are passed straight through to :func:`init_tracing` -- see there for what each does. Requires the `otel` extra: `pip install zeython[otel]`.
 
 Source code in `src/zeython/tracing.py`
 
 ```python
-def __init__(self, app: Any, *, service_name: str, exporter: SpanExporter | None = None) -> None:
+def __init__(
+    self,
+    app: Any,
+    *,
+    service_name: str,
+    exporter: SpanExporter | None = None,
+    sample_ratio: float | None = None,
+    sampler: Sampler | None = None,
+) -> None:
     super().__init__(app)
     self.service_name = service_name
     self.exporter = exporter
+    self.sample_ratio = sample_ratio
+    self.sampler = sampler
 ```
 
 ### init_tracing
@@ -529,23 +541,47 @@ init_tracing(
     *,
     service_name: str,
     exporter: SpanExporter | None = None,
+    sample_ratio: float | None = None,
+    sampler: Sampler | None = None,
 ) -> TracerProvider
 ```
 
 Initialize the OpenTelemetry SDK with a single `BatchSpanProcessor` exporting to `exporter` (a `ConsoleSpanExporter` -- printing spans to stdout -- if none is given, so tracing is inspectable with zero configuration before you've wired up a real collector). Raises `ImportError` with an install hint if the `otel` extra isn't installed.
+
+By default every request is traced (the SDK's own default sampler, `ParentBased(ALWAYS_ON)`) -- fine for moderate traffic, and the right choice while you're still confirming tracing works at all. Pass `sample_ratio` (0.0-1.0) once request volume makes tracing *everything* too expensive to export/store -- `0.1` traces roughly 10% of requests. It's wrapped in `ParentBased` automatically, so a trace already sampled by an upstream service (its decision arrives via the incoming `traceparent` header) is always continued regardless of this service's own ratio -- a distributed trace should never have a gap in the middle because one hop in the chain independently decided not to sample. Pass `sampler` instead for anything else (a rate-limiting sampler, one driven by your own config) -- it takes precedence over `sample_ratio` if both are given.
 
 Registers the returned provider as the global tracer provider, so application code can also do `from opentelemetry import trace; trace.get_tracer(__name__)` directly rather than going through this module.
 
 Source code in `src/zeython/tracing.py`
 
 ```python
-def init_tracing(*, service_name: str, exporter: SpanExporter | None = None) -> TracerProvider:
+def init_tracing(
+    *,
+    service_name: str,
+    exporter: SpanExporter | None = None,
+    sample_ratio: float | None = None,
+    sampler: Sampler | None = None,
+) -> TracerProvider:
     """Initialize the OpenTelemetry SDK with a single ``BatchSpanProcessor``
     exporting to ``exporter`` (a ``ConsoleSpanExporter`` -- printing spans to
     stdout -- if none is given, so tracing is inspectable with zero
     configuration before you've wired up a real collector). Raises
     ``ImportError`` with an install hint if the ``otel`` extra isn't
     installed.
+
+    By default every request is traced (the SDK's own default sampler,
+    ``ParentBased(ALWAYS_ON)``) -- fine for moderate traffic, and the
+    right choice while you're still confirming tracing works at all.
+    Pass ``sample_ratio`` (0.0-1.0) once request volume makes tracing
+    *everything* too expensive to export/store -- ``0.1`` traces roughly
+    10% of requests. It's wrapped in ``ParentBased`` automatically, so a
+    trace already sampled by an upstream service (its decision arrives via
+    the incoming ``traceparent`` header) is always continued regardless of
+    this service's own ratio -- a distributed trace should never have a
+    gap in the middle because one hop in the chain independently decided
+    not to sample. Pass ``sampler`` instead for anything else (a rate-limiting
+    sampler, one driven by your own config) -- it takes precedence over
+    ``sample_ratio`` if both are given.
 
     Registers the returned provider as the global tracer provider, so
     application code can also do ``from opentelemetry import trace;
@@ -558,16 +594,123 @@ def init_tracing(*, service_name: str, exporter: SpanExporter | None = None) -> 
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+        from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
     except ImportError as exc:
         raise ImportError(
             "Tracing requires the OpenTelemetry SDK. Install it with: pip install zeython[otel]"
         ) from exc
 
-    provider = TracerProvider(resource=Resource.create({"service.name": service_name}))
+    if sampler is None and sample_ratio is not None:
+        if not 0.0 <= sample_ratio <= 1.0:
+            raise ValueError(f"sample_ratio must be between 0.0 and 1.0, got {sample_ratio!r}")
+        sampler = ParentBased(TraceIdRatioBased(sample_ratio))
+
+    provider = TracerProvider(resource=Resource.create({"service.name": service_name}), sampler=sampler)
     provider.add_span_processor(BatchSpanProcessor(exporter or ConsoleSpanExporter()))
     trace.set_tracer_provider(provider)
     _tracer_provider = provider
     return provider
+```
+
+### current_baggage
+
+```python
+current_baggage(key: str) -> str | None
+```
+
+The value of baggage member `key` on the current request, or `None` if unset -- baggage set by this service via :func:`set_baggage`, or received from an upstream service's own W3C `baggage` header (extracted automatically by :class:`TracingMiddleware`, the same way it extracts `traceparent`).
+
+Unlike a span attribute, baggage travels *with* the trace across service boundaries -- set once, readable by every downstream service the request reaches, not just visible in this one span. Don't put anything sensitive in it: it rides in plain-text request headers.
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def current_baggage(key: str) -> str | None:
+    """The value of baggage member ``key`` on the current request, or
+    ``None`` if unset -- baggage set by this service via :func:`set_baggage`,
+    or received from an upstream service's own W3C ``baggage`` header
+    (extracted automatically by :class:`TracingMiddleware`, the same way
+    it extracts ``traceparent``).
+
+    Unlike a span attribute, baggage travels *with* the trace across
+    service boundaries -- set once, readable by every downstream service
+    the request reaches, not just visible in this one span. Don't put
+    anything sensitive in it: it rides in plain-text request headers.
+    """
+    from opentelemetry import baggage
+
+    value = baggage.get_baggage(key)
+    return None if value is None else str(value)
+```
+
+### set_baggage
+
+```python
+set_baggage(key: str, value: str) -> None
+```
+
+Attach a baggage member to the current request's trace context, for the rest of the request -- visible to :func:`current_baggage` calls later in the same request, to child spans, and (via :func:`inject_headers`) to any downstream service this request calls::
+
+```text
+set_baggage("tenant_id", str(tenant.id))
+```
+
+Scoped to the current request the same way a span is: the ASGI middleware's own context is detached automatically when the request finishes, so this never leaks into a later, unrelated request.
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def set_baggage(key: str, value: str) -> None:
+    """Attach a baggage member to the current request's trace context, for
+    the rest of the request -- visible to :func:`current_baggage` calls
+    later in the same request, to child spans, and (via
+    :func:`inject_headers`) to any downstream service this request calls::
+
+        set_baggage("tenant_id", str(tenant.id))
+
+    Scoped to the current request the same way a span is: the ASGI
+    middleware's own context is detached automatically when the request
+    finishes, so this never leaks into a later, unrelated request.
+    """
+    from opentelemetry import baggage
+    from opentelemetry import context as otel_context
+
+    otel_context.attach(baggage.set_baggage(key, value))
+```
+
+### inject_headers
+
+```python
+inject_headers(
+    headers: dict[str, str] | None = None,
+) -> dict[str, str]
+```
+
+The current trace context (and any baggage) encoded as W3C `traceparent`/`baggage` headers, merged into `headers` -- pass the result to whatever HTTP client you use for an outbound call, so the trace continues in the service you're calling instead of starting a new, disconnected one there::
+
+```text
+response = await http.get(url, headers=inject_headers())
+response = await http.post(url, headers=inject_headers({"Authorization": f"Bearer {token}"}))
+```
+
+Source code in `src/zeython/tracing.py`
+
+```python
+def inject_headers(headers: dict[str, str] | None = None) -> dict[str, str]:
+    """The current trace context (and any baggage) encoded as W3C
+    ``traceparent``/``baggage`` headers, merged into ``headers`` -- pass
+    the result to whatever HTTP client you use for an outbound call, so
+    the trace continues in the service you're calling instead of starting
+    a new, disconnected one there::
+
+        response = await http.get(url, headers=inject_headers())
+        response = await http.post(url, headers=inject_headers({"Authorization": f"Bearer {token}"}))
+    """
+    from opentelemetry.propagate import inject
+
+    carrier = dict(headers) if headers else {}
+    inject(carrier)
+    return carrier
 ```
 
 ## cache
