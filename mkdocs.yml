@@ -43,6 +43,7 @@ nav:
       - OpenAPI & API Docs: openapi.md
       - API Standards: api-standards.md
       - GraphQL: graphql.md
+      - Idempotency Keys: idempotency.md
   - Digging Deeper:
       - CLI Reference: cli.md
       - Console Commands: console-commands.md
@@ -207,6 +208,7 @@ plugins:
           - openapi.md
           - api-standards.md
           - graphql.md
+          - idempotency.md
         Digging Deeper:
           - cli.md
           - console-commands.md
