@@ -35,6 +35,7 @@ Zeython is an async-first, batteries-included MVC framework for Python: a depend
 
 - [Authentication](https://zeython.zaber.dev/docs/authentication/index.md)
 - [OAuth2 / OIDC Login (SSO)](https://zeython.zaber.dev/docs/oauth/index.md)
+- [SAML SSO](https://zeython.zaber.dev/docs/saml/index.md)
 - [Two-Factor Auth (MFA)](https://zeython.zaber.dev/docs/mfa/index.md)
 - [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)
 - [Authorization](https://zeython.zaber.dev/docs/authorization/index.md)

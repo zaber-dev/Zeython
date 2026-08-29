@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/docker/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/saml/">
       
       
-        <link rel="prev" href="../error-monitoring/">
+        <link rel="prev" href="../oauth/">
       
       
-        <link rel="next" href="../production-checklist/">
+        <link rel="next" href="../mfa/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Docker - Zeython Docs</title>
+        <title>SAML SSO - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#docker" class="md-skip">
+        <a href="#saml-sso" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Docker
+              SAML SSO
             
           </span>
         </div>
@@ -287,10 +287,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../authentication/" class="md-tabs__link">
           
   
@@ -366,12 +368,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../health-check/" class="md-tabs__link">
           
   
@@ -1139,26 +1139,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -1176,7 +1181,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1247,10 +1252,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../saml/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML SSO
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1266,6 +1298,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-exists-and-why-its-a-separate-module-from-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this exists, and why it's a separate module from OAuth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handing-the-idp-your-sp-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handing the IdP your SP metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signing-outgoing-requests-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signing outgoing requests (optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-isnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this isn't
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2239,31 +2396,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -2281,7 +2433,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2492,37 +2644,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Docker
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../docker/" class="md-nav__link">
         
   
   
@@ -2538,81 +2663,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#building-and-running" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Building and running
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-the-image-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What the image does
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#postgres-redis" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Postgres, Redis
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scheduled-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scheduled tasks
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#persisting-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Persisting data
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2991,10 +3041,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#building-and-running" class="md-nav__link">
+  <a href="#why-this-exists-and-why-its-a-separate-module-from-oauth" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Building and running
+        Why this exists, and why it's a separate module from OAuth
       
     </span>
   </a>
@@ -3002,10 +3052,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-the-image-does" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What the image does
+        Setup
       
     </span>
   </a>
@@ -3013,10 +3063,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#postgres-redis" class="md-nav__link">
+  <a href="#routes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Postgres, Redis
+        Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handing-the-idp-your-sp-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handing the IdP your SP metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get back
       
     </span>
   </a>
@@ -3024,10 +3102,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scheduled-tasks" class="md-nav__link">
+  <a href="#signing-outgoing-requests-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Scheduled tasks
+        Signing outgoing requests (optional)
       
     </span>
   </a>
@@ -3035,10 +3113,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#persisting-data" class="md-nav__link">
+  <a href="#errors" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Persisting data
+        Errors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-isnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this isn't
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
       
     </span>
   </a>
@@ -3062,7 +3162,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/docker.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/saml.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -3070,65 +3170,173 @@
   
 
 
-<h1 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h1>
-<p>A generated project ships a <code>Dockerfile</code>, <code>docker-compose.yml</code>, and
-<code>.dockerignore</code> -- a working container from <code>zeython new</code> onward, not
-something you have to bolt on before a first deployment.</p>
-<h2 id="building-and-running">Building and running<a class="headerlink" href="#building-and-running" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--build
+<h1 id="saml-sso">SAML SSO<a class="headerlink" href="#saml-sso" title="Permanent link">&para;</a></h1>
+<p><code>zeython.saml</code> adds "Sign in with Okta/Azure AD/ADFS/your enterprise IdP"
+via the SAML 2.0 protocol -- for the identity providers, and the
+enterprise customers who require them, that specifically need SAML rather
+than <a href="../oauth/">OAuth2/OIDC</a>. Both modules give back the same shape of
+thing (a normalized identity, not an opinion about your <code>User</code> model), so
+they sit side by side in one app and share the same find-or-create-a-user
+callback.</p>
+<p>Built on <a href="https://github.com/SAML-Toolkits/python3-saml">python3-saml</a>
+(OneLogin's toolkit), an optional dependency:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>zeython<span class="o">[</span>saml<span class="o">]</span>
 </span></code></pre></div>
-<p>This builds the image, runs pending migrations, and starts the server on
-<code>http://localhost:8000</code>. <code>docker compose</code> reads <code>.env</code> for configuration
-(copy <code>.env.example</code> to <code>.env</code> first, same as running locally) --
-<code>.dockerignore</code> deliberately excludes <code>.env</code> from the build context itself,
-so a secret never ends up baked into an image layer.</p>
-<p>Without compose:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-app<span class="w"> </span>.
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--env-file<span class="w"> </span>.env<span class="w"> </span>my-app
+<h2 id="why-this-exists-and-why-its-a-separate-module-from-oauth">Why this exists, and why it's a separate module from OAuth<a class="headerlink" href="#why-this-exists-and-why-its-a-separate-module-from-oauth" title="Permanent link">&para;</a></h2>
+<p>Plenty of enterprise IdPs speak OIDC today, but SAML is still what a lot
+of established identity providers (classic Okta/OneLogin/ADFS
+deployments, many university and government SSO setups) default to, and
+what an enterprise customer's security team sometimes mandates by policy
+regardless of what else you support. It's a meaningfully different
+protocol -- XML, not JSON; the security-critical direction is the IdP's
+<strong>signed</strong> response, verified with its public certificate, not a
+bearer-token exchange -- so it isn't a thin variant of <code>zeython.oauth</code>,
+it's its own protocol with its own module. <code>python3-saml</code> does the actual
+XML work (building the AuthnRequest, verifying the Response's XML
+signature, checking expiry/audience/recipient); Zeython wraps that in an
+async, container-bound <code>SamlManager</code>.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">AuthServiceProvider</span><span class="p">,</span> <span class="n">SamlServiceProvider</span><span class="p">,</span> <span class="n">saml_provider</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">app.Models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AuthServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">user_model</span><span class="o">=</span><span class="n">User</span><span class="p">))</span>  <span class="c1"># for login() your ACS route calls</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">SamlServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">providers</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">saml_provider</span><span class="p">(</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"okta"</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">idp_entity_id</span><span class="o">=</span><span class="s2">"http://www.okta.com/exk1a2b3c4d5e6f7g8h9"</span><span class="p">,</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">idp_sso_url</span><span class="o">=</span><span class="s2">"https://your-org.okta.com/app/your-org_app_1/exk.../sso/saml"</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="n">idp_x509_cert</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"saml.okta.idp_cert"</span><span class="p">),</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="n">sp_entity_id</span><span class="o">=</span><span class="s2">"https://app.example.com/saml/okta/metadata"</span><span class="p">,</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">acs_url</span><span class="o">=</span><span class="s2">"https://app.example.com/saml/okta/acs"</span><span class="p">,</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="p">),</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="p">]))</span>
 </span></code></pre></div>
-<h2 id="what-the-image-does">What the image does<a class="headerlink" href="#what-the-image-does" title="Permanent link">&para;</a></h2>
+<p>Everything in <code>saml_provider(...)</code> beyond <code>name=</code>/<code>acs_url=</code> comes from
+your IdP admin's console: entity ID, SSO URL, and the certificate it
+signs assertions with. <code>acs_url</code> -- your app's Assertion Consumer
+Service, where the IdP posts its signed response back to -- is the one
+value that flows the other way: you decide it, then register it (along
+with <code>sp_entity_id</code>) at the IdP. Both must be <strong>exact, absolute</strong> URLs;
+SAML validates the request's actual destination/audience against them.</p>
+<h2 id="routes">Routes<a class="headerlink" href="#routes" title="Permanent link">&para;</a></h2>
+<p>Unlike <code>zeython.oauth</code>'s <code>oauth_redirect</code>/<code>oauth_callback</code>, there's no
+generated project wiring to uncomment here (SAML setups vary too much
+IdP-to-IdP to have one commented-out default) -- add the three routes
+yourself:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># routes/web.py</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/saml/</span><span class="si">{provider}</span><span class="s2">/login"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"saml.login"</span><span class="p">)(</span><span class="n">auth</span><span class="o">.</span><span class="n">saml_login</span><span class="p">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/saml/</span><span class="si">{provider}</span><span class="s2">/acs"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"saml.acs"</span><span class="p">)(</span><span class="n">auth</span><span class="o">.</span><span class="n">saml_acs</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/saml/</span><span class="si">{provider}</span><span class="s2">/metadata"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"saml.metadata"</span><span class="p">)(</span><span class="n">auth</span><span class="o">.</span><span class="n">saml_metadata</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># app/Controllers/auth_controller.py</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">RedirectResponse</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.saml</span><span class="w"> </span><span class="kn">import</span> <span class="n">saml_acs</span> <span class="k">as</span> <span class="n">complete_saml_login</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.saml</span><span class="w"> </span><span class="kn">import</span> <span class="n">saml_login</span> <span class="k">as</span> <span class="n">start_saml_login</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.saml</span><span class="w"> </span><span class="kn">import</span> <span class="n">saml_metadata</span> <span class="k">as</span> <span class="n">serve_saml_metadata</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">saml_login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="k">return</span> <span class="n">start_saml_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"provider"</span><span class="p">])</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">saml_acs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">identity</span> <span class="o">=</span> <span class="k">await</span> <span class="n">complete_saml_login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"provider"</span><span class="p">])</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="k">raise</span> <span class="n">BadRequestException</span><span class="p">(</span><span class="s2">"This IdP did not send an email address."</span><span class="p">)</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">User</span><span class="o">.</span><span class="n">first_where</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">identity</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">identity</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">secrets</span><span class="o">.</span><span class="n">token_urlsafe</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>  <span class="c1"># unusable -- this account only logs in via SAML</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="k">return</span> <span class="n">RedirectResponse</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">303</span><span class="p">)</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">saml_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">serve_saml_metadata</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">path_params</span><span class="p">[</span><span class="s2">"provider"</span><span class="p">])</span>
+</span></code></pre></div>
+<p><code>{provider}</code> is whichever <code>name=</code> you gave a provider in
+<code>SamlServiceProvider(providers=[...])</code> (<code>"okta"</code> above). The ACS route
+must accept <code>POST</code> -- that's how the IdP delivers the signed assertion,
+never a redirect with a query string the way OAuth's callback works.</p>
+<h3 id="handing-the-idp-your-sp-metadata">Handing the IdP your SP metadata<a class="headerlink" href="#handing-the-idp-your-sp-metadata" title="Permanent link">&para;</a></h3>
+<p>Most IdP admin consoles offer "upload metadata XML" or "enter these
+values by hand" as alternatives -- point them at your <code>/saml/{provider}/
+metadata</code> route instead of copying entity ID/ACS URL/certificate into
+separate fields one at a time:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>https://app.example.com/saml/okta/metadata
+</span></code></pre></div>
+<h2 id="what-you-get-back">What you get back<a class="headerlink" href="#what-you-get-back" title="Permanent link">&para;</a></h2>
+<p><code>saml_acs()</code>/<code>SamlManager.handle_acs()</code> return a <code>SamlUser</code>: <code>name_id</code>
+(the subject identifier the IdP asserts -- an email address, in the
+default <code>NameIDFormat</code>), <code>email</code>, <code>name</code>, <code>attributes</code> (everything the
+assertion included, as <code>dict[str, list[str]]</code>), and <code>session_index</code> (for
+<a href="#what-this-isnt">Single Logout</a>, if you add it later).</p>
+<p>There's no universal attribute-naming standard the way OIDC's userinfo
+claims are -- an IdP admin configures which attribute names an assertion
+sends, often a URN
+(<code>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress</code>) or
+a short name (<code>email</code>), and it varies by IdP and by how that IdP's admin
+set it up. <code>SamlUser.email</code>/<code>.name</code> recognize a handful of common names
+automatically; when your IdP sends something else, tell <code>saml_provider()</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">saml_provider</span><span class="p">(</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="o">...</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">email_attribute</span><span class="o">=</span><span class="s2">"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">name_attribute</span><span class="o">=</span><span class="s2">"displayName"</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>For anything beyond email/name, read it straight off the assertion:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">department</span> <span class="o">=</span> <span class="n">identity</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">"department"</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">groups</span> <span class="o">=</span> <span class="n">identity</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>  <span class="c1"># every value, not just the first</span>
+</span></code></pre></div>
+<h2 id="signing-outgoing-requests-optional">Signing outgoing requests (optional)<a class="headerlink" href="#signing-outgoing-requests-optional" title="Permanent link">&para;</a></h2>
+<p>By default, the AuthnRequest Zeython sends to the IdP is unsigned --
+which most IdPs accept for SP-initiated login, since the
+security-critical direction is the IdP's own signed <em>response</em>, always
+required. Some IdPs require signed requests too; give <code>saml_provider()</code>
+your SP's own certificate and private key to enable it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">saml_provider</span><span class="p">(</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="o">...</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">sp_x509_cert</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"saml.sp_cert"</span><span class="p">),</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">sp_private_key</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"saml.sp_key"</span><span class="p">),</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Multi-stage build.</strong> A <code>builder</code> stage installs dependencies into a
-  venv; the final image copies just that venv plus the app source -- no
-  pip build cache, no dev tooling, in the shipped image.</li>
-<li><strong>Runs as a non-root user.</strong> <code>appuser</code>, not root.</li>
-<li><strong>Migrates on startup.</strong> The container's <code>CMD</code> runs
-  <code>alembic upgrade head</code> before starting <code>uvicorn</code>. A single-container
-  deployment doesn't need anything fancier; running more than one replica
-  usually means moving the migration into its own one-shot job so N
-  containers starting together don't race to run it.</li>
-<li><strong>A <code>HEALTHCHECK</code></strong> hits <a href="../health-check/"><code>/up</code></a> -- Docker (and anything
-  reading <code>docker inspect</code>, like a Compose <code>depends_on: condition:
-  service_healthy</code>) can tell when the app is actually ready, not just when
-  the process started.</li>
+<li><strong>Unknown provider</strong> in the URL -- <code>NotFoundException</code> (404), the same
+  as an unknown OAuth provider name.</li>
+<li><strong>No <code>SAMLResponse</code></strong> in the ACS POST body -- <code>BadRequestException</code>
+  (400): the IdP (or whoever's calling this URL) didn't send one.</li>
+<li><strong>Response failed validation</strong> -- <code>ForbiddenException</code> (403): a
+  missing/invalid signature, an expired assertion, a response meant for a
+  different SP (wrong audience), or one delivered to the wrong URL (wrong
+  recipient/destination). The exception message names which of python3-saml's
+  own validation errors fired, and its detailed reason.</li>
 </ul>
-<h2 id="postgres-redis">Postgres, Redis<a class="headerlink" href="#postgres-redis" title="Permanent link">&para;</a></h2>
-<p>The default <code>DATABASE_URL</code> is SQLite, and caching/rate-limiting default to
-in-memory -- fine for a single container, not for anything you'd run more
-than one replica of (see <a href="../redis/">Redis</a>). <code>docker-compose.yml</code> includes
-commented-out <code>db</code> (Postgres) and <code>redis</code> services with the config you'd
-uncomment to switch -- <strong>uncommenting them alone isn't enough</strong>: also add
-the matching database driver (<code>asyncpg</code> for Postgres) to <code>pyproject.toml</code>'s
-dependencies and set <code>DATABASE_URL</code>/point <code>RedisCache</code>/<code>RedisRateLimiter</code>
-at the <code>redis</code> service in <code>main.py</code>.</p>
-<p>Switching <code>QUEUE_DRIVER=redis</code> (see <a href="../queues/">Background Jobs</a>) also
-needs a <code>queue-worker</code> service -- also commented out in
-<code>docker-compose.yml</code> -- running <code>zeython queue work</code> as its own container
-alongside <code>redis</code> and <code>app</code>. Jobs a durable queue is meant to protect
-(payment capture, anything a crash shouldn't drop) don't get that
-protection if nothing is actually running the worker.</p>
-<h2 id="scheduled-tasks">Scheduled tasks<a class="headerlink" href="#scheduled-tasks" title="Permanent link">&para;</a></h2>
-<p>A container has no host crontab to point <code>zeython schedule run</code> at (see
-<a href="../scheduling/">Scheduling</a>). <code>docker-compose.yml</code> includes a commented-out
-<code>scheduler</code> service -- a sidecar loop container that runs <code>zeython
-schedule run</code> once a minute, forever, the container equivalent of a single
-cron entry. Uncomment it once <code>schedule.py</code> actually defines something.</p>
-<h2 id="persisting-data">Persisting data<a class="headerlink" href="#persisting-data" title="Permanent link">&para;</a></h2>
-<p><code>docker-compose.yml</code> mounts <code>./storage</code> (uploaded files -- see
-<a href="../storage/">File Storage</a>) onto the host by default. The default SQLite
-database file lives <em>inside</em> the container unless you also uncomment the
-<code>database.db</code> volume mount -- otherwise <code>docker compose down</code> takes your
-data with it.</p>
+<h2 id="what-this-isnt">What this isn't<a class="headerlink" href="#what-this-isnt" title="Permanent link">&para;</a></h2>
+<p>Service-provider-initiated login and IdP-initiated login (an IdP's admin
+console sending an unsolicited assertion -- common from a "test
+connection" button) both land at the same ACS route and validate the same
+way. What's <strong>not</strong> here:</p>
+<ul>
+<li><strong>Single Logout (SLO)</strong> -- ending the IdP's own session when a user logs
+  out of your app, or vice versa. <code>SamlUser.session_index</code> is captured for
+  when you need to add it (<code>python3-saml</code>'s <code>OneLogin_Saml2_Auth.logout()</code>/
+  <code>process_slo()</code> cover the protocol), but Zeython doesn't wire it up
+  itself -- most apps get by with a local logout only.</li>
+<li><strong>SAML assertion/response encryption</strong> -- signing (authenticity) is
+  supported and always required; encryption (confidentiality, on top of
+  TLS) is a <code>python3-saml</code> setting this module doesn't expose yet.</li>
+<li><strong>IdP-side (identity provider) SAML</strong> -- this module is a Service
+  Provider (SP) only, for signing <em>into</em> your app via someone else's IdP,
+  not for turning your app into an IdP other services sign into.</li>
+</ul>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<p>See <a href="../reference/security/"><code>zeython.saml</code></a> for the full class/function
+list, including <code>SamlManager</code>/<code>SamlProvider</code>/<code>SamlUser</code> if you need to
+resolve or construct these directly outside of a request.</p>
 
 
 
@@ -3164,7 +3372,7 @@ data with it.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../error-monitoring/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Error Monitoring">
+          <a href="../oauth/" class="md-footer__link md-footer__link--prev" aria-label="Previous: OAuth2 / OIDC Login (SSO)">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3174,20 +3382,20 @@ data with it.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Error Monitoring
+                OAuth2 / OIDC Login (SSO)
               </div>
             </div>
           </a>
         
         
           
-          <a href="../production-checklist/" class="md-footer__link md-footer__link--next" aria-label="Next: Production Checklist">
+          <a href="../mfa/" class="md-footer__link md-footer__link--next" aria-label="Next: Two-Factor Auth (MFA)">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Production Checklist
+                Two-Factor Auth (MFA)
               </div>
             </div>
             <div class="md-footer__button md-icon">
