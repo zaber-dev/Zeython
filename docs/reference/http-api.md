@@ -1,7 +1,7 @@
 # HTTP & APIs
 
-Rate limiting, ETags, gzip compression, request correlation IDs, and
-OpenAPI schema generation.
+Rate limiting, ETags, gzip compression, request correlation IDs, OpenAPI
+schema generation, and a GraphQL endpoint.
 
 ::: zeython.rate_limit
 
@@ -12,3 +12,5 @@ OpenAPI schema generation.
 ::: zeython.request_id
 
 ::: zeython.openapi
+
+::: zeython.graphql
