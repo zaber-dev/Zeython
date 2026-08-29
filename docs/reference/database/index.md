@@ -1,6 +1,6 @@
 # Database
 
-The async SQLAlchemy-backed `Model` base class, session/transaction management, audit logging, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
+The async SQLAlchemy-backed `Model` base class, session/transaction management, audit logging, full-text search index creation, N+1 query detection, a request/query profiler, and factories & seeders for tests and local data.
 
 ## db
 
@@ -231,6 +231,61 @@ async def paginate(
     items = list(result.scalars().all())
 
     return Page(items=items, page=page, per_page=per_page, total=total)
+```
+
+#### search
+
+```python
+search(
+    query: str,
+    *,
+    limit: int = 20,
+    include_deleted: bool = False,
+) -> list[Self]
+```
+
+Full-text search over `__searchable__`'s columns, ranked most relevant first -- requires a matching index created once via a migration (:mod:`zeython.search`, see docs/search.md)::
+
+```text
+class Post(Model):
+    __searchable__ = ("title", "body")
+
+results = await Post.search("async orm")
+```
+
+Dispatches to SQLite's FTS5 (`MATCH` + built-in `rank`) or Postgres's `tsvector`/`ts_rank` depending on the current connection's dialect -- whichever index your migration created. Raises `RuntimeError` if `__searchable__` is empty (search isn't configured for this model) or the dialect isn't one of those two (search isn't supported there yet).
+
+Source code in `src/zeython/db/model.py`
+
+```python
+@classmethod
+async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = False) -> list[Self]:
+    """Full-text search over ``__searchable__``'s columns, ranked most
+    relevant first -- requires a matching index created once via a
+    migration (:mod:`zeython.search`, see docs/search.md)::
+
+        class Post(Model):
+            __searchable__ = ("title", "body")
+
+        results = await Post.search("async orm")
+
+    Dispatches to SQLite's FTS5 (``MATCH`` + built-in ``rank``) or
+    Postgres's ``tsvector``/``ts_rank`` depending on the current
+    connection's dialect -- whichever index your migration created.
+    Raises ``RuntimeError`` if ``__searchable__`` is empty (search
+    isn't configured for this model) or the dialect isn't one of
+    those two (search isn't supported there yet).
+    """
+    session = current_session()
+    dialect = session.bind.dialect.name if session.bind is not None else None
+    sql = cls._search_sql(dialect, include_deleted=include_deleted)
+    params: dict[str, Any] = {"query": query, "limit": limit}
+    if dialect == "postgresql":
+        params["language"] = cls.__search_language__
+
+    stmt = select(cls).from_statement(text(sql)).params(**params)
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
 ```
 
 #### to_dict
@@ -846,6 +901,176 @@ async def audit_trail(record_model: type[Model], model: Model) -> list[Model]:
     """
     rows = await record_model.find_by(auditable_type=type(model).__name__, auditable_id=model.id)
     return sorted(rows, key=lambda row: row.created_at)
+```
+
+## search
+
+Full-text search index creation for :meth:`zeython.db.model.Model.search` -- run once from your own Alembic migration, not at request time.
+
+Dispatches to whichever native full-text engine your database already has -- SQLite's FTS5 virtual tables, Postgres's `tsvector`/GIN indexes -- so there's no new dependency and no separate search service to run and keep in sync. That's also the trade-off: cross-database consistency and relevance tuning are whatever each engine's own full-text implementation gives you, not a shared abstraction over both. For requirements a database's own full-text search can't meet (typo tolerance, faceting, huge multi-tenant indexes), point at a dedicated search service instead and skip this module entirely -- `Model.search()` is deliberately just a thin dispatch over raw SQL, not a search engine of its own.
+
+### create_fts5_index
+
+```python
+create_fts5_index(
+    op: Any, table: str, columns: Iterable[str]
+) -> None
+```
+
+Create a SQLite FTS5 external-content index over `table`'s `columns`, backfilled from every existing row, and kept in sync by three triggers (`AFTER INSERT`/`UPDATE`/`DELETE`) -- SQLite's own documented recipe for external-content FTS5 tables. Unlike an ORM-level hook, these triggers fire for *any* write to `table` (raw SQL, another process), not just ones that go through :class:`~zeython.db.model.Model`.
+
+Call this once from a migration's `upgrade()`::
+
+```text
+from zeython.search import create_fts5_index
+
+def upgrade() -> None:
+    create_fts5_index(op, "posts", ["title", "body"])
+```
+
+Requires `id` to be the table's integer primary key (true of every :class:`~zeython.db.model.Model` subclass) -- FTS5's `content_rowid` is set to it.
+
+Source code in `src/zeython/search.py`
+
+```python
+def create_fts5_index(op: Any, table: str, columns: Iterable[str]) -> None:
+    """Create a SQLite FTS5 external-content index over ``table``'s
+    ``columns``, backfilled from every existing row, and kept in sync by
+    three triggers (``AFTER INSERT``/``UPDATE``/``DELETE``) -- SQLite's own
+    documented recipe for external-content FTS5 tables. Unlike an
+    ORM-level hook, these triggers fire for *any* write to ``table``
+    (raw SQL, another process), not just ones that go through
+    :class:`~zeython.db.model.Model`.
+
+    Call this once from a migration's ``upgrade()``::
+
+        from zeython.search import create_fts5_index
+
+        def upgrade() -> None:
+            create_fts5_index(op, "posts", ["title", "body"])
+
+    Requires ``id`` to be the table's integer primary key (true of every
+    :class:`~zeython.db.model.Model` subclass) -- FTS5's ``content_rowid``
+    is set to it.
+    """
+    cols = list(columns)
+    col_list = ", ".join(cols)
+    new_values = ", ".join(f"new.{c}" for c in cols)
+    old_values = ", ".join(f"old.{c}" for c in cols)
+
+    op.execute(f"CREATE VIRTUAL TABLE {table}_fts USING fts5({col_list}, content='{table}', content_rowid='id')")
+    op.execute(f"INSERT INTO {table}_fts(rowid, {col_list}) SELECT id, {col_list} FROM {table}")
+    op.execute(
+        f"CREATE TRIGGER {table}_fts_ai AFTER INSERT ON {table} BEGIN "
+        f"INSERT INTO {table}_fts(rowid, {col_list}) VALUES (new.id, {new_values}); "
+        f"END"
+    )
+    op.execute(
+        f"CREATE TRIGGER {table}_fts_ad AFTER DELETE ON {table} BEGIN "
+        f"INSERT INTO {table}_fts({table}_fts, rowid, {col_list}) VALUES('delete', old.id, {old_values}); "
+        f"END"
+    )
+    op.execute(
+        f"CREATE TRIGGER {table}_fts_au AFTER UPDATE ON {table} BEGIN "
+        f"INSERT INTO {table}_fts({table}_fts, rowid, {col_list}) VALUES('delete', old.id, {old_values}); "
+        f"INSERT INTO {table}_fts(rowid, {col_list}) VALUES (new.id, {new_values}); "
+        f"END"
+    )
+```
+
+### drop_fts5_index
+
+```python
+drop_fts5_index(op: Any, table: str) -> None
+```
+
+Undo :func:`create_fts5_index` -- call from a migration's `downgrade()`.
+
+Source code in `src/zeython/search.py`
+
+```python
+def drop_fts5_index(op: Any, table: str) -> None:
+    """Undo :func:`create_fts5_index` -- call from a migration's ``downgrade()``."""
+    op.execute(f"DROP TRIGGER IF EXISTS {table}_fts_au")
+    op.execute(f"DROP TRIGGER IF EXISTS {table}_fts_ad")
+    op.execute(f"DROP TRIGGER IF EXISTS {table}_fts_ai")
+    op.execute(f"DROP TABLE IF EXISTS {table}_fts")
+```
+
+### create_tsvector_index
+
+```python
+create_tsvector_index(
+    op: Any,
+    table: str,
+    columns: Iterable[str],
+    *,
+    language: str = "english",
+    column_name: str = "search_vector",
+) -> None
+```
+
+Add a generated `tsvector` column over `table`'s `columns` plus a GIN index on it -- Postgres keeps a `GENERATED ALWAYS ... STORED` column in sync automatically on every write, no triggers needed.
+
+Call this once from a migration's `upgrade()`::
+
+```text
+from zeython.search import create_tsvector_index
+
+def upgrade() -> None:
+    create_tsvector_index(op, "posts", ["title", "body"])
+```
+
+`language` must match whatever `Model.__search_language__` the corresponding model uses (default `"english"` on both sides).
+
+Source code in `src/zeython/search.py`
+
+```python
+def create_tsvector_index(
+    op: Any, table: str, columns: Iterable[str], *, language: str = "english", column_name: str = "search_vector"
+) -> None:
+    """Add a generated ``tsvector`` column over ``table``'s ``columns`` plus
+    a GIN index on it -- Postgres keeps a ``GENERATED ALWAYS ... STORED``
+    column in sync automatically on every write, no triggers needed.
+
+    Call this once from a migration's ``upgrade()``::
+
+        from zeython.search import create_tsvector_index
+
+        def upgrade() -> None:
+            create_tsvector_index(op, "posts", ["title", "body"])
+
+    ``language`` must match whatever ``Model.__search_language__`` the
+    corresponding model uses (default ``"english"`` on both sides).
+    """
+    concat_expr = " || ' ' || ".join(f"coalesce({c}, '')" for c in columns)
+    op.execute(
+        f"ALTER TABLE {table} ADD COLUMN {column_name} tsvector "
+        f"GENERATED ALWAYS AS (to_tsvector('{language}', {concat_expr})) STORED"
+    )
+    op.execute(f"CREATE INDEX ix_{table}_{column_name} ON {table} USING GIN ({column_name})")
+```
+
+### drop_tsvector_index
+
+```python
+drop_tsvector_index(
+    op: Any,
+    table: str,
+    *,
+    column_name: str = "search_vector",
+) -> None
+```
+
+Undo :func:`create_tsvector_index` -- call from a migration's `downgrade()`.
+
+Source code in `src/zeython/search.py`
+
+```python
+def drop_tsvector_index(op: Any, table: str, *, column_name: str = "search_vector") -> None:
+    """Undo :func:`create_tsvector_index` -- call from a migration's ``downgrade()``."""
+    op.execute(f"DROP INDEX IF EXISTS ix_{table}_{column_name}")
+    op.execute(f"ALTER TABLE {table} DROP COLUMN IF EXISTS {column_name}")
 ```
 
 ## database

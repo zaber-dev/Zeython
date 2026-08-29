@@ -23,6 +23,7 @@ Zeython is an async-first, batteries-included MVC framework for Python: a depend
 ## The Basics
 
 - [Database & Migrations](https://zeython.zaber.dev/docs/database/index.md)
+- [Full-Text Search](https://zeython.zaber.dev/docs/search/index.md)
 - [Relationships](https://zeython.zaber.dev/docs/relationships/index.md)
 - [Validation](https://zeython.zaber.dev/docs/validation/index.md)
 - [Model Events](https://zeython.zaber.dev/docs/model-events/index.md)
