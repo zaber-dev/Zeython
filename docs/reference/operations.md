@@ -1,7 +1,7 @@
 # Operations
 
 Health checks, maintenance mode, structured logging, error monitoring
-(Sentry), caching, and file storage.
+(Sentry), metrics, tracing, caching, and file storage.
 
 ::: zeython.health
 
@@ -10,6 +10,10 @@ Health checks, maintenance mode, structured logging, error monitoring
 ::: zeython.logging
 
 ::: zeython.error_monitoring
+
+::: zeython.metrics
+
+::: zeython.tracing
 
 ::: zeython.cache
 

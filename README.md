@@ -51,6 +51,11 @@ scaffolding on every project. Zeython does that assembly once:
   third party's URL to an event, and delivery, retry-with-backoff, and a
   per-attempt audit trail all ride on the same background-job queue every
   other job uses. See [Webhooks](docs/webhooks.md).
+- **Production observability, not just logs** — Prometheus-compatible
+  metrics at `/metrics` (request counts, latency histograms, your own
+  custom counters/gauges), with zero new dependency, plus opt-in
+  OpenTelemetry distributed tracing with W3C `traceparent` propagation.
+  See [Metrics](docs/metrics.md), [Tracing](docs/tracing.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
   suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
@@ -210,6 +215,8 @@ empty scaffold to a tested, authenticated API
 [Health Check](docs/health-check.md) ·
 [Maintenance Mode](docs/maintenance-mode.md) ·
 [Observability](docs/observability.md) ·
+[Metrics](docs/metrics.md) ·
+[Tracing](docs/tracing.md) ·
 [Profiling](docs/profiling.md) ·
 [Error Monitoring](docs/error-monitoring.md) ·
 [Docker](docs/docker.md) ·

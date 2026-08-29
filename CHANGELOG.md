@@ -116,6 +116,14 @@ end-to-end tutorial. Licensed under MIT.
   headers, slow-query logging, and the queries a crashed request ran shown
   on its debug page.
 - Sentry error monitoring (`zeython.error_monitoring`).
+- Prometheus-compatible metrics (`zeython.metrics`) — request counts and
+  latency histograms at `/metrics` with zero new dependency, plus a
+  `MetricsRegistry` for your own counters/gauges/histograms, grouped by
+  route path template to keep label cardinality bounded.
+- Optional OpenTelemetry distributed tracing (`zeython.tracing`,
+  `pip install zeython[otel]`) — one span per request, W3C `traceparent`
+  propagation, exception recording; bring your own exporter or use the
+  console one to start.
 - A consolidated production-readiness checklist (`docs/production-checklist.md`).
 
 ### Extensibility & i18n
