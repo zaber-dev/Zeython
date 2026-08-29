@@ -30,6 +30,12 @@ end-to-end tutorial. Licensed under MIT.
   connection pooling (`DATABASE_POOL_SIZE`/`DATABASE_MAX_OVERFLOW`).
 - Model validation (`__rules__`, built-in `Rule`s: `required`, `email`,
   `min_length`, `max_length`, `one_of`, `matches`).
+- Full-text search (`Model.search()`, `__searchable__`) — dispatches to
+  SQLite FTS5 or Postgres `tsvector`/GIN depending on the connection's
+  dialect, ranked most relevant first; `zeython.search` provides the
+  one-time migration helpers (`create_fts5_index`, `create_tsvector_index`)
+  that create and keep each index in sync, no new dependency or separate
+  search service required.
 - An application-level event dispatcher (`zeython.events`) — `emit()`,
   decoupled `listen()` handlers, an `EventServiceProvider` for wiring an
   app's own listeners in one place.

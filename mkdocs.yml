@@ -21,6 +21,7 @@ nav:
       - "6. Testing": tutorial-6-testing.md
   - The Basics:
       - Database & Migrations: database.md
+      - Full-Text Search: search.md
       - Relationships: relationships.md
       - Validation: validation.md
       - Model Events: model-events.md
@@ -182,6 +183,7 @@ plugins:
           - tutorial-6-testing.md
         The Basics:
           - database.md
+          - search.md
           - relationships.md
           - validation.md
           - model-events.md

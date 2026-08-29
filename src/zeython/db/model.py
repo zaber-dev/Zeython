@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, ClassVar, Generic, Self, TypeVar
 
-from sqlalchemy import Boolean, DateTime, Integer, func, inspect, select
+from sqlalchemy import Boolean, DateTime, Integer, func, inspect, select, text
 from sqlalchemy.orm import Mapped, mapped_column, selectinload
 from starlette.requests import Request
 
@@ -140,6 +140,18 @@ class Model(Base):
     #: Checked by ``save()`` (and therefore ``create()``/``update()``); a
     #: failing rule raises :class:`~zeython.exceptions.ValidationException`.
     __rules__: ClassVar[dict[str, list[Rule]]] = {}
+
+    #: Columns full-text-indexed for :meth:`search`, e.g. ``("title", "body")``.
+    #: Requires a matching index created once via a migration -- see
+    #: docs/search.md and :mod:`zeython.search`. Empty by default: opt-in
+    #: per model, same as ``__rules__``.
+    __searchable__: ClassVar[tuple[str, ...]] = ()
+
+    #: Postgres text-search configuration (``to_tsvector('english', ...)``)
+    #: used when creating/querying a `tsvector` search index -- ignored on
+    #: SQLite. Must match whatever language the migration's own
+    #: `create_tsvector_index()` call used.
+    __search_language__: ClassVar[str] = "english"
 
     #: Observers registered via :meth:`observe`. Re-initialized to a fresh,
     #: empty list for every subclass by ``__init_subclass__`` below -- never
@@ -326,6 +338,64 @@ class Model(Base):
     ) -> Self | None:
         results = await cls.find_by(include_deleted=include_deleted, include=include, **filters)
         return results[0] if results else None
+
+    @classmethod
+    def _search_sql(cls, dialect: str | None, *, include_deleted: bool) -> str:
+        if not cls.__searchable__:
+            raise RuntimeError(
+                f"{cls.__name__} has no __searchable__ columns declared -- add e.g. "
+                f'__searchable__ = ("title", "body") and create a matching search index via a '
+                f"migration. See docs/search.md."
+            )
+        table = cls.__tablename__
+        if dialect == "sqlite":
+            deleted_filter = "" if include_deleted else f" AND {table}.is_deleted = 0"
+            return (
+                f"SELECT {table}.* FROM {table} "
+                f"JOIN {table}_fts ON {table}.id = {table}_fts.rowid "
+                f"WHERE {table}_fts MATCH :query{deleted_filter} "
+                f"ORDER BY rank LIMIT :limit"
+            )
+        if dialect == "postgresql":
+            deleted_filter = "" if include_deleted else " AND is_deleted = false"
+            return (
+                f"SELECT * FROM {table} "
+                f"WHERE search_vector @@ plainto_tsquery(:language, :query){deleted_filter} "
+                f"ORDER BY ts_rank(search_vector, plainto_tsquery(:language, :query)) DESC LIMIT :limit"
+            )
+        raise RuntimeError(
+            f"zeython full-text search doesn't support the {dialect!r} database dialect yet "
+            "(supported: sqlite, postgresql)."
+        )
+
+    @classmethod
+    async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = False) -> list[Self]:
+        """Full-text search over ``__searchable__``'s columns, ranked most
+        relevant first -- requires a matching index created once via a
+        migration (:mod:`zeython.search`, see docs/search.md)::
+
+            class Post(Model):
+                __searchable__ = ("title", "body")
+
+            results = await Post.search("async orm")
+
+        Dispatches to SQLite's FTS5 (``MATCH`` + built-in ``rank``) or
+        Postgres's ``tsvector``/``ts_rank`` depending on the current
+        connection's dialect -- whichever index your migration created.
+        Raises ``RuntimeError`` if ``__searchable__`` is empty (search
+        isn't configured for this model) or the dialect isn't one of
+        those two (search isn't supported there yet).
+        """
+        session = current_session()
+        dialect = session.bind.dialect.name if session.bind is not None else None
+        sql = cls._search_sql(dialect, include_deleted=include_deleted)
+        params: dict[str, Any] = {"query": query, "limit": limit}
+        if dialect == "postgresql":
+            params["language"] = cls.__search_language__
+
+        stmt = select(cls).from_statement(text(sql)).params(**params)
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
 
     async def save(self) -> Self:
         is_new = self.id is None
