@@ -1,6 +1,6 @@
 # HTTP & APIs
 
-Rate limiting, ETags, gzip compression, request correlation IDs, OpenAPI schema generation, and a GraphQL endpoint.
+Rate limiting, ETags, gzip compression, request correlation IDs, OpenAPI schema generation, a GraphQL endpoint, and idempotency keys.
 
 ## rate_limit
 
@@ -729,4 +729,95 @@ async def execute_graphql(
     if result.errors:
         body["errors"] = [error.formatted for error in result.errors]
     return body
+```
+
+## idempotency
+
+Idempotency keys: replay a mutating request's first response instead of running it again, for a client that must safely retry a `POST`/`PUT`/ `PATCH`/`DELETE` it can't tell succeeded or not -- a dropped connection, a timeout -- without double-charging a card, double-sending an email, or creating a duplicate row.
+
+Opt-in per request, the same way Stripe's API works: a request without an `Idempotency-Key` header is never touched. Built on :class:`zeython.cache.Cache` (`InMemoryCache` by default, `RedisCache` for a shared store across processes/machines) -- the same abstraction application code already uses for caching, not a bespoke storage backend.
+
+### IdempotencyMiddleware
+
+```python
+IdempotencyMiddleware(
+    app: Any,
+    *,
+    cache: Cache,
+    methods: Iterable[str] = DEFAULT_METHODS,
+    ttl: float = DEFAULT_TTL,
+    header: str = DEFAULT_HEADER,
+)
+```
+
+Pure ASGI middleware. See :class:`IdempotencyServiceProvider` for the usual way to register this.
+
+A request without the configured header (default `Idempotency-Key`), or whose method isn't in `methods` (default `POST`/`PUT`/ `PATCH`/`DELETE` -- the ones that aren't already naturally idempotent), passes straight through untouched.
+
+A first-seen key runs the request normally and stores its response (status, headers, body) under that key, scoped to this method and path. A repeated key within `ttl` replays the stored response verbatim instead of running the request again, adding an `Idempotency-Replayed: true` response header so a client (or your own logs) can tell the two cases apart.
+
+A repeated key whose request body doesn't match the first request's raises :class:`~zeython.exceptions.ConflictException` (409) rather than silently returning a stale response for what might be a different operation that reused the same key by mistake.
+
+A repeated key that arrives *while the first request with that key is still being processed* waits for it to finish, then replays its result, instead of running the operation a second time in parallel -- correct within one worker process. Across multiple processes or machines, only the *stored result* is shared (via :class:`~zeython.cache.RedisCache`); two processes racing on a brand-new key can both start processing it before either finishes -- the same in-process-only limitation :class:`~zeython.rate_limit.RateLimiter` and :class:`~zeython.cache.Cache` already document for their default backends, not something new here.
+
+Source code in `src/zeython/idempotency.py`
+
+```python
+def __init__(
+    self,
+    app: Any,
+    *,
+    cache: Cache,
+    methods: Iterable[str] = DEFAULT_METHODS,
+    ttl: float = DEFAULT_TTL,
+    header: str = DEFAULT_HEADER,
+) -> None:
+    self.app = app
+    self.cache = cache
+    self.methods = frozenset(method.upper() for method in methods)
+    self.ttl = ttl
+    self._header = header.lower().encode("latin-1")
+    self._locks: dict[str, asyncio.Lock] = {}
+```
+
+### IdempotencyServiceProvider
+
+```python
+IdempotencyServiceProvider(
+    app: Any,
+    *,
+    cache: Cache | None = None,
+    methods: Iterable[str] = DEFAULT_METHODS,
+    ttl: float = DEFAULT_TTL,
+    header: str = DEFAULT_HEADER,
+)
+```
+
+Bases: `ServiceProvider`
+
+Registers :class:`IdempotencyMiddleware`::
+
+```text
+app.register(IdempotencyServiceProvider(app))
+```
+
+Uses its own process-local :class:`~zeython.cache.InMemoryCache` by default -- pass `cache=` to share a :class:`~zeython.cache.RedisCache` with the rest of the app instead, so a replay works across every process/machine, not just the one that handled the original request.
+
+Source code in `src/zeython/idempotency.py`
+
+```python
+def __init__(
+    self,
+    app: Any,
+    *,
+    cache: Cache | None = None,
+    methods: Iterable[str] = DEFAULT_METHODS,
+    ttl: float = DEFAULT_TTL,
+    header: str = DEFAULT_HEADER,
+) -> None:
+    super().__init__(app)
+    self.cache = cache if cache is not None else InMemoryCache()
+    self.methods = methods
+    self.ttl = ttl
+    self.header = header
 ```

@@ -12,13 +12,13 @@
         <meta name="author" content="Md Mahedi Zaman Zaber">
       
       
-        <link rel="canonical" href="https://zeython.zaber.dev/docs/views/">
+        <link rel="canonical" href="https://zeython.zaber.dev/docs/idempotency/">
       
       
-        <link rel="prev" href="../database-seeding/">
+        <link rel="prev" href="../graphql/">
       
       
-        <link rel="next" href="../frontend/">
+        <link rel="next" href="../cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Views - Zeython Docs</title>
+        <title>Idempotency Keys - Zeython Docs</title>
       
     
     
@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#views" class="md-skip">
+        <a href="#idempotency-keys" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Views
+              Idempotency Keys
             
           </span>
         </div>
@@ -267,12 +267,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../database/" class="md-tabs__link">
           
   
@@ -309,10 +307,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../openapi/" class="md-tabs__link">
           
   
@@ -856,31 +856,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -898,7 +893,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1081,37 +1076,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Views
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../views/" class="md-nav__link">
         
   
   
@@ -1127,59 +1095,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#wiring-it-up" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Wiring it up
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-views-object-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using the Views object directly
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1563,26 +1478,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1600,7 +1520,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1699,10 +1619,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../idempotency/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Idempotency Keys
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1718,6 +1665,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-requests-this-covers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which requests this covers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-replayed-key-with-a-different-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A replayed key with a different body
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrent-retries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrent retries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-default-store-is-process-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The default store is process-local
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2997,10 +3052,54 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#wiring-it-up" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Wiring it up
+        Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-requests-this-covers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which requests this covers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-replayed-key-with-a-different-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A replayed key with a different body
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrent-retries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrent retries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-default-store-is-process-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The default store is process-local
       
     </span>
   </a>
@@ -3019,10 +3118,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-the-views-object-directly" class="md-nav__link">
+  <a href="#scope-limits" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using the Views object directly
+        Scope limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
       
     </span>
   </a>
@@ -3046,7 +3156,7 @@
 
 
   
-    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/views.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/zaber-dev/Zeython/edit/main/docs/idempotency.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -3054,48 +3164,113 @@
   
 
 
-<h1 id="views">Views<a class="headerlink" href="#views" title="Permanent link">&para;</a></h1>
-<p>Zeython renders server-side HTML with Jinja2, by convention reading templates
-from <code>resources/views/</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># app/Controllers/page_controller.py</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">PageController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"pages/show.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Hello"</span><span class="p">})</span>
+<h1 id="idempotency-keys">Idempotency Keys<a class="headerlink" href="#idempotency-keys" title="Permanent link">&para;</a></h1>
+<p><code>zeython.idempotency</code> replays a mutating request's first response instead
+of running it again, for a client that must safely retry a <code>POST</code>/<code>PUT</code>/
+<code>PATCH</code>/<code>DELETE</code> it can't tell succeeded or not — a dropped connection, a
+timeout, a proxy that gave up waiting. Without this, a naive retry can
+double-charge a card, double-send an email, or create a duplicate row;
+with it, the retry gets back exactly what the first attempt produced,
+without running the handler a second time.</p>
+<p>Opt-in per request, the same way Stripe's API works: a request without an
+<code>Idempotency-Key</code> header is never touched.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># main.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">IdempotencyServiceProvider</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">IdempotencyServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
 </span></code></pre></div>
-<div class="language-html highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- resources/views/pages/show.html --&gt;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">&lt;!doctype html&gt;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/orders<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Idempotency-Key: 8f14e45f-ceea-467e-9578-...'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"amount": 2000}'</span>
 </span></code></pre></div>
-<h2 id="wiring-it-up">Wiring it up<a class="headerlink" href="#wiring-it-up" title="Permanent link">&para;</a></h2>
-<p><code>render()</code> looks up the application's <code>Views</code> instance from the container, so
-register <code>ViewServiceProvider</code> alongside your other providers:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">DatabaseServiceProvider</span><span class="p">,</span> <span class="n">RouteServiceProvider</span><span class="p">,</span> <span class="n">ViewServiceProvider</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">app</span> <span class="o">=</span> <span class="n">Application</span><span class="p">()</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DatabaseServiceProvider</span><span class="p">)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ViewServiceProvider</span><span class="p">)</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RouteServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="p">(</span><span class="s2">"routes.web"</span><span class="p">,)))</span>
+<p>Send the same key again — from a genuine retry, or by hand to see it
+work — and the response comes back identical, with an added
+<code>Idempotency-Replayed: true</code> header, and the handler never runs a second
+time:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/orders<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Idempotency-Key: 8f14e45f-ceea-467e-9578-...'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"amount": 2000}'</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># same body, same status code, + Idempotency-Replayed: true</span>
+</span></code></pre></div>
+<p>Generating the key is the client's job, not the server's — usually a
+UUID minted once per logical operation (e.g. once when a "place order"
+button is clicked, reused across every retry of that same click, but
+never reused for the <em>next</em> order).</p>
+<h2 id="which-requests-this-covers">Which requests this covers<a class="headerlink" href="#which-requests-this-covers" title="Permanent link">&para;</a></h2>
+<p>By default: <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code> — the methods that aren't
+already naturally idempotent. <code>GET</code>/<code>HEAD</code>/<code>OPTIONS</code> are never touched,
+even with the header set, since retrying a <code>GET</code> is always safe on its
+own. Narrow it further if you only want this on specific operations
+(payments, say) rather than every mutating request:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">IdempotencyServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"POST"</span><span class="p">])</span>
+</span></code></pre></div>
+<p>Records are scoped per method <em>and</em> path, so the same key value used
+against two different endpoints doesn't collide.</p>
+<h2 id="a-replayed-key-with-a-different-body">A replayed key with a different body<a class="headerlink" href="#a-replayed-key-with-a-different-body" title="Permanent link">&para;</a></h2>
+<p>If a repeated <code>Idempotency-Key</code> shows up with a <strong>different</strong> request
+body than the first time, that's almost always a client bug — reusing a
+key across two logically different operations — not a legitimate retry.
+This raises <code>ConflictException</code> (409) instead of silently returning a
+response for the wrong request:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Idempotency-Key '8f14e45f-...' was already used with a different request body."</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="mi">409</span><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="concurrent-retries">Concurrent retries<a class="headerlink" href="#concurrent-retries" title="Permanent link">&para;</a></h2>
+<p>A key that arrives again <strong>while the first request with that key is
+still being processed</strong> — a client that retries eagerly, before the
+first attempt has even finished — waits for it to finish, then replays
+its result, rather than running the operation a second time in parallel.
+This is correct within one worker process. Across multiple processes or
+machines, only the <em>stored result</em> is shared (see below); two processes
+racing on a brand-new key can both start processing it before either
+finishes — the same in-process-only limitation
+<a href="../rate-limiting/#the-default-limiter-is-process-local"><code>RateLimiter</code></a> and
+<a href="../caching/"><code>Cache</code></a> already document for their default backends, not
+something new here.</p>
+<h2 id="the-default-store-is-process-local">The default store is process-local<a class="headerlink" href="#the-default-store-is-process-local" title="Permanent link">&para;</a></h2>
+<p><code>IdempotencyServiceProvider</code> uses its own
+<a href="../caching/"><code>InMemoryCache</code></a> by default — correct for a single process,
+and a real limitation once you run multiple workers or machines: a retry
+that lands on a <em>different</em> process than the one that handled the
+original request won't find the stored response, and will process the
+request again. Share a <a href="../redis/"><code>RedisCache</code></a> instead for a store every
+process/machine sees:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache</span><span class="p">,</span> <span class="n">IdempotencyServiceProvider</span><span class="p">,</span> <span class="n">RedisCache</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">cache</span> <span class="o">=</span> <span class="n">RedisCache</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">))</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">IdempotencyServiceProvider</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">))</span>
 </span></code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>By default templates are read from <code>&lt;project root&gt;/resources/views</code>. Override
-with <code>VIEWS_PATH</code> in <code>.env</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>VIEWS_PATH=templates
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">IdempotencyServiceProvider</span><span class="p">(</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">app</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                              <span class="c1"># default: a fresh InMemoryCache()</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"PUT"</span><span class="p">,</span> <span class="s2">"PATCH"</span><span class="p">,</span> <span class="s2">"DELETE"</span><span class="p">],</span>  <span class="c1"># default</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">ttl</span><span class="o">=</span><span class="mf">86400.0</span><span class="p">,</span>                              <span class="c1"># default: 24 hours</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">header</span><span class="o">=</span><span class="s2">"Idempotency-Key"</span><span class="p">,</span>                 <span class="c1"># default</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="using-the-views-object-directly">Using the <code>Views</code> object directly<a class="headerlink" href="#using-the-views-object-directly" title="Permanent link">&para;</a></h2>
-<p><code>render()</code> is sugar over the container-bound <code>Views</code> instance; you can also
-resolve and use it directly if you need more control (custom filters, globals):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Views</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">views</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">Views</span><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">views</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"shout"</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-</span></code></pre></div>
+<p><code>ttl</code> is how long a stored response stays replayable — after it expires,
+the same key is treated as brand new and the request runs again. 24 hours
+matches the retention window Stripe's own API documents; shorten it if
+your operations are retried on a much tighter loop, or lengthen it for
+something a client might reasonably retry a day later.</p>
+<h2 id="scope-limits">Scope limits<a class="headerlink" href="#scope-limits" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The request body is buffered in memory to compute its hash (for the
+  conflict check above) and to replay it to your handler — the same
+  trade-off <a href="../api-standards/#conditional-requests-etags"><code>ETagServiceProvider</code></a>
+  makes on the response side. Fine for a typical JSON request body; not a
+  fit in front of a large streamed upload.</li>
+<li>There's no automatic cleanup beyond <code>ttl</code> — a very high-cardinality key
+  space (a fresh UUID per request, correctly used) naturally self-limits
+  since old entries simply expire; this isn't a request-deduplication
+  cache meant to hold every request ever made indefinitely.</li>
+</ul>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<p>See <a href="../reference/http-api/"><code>zeython.idempotency</code></a> for the full API.</p>
 
 
 
@@ -3131,7 +3306,7 @@ resolve and use it directly if you need more control (custom filters, globals):<
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../database-seeding/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Factories &amp; Seeders">
+          <a href="../graphql/" class="md-footer__link md-footer__link--prev" aria-label="Previous: GraphQL">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3141,20 +3316,20 @@ resolve and use it directly if you need more control (custom filters, globals):<
                 Previous
               </span>
               <div class="md-ellipsis">
-                Factories & Seeders
+                GraphQL
               </div>
             </div>
           </a>
         
         
           
-          <a href="../frontend/" class="md-footer__link md-footer__link--next" aria-label="Next: Frontend &amp; CSS">
+          <a href="../cli/" class="md-footer__link md-footer__link--next" aria-label="Next: CLI Reference">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Frontend & CSS
+                CLI Reference
               </div>
             </div>
             <div class="md-footer__button md-icon">
