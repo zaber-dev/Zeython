@@ -164,7 +164,7 @@ from zeython.rate_limit import (
     throttle,
 )
 from zeython.request_id import RequestIdMiddleware, RequestIdServiceProvider, request_id
-from zeython.routing import Controller, Router
+from zeython.routing import Controller, Router, current_api_version, deprecated
 from zeython.schedule import Schedule, ScheduledEvent, ScheduleServiceProvider
 from zeython.search import (
     create_fts5_index,
@@ -229,6 +229,8 @@ __all__ = [
     "Factory",
     "Seeder",
     "Router",
+    "current_api_version",
+    "deprecated",
     "ServiceProvider",
     "DatabaseServiceProvider",
     "RouteServiceProvider",

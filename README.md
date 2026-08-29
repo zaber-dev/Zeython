@@ -69,6 +69,11 @@ scaffolding on every project. Zeython does that assembly once:
   SQLite's FTS5 or Postgres's `tsvector`/GIN, whichever your database
   already ships, ranked most relevant first, kept in sync by the database
   itself. See [Full-Text Search](docs/search.md).
+- **API versioning built into the router** — group routes by version with
+  `Router.version()`, read the active one from any handler with
+  `current_api_version()`, and flag an old one for removal with standard
+  `Deprecation`/`Sunset` headers via `deprecated()`. See
+  [API Standards](docs/api-standards.md#api-versioning).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
   suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
