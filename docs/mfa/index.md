@@ -104,7 +104,7 @@ async def mfa_challenge(self, request):
 
 ## Recovery codes
 
-Each of the 8 codes `confirm()` returns works exactly once — passing one to `complete_challenge()` (or `verify_and_consume()` directly) removes it from storage on success, so a captured or reused code can't be replayed. They exist for the case an authenticator app is lost or a phone is wiped; without them, a locked-out user has no way back into their own account short of a manual database fix.
+Each of the 8 codes `confirm()` returns works exactly once — passing one to `complete_challenge()` (or `verify_and_consume()` directly) removes it from storage on success, so a captured or reused code can't be replayed, including by two requests presenting it at the same time: the check locks the user's row (`Model.find(..., for_update=True)`, see [Locking a row](https://zeython.zaber.dev/docs/database/#locking-a-row)) so the second request's check blocks until the first's transaction actually commits, then correctly finds the code already gone. On SQLite specifically — no row-level locking there — this guarantee doesn't hold; two genuinely concurrent requests can still both succeed, the same as if the lock weren't there at all. They exist for the case an authenticator app is lost or a phone is wiped; without them, a locked-out user has no way back into their own account short of a manual database fix.
 
 ## Disabling
 

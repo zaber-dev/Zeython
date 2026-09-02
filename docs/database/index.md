@@ -78,6 +78,22 @@ If `reserve_inventory`/`charge_payment` raise, only their writes roll back (a `S
 
 Requires an active session, same as the rest of the Active Record API -- raises the same `RuntimeError` as calling `Model.create()` outside one.
 
+## Locking a row
+
+`find(id, for_update=True)` locks the row for the rest of the current transaction (`SELECT ... FOR UPDATE`) -- a second, concurrent `find(..., for_update=True)` for the same row elsewhere blocks until this transaction commits or rolls back, instead of both transactions reading the same not-yet-committed state and independently making the same decision from it:
+
+```python
+async def redeem(self, request):
+    coupon = await Coupon.find(coupon_id, for_update=True)
+    if coupon.redeemed:
+        raise ConflictException("Already redeemed.")
+    await coupon.update(redeemed=True)
+```
+
+Without the lock, two requests racing to redeem the same coupon could both read `redeemed=False` before either had written `True`, and both would succeed -- `zeython.mfa.verify_and_consume()` uses this exact pattern to stop two requests from spending the same one-time recovery code. Reach for this whenever a decision depends on a row's *current* state and getting it wrong twice is a real problem (redeeming something one-time-use, decrementing a limited stock count) -- not for every read just in case, since a lock held across the rest of a slow request blocks whoever's waiting on it for that whole time.
+
+**SQLite has no row-level locking** -- `for_update=True` there compiles away to an ordinary, unlocked `SELECT` (and logs a warning saying so): two concurrent SQLite readers still both see the pre-write state, same as without the flag. Postgres and MySQL support it fully.
+
 ## Pagination
 
 `all()` loads every matching row — fine for a small table, not for a listing endpoint whose table grows without bound. `paginate()` is the same query, sliced:

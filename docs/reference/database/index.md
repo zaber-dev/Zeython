@@ -178,6 +178,64 @@ async def deleted(self) -> None:
     """Runs after delete() -- soft or hard."""
 ```
 
+#### find
+
+```python
+find(
+    id_: Any,
+    *,
+    include_deleted: bool = False,
+    include: Iterable[str] = (),
+    for_update: bool = False,
+) -> Self | None
+```
+
+Find by primary key, or `None`.
+
+Pass `for_update=True` to lock the row for the rest of this transaction (`SELECT ... FOR UPDATE`) on Postgres/MySQL -- a second, concurrent `find(..., for_update=True)` for the same row elsewhere (this process or another) blocks until this transaction commits or rolls back, instead of both transactions reading the same not-yet-committed state and independently making the same decision from it. See :func:`zeython.mfa.verify_and_consume` for a real example this closes: two concurrent requests spending the same one-time recovery code.
+
+SQLite has no row-level locking -- there, `for_update=True` compiles away to an ordinary, unlocked `SELECT` (and logs a warning saying so): two concurrent SQLite readers still both see the pre-write state, the same as without this flag. Postgres and MySQL support it fully.
+
+Source code in `src/zeython/db/model.py`
+
+```python
+@classmethod
+async def find(
+    cls, id_: Any, *, include_deleted: bool = False, include: Iterable[str] = (), for_update: bool = False
+) -> Self | None:
+    """Find by primary key, or ``None``.
+
+    Pass ``for_update=True`` to lock the row for the rest of this
+    transaction (``SELECT ... FOR UPDATE``) on Postgres/MySQL -- a
+    second, concurrent ``find(..., for_update=True)`` for the same row
+    elsewhere (this process or another) blocks until this transaction
+    commits or rolls back, instead of both transactions reading the
+    same not-yet-committed state and independently making the same
+    decision from it. See :func:`zeython.mfa.verify_and_consume` for a
+    real example this closes: two concurrent requests spending the
+    same one-time recovery code.
+
+    SQLite has no row-level locking -- there, ``for_update=True``
+    compiles away to an ordinary, unlocked ``SELECT`` (and logs a
+    warning saying so): two concurrent SQLite readers still both see
+    the pre-write state, the same as without this flag. Postgres and
+    MySQL support it fully.
+    """
+    session = current_session()
+    if for_update:
+        dialect = session.bind.dialect.name if session.bind is not None else None
+        if dialect == "sqlite":
+            logger.warning(
+                "%s.find(..., for_update=True): SQLite has no row-level locking, "
+                "so this is an ordinary, unlocked SELECT -- two concurrent readers "
+                "can still both see the same pre-write state.",
+                cls.__name__,
+            )
+    stmt = cls._find_stmt(id_, include_deleted=include_deleted, include=include, for_update=for_update)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+```
+
 #### paginate
 
 ```python

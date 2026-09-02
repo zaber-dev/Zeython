@@ -3283,10 +3283,17 @@ same way you'd throttle <code>/login</code> — see <a href="../rate-limiting/">
 <h2 id="recovery-codes">Recovery codes<a class="headerlink" href="#recovery-codes" title="Permanent link">&para;</a></h2>
 <p>Each of the 8 codes <code>confirm()</code> returns works exactly once — passing one
 to <code>complete_challenge()</code> (or <code>verify_and_consume()</code> directly) removes it
-from storage on success, so a captured or reused code can't be replayed.
-They exist for the case an authenticator app is lost or a phone is wiped;
-without them, a locked-out user has no way back into their own account
-short of a manual database fix.</p>
+from storage on success, so a captured or reused code can't be replayed,
+including by two requests presenting it at the same time: the check locks
+the user's row (<code>Model.find(..., for_update=True)</code>, see
+<a href="../database/#locking-a-row">Locking a row</a>) so the second request's check
+blocks until the first's transaction actually commits, then correctly
+finds the code already gone. On SQLite specifically — no row-level
+locking there — this guarantee doesn't hold; two genuinely concurrent
+requests can still both succeed, the same as if the lock weren't there at
+all. They exist for the case an authenticator app is lost or a phone is
+wiped; without them, a locked-out user has no way back into their own
+account short of a manual database fix.</p>
 <h2 id="disabling">Disabling<a class="headerlink" href="#disabling" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.mfa</span><span class="w"> </span><span class="kn">import</span> <span class="n">disable</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>

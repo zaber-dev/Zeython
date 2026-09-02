@@ -1051,6 +1051,22 @@ If `reserve_inventory`/`charge_payment` raise, only their writes roll back (a `S
 
 Requires an active session, same as the rest of the Active Record API -- raises the same `RuntimeError` as calling `Model.create()` outside one.
 
+## Locking a row
+
+`find(id, for_update=True)` locks the row for the rest of the current transaction (`SELECT ... FOR UPDATE`) -- a second, concurrent `find(..., for_update=True)` for the same row elsewhere blocks until this transaction commits or rolls back, instead of both transactions reading the same not-yet-committed state and independently making the same decision from it:
+
+```python
+async def redeem(self, request):
+    coupon = await Coupon.find(coupon_id, for_update=True)
+    if coupon.redeemed:
+        raise ConflictException("Already redeemed.")
+    await coupon.update(redeemed=True)
+```
+
+Without the lock, two requests racing to redeem the same coupon could both read `redeemed=False` before either had written `True`, and both would succeed -- `zeython.mfa.verify_and_consume()` uses this exact pattern to stop two requests from spending the same one-time recovery code. Reach for this whenever a decision depends on a row's *current* state and getting it wrong twice is a real problem (redeeming something one-time-use, decrementing a limited stock count) -- not for every read just in case, since a lock held across the rest of a slow request blocks whoever's waiting on it for that whole time.
+
+**SQLite has no row-level locking** -- `for_update=True` there compiles away to an ordinary, unlocked `SELECT` (and logs a warning saying so): two concurrent SQLite readers still both see the pre-write state, same as without the flag. Postgres and MySQL support it fully.
+
 ## Pagination
 
 `all()` loads every matching row — fine for a small table, not for a listing endpoint whose table grows without bound. `paginate()` is the same query, sliced:
@@ -2227,7 +2243,7 @@ async def mfa_challenge(self, request):
 
 ## Recovery codes
 
-Each of the 8 codes `confirm()` returns works exactly once — passing one to `complete_challenge()` (or `verify_and_consume()` directly) removes it from storage on success, so a captured or reused code can't be replayed. They exist for the case an authenticator app is lost or a phone is wiped; without them, a locked-out user has no way back into their own account short of a manual database fix.
+Each of the 8 codes `confirm()` returns works exactly once — passing one to `complete_challenge()` (or `verify_and_consume()` directly) removes it from storage on success, so a captured or reused code can't be replayed, including by two requests presenting it at the same time: the check locks the user's row (`Model.find(..., for_update=True)`, see [Locking a row](https://zeython.zaber.dev/docs/database/#locking-a-row)) so the second request's check blocks until the first's transaction actually commits, then correctly finds the code already gone. On SQLite specifically — no row-level locking there — this guarantee doesn't hold; two genuinely concurrent requests can still both succeed, the same as if the lock weren't there at all. They exist for the case an authenticator app is lost or a phone is wiped; without them, a locked-out user has no way back into their own account short of a manual database fix.
 
 ## Disabling
 
@@ -7754,6 +7770,64 @@ async def deleted(self) -> None:
     """Runs after delete() -- soft or hard."""
 ```
 
+#### find
+
+```python
+find(
+    id_: Any,
+    *,
+    include_deleted: bool = False,
+    include: Iterable[str] = (),
+    for_update: bool = False,
+) -> Self | None
+```
+
+Find by primary key, or `None`.
+
+Pass `for_update=True` to lock the row for the rest of this transaction (`SELECT ... FOR UPDATE`) on Postgres/MySQL -- a second, concurrent `find(..., for_update=True)` for the same row elsewhere (this process or another) blocks until this transaction commits or rolls back, instead of both transactions reading the same not-yet-committed state and independently making the same decision from it. See :func:`zeython.mfa.verify_and_consume` for a real example this closes: two concurrent requests spending the same one-time recovery code.
+
+SQLite has no row-level locking -- there, `for_update=True` compiles away to an ordinary, unlocked `SELECT` (and logs a warning saying so): two concurrent SQLite readers still both see the pre-write state, the same as without this flag. Postgres and MySQL support it fully.
+
+Source code in `src/zeython/db/model.py`
+
+```python
+@classmethod
+async def find(
+    cls, id_: Any, *, include_deleted: bool = False, include: Iterable[str] = (), for_update: bool = False
+) -> Self | None:
+    """Find by primary key, or ``None``.
+
+    Pass ``for_update=True`` to lock the row for the rest of this
+    transaction (``SELECT ... FOR UPDATE``) on Postgres/MySQL -- a
+    second, concurrent ``find(..., for_update=True)`` for the same row
+    elsewhere (this process or another) blocks until this transaction
+    commits or rolls back, instead of both transactions reading the
+    same not-yet-committed state and independently making the same
+    decision from it. See :func:`zeython.mfa.verify_and_consume` for a
+    real example this closes: two concurrent requests spending the
+    same one-time recovery code.
+
+    SQLite has no row-level locking -- there, ``for_update=True``
+    compiles away to an ordinary, unlocked ``SELECT`` (and logs a
+    warning saying so): two concurrent SQLite readers still both see
+    the pre-write state, the same as without this flag. Postgres and
+    MySQL support it fully.
+    """
+    session = current_session()
+    if for_update:
+        dialect = session.bind.dialect.name if session.bind is not None else None
+        if dialect == "sqlite":
+            logger.warning(
+                "%s.find(..., for_update=True): SQLite has no row-level locking, "
+                "so this is an ordinary, unlocked SELECT -- two concurrent readers "
+                "can still both see the same pre-write state.",
+                cls.__name__,
+            )
+    stmt = cls._find_stmt(id_, include_deleted=include_deleted, include=include, for_update=for_update)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+```
+
 #### paginate
 
 ```python
@@ -10355,7 +10429,11 @@ async def disable(user: Any) -> None:
 verify_and_consume(user: Any, code: str) -> bool
 ```
 
-`True` if `code` is a valid live TOTP code, or an unused recovery code. A matching recovery code is consumed -- removed from storage -- on success, since each is one-time use; a spent code never verifies again.
+`True` if `code` is a valid live TOTP code, or an unused recovery code. A matching recovery code is consumed -- removed from storage -- on success, since each is one-time use; a spent code never verifies again, including under two requests racing to spend it at once (on Postgres/MySQL -- see the note below for SQLite).
+
+The recovery-code check re-fetches `user` with `find(..., for_update=True)` rather than trusting whatever's already loaded on the `user` passed in: without a lock, two concurrent requests presenting the same code could each read it as still unused before either had written its removal, and both would be told the code was valid. Locking the row means the second request's re-fetch blocks until the first's transaction actually commits, so it then correctly sees the code already gone.
+
+On SQLite specifically, this guarantee doesn't hold -- see :meth:`~zeython.db.Model.find`'s `for_update` docs -- so two genuinely concurrent requests there can still both succeed, same as before this existed.
 
 Source code in `src/zeython/mfa.py`
 
@@ -10364,17 +10442,35 @@ async def verify_and_consume(user: Any, code: str) -> bool:
     """``True`` if ``code`` is a valid live TOTP code, or an unused recovery
     code. A matching recovery code is consumed -- removed from storage --
     on success, since each is one-time use; a spent code never verifies
-    again.
+    again, including under two requests racing to spend it at once (on
+    Postgres/MySQL -- see the note below for SQLite).
+
+    The recovery-code check re-fetches ``user`` with
+    ``find(..., for_update=True)`` rather than trusting whatever's already
+    loaded on the ``user`` passed in: without a lock, two concurrent
+    requests presenting the same code could each read it as still unused
+    before either had written its removal, and both would be told the
+    code was valid. Locking the row means the second request's re-fetch
+    blocks until the first's transaction actually commits, so it then
+    correctly sees the code already gone.
+
+    On SQLite specifically, this guarantee doesn't hold -- see
+    :meth:`~zeython.db.Model.find`'s ``for_update`` docs -- so two
+    genuinely concurrent requests there can still both succeed, same as
+    before this existed.
     """
     if not user.mfa_enabled or not user.mfa_secret:
         return False
     if verify_totp(user.mfa_secret, code):
         return True
 
-    for hashed in user.mfa_recovery_codes or []:
+    locked = await type(user).find(user.id, for_update=True)
+    if locked is None:
+        return False
+    for hashed in locked.mfa_recovery_codes or []:
         if verify_password(code, hashed):
-            user.mfa_recovery_codes = [h for h in user.mfa_recovery_codes if h != hashed]
-            await user.save()
+            locked.mfa_recovery_codes = [h for h in locked.mfa_recovery_codes if h != hashed]
+            await locked.save()
             return True
     return False
 ```
