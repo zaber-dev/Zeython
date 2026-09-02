@@ -24,7 +24,8 @@ GPL-3.0 to MIT.
 - `Model` — async Active-Record base class (SQLAlchemy 2.0 async) with soft
   deletes, audit timestamps, `to_dict()` serialization, safe relationship
   eager-loading (`include=`), lifecycle hooks (`creating`/`created`/etc.),
-  pagination, and a dev-only N+1 query detector.
+  pagination, row locking (`find(..., for_update=True)`, a no-op on
+  SQLite -- no row-level locking there), and a dev-only N+1 query detector.
 - `Config` — layered `.env` + process-environment configuration.
 - HTTP exception hierarchy (`NotFoundException`, `ValidationException`,
   etc.) with a default JSON error handler and RFC 7807 `problem+json`
@@ -71,8 +72,12 @@ GPL-3.0 to MIT.
   replayed assertion ID, serves SP metadata for the IdP admin, and hands
   back the same kind of normalized identity `zeython.oauth` does.
 - Two-factor authentication (`zeython.mfa`) — RFC 6238 TOTP with no new
-  dependency, one-time recovery codes, and a login-time challenge that
-  gates `zeython.auth.login()` behind a second factor once a user enrolls.
+  dependency, one-time recovery codes (spending one locks the row via
+  `Model.find(..., for_update=True)` so two requests racing to present
+  the same code can't both succeed on Postgres/MySQL -- SQLite has no
+  row-level locking, so that guarantee doesn't hold there), and a
+  login-time challenge that gates `zeython.auth.login()` behind a second
+  factor once a user enrolls.
 - Authorization: `Gate`, `authorize()`, Policy classes, a global
   `before()` hook, and role/permission checks (RBAC).
 - CSRF protection, on by default with session auth.
