@@ -147,15 +147,25 @@ class GraphQLServiceProvider(ServiceProvider):
                     raise MethodNotAllowedException("GraphiQL is disabled -- send a POST request instead.")
                 return HTMLResponse(_GRAPHIQL_HTML.format(graphql_url=self.path))
 
-            payload = await request.json()
+            try:
+                payload = await request.json()
+            except ValueError as exc:
+                raise BadRequestException(f"Malformed JSON request body: {exc}") from exc
+            if not isinstance(payload, dict):
+                raise BadRequestException("A GraphQL request body must be a JSON object.")
+
             query = payload.get("query")
-            if not query:
-                raise BadRequestException("A GraphQL request body must include a 'query' field.")
+            if not isinstance(query, str) or not query:
+                raise BadRequestException("A GraphQL request body must include a non-empty string 'query' field.")
+
+            variables = payload.get("variables")
+            if variables is not None and not isinstance(variables, dict):
+                raise BadRequestException("A GraphQL request's 'variables' must be a JSON object.")
 
             body = await execute_graphql(
                 self.schema,
                 query=query,
-                variables=payload.get("variables"),
+                variables=variables,
                 operation_name=payload.get("operationName"),
                 context_value={"request": request, "container": request.app.state.container},
             )

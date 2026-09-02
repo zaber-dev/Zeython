@@ -19,6 +19,7 @@ from onelogin.saml2.utils import OneLogin_Saml2_Utils
 from starlette.responses import JSONResponse
 
 from zeython.application import Application
+from zeython.cache import InMemoryCache
 from zeython.config import Config
 from zeython.saml import (
     SamlServiceProvider,
@@ -208,6 +209,69 @@ async def test_acs_accepts_a_validly_signed_response(
     assert body["name"] == "Ada Lovelace"
     assert body["session_index"] == "_session123"
     assert body["attributes"] == {"email": ["ada@example.com"], "name": ["Ada Lovelace"]}
+
+
+async def test_acs_rejects_a_replayed_response(tmp_path: Path, provider, idp_cert_and_key: tuple[str, str]) -> None:
+    idp_cert, idp_key = idp_cert_and_key
+    app = await _make_app(tmp_path, provider)
+    signed = _build_signed_response(idp_cert, idp_key)
+    encoded = base64.b64encode(signed).decode()
+
+    async with client(app, base_url="https://app.example.com") as http:
+        first = await http.post(f"/saml/{provider.name}/acs", data={"SAMLResponse": encoded})
+        second = await http.post(f"/saml/{provider.name}/acs", data={"SAMLResponse": encoded})
+
+    assert first.status_code == 200
+    assert second.status_code == 403
+
+
+async def test_acs_accepts_two_independently_signed_responses(
+    tmp_path: Path, provider, idp_cert_and_key: tuple[str, str]
+) -> None:
+    # Regression guard for the replay check itself: two *different*
+    # assertions (each with their own generated ID) from the same IdP
+    # must not collide with each other.
+    idp_cert, idp_key = idp_cert_and_key
+    app = await _make_app(tmp_path, provider)
+
+    async with client(app, base_url="https://app.example.com") as http:
+        first = await http.post(
+            f"/saml/{provider.name}/acs",
+            data={"SAMLResponse": base64.b64encode(_build_signed_response(idp_cert, idp_key)).decode()},
+        )
+        second = await http.post(
+            f"/saml/{provider.name}/acs",
+            data={"SAMLResponse": base64.b64encode(_build_signed_response(idp_cert, idp_key)).decode()},
+        )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+
+async def test_replay_protection_uses_an_explicitly_shared_cache(
+    tmp_path: Path, provider, idp_cert_and_key: tuple[str, str]
+) -> None:
+    idp_cert, idp_key = idp_cert_and_key
+    shared_cache = InMemoryCache()
+    app = Application(Config.load(tmp_path))
+    app.register(SamlServiceProvider(app, providers=[provider], replay_cache=shared_cache))
+
+    @app.post("/saml/{provider}/acs")
+    async def acs(request):
+        identity = await saml_acs(request, request.path_params["provider"])
+        return JSONResponse({"email": identity.email})
+
+    signed = _build_signed_response(idp_cert, idp_key)
+    async with client(app, base_url="https://app.example.com") as http:
+        response = await http.post(
+            f"/saml/{provider.name}/acs", data={"SAMLResponse": base64.b64encode(signed).decode()}
+        )
+
+    assert response.status_code == 200
+    # The assertion ID landed in the *caller's own* cache instance, not a
+    # private one the manager built internally -- proving replay tracking
+    # can be pointed at a real shared RedisCache in production.
+    assert any(key.startswith("saml:seen-assertion:") for key in shared_cache._entries)
 
 
 async def test_acs_rejects_a_tampered_response(tmp_path: Path, provider, idp_cert_and_key: tuple[str, str]) -> None:
