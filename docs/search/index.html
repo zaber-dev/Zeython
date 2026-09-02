@@ -1059,6 +1059,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#query-is-always-treated-as-plain-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query is always treated as plain text
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-this-isnt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1070,7 +1092,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#api-reference_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         API reference
@@ -3096,6 +3118,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#query-is-always-treated-as-plain-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query is always treated as plain text
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-this-isnt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3107,7 +3151,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#api-reference_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         API reference
@@ -3214,6 +3258,22 @@ need it, and keep them in sync.</p>
 <h2 id="limiting-results">Limiting results<a class="headerlink" href="#limiting-results" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">"async orm"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># default 20</span>
 </span></code></pre></div>
+<h2 id="query-is-always-treated-as-plain-text"><code>query</code> is always treated as plain text<a class="headerlink" href="#query-is-always-treated-as-plain-text" title="Permanent link">&para;</a></h2>
+<p>Pass through whatever a search box actually receives — a stray quote, a
+hyphenated word, a colon, a lone <code>AND</code> — and it's searched for as literal
+text, not parsed as a query mini-language:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">"well-known movie"</span><span class="p">)</span>   <span class="c1"># matches "well-known" and "movie"</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">"what's new?"</span><span class="p">)</span>        <span class="c1"># the apostrophe/quote is just text</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>                   <span class="c1"># [] -- nothing to search for, no query run</span>
+</span></code></pre></div>
+<p>Both engines are safe here for the same reason (each does its own thing to
+get there): Postgres's <code>plainto_tsquery()</code> already always treats its
+input as plain text; on SQLite, <code>Model.search()</code> quotes each
+whitespace-separated term as an FTS5 string literal before it reaches
+<code>MATCH</code>, so a raw query string can never be parsed as FTS5's own operator
+syntax (<code>AND</code>/<code>OR</code>/<code>NOT</code>, <code>col:</code> filters, unbalanced <code>"</code>/<code>(</code>) and crash
+the request with a syntax error the way it would unquoted.</p>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <h2 id="what-this-isnt">What this isn't<a class="headerlink" href="#what-this-isnt" title="Permanent link">&para;</a></h2>
 <p><code>Model.search()</code> is a thin, honest dispatch over each database's own
 full-text SQL — not a search engine. It doesn't give you: relevance
@@ -3229,7 +3289,7 @@ service to run, not every case.</p>
 naming the dialect) — its own full-text indexes work differently enough
 from SQLite/Postgres's that adding a third dispatch branch is deliberately
 left for when someone actually needs it, not implemented speculatively.</p>
-<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<h2 id="api-reference_1">API reference<a class="headerlink" href="#api-reference_1" title="Permanent link">&para;</a></h2>
 <p>See <a href="../reference/database/"><code>zeython.search</code></a> for the full API, and
 <a href="../reference/database/"><code>Model.search()</code></a> alongside the rest of <code>Model</code>.</p>
 

@@ -255,6 +255,8 @@ results = await Post.search("async orm")
 
 Dispatches to SQLite's FTS5 (`MATCH` + built-in `rank`) or Postgres's `tsvector`/`ts_rank` depending on the current connection's dialect -- whichever index your migration created. Raises `RuntimeError` if `__searchable__` is empty (search isn't configured for this model) or the dialect isn't one of those two (search isn't supported there yet).
 
+A blank `query` (or one that's only whitespace) returns `[]` without touching the database -- there's nothing to search for. Otherwise `query` is treated as plain text a user typed, not a query mini-language: every term matches literally, so a stray quote, hyphen, colon, or the word "AND" is searched for as text instead of raising a syntax error or being parsed as an operator.
+
 Source code in `src/zeython/db/model.py`
 
 ```python
@@ -275,10 +277,21 @@ async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = Fa
     Raises ``RuntimeError`` if ``__searchable__`` is empty (search
     isn't configured for this model) or the dialect isn't one of
     those two (search isn't supported there yet).
+
+    A blank ``query`` (or one that's only whitespace) returns ``[]``
+    without touching the database -- there's nothing to search for.
+    Otherwise ``query`` is treated as plain text a user typed, not a
+    query mini-language: every term matches literally, so a stray
+    quote, hyphen, colon, or the word "AND" is searched for as text
+    instead of raising a syntax error or being parsed as an operator.
     """
     session = current_session()
     dialect = session.bind.dialect.name if session.bind is not None else None
     sql = cls._search_sql(dialect, include_deleted=include_deleted)
+    if not query.strip():
+        return []
+    if dialect == "sqlite":
+        query = cls._quote_fts5_terms(query)
     params: dict[str, Any] = {"query": query, "limit": limit}
     if dialect == "postgresql":
         params["language"] = cls.__search_language__
