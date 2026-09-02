@@ -191,7 +191,7 @@ end-to-end tutorial. Licensed under MIT.
 - Published benchmarks: Zeython vs. raw Starlette vs. FastAPI, with
   methodology and caveats disclosed.
 - CI: lint (ruff), type-check (mypy), tests across Python 3.11–3.13
-  (with a live Redis service container), a coverage floor (~94% actual,
+  (with a live Redis service container), a coverage floor (~95% actual,
   enforced at 90%), and a scaffold smoke test that generates a project,
   migrates it, and runs its own test suite.
 - `AGENTS.md` for AI coding agents working in Zeython codebases.
