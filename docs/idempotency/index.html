@@ -1715,6 +1715,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#a-5xx-response-is-never-cached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A 5xx response is never cached
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#concurrent-retries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3085,6 +3096,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#a-5xx-response-is-never-cached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A 5xx response is never cached
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#concurrent-retries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3218,6 +3240,15 @@ This raises <code>ConflictException</code> (409) instead of silently returning a
 response for the wrong request:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Idempotency-Key '8f14e45f-...' was already used with a different request body."</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="mi">409</span><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="a-5xx-response-is-never-cached">A <code>5xx</code> response is never cached<a class="headerlink" href="#a-5xx-response-is-never-cached" title="Permanent link">&para;</a></h2>
+<p>Only a <code>2xx</code>/<code>4xx</code> response gets stored — a deterministic, completed
+outcome, exactly what an idempotency key is meant to protect. A <code>5xx</code>
+means the operation didn't genuinely complete (a downstream timeout, a
+dropped DB connection), so it's never cached: a retry with the same key
+reprocesses the request from scratch instead of replaying the same
+failure until <code>ttl</code> expires, which would defeat the entire point of
+retrying. Once a retry succeeds, <em>that</em> response is what gets cached and
+replayed by any further retry.</p>
 <h2 id="concurrent-retries">Concurrent retries<a class="headerlink" href="#concurrent-retries" title="Permanent link">&para;</a></h2>
 <p>A key that arrives again <strong>while the first request with that key is
 still being processed</strong> — a client that retries eagerly, before the

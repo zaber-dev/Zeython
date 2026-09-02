@@ -118,11 +118,35 @@ saml_provider(
 )
 ```
 
+## Replay protection
+
+A signed, still-valid SAMLResponse is, cryptographically, exactly as valid the second time it's submitted as the first -- signature checking alone doesn't stop a network observer (or a buggy IdP integration) from resubmitting one it captured. `SamlManager` tracks every assertion ID it accepts and rejects a second callback presenting the same one:
+
+```python
+app.register(SamlServiceProvider(
+    app,
+    providers=[...],
+    replay_window=300.0,  # seconds an assertion ID is remembered -- the default
+))
+```
+
+Tracked in its own process-local `InMemoryCache` by default, the same in-process-only limitation [`RateLimiter`](https://zeython.zaber.dev/docs/rate-limiting/index.md) and [`Cache`](https://zeython.zaber.dev/docs/caching/index.md) already document — pass `replay_cache=` (a [`RedisCache`](https://zeython.zaber.dev/docs/redis/index.md)) to share it across every process/machine instead of each one only remembering what it itself has seen:
+
+```python
+from zeython import RedisCache, SamlServiceProvider
+
+app.register(SamlServiceProvider(
+    app,
+    providers=[...],
+    replay_cache=RedisCache(app.config.get("redis.url")),
+))
+```
+
 ## Errors
 
 - **Unknown provider** in the URL -- `NotFoundException` (404), the same as an unknown OAuth provider name.
 - **No `SAMLResponse`** in the ACS POST body -- `BadRequestException` (400): the IdP (or whoever's calling this URL) didn't send one.
-- **Response failed validation** -- `ForbiddenException` (403): a missing/invalid signature, an expired assertion, a response meant for a different SP (wrong audience), or one delivered to the wrong URL (wrong recipient/destination). The exception message names which of python3-saml's own validation errors fired, and its detailed reason.
+- **Response failed validation, or already used once** -- `ForbiddenException` (403): a missing/invalid signature, an expired assertion, a response meant for a different SP (wrong audience), one delivered to the wrong URL (wrong recipient/destination), or an assertion ID this SP has already accepted (see "Replay protection" above). The exception message names which of python3-saml's own validation errors fired, and its detailed reason.
 
 ## What this isn't
 

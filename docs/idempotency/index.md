@@ -51,6 +51,10 @@ If a repeated `Idempotency-Key` shows up with a **different** request body than 
 {"error": "Idempotency-Key '8f14e45f-...' was already used with a different request body.", "status": 409}
 ```
 
+## A `5xx` response is never cached
+
+Only a `2xx`/`4xx` response gets stored — a deterministic, completed outcome, exactly what an idempotency key is meant to protect. A `5xx` means the operation didn't genuinely complete (a downstream timeout, a dropped DB connection), so it's never cached: a retry with the same key reprocesses the request from scratch instead of replaying the same failure until `ttl` expires, which would defeat the entire point of retrying. Once a retry succeeds, *that* response is what gets cached and replayed by any further retry.
+
 ## Concurrent retries
 
 A key that arrives again **while the first request with that key is still being processed** — a client that retries eagerly, before the first attempt has even finished — waits for it to finish, then replays its result, rather than running the operation a second time in parallel. This is correct within one worker process. Across multiple processes or machines, only the *stored result* is shared (see below); two processes racing on a brand-new key can both start processing it before either finishes — the same in-process-only limitation [`RateLimiter`](https://zeython.zaber.dev/docs/rate-limiting/#the-default-limiter-is-process-local) and [`Cache`](https://zeython.zaber.dev/docs/caching/index.md) already document for their default backends, not something new here.

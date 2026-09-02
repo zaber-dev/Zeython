@@ -754,7 +754,7 @@ Pure ASGI middleware. See :class:`IdempotencyServiceProvider` for the usual way 
 
 A request without the configured header (default `Idempotency-Key`), or whose method isn't in `methods` (default `POST`/`PUT`/ `PATCH`/`DELETE` -- the ones that aren't already naturally idempotent), passes straight through untouched.
 
-A first-seen key runs the request normally and stores its response (status, headers, body) under that key, scoped to this method and path. A repeated key within `ttl` replays the stored response verbatim instead of running the request again, adding an `Idempotency-Replayed: true` response header so a client (or your own logs) can tell the two cases apart.
+A first-seen key runs the request normally and stores its response (status, headers, body) under that key, scoped to this method and path -- unless that response is a `5xx`, which is never cached: a transient server error isn't a completed operation, and locking a retry into replaying the same failure until `ttl` expires would defeat the entire point of retrying. A `2xx`/`4xx` response is exactly as deterministic-and-final as an idempotency key is meant to protect, so those are cached and replayed. A repeated key within `ttl` replays the stored response verbatim instead of running the request again, adding an `Idempotency-Replayed: true` response header so a client (or your own logs) can tell the two cases apart.
 
 A repeated key whose request body doesn't match the first request's raises :class:`~zeython.exceptions.ConflictException` (409) rather than silently returning a stale response for what might be a different operation that reused the same key by mistake.
 

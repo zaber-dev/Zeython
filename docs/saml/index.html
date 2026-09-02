@@ -1387,6 +1387,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#replay-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replay protection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#errors" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3141,6 +3152,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#replay-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replay protection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#errors" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3331,17 +3353,44 @@ your SP's own certificate and private key to enable it:</p>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">sp_private_key</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"saml.sp_key"</span><span class="p">),</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">)</span>
 </span></code></pre></div>
+<h2 id="replay-protection">Replay protection<a class="headerlink" href="#replay-protection" title="Permanent link">&para;</a></h2>
+<p>A signed, still-valid SAMLResponse is, cryptographically, exactly as
+valid the second time it's submitted as the first -- signature checking
+alone doesn't stop a network observer (or a buggy IdP integration) from
+resubmitting one it captured. <code>SamlManager</code> tracks every assertion ID it
+accepts and rejects a second callback presenting the same one:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">SamlServiceProvider</span><span class="p">(</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">app</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">providers</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">replay_window</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span>  <span class="c1"># seconds an assertion ID is remembered -- the default</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">))</span>
+</span></code></pre></div>
+<p>Tracked in its own process-local <code>InMemoryCache</code> by default, the same
+in-process-only limitation <a href="../rate-limiting/"><code>RateLimiter</code></a> and
+<a href="../caching/"><code>Cache</code></a> already document — pass <code>replay_cache=</code> (a
+<a href="../redis/"><code>RedisCache</code></a>) to share it across every process/machine
+instead of each one only remembering what it itself has seen:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">RedisCache</span><span class="p">,</span> <span class="n">SamlServiceProvider</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">app</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">SamlServiceProvider</span><span class="p">(</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">app</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">providers</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">replay_cache</span><span class="o">=</span><span class="n">RedisCache</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"redis.url"</span><span class="p">)),</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="p">))</span>
+</span></code></pre></div>
 <h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Unknown provider</strong> in the URL -- <code>NotFoundException</code> (404), the same
   as an unknown OAuth provider name.</li>
 <li><strong>No <code>SAMLResponse</code></strong> in the ACS POST body -- <code>BadRequestException</code>
   (400): the IdP (or whoever's calling this URL) didn't send one.</li>
-<li><strong>Response failed validation</strong> -- <code>ForbiddenException</code> (403): a
-  missing/invalid signature, an expired assertion, a response meant for a
-  different SP (wrong audience), or one delivered to the wrong URL (wrong
-  recipient/destination). The exception message names which of python3-saml's
-  own validation errors fired, and its detailed reason.</li>
+<li><strong>Response failed validation, or already used once</strong> --
+  <code>ForbiddenException</code> (403): a missing/invalid signature, an expired
+  assertion, a response meant for a different SP (wrong audience), one
+  delivered to the wrong URL (wrong recipient/destination), or an
+  assertion ID this SP has already accepted (see "Replay protection"
+  above). The exception message names which of python3-saml's own
+  validation errors fired, and its detailed reason.</li>
 </ul>
 <h2 id="what-this-isnt">What this isn't<a class="headerlink" href="#what-this-isnt" title="Permanent link">&para;</a></h2>
 <p>Service-provider-initiated login and IdP-initiated login (an IdP's admin

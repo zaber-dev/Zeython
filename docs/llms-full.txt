@@ -2065,11 +2065,35 @@ saml_provider(
 )
 ```
 
+## Replay protection
+
+A signed, still-valid SAMLResponse is, cryptographically, exactly as valid the second time it's submitted as the first -- signature checking alone doesn't stop a network observer (or a buggy IdP integration) from resubmitting one it captured. `SamlManager` tracks every assertion ID it accepts and rejects a second callback presenting the same one:
+
+```python
+app.register(SamlServiceProvider(
+    app,
+    providers=[...],
+    replay_window=300.0,  # seconds an assertion ID is remembered -- the default
+))
+```
+
+Tracked in its own process-local `InMemoryCache` by default, the same in-process-only limitation [`RateLimiter`](https://zeython.zaber.dev/docs/rate-limiting/index.md) and [`Cache`](https://zeython.zaber.dev/docs/caching/index.md) already document — pass `replay_cache=` (a [`RedisCache`](https://zeython.zaber.dev/docs/redis/index.md)) to share it across every process/machine instead of each one only remembering what it itself has seen:
+
+```python
+from zeython import RedisCache, SamlServiceProvider
+
+app.register(SamlServiceProvider(
+    app,
+    providers=[...],
+    replay_cache=RedisCache(app.config.get("redis.url")),
+))
+```
+
 ## Errors
 
 - **Unknown provider** in the URL -- `NotFoundException` (404), the same as an unknown OAuth provider name.
 - **No `SAMLResponse`** in the ACS POST body -- `BadRequestException` (400): the IdP (or whoever's calling this URL) didn't send one.
-- **Response failed validation** -- `ForbiddenException` (403): a missing/invalid signature, an expired assertion, a response meant for a different SP (wrong audience), or one delivered to the wrong URL (wrong recipient/destination). The exception message names which of python3-saml's own validation errors fired, and its detailed reason.
+- **Response failed validation, or already used once** -- `ForbiddenException` (403): a missing/invalid signature, an expired assertion, a response meant for a different SP (wrong audience), one delivered to the wrong URL (wrong recipient/destination), or an assertion ID this SP has already accepted (see "Replay protection" above). The exception message names which of python3-saml's own validation errors fired, and its detailed reason.
 
 ## What this isn't
 
@@ -3148,6 +3172,10 @@ If a repeated `Idempotency-Key` shows up with a **different** request body than 
 ```json
 {"error": "Idempotency-Key '8f14e45f-...' was already used with a different request body.", "status": 409}
 ```
+
+## A `5xx` response is never cached
+
+Only a `2xx`/`4xx` response gets stored — a deterministic, completed outcome, exactly what an idempotency key is meant to protect. A `5xx` means the operation didn't genuinely complete (a downstream timeout, a dropped DB connection), so it's never cached: a retry with the same key reprocesses the request from scratch instead of replaying the same failure until `ttl` expires, which would defeat the entire point of retrying. Once a retry succeeds, *that* response is what gets cached and replayed by any further retry.
 
 ## Concurrent retries
 
@@ -9533,16 +9561,32 @@ def to_settings(self) -> dict[str, Any]:
 ### SamlManager
 
 ```python
-SamlManager(providers: dict[str, SamlProvider])
+SamlManager(
+    providers: dict[str, SamlProvider],
+    *,
+    replay_cache: Cache | None = None,
+    replay_window: float = DEFAULT_REPLAY_WINDOW,
+)
 ```
 
 Builds the login redirect, validates the ACS callback, and generates SP metadata for every provider registered with it. Bound in the container by :class:`SamlServiceProvider`.
 
+Tracks every assertion ID it accepts in `replay_cache` (a fresh :class:`~zeython.cache.InMemoryCache` by default) for `replay_window` seconds, and rejects a second callback presenting the same ID -- without this, a signed SAMLResponse a network observer captures (or an IdP-side bug/misconfiguration that redelivers one) stays valid and replayable for its entire signature-validity window, letting an attacker complete the same login again by simply resending the original request. Signature validation alone doesn't catch this: a replayed response is, cryptographically, exactly as valid the second time as the first.
+
 Source code in `src/zeython/saml.py`
 
 ```python
-def __init__(self, providers: dict[str, SamlProvider]) -> None:
+def __init__(
+    self,
+    providers: dict[str, SamlProvider],
+    *,
+    replay_cache: Cache | None = None,
+    replay_window: float = DEFAULT_REPLAY_WINDOW,
+) -> None:
     self.providers = providers
+    self.replay_cache = replay_cache if replay_cache is not None else InMemoryCache()
+    self.replay_window = replay_window
+    self._replay_locks: dict[str, asyncio.Lock] = {}
 ```
 
 #### login_url
@@ -9569,7 +9613,7 @@ handle_acs(
 ) -> SamlUser
 ```
 
-Validate the IdP's POSTed assertion and return the identity it asserts. Raises :class:`~zeython.exceptions.BadRequestException` if the callback carried no `SAMLResponse`, and :class:`~zeython.exceptions.ForbiddenException` if the response failed validation (bad/missing signature, expired, wrong audience/recipient, ...).
+Validate the IdP's POSTed assertion and return the identity it asserts. Raises :class:`~zeython.exceptions.BadRequestException` if the callback carried no `SAMLResponse`, and :class:`~zeython.exceptions.ForbiddenException` if the response failed validation (bad/missing signature, expired, wrong audience/recipient, already used once before, ...).
 
 Source code in `src/zeython/saml.py`
 
@@ -9580,7 +9624,7 @@ async def handle_acs(self, request: Request, provider_name: str) -> SamlUser:
     if the callback carried no ``SAMLResponse``, and
     :class:`~zeython.exceptions.ForbiddenException` if the response
     failed validation (bad/missing signature, expired, wrong
-    audience/recipient, ...).
+    audience/recipient, already used once before, ...).
     """
     form = await request.form()
     saml_response = form.get("SAMLResponse")
@@ -9596,6 +9640,20 @@ async def handle_acs(self, request: Request, provider_name: str) -> SamlUser:
         )
     if not auth.is_authenticated():
         raise ForbiddenException("SAML authentication was not successful.")
+
+    assertion_id = auth.get_last_assertion_id()
+    replay_key = f"saml:seen-assertion:{assertion_id}"
+    # Locked (not just checked) so two requests racing to replay the
+    # very same assertion can't both pass the has()-then-put() check
+    # before either has written its own entry.
+    lock = self._replay_locks.setdefault(replay_key, asyncio.Lock())
+    try:
+        async with lock:
+            if await self.replay_cache.has(replay_key):
+                raise ForbiddenException("This SAML assertion has already been used.")
+            await self.replay_cache.put(replay_key, True, ttl=self.replay_window)
+    finally:
+        self._replay_locks.pop(replay_key, None)
 
     provider = self._provider(provider_name)
     attributes: dict[str, list[str]] = auth.get_attributes()
@@ -9655,7 +9713,11 @@ def metadata_xml(self, provider_name: str) -> str:
 
 ```python
 SamlServiceProvider(
-    app: Application, *, providers: list[SamlProvider]
+    app: Application,
+    *,
+    providers: list[SamlProvider],
+    replay_cache: Cache | None = None,
+    replay_window: float = DEFAULT_REPLAY_WINDOW,
 )
 ```
 
@@ -9678,12 +9740,23 @@ app.register(SamlServiceProvider(app, providers=[
 
 Needs `AuthServiceProvider` registered too (for :func:`zeython.auth.login` your ACS route calls) -- registration order between the two doesn't matter. See docs/saml.md.
 
+Pass `replay_cache` (a :class:`~zeython.cache.RedisCache`) to share the used-assertion tracking across every process/machine instead of each one only remembering what it itself has seen -- see :class:`SamlManager` for why this tracking exists at all.
+
 Source code in `src/zeython/saml.py`
 
 ```python
-def __init__(self, app: Application, *, providers: list[SamlProvider]) -> None:
+def __init__(
+    self,
+    app: Application,
+    *,
+    providers: list[SamlProvider],
+    replay_cache: Cache | None = None,
+    replay_window: float = DEFAULT_REPLAY_WINDOW,
+) -> None:
     super().__init__(app)
     self.providers = providers
+    self.replay_cache = replay_cache
+    self.replay_window = replay_window
 ```
 
 ### saml_provider
@@ -11723,7 +11796,7 @@ Pure ASGI middleware. See :class:`IdempotencyServiceProvider` for the usual way 
 
 A request without the configured header (default `Idempotency-Key`), or whose method isn't in `methods` (default `POST`/`PUT`/ `PATCH`/`DELETE` -- the ones that aren't already naturally idempotent), passes straight through untouched.
 
-A first-seen key runs the request normally and stores its response (status, headers, body) under that key, scoped to this method and path. A repeated key within `ttl` replays the stored response verbatim instead of running the request again, adding an `Idempotency-Replayed: true` response header so a client (or your own logs) can tell the two cases apart.
+A first-seen key runs the request normally and stores its response (status, headers, body) under that key, scoped to this method and path -- unless that response is a `5xx`, which is never cached: a transient server error isn't a completed operation, and locking a retry into replaying the same failure until `ttl` expires would defeat the entire point of retrying. A `2xx`/`4xx` response is exactly as deterministic-and-final as an idempotency key is meant to protect, so those are cached and replayed. A repeated key within `ttl` replays the stored response verbatim instead of running the request again, adding an `Idempotency-Replayed: true` response header so a client (or your own logs) can tell the two cases apart.
 
 A repeated key whose request body doesn't match the first request's raises :class:`~zeython.exceptions.ConflictException` (409) rather than silently returning a stale response for what might be a different operation that reused the same key by mistake.
 
