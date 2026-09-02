@@ -1,6 +1,8 @@
+import logging
 import time
 from pathlib import Path
 
+import pytest
 from sqlalchemy import JSON, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 from starlette.responses import JSONResponse
@@ -251,6 +253,30 @@ async def test_recovery_code_is_single_use(tmp_path: Path) -> None:
         assert await verify_and_consume(user, recovery_code) is False  # already spent
 
 
+async def test_recovery_code_check_locks_the_row(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    # Regression guard: verify_and_consume() used to check the recovery
+    # code against whatever was already loaded on `user`, so two requests
+    # racing to spend the same code could both read it as still unused
+    # before either had written its removal. It now re-fetches with
+    # find(..., for_update=True) instead -- proven here indirectly via the
+    # SQLite "no row-level locking" warning that call logs (see
+    # test_db_model.py for the direct for_update tests, including that it
+    # actually adds FOR UPDATE to the SQL on Postgres/MySQL).
+    app = await _make_app(tmp_path)
+    database = app.container.make(Database)
+    async with database.session():
+        user = MfaUser(email="ada@example.com")
+        user.set_password("hunter2")
+        await user.save()
+        enrollment = await enroll(user, account_name=user.email)
+        codes = await confirm(user, _valid_code(enrollment.secret))
+
+        with caplog.at_level(logging.WARNING, logger="zeython.db.model"):
+            assert await verify_and_consume(user, codes[0]) is True
+
+    assert any("no row-level locking" in record.message for record in caplog.records)
+
+
 async def test_verify_and_consume_returns_false_when_mfa_not_enabled(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
     database = app.container.make(Database)
@@ -259,6 +285,24 @@ async def test_verify_and_consume_returns_false_when_mfa_not_enabled(tmp_path: P
         user.set_password("hunter2")
         await user.save()
         assert await verify_and_consume(user, "000000") is False
+
+
+async def test_verify_and_consume_returns_false_if_the_user_row_is_gone(tmp_path: Path) -> None:
+    # The locked re-fetch can come back empty (the row was hard-deleted
+    # between this `user` being loaded and the recovery-code check) --
+    # that's a "no" the same as a wrong code, not an error.
+    app = await _make_app(tmp_path)
+    database = app.container.make(Database)
+    async with database.session():
+        user = MfaUser(email="ada@example.com")
+        user.set_password("hunter2")
+        await user.save()
+        enrollment = await enroll(user, account_name=user.email)
+        codes = await confirm(user, _valid_code(enrollment.secret))
+
+        await user.delete(soft=False)
+
+        assert await verify_and_consume(user, codes[0]) is False
 
 
 # -- login-time challenge (HTTP end-to-end) ------------------------------------------------

@@ -160,17 +160,35 @@ async def verify_and_consume(user: Any, code: str) -> bool:
     """``True`` if ``code`` is a valid live TOTP code, or an unused recovery
     code. A matching recovery code is consumed -- removed from storage --
     on success, since each is one-time use; a spent code never verifies
-    again.
+    again, including under two requests racing to spend it at once (on
+    Postgres/MySQL -- see the note below for SQLite).
+
+    The recovery-code check re-fetches ``user`` with
+    ``find(..., for_update=True)`` rather than trusting whatever's already
+    loaded on the ``user`` passed in: without a lock, two concurrent
+    requests presenting the same code could each read it as still unused
+    before either had written its removal, and both would be told the
+    code was valid. Locking the row means the second request's re-fetch
+    blocks until the first's transaction actually commits, so it then
+    correctly sees the code already gone.
+
+    On SQLite specifically, this guarantee doesn't hold -- see
+    :meth:`~zeython.db.Model.find`'s ``for_update`` docs -- so two
+    genuinely concurrent requests there can still both succeed, same as
+    before this existed.
     """
     if not user.mfa_enabled or not user.mfa_secret:
         return False
     if verify_totp(user.mfa_secret, code):
         return True
 
-    for hashed in user.mfa_recovery_codes or []:
+    locked = await type(user).find(user.id, for_update=True)
+    if locked is None:
+        return False
+    for hashed in locked.mfa_recovery_codes or []:
         if verify_password(code, hashed):
-            user.mfa_recovery_codes = [h for h in user.mfa_recovery_codes if h != hashed]
-            await user.save()
+            locked.mfa_recovery_codes = [h for h in locked.mfa_recovery_codes if h != hashed]
+            await locked.save()
             return True
     return False
 

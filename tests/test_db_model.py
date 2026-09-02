@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from urllib.parse import parse_qsl, urlsplit
@@ -5,6 +6,7 @@ from urllib.parse import parse_qsl, urlsplit
 import pytest
 import pytest_asyncio
 from sqlalchemy import String
+from sqlalchemy.dialects import mysql, postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 from starlette.requests import Request
 
@@ -104,6 +106,57 @@ async def test_create_and_find(database: Database) -> None:
         found = await Article.find(created.id)
         assert found is not None
         assert found.title == "Hello World"
+
+
+async def test_find_stmt_adds_for_update_when_requested() -> None:
+    stmt = Article._find_stmt(1, include_deleted=False, include=(), for_update=True)
+    assert "FOR UPDATE" in str(stmt.compile(dialect=postgresql.dialect()))
+    assert "FOR UPDATE" in str(stmt.compile(dialect=mysql.dialect()))
+
+
+def test_find_stmt_omits_for_update_by_default() -> None:
+    stmt = Article._find_stmt(1, include_deleted=False, include=(), for_update=False)
+    assert "FOR UPDATE" not in str(stmt.compile(dialect=postgresql.dialect()))
+
+
+async def test_find_with_for_update_still_returns_the_row_on_sqlite(database: Database) -> None:
+    # SQLite has no row-level locking, so for_update=True can't actually
+    # lock anything there -- it must still behave as an ordinary find(),
+    # not raise or return something different.
+    async with session_scope(database):
+        created = await Article.create(title="Hello World")
+        article_id = created.id
+
+    async with session_scope(database):
+        found = await Article.find(article_id, for_update=True)
+        assert found is not None
+        assert found.title == "Hello World"
+
+
+async def test_find_with_for_update_warns_on_sqlite(database: Database, caplog: pytest.LogCaptureFixture) -> None:
+    async with session_scope(database):
+        created = await Article.create(title="Hello World")
+        article_id = created.id
+
+    async with session_scope(database):
+        with caplog.at_level(logging.WARNING, logger="zeython.db.model"):
+            await Article.find(article_id, for_update=True)
+
+    assert any("no row-level locking" in record.message for record in caplog.records)
+
+
+async def test_find_without_for_update_does_not_warn_on_sqlite(
+    database: Database, caplog: pytest.LogCaptureFixture
+) -> None:
+    async with session_scope(database):
+        created = await Article.create(title="Hello World")
+        article_id = created.id
+
+    async with session_scope(database):
+        with caplog.at_level(logging.WARNING, logger="zeython.db.model"):
+            await Article.find(article_id)
+
+    assert caplog.records == []
 
 
 async def test_soft_delete_excludes_from_default_queries(database: Database) -> None:
