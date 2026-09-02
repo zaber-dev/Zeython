@@ -368,6 +368,22 @@ class Model(Base):
             "(supported: sqlite, postgresql)."
         )
 
+    @staticmethod
+    def _quote_fts5_terms(query: str) -> str:
+        # FTS5's MATCH argument isn't a plain string -- it's its own query
+        # syntax (AND/OR/NOT, "phrase quoting", col: filters, prefix*,
+        # parens), so passing a user's search box input straight through
+        # raises a syntax error on completely ordinary text: a lone
+        # quote, a leading hyphen ("well-known" split on whitespace gives
+        # a literal "well-known" term, fine, but "-1" alone reads as NOT),
+        # a bare colon, unbalanced parens, or the word AND/OR/NOT on its
+        # own. Quoting each whitespace-split term as an FTS5 string
+        # literal (doubling embedded quotes, the syntax's own escape)
+        # forces every term to be matched literally instead of parsed as
+        # an operator, while still ANDing separate terms together the
+        # same way an unquoted multi-word MATCH already implicitly does.
+        return " ".join('"' + term.replace('"', '""') + '"' for term in query.split())
+
     @classmethod
     async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = False) -> list[Self]:
         """Full-text search over ``__searchable__``'s columns, ranked most
@@ -385,10 +401,21 @@ class Model(Base):
         Raises ``RuntimeError`` if ``__searchable__`` is empty (search
         isn't configured for this model) or the dialect isn't one of
         those two (search isn't supported there yet).
+
+        A blank ``query`` (or one that's only whitespace) returns ``[]``
+        without touching the database -- there's nothing to search for.
+        Otherwise ``query`` is treated as plain text a user typed, not a
+        query mini-language: every term matches literally, so a stray
+        quote, hyphen, colon, or the word "AND" is searched for as text
+        instead of raising a syntax error or being parsed as an operator.
         """
         session = current_session()
         dialect = session.bind.dialect.name if session.bind is not None else None
         sql = cls._search_sql(dialect, include_deleted=include_deleted)
+        if not query.strip():
+            return []
+        if dialect == "sqlite":
+            query = cls._quote_fts5_terms(query)
         params: dict[str, Any] = {"query": query, "limit": limit}
         if dialect == "postgresql":
             params["language"] = cls.__search_language__
