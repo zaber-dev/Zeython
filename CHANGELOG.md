@@ -35,7 +35,9 @@ end-to-end tutorial. Licensed under MIT.
   dialect, ranked most relevant first; `zeython.search` provides the
   one-time migration helpers (`create_fts5_index`, `create_tsvector_index`)
   that create and keep each index in sync, no new dependency or separate
-  search service required.
+  search service required. `query` is always treated as plain text, never
+  a query mini-language -- a stray quote, hyphen, colon, or bare `AND` in
+  a search box no longer crashes the request with an FTS5 syntax error.
 - An application-level event dispatcher (`zeython.events`) — `emit()`,
   decoupled `listen()` handlers, an `EventServiceProvider` for wiring an
   app's own listeners in one place.
@@ -54,9 +56,10 @@ end-to-end tutorial. Licensed under MIT.
 - OAuth2/OIDC login (`zeython.oauth`) — "Sign in with Google/GitHub/
   Microsoft", or any standards-compliant OIDC provider (Okta, Auth0,
   Keycloak) via `generic_oidc()`. Handles the CSRF-protected `state`
-  round-trip and the code-for-token exchange; hands your app a normalized
-  identity to find-or-create a user from, the same way Laravel Socialite
-  does.
+  round-trip (compared in constant time, the same as `zeython.csrf`'s own
+  token check) and the code-for-token exchange; hands your app a
+  normalized identity to find-or-create a user from, the same way Laravel
+  Socialite does.
 - SAML 2.0 SSO login (`zeython.saml`, `pip install zeython[saml]`) — for
   the enterprise IdPs (Okta, Azure AD, ADFS) that specifically require
   SAML over OIDC. Built on python3-saml: verifies the IdP's signed

@@ -309,6 +309,22 @@ async def test_callback_with_a_mismatched_state_is_rejected(tmp_path: Path) -> N
     assert response.status_code == 403
 
 
+async def test_callback_with_a_different_length_state_is_rejected(tmp_path: Path) -> None:
+    # state comparison uses secrets.compare_digest() rather than `==` (the
+    # same constant-time check zeython.csrf's own token comparison uses)
+    # so a network observer can't time the comparison to help brute-force
+    # a state value -- a mismatched *length* is the one input shape a
+    # naive constant-time comparison could mishandle, so it's worth
+    # covering on its own rather than trusting the general mismatch case.
+    app = await _make_app(tmp_path, providers=[_mock_provider()])
+
+    async with client(app) as http:
+        await http.get("/auth/google/redirect")
+        response = await http.get("/auth/google/callback", params={"code": "abc", "state": "short"})
+
+    assert response.status_code == 403
+
+
 async def test_callback_without_a_code_is_a_bad_request(tmp_path: Path) -> None:
     app = await _make_app(tmp_path, providers=[_mock_provider()])
 

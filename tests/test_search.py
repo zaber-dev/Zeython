@@ -166,6 +166,59 @@ async def test_search_raises_when_searchable_is_not_configured(database: Databas
             await UnsearchablePost.search("anything")
 
 
+async def test_search_with_a_blank_query_returns_nothing_without_touching_the_database(database: Database) -> None:
+    async with session_scope(database):
+        await SearchPost.create(title="Hello", body="World")
+
+    async with session_scope(database):
+        assert await SearchPost.search("") == []
+        assert await SearchPost.search("   ") == []
+
+
+@pytest.mark.parametrize(
+    "query",
+    ['"', 'foo"bar', "a OR", "(unbalanced", "col:foo", 'a b"c', "AND", "*"],
+)
+async def test_search_treats_fts5_special_characters_as_literal_text_not_syntax(
+    database: Database, query: str
+) -> None:
+    # Every one of these strings is ordinary user input a search box has
+    # to survive (a stray quote, a colon, unbalanced parens, the word
+    # "AND") -- unquoted, FTS5 parses them as its own query mini-language
+    # and raises a syntax error instead of treating them as text to
+    # search for. Not raising is the whole assertion; matching nothing is
+    # the correct, boring result for a query that matches no document.
+    async with session_scope(database):
+        await SearchPost.create(title="Hello", body="World")
+
+    async with session_scope(database):
+        assert await SearchPost.search(query) == []
+
+
+async def test_search_with_a_leading_hyphen_does_not_raise_and_still_tokenizes(database: Database) -> None:
+    # Unquoted, a leading "-" is FTS5's NOT operator and "-hello" alone
+    # raises a syntax error (no left-hand term to negate). Quoted, it's
+    # just punctuation the tokenizer strips like any other, so "-hello"
+    # is searched -- and found -- as the word "hello".
+    async with session_scope(database):
+        await SearchPost.create(title="Hello", body="World")
+
+    async with session_scope(database):
+        assert [r.title for r in await SearchPost.search("-hello")] == ["Hello"]
+
+
+async def test_search_multi_word_query_still_matches_regardless_of_term_order(database: Database) -> None:
+    async with session_scope(database):
+        await SearchPost.create(title="Async ORM basics", body="An introduction to async database access.")
+
+    async with session_scope(database):
+        # Quoting each term individually must not turn "async database"
+        # into a single adjacent phrase -- it should still AND together
+        # as two independent terms the way an unquoted multi-word MATCH
+        # already does.
+        assert [r.title for r in await SearchPost.search("database async")] == ["Async ORM basics"]
+
+
 def test_drop_fts5_index_removes_table_and_triggers() -> None:
     executed: list[str] = []
 
@@ -275,3 +328,14 @@ def test_search_sql_postgresql_uses_tsvector_and_ts_rank() -> None:
 def test_search_sql_postgresql_include_deleted_omits_the_filter() -> None:
     sql = SearchPost._search_sql("postgresql", include_deleted=True)
     assert "is_deleted" not in sql
+
+
+# -- Model._quote_fts5_terms() -----------------------------------------------------
+
+
+def test_quote_fts5_terms_quotes_each_whitespace_separated_term() -> None:
+    assert SearchPost._quote_fts5_terms("async database") == '"async" "database"'
+
+
+def test_quote_fts5_terms_doubles_embedded_quotes() -> None:
+    assert SearchPost._quote_fts5_terms('foo"bar') == '"foo""bar"'

@@ -101,6 +101,28 @@ await Post.search("draft", include_deleted=True)
 await Post.search("async orm", limit=10)  # default 20
 ```
 
+## `query` is always treated as plain text
+
+Pass through whatever a search box actually receives — a stray quote, a
+hyphenated word, a colon, a lone `AND` — and it's searched for as literal
+text, not parsed as a query mini-language:
+
+```python
+await Post.search("well-known movie")   # matches "well-known" and "movie"
+await Post.search("what's new?")        # the apostrophe/quote is just text
+await Post.search("")                   # [] -- nothing to search for, no query run
+```
+
+Both engines are safe here for the same reason (each does its own thing to
+get there): Postgres's `plainto_tsquery()` already always treats its
+input as plain text; on SQLite, `Model.search()` quotes each
+whitespace-separated term as an FTS5 string literal before it reaches
+`MATCH`, so a raw query string can never be parsed as FTS5's own operator
+syntax (`AND`/`OR`/`NOT`, `col:` filters, unbalanced `"`/`(`) and crash
+the request with a syntax error the way it would unquoted.
+
+## API reference
+
 ## What this isn't
 
 `Model.search()` is a thin, honest dispatch over each database's own

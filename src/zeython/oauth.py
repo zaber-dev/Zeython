@@ -284,7 +284,11 @@ class OAuthManager:
         session_key = f"{_STATE_SESSION_PREFIX}{provider_name}"
         expected_state = request.session.pop(session_key, None)
         received_state = request.query_params.get("state")
-        if not expected_state or not received_state or expected_state != received_state:
+        if (
+            not expected_state
+            or not received_state
+            or not secrets.compare_digest(expected_state, received_state)
+        ):
             raise ForbiddenException(
                 "Invalid or expired OAuth state -- possible CSRF attempt, or the login flow took too long."
             )
