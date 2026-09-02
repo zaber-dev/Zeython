@@ -4004,6 +4004,8 @@ await WebhookEndpoint.create(
 )
 ```
 
+If you do build a self-service endpoint that lets a user register their *own* `url` -- letting a customer point your integrations page at a URL they don't control -- `fire_webhook()` will happily deliver a server-signed POST wherever that row says to, including a private/internal address (`http://169.254.169.254/...`, `http://localhost:6379`) if nothing stops it: a classic SSRF vector. Validate the URL yourself before saving it (a public scheme/host allow-list, resolving and rejecting private IP ranges) the same way you'd validate any other user-submitted URL your server will later fetch -- `zeython.webhooks` sends what a row's `url` says, it doesn't audit where that points.
+
 ## Firing an event
 
 ```python

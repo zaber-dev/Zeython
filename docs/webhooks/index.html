@@ -3254,6 +3254,16 @@ yourself via <code>zeython tinker</code> or a seeder:</p>
 </span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">)</span>
 </span></code></pre></div>
+<p>If you do build a self-service endpoint that lets a user register their
+<em>own</em> <code>url</code> -- letting a customer point your integrations page at a URL
+they don't control -- <code>fire_webhook()</code> will happily deliver a
+server-signed POST wherever that row says to, including a private/internal
+address (<code>http://169.254.169.254/...</code>, <code>http://localhost:6379</code>) if nothing
+stops it: a classic SSRF vector. Validate the URL yourself before saving
+it (a public scheme/host allow-list, resolving and rejecting private IP
+ranges) the same way you'd validate any other user-submitted URL your
+server will later fetch -- <code>zeython.webhooks</code> sends what a row's <code>url</code>
+says, it doesn't audit where that points.</p>
 <h2 id="firing-an-event">Firing an event<a class="headerlink" href="#firing-an-event" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython.webhooks</span><span class="w"> </span><span class="kn">import</span> <span class="n">fire_webhook</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
