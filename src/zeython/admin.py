@@ -113,6 +113,19 @@ def _decode_errors(raw: str | None) -> dict[str, list[str]]:
         return {}
 
 
+def _parse_page(raw: str | None) -> int:
+    # A hand-edited or stale bookmarked ?page= (non-numeric, negative,
+    # zero) shouldn't crash the list view -- Model.paginate() itself
+    # raises ValueError for anything under 1, and int() raises its own
+    # for anything non-numeric. Falling back to page 1 for either keeps
+    # the admin list usable instead of a 500 for a bad query string.
+    try:
+        page = int(raw) if raw is not None else 1
+    except (TypeError, ValueError):
+        return 1
+    return page if page >= 1 else 1
+
+
 _STYLE = """
 <style>
   body { font-family: system-ui, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
@@ -311,7 +324,7 @@ class AdminServiceProvider(ServiceProvider):
         async def list_view(request: Request) -> HTMLResponse:
             await _check_access(request)
             model = _model_or_404(request.path_params["model"])
-            page_number = int(request.query_params.get("page", "1"))
+            page_number = _parse_page(request.query_params.get("page"))
             page = await model.paginate(page=page_number, per_page=20)
             return HTMLResponse(_render_list(prefix, model, page))
 

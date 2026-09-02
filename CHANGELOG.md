@@ -15,8 +15,10 @@ end-to-end tutorial. Licensed under MIT.
   `instance`, `make`, `call`).
 - `ServiceProvider` — `register()`/`boot()` lifecycle.
 - `Router` / `Controller` — decorator routing, route groups (`include`),
-  and RESTful `resource()` registration. `Router.mount()` for arbitrary
-  ASGI apps, `Router.websocket()` for WebSocket routes.
+  and RESTful `resource()` registration (`show`/`update`/`destroy` bind
+  `{id:int}`, so a non-numeric id 404s at the router instead of reaching
+  the handler and raising). `Router.mount()` for arbitrary ASGI apps,
+  `Router.websocket()` for WebSocket routes.
 - `Model` — async Active-Record base class (SQLAlchemy 2.0 async) with soft
   deletes, audit timestamps, `to_dict()` serialization, safe relationship
   eager-loading (`include=`), lifecycle hooks (`creating`/`created`/etc.),

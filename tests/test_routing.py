@@ -1,6 +1,11 @@
+from pathlib import Path
+
 from starlette.responses import JSONResponse
 
+from zeython.application import Application
+from zeython.config import Config
 from zeython.routing import Controller, Router
+from zeython.testing import client
 
 
 async def _handler(request):
@@ -48,7 +53,7 @@ def test_resource_registers_conventional_crud_routes() -> None:
 
     paths = {(route.path, tuple(route.methods - {"HEAD"})) for route in router.routes}
     assert ("/users", ("GET",)) in paths
-    assert ("/users/{id}", ("GET",)) in paths
+    assert ("/users/{id:int}", ("GET",)) in paths
 
 
 class UsersWithUpdate(Controller):
@@ -67,5 +72,22 @@ def test_resource_update_accepts_both_put_and_patch() -> None:
 
     assert len(router.routes) == 1
     route = router.routes[0]
-    assert route.path == "/users/{id}"
+    assert route.path == "/users/{id:int}"
     assert route.methods - {"HEAD"} == {"PUT", "PATCH"}
+
+
+async def test_resource_show_action_rejects_a_non_integer_id_with_a_clean_404(tmp_path: Path) -> None:
+    # Regression guard: resource()'s generated show/update/destroy actions
+    # all do int(request.path_params["id"]) -- before {id:int}, a
+    # non-numeric id (a typo, a stale link, a scanner poking at the API)
+    # reached the handler as a plain string and blew up with an unhandled
+    # ValueError instead of the ordinary "route didn't match" 404.
+    app = Application(Config.load(tmp_path))
+    app.router.resource("/users", Users, only=("show",))
+
+    async with client(app) as http:
+        valid = await http.get("/users/1")
+        invalid = await http.get("/users/not-a-number")
+
+    assert valid.status_code == 200
+    assert invalid.status_code == 404

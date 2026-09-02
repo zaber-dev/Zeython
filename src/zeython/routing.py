@@ -185,16 +185,23 @@ class Router:
     def resource(self, path: str, controller_cls: type[Controller], *, only: Iterable[str] | None = None) -> None:
         """Register RESTful CRUD routes bound to a controller's methods.
 
-        Maps: index->GET path, store->POST path, show->GET path/{id},
-        update->PUT/PATCH path/{id}, destroy->DELETE path/{id}.
+        Maps: index->GET path, store->POST path, show->GET path/{id:int},
+        update->PUT/PATCH path/{id:int}, destroy->DELETE path/{id:int}.
+
+        ``{id:int}``, not a plain ``{id}`` -- every :class:`~zeython.db.Model`'s
+        primary key is an integer, so a request for e.g. ``/posts/abc``
+        fails route *matching* itself (a clean 404, same as an unknown
+        route) instead of reaching the handler and blowing up on
+        ``int(request.path_params["id"])``, the conversion every generated
+        ``show``/``update``/``destroy`` action does next.
         """
         controller = controller_cls()
         action_map: dict[str, tuple[tuple[str, ...], str]] = {
             "index": (("GET",), ""),
             "store": (("POST",), ""),
-            "show": (("GET",), "/{id}"),
-            "update": (("PUT", "PATCH"), "/{id}"),
-            "destroy": (("DELETE",), "/{id}"),
+            "show": (("GET",), "/{id:int}"),
+            "update": (("PUT", "PATCH"), "/{id:int}"),
+            "destroy": (("DELETE",), "/{id:int}"),
         }
         allowed = set(only) if only is not None else set(action_map)
 
