@@ -60,9 +60,9 @@ end-to-end tutorial. Licensed under MIT.
 - SAML 2.0 SSO login (`zeython.saml`, `pip install zeython[saml]`) — for
   the enterprise IdPs (Okta, Azure AD, ADFS) that specifically require
   SAML over OIDC. Built on python3-saml: verifies the IdP's signed
-  response (XML signature, expiry, audience, recipient), serves SP
-  metadata for the IdP admin, and hands back the same kind of normalized
-  identity `zeython.oauth` does.
+  response (XML signature, expiry, audience, recipient) and rejects a
+  replayed assertion ID, serves SP metadata for the IdP admin, and hands
+  back the same kind of normalized identity `zeython.oauth` does.
 - Two-factor authentication (`zeython.mfa`) — RFC 6238 TOTP with no new
   dependency, one-time recovery codes, and a login-time challenge that
   gates `zeython.auth.login()` behind a second factor once a user enrolls.
@@ -124,9 +124,10 @@ end-to-end tutorial. Licensed under MIT.
   on a `POST`/`PUT`/`PATCH`/`DELETE` replays that request's first response
   instead of running it again, with a request that reuses a key against a
   different body rejected as a conflict and a genuinely concurrent retry
-  serialized rather than double-processed; built on the same `Cache`
-  abstraction (`InMemoryCache`/`RedisCache`) the rest of the framework
-  already uses.
+  serialized rather than double-processed; a `5xx` is never cached, so a
+  retry after a transient failure reprocesses instead of replaying the
+  same error forever. Built on the same `Cache` abstraction
+  (`InMemoryCache`/`RedisCache`) the rest of the framework already uses.
 - WebSocket support: real-time handlers, a broadcast hub
   (`WebSocketHub`), and per-IP connection limiting.
 - `RedisWebSocketHub` — distributed broadcast across every process/container

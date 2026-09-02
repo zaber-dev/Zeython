@@ -34,17 +34,21 @@ else your app needs from the assertion.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
+from zeython.cache import Cache, InMemoryCache
 from zeython.exceptions import BadRequestException, ForbiddenException, NotFoundException
 from zeython.providers import ServiceProvider
 
 if TYPE_CHECKING:
     from zeython.application import Application
+
+DEFAULT_REPLAY_WINDOW = 300.0  # 5 minutes -- comfortably covers a typical assertion's NotOnOrAfter.
 
 _EMAIL_ATTRIBUTE_CANDIDATES = (
     "email",
@@ -198,10 +202,30 @@ class SamlManager:
     """Builds the login redirect, validates the ACS callback, and generates
     SP metadata for every provider registered with it. Bound in the
     container by :class:`SamlServiceProvider`.
+
+    Tracks every assertion ID it accepts in ``replay_cache`` (a fresh
+    :class:`~zeython.cache.InMemoryCache` by default) for ``replay_window``
+    seconds, and rejects a second callback presenting the same ID --
+    without this, a signed SAMLResponse a network observer captures (or an
+    IdP-side bug/misconfiguration that redelivers one) stays valid and
+    replayable for its entire signature-validity window, letting an
+    attacker complete the same login again by simply resending the
+    original request. Signature validation alone doesn't catch this: a
+    replayed response is, cryptographically, exactly as valid the second
+    time as the first.
     """
 
-    def __init__(self, providers: dict[str, SamlProvider]) -> None:
+    def __init__(
+        self,
+        providers: dict[str, SamlProvider],
+        *,
+        replay_cache: Cache | None = None,
+        replay_window: float = DEFAULT_REPLAY_WINDOW,
+    ) -> None:
         self.providers = providers
+        self.replay_cache = replay_cache if replay_cache is not None else InMemoryCache()
+        self.replay_window = replay_window
+        self._replay_locks: dict[str, asyncio.Lock] = {}
 
     def _provider(self, name: str) -> SamlProvider:
         provider = self.providers.get(name)
@@ -224,7 +248,7 @@ class SamlManager:
         if the callback carried no ``SAMLResponse``, and
         :class:`~zeython.exceptions.ForbiddenException` if the response
         failed validation (bad/missing signature, expired, wrong
-        audience/recipient, ...).
+        audience/recipient, already used once before, ...).
         """
         form = await request.form()
         saml_response = form.get("SAMLResponse")
@@ -240,6 +264,20 @@ class SamlManager:
             )
         if not auth.is_authenticated():
             raise ForbiddenException("SAML authentication was not successful.")
+
+        assertion_id = auth.get_last_assertion_id()
+        replay_key = f"saml:seen-assertion:{assertion_id}"
+        # Locked (not just checked) so two requests racing to replay the
+        # very same assertion can't both pass the has()-then-put() check
+        # before either has written its own entry.
+        lock = self._replay_locks.setdefault(replay_key, asyncio.Lock())
+        try:
+            async with lock:
+                if await self.replay_cache.has(replay_key):
+                    raise ForbiddenException("This SAML assertion has already been used.")
+                await self.replay_cache.put(replay_key, True, ttl=self.replay_window)
+        finally:
+            self._replay_locks.pop(replay_key, None)
 
         provider = self._provider(provider_name)
         attributes: dict[str, list[str]] = auth.get_attributes()
@@ -340,14 +378,32 @@ class SamlServiceProvider(ServiceProvider):
     Needs ``AuthServiceProvider`` registered too (for
     :func:`zeython.auth.login` your ACS route calls) -- registration order
     between the two doesn't matter. See docs/saml.md.
+
+    Pass ``replay_cache`` (a :class:`~zeython.cache.RedisCache`) to share
+    the used-assertion tracking across every process/machine instead of
+    each one only remembering what it itself has seen -- see
+    :class:`SamlManager` for why this tracking exists at all.
     """
 
-    def __init__(self, app: Application, *, providers: list[SamlProvider]) -> None:
+    def __init__(
+        self,
+        app: Application,
+        *,
+        providers: list[SamlProvider],
+        replay_cache: Cache | None = None,
+        replay_window: float = DEFAULT_REPLAY_WINDOW,
+    ) -> None:
         super().__init__(app)
         self.providers = providers
+        self.replay_cache = replay_cache
+        self.replay_window = replay_window
 
     def register(self) -> None:
-        manager = SamlManager({provider.name: provider for provider in self.providers})
+        manager = SamlManager(
+            {provider.name: provider for provider in self.providers},
+            replay_cache=self.replay_cache,
+            replay_window=self.replay_window,
+        )
         self.container.singleton(SamlManager, lambda: manager)
 
 

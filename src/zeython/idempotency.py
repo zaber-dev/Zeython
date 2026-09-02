@@ -52,10 +52,15 @@ class IdempotencyMiddleware:
 
     A first-seen key runs the request normally and stores its response
     (status, headers, body) under that key, scoped to this method and
-    path. A repeated key within ``ttl`` replays the stored response
-    verbatim instead of running the request again, adding an
-    ``Idempotency-Replayed: true`` response header so a client (or your
-    own logs) can tell the two cases apart.
+    path -- unless that response is a ``5xx``, which is never cached: a
+    transient server error isn't a completed operation, and locking a
+    retry into replaying the same failure until ``ttl`` expires would
+    defeat the entire point of retrying. A ``2xx``/``4xx`` response is
+    exactly as deterministic-and-final as an idempotency key is meant to
+    protect, so those are cached and replayed. A repeated key within
+    ``ttl`` replays the stored response verbatim instead of running the
+    request again, adding an ``Idempotency-Replayed: true`` response
+    header so a client (or your own logs) can tell the two cases apart.
 
     A repeated key whose request body doesn't match the first request's
     raises :class:`~zeython.exceptions.ConflictException` (409) rather
@@ -143,6 +148,15 @@ class IdempotencyMiddleware:
             await send(message)
 
         await self.app(scope, receive, capturing_send)
+
+        if captured["status"] >= 500:
+            # A transient server error, not a genuine completed operation --
+            # don't lock a retry into replaying it forever until ttl
+            # expires. Whatever failed (a flaky downstream call, a dropped
+            # DB connection) may well succeed on the very next attempt, and
+            # an idempotency key's whole point is to make a safe retry
+            # possible, not to freeze the first failure in place.
+            return
 
         record = {
             "status": captured["status"],

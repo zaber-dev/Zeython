@@ -3,6 +3,7 @@
 import asyncio
 from pathlib import Path
 
+import pytest
 from starlette.responses import JSONResponse
 
 from zeython.application import Application
@@ -88,6 +89,52 @@ async def test_a_repeated_key_with_a_different_body_is_a_conflict(tmp_path: Path
     assert len(calls) == 1
     assert first.status_code == 201
     assert second.status_code == 409
+
+
+async def test_a_5xx_response_is_never_cached_so_a_retry_reprocesses(tmp_path: Path) -> None:
+    app = Application(Config.load(tmp_path))
+    app.register(IdempotencyServiceProvider(app))
+    calls: list[int] = []
+
+    @app.post("/orders")
+    async def create_order(request):
+        calls.append(len(calls) + 1)
+        if len(calls) == 1:
+            return JSONResponse({"error": "downstream unavailable"}, status_code=503)
+        return JSONResponse({"call": len(calls)}, status_code=201)
+
+    async with client(app) as http:
+        first = await http.post("/orders", json={}, headers={"Idempotency-Key": "abc"})
+        second = await http.post("/orders", json={}, headers={"Idempotency-Key": "abc"})
+
+    assert first.status_code == 503
+    assert second.status_code == 201  # reprocessed, not replayed the 503
+    assert "Idempotency-Replayed" not in second.headers
+    assert len(calls) == 2
+
+
+async def test_an_unhandled_exception_is_not_cached_and_does_not_leak_the_lock(tmp_path: Path) -> None:
+    app = Application(Config.load(tmp_path))
+    app.register(IdempotencyServiceProvider(app))
+    calls: list[int] = []
+
+    @app.post("/orders")
+    async def create_order(request):
+        calls.append(len(calls) + 1)
+        if len(calls) == 1:
+            raise RuntimeError("boom")
+        return JSONResponse({"call": len(calls)}, status_code=201)
+
+    async with client(app) as http:
+        with pytest.raises(RuntimeError):
+            await http.post("/orders", json={}, headers={"Idempotency-Key": "abc"})
+        # A second attempt with the same key must not deadlock (the lock
+        # from the crashed first attempt has to have been released) and
+        # must reprocess rather than replay, since nothing was cached.
+        second = await http.post("/orders", json={}, headers={"Idempotency-Key": "abc"})
+
+    assert second.status_code == 201
+    assert len(calls) == 2
 
 
 async def test_concurrent_requests_with_the_same_key_only_run_the_handler_once(tmp_path: Path) -> None:

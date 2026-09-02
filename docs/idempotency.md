@@ -73,6 +73,17 @@ response for the wrong request:
 {"error": "Idempotency-Key '8f14e45f-...' was already used with a different request body.", "status": 409}
 ```
 
+## A `5xx` response is never cached
+
+Only a `2xx`/`4xx` response gets stored — a deterministic, completed
+outcome, exactly what an idempotency key is meant to protect. A `5xx`
+means the operation didn't genuinely complete (a downstream timeout, a
+dropped DB connection), so it's never cached: a retry with the same key
+reprocesses the request from scratch instead of replaying the same
+failure until `ttl` expires, which would defeat the entire point of
+retrying. Once a retry succeeds, *that* response is what gets cached and
+replayed by any further retry.
+
 ## Concurrent retries
 
 A key that arrives again **while the first request with that key is

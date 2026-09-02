@@ -145,6 +145,44 @@ async def test_post_without_a_query_field_is_a_bad_request(tmp_path: Path) -> No
     assert response.status_code == 400
 
 
+async def test_post_with_malformed_json_is_a_bad_request_not_a_500(tmp_path: Path) -> None:
+    app = await _make_app(tmp_path)
+
+    async with client(app) as http:
+        response = await http.post(
+            "/graphql", content=b"{not valid json", headers={"content-type": "application/json"}
+        )
+
+    assert response.status_code == 400
+
+
+async def test_post_with_a_json_array_body_is_a_bad_request(tmp_path: Path) -> None:
+    app = await _make_app(tmp_path)
+
+    async with client(app) as http:
+        response = await http.post("/graphql", json=["not", "an", "object"])
+
+    assert response.status_code == 400
+
+
+async def test_post_with_a_non_string_query_is_a_bad_request(tmp_path: Path) -> None:
+    app = await _make_app(tmp_path)
+
+    async with client(app) as http:
+        response = await http.post("/graphql", json={"query": 123})
+
+    assert response.status_code == 400
+
+
+async def test_post_with_non_object_variables_is_a_bad_request(tmp_path: Path) -> None:
+    app = await _make_app(tmp_path)
+
+    async with client(app) as http:
+        response = await http.post("/graphql", json={"query": "{ hello }", "variables": "not an object"})
+
+    assert response.status_code == 400
+
+
 async def test_resolvers_receive_the_request_and_container_in_context(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
 
