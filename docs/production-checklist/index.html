@@ -3219,6 +3219,12 @@ second replica, a new external API) that changes the answer.</p>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>You've read <a href="https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md">SECURITY.md</a></strong>
   -- supported versions and how to report a vulnerability privately, for
   your own app as much as for the framework.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>SAML replay protection is shared across processes</strong>, if you use
+  <a href="../saml/">SAML SSO</a> and run more than one app process/machine --
+  <code>SamlServiceProvider</code>'s used-assertion tracking defaults to a
+  process-local <code>InMemoryCache</code>, so pass <code>replay_cache=RedisCache(...)</code>
+  or two processes can each accept the same replayed assertion once. See
+  <a href="../saml/#replay-protection">Replay protection</a>.</li>
 </ul>
 <h2 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h2>
 <ul class="task-list">
@@ -3255,6 +3261,10 @@ second replica, a new external API) that changes the answer.</p>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong><code>/up</code> is actually wired into your infrastructure's health
   check</strong> -- a load balancer target group, a Kubernetes probe, an uptime
   monitor -- not just reachable by hand. See <a href="../health-check/">Health Check</a>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Tracing's <code>sample_ratio</code> is tuned for your actual traffic</strong>, if
+  <code>TracingServiceProvider</code> is registered -- tracing every single request
+  (the default) is fine at low volume, but a wasteful exporter/collector
+  bill at real production traffic; see <a href="../tracing/">Tracing</a>.</li>
 </ul>
 <h2 id="background-work">Background work<a class="headerlink" href="#background-work" title="Permanent link">&para;</a></h2>
 <ul class="task-list">
@@ -3286,6 +3296,11 @@ second replica, a new external API) that changes the answer.</p>
   <code>application/problem+json</code> (<code>API_PROBLEM_JSON=true</code>) if you're
   integrating with tooling that expects the standard. Decide once, not
   per route. See <a href="../api-standards/#rfc-7807-error-responses-applicationproblemjson">RFC 7807 error responses</a>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Idempotency keys use a shared cache</strong> if you registered
+  <code>IdempotencyServiceProvider</code> and run more than one app process/machine
+  -- its process-local <code>InMemoryCache</code> default means a retry that lands
+  on a different process won't see the first attempt's cached response.
+  Pass <code>cache=RedisCache(...)</code>. See <a href="../idempotency/">Idempotency Keys</a>.</li>
 </ul>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <ul class="task-list">

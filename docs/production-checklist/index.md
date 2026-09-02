@@ -19,6 +19,7 @@ Everything below is documented in its own page already -- this is the one-page i
 - **WebSocket origin checking** is on if you're not the only expected client -- see the Origin-check note in [WebSockets](https://zeython.zaber.dev/docs/websockets/index.md).
 - **RBAC/authorization is actually enforced** on every route that needs it -- an undefined ability is a bug, not a silent deny (see [Authorization](https://zeython.zaber.dev/docs/authorization/index.md)), so audit routes for a missing `authorize()`/`Gate.allows()` call rather than trusting that one exists.
 - **You've read [SECURITY.md](https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md)** -- supported versions and how to report a vulnerability privately, for your own app as much as for the framework.
+- **SAML replay protection is shared across processes**, if you use [SAML SSO](https://zeython.zaber.dev/docs/saml/index.md) and run more than one app process/machine -- `SamlServiceProvider`'s used-assertion tracking defaults to a process-local `InMemoryCache`, so pass `replay_cache=RedisCache(...)` or two processes can each accept the same replayed assertion once. See [Replay protection](https://zeython.zaber.dev/docs/saml/#replay-protection).
 
 ## Database
 
@@ -33,6 +34,7 @@ Everything below is documented in its own page already -- this is the one-page i
 - **`X-Request-ID` correlation is working end to end** -- it's on by default (`RequestIdServiceProvider`), but confirm your proxy/load balancer isn't stripping the header before it reaches the app. See [Request/Correlation IDs](https://zeython.zaber.dev/docs/observability/#requestcorrelation-ids).
 - **Error monitoring is wired up** (Sentry via `ErrorMonitoringServiceProvider` + `SENTRY_DSN`) so an unhandled exception, an exhausted job retry, or a raising scheduled task reaches you instead of only a log line nobody's watching. See [Error Monitoring](https://zeython.zaber.dev/docs/error-monitoring/index.md).
 - **`/up` is actually wired into your infrastructure's health check** -- a load balancer target group, a Kubernetes probe, an uptime monitor -- not just reachable by hand. See [Health Check](https://zeython.zaber.dev/docs/health-check/index.md).
+- **Tracing's `sample_ratio` is tuned for your actual traffic**, if `TracingServiceProvider` is registered -- tracing every single request (the default) is fine at low volume, but a wasteful exporter/collector bill at real production traffic; see [Tracing](https://zeython.zaber.dev/docs/tracing/index.md).
 
 ## Background work
 
@@ -45,6 +47,7 @@ Everything below is documented in its own page already -- this is the one-page i
 - **Response compression is on** for a JSON API with non-trivial payloads (`GzipServiceProvider`) -- opt-in, not registered by default. See [Compression (gzip)](https://zeython.zaber.dev/docs/api-standards/#compression-gzip).
 - **Conditional GETs are on** if clients re-fetch the same resources often (`ETagServiceProvider`) -- know the memory trade-off (it buffers the full response body) before turning it on for large or streamed responses. See [Conditional requests (ETags)](https://zeython.zaber.dev/docs/api-standards/#conditional-requests-etags).
 - **Error response shape matches what your clients expect** -- the default `{"error": ..., "status": ...}` shape, or RFC 7807 `application/problem+json` (`API_PROBLEM_JSON=true`) if you're integrating with tooling that expects the standard. Decide once, not per route. See [RFC 7807 error responses](https://zeython.zaber.dev/docs/api-standards/#rfc-7807-error-responses-applicationproblemjson).
+- **Idempotency keys use a shared cache** if you registered `IdempotencyServiceProvider` and run more than one app process/machine -- its process-local `InMemoryCache` default means a retry that lands on a different process won't see the first attempt's cached response. Pass `cache=RedisCache(...)`. See [Idempotency Keys](https://zeython.zaber.dev/docs/idempotency/index.md).
 
 ## Testing
 
