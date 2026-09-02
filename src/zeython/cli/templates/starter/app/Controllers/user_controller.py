@@ -1,7 +1,7 @@
 from starlette.responses import JSONResponse
 
 from app.Models.user import User
-from zeython import Controller, NotFoundException
+from zeython import BadRequestException, Controller, NotFoundException
 
 
 class UserController(Controller):
@@ -10,9 +10,15 @@ class UserController(Controller):
 
     async def index(self, request):
         # See docs/database.md#pagination -- ?page=2&per_page=10, defaults below.
-        page = int(request.query_params.get("page", 1))
-        per_page = int(request.query_params.get("per_page", 20))
-        result = await User.paginate(page=page, per_page=per_page)
+        try:
+            page = int(request.query_params.get("page", 1))
+            per_page = int(request.query_params.get("per_page", 20))
+        except ValueError as exc:
+            raise BadRequestException("'page' and 'per_page' must be integers.") from exc
+        try:
+            result = await User.paginate(page=page, per_page=per_page)
+        except ValueError as exc:
+            raise BadRequestException(str(exc)) from exc
         return JSONResponse(result.to_dict(request=request))
 
     async def show(self, request):

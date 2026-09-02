@@ -139,6 +139,27 @@ async def test_list_view_shows_existing_rows(tmp_path: Path) -> None:
     assert "Hello World" in response.text
 
 
+async def test_list_view_with_a_non_numeric_page_falls_back_to_page_one(tmp_path: Path) -> None:
+    # Regression guard: ?page= reached int() unguarded, so a hand-edited
+    # or stale bookmarked URL (?page=abc, ?page=-1, ?page=0) crashed the
+    # list view with an unhandled ValueError instead of just showing page 1.
+    app = await _make_app(tmp_path)
+    user = await _create_user(app, is_admin=True)
+    database = app.container.make(Database)
+    async with database.session():
+        await AdminTestPost.create(title="Only Post")
+
+    async with client(app) as http:
+        login_as(http, app, user)
+        non_numeric = await http.get("/admin/admin_test_posts?page=not-a-number")
+        negative = await http.get("/admin/admin_test_posts?page=-1")
+        zero = await http.get("/admin/admin_test_posts?page=0")
+
+    for response in (non_numeric, negative, zero):
+        assert response.status_code == 200
+        assert "Only Post" in response.text
+
+
 async def test_create_form_renders(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
     user = await _create_user(app, is_admin=True)
