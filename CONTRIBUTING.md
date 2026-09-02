@@ -54,7 +54,10 @@ docs/                     # mkdocs source
   hints; `mypy src/zeython` must pass clean.
 - Add tests for anything you change in `src/zeython/` — `pytest` must pass.
   CI also enforces a coverage floor (`pytest --cov=zeython --cov-fail-under=90`,
-  currently sitting around 94% — see the `coverage` job).
+  currently sitting around 95% — see the `coverage` job). Note: some tests
+  need a live Redis service and skip without one, so a local run without
+  Redis under-reports coverage — see `.github/workflows/ci.yml` for how CI
+  provides it.
 - Run `ruff check src tests` before opening a PR; CI enforces it.
 - If you change `src/zeython/cli/templates/starter/`, regenerate a project with
   `zeython new` and confirm it boots (`zeython serve`) and its own `pytest`

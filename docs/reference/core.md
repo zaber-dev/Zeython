@@ -2,7 +2,8 @@
 
 The application bootstrap, DI container, config, routing, service
 providers, the application-level event dispatcher, feature flags, view
-rendering, and the framework's exception/validation primitives.
+rendering, the framework's exception/validation primitives, and its own
+testing utilities.
 
 ::: zeython.application
 
@@ -23,3 +24,5 @@ rendering, and the framework's exception/validation primitives.
 ::: zeython.exceptions
 
 ::: zeython.validation
+
+::: zeython.testing

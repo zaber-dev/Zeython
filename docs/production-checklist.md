@@ -55,6 +55,12 @@ second replica, a new external API) that changes the answer.
 - [ ] **You've read [SECURITY.md](https://github.com/zaber-dev/Zeython/blob/main/SECURITY.md)**
   -- supported versions and how to report a vulnerability privately, for
   your own app as much as for the framework.
+- [ ] **SAML replay protection is shared across processes**, if you use
+  [SAML SSO](saml.md) and run more than one app process/machine --
+  `SamlServiceProvider`'s used-assertion tracking defaults to a
+  process-local `InMemoryCache`, so pass `replay_cache=RedisCache(...)`
+  or two processes can each accept the same replayed assertion once. See
+  [Replay protection](saml.md#replay-protection).
 
 ## Database
 
@@ -91,6 +97,10 @@ second replica, a new external API) that changes the answer.
 - [ ] **`/up` is actually wired into your infrastructure's health
   check** -- a load balancer target group, a Kubernetes probe, an uptime
   monitor -- not just reachable by hand. See [Health Check](health-check.md).
+- [ ] **Tracing's `sample_ratio` is tuned for your actual traffic**, if
+  `TracingServiceProvider` is registered -- tracing every single request
+  (the default) is fine at low volume, but a wasteful exporter/collector
+  bill at real production traffic; see [Tracing](tracing.md).
 
 ## Background work
 
@@ -122,6 +132,11 @@ second replica, a new external API) that changes the answer.
   `application/problem+json` (`API_PROBLEM_JSON=true`) if you're
   integrating with tooling that expects the standard. Decide once, not
   per route. See [RFC 7807 error responses](api-standards.md#rfc-7807-error-responses-applicationproblemjson).
+- [ ] **Idempotency keys use a shared cache** if you registered
+  `IdempotencyServiceProvider` and run more than one app process/machine
+  -- its process-local `InMemoryCache` default means a retry that lands
+  on a different process won't see the first attempt's cached response.
+  Pass `cache=RedisCache(...)`. See [Idempotency Keys](idempotency.md).
 
 ## Testing
 

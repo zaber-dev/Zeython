@@ -88,7 +88,7 @@ scaffolding on every project. Zeython does that assembly once:
   [Idempotency Keys](docs/idempotency.md).
 - **Small, typed, tested core** — the framework itself ships full type hints
   ([PEP 561](https://peps.python.org/pep-0561/) `py.typed`) and a pytest
-  suite of 700+ tests; it is not scaffolding wrapped around unfinished features.
+  suite of 950+ tests; it is not scaffolding wrapped around unfinished features.
 
 ## Quick start
 
