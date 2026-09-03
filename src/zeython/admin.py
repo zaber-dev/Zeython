@@ -99,6 +99,34 @@ def _parse_form_value(column_type: Any, raw: Any) -> Any:
     return raw
 
 
+def _parse_attributes(model: type[Model], form: Any) -> dict[str, Any]:
+    """Parse ``form`` into constructor/update kwargs for ``model``'s editable
+    columns.
+
+    Raises :class:`~zeython.exceptions.ValidationException` (422, folded
+    into the same redirect-with-errors flow a model validation failure
+    already takes) for any column whose submitted value doesn't parse as
+    its column type -- a non-numeric string in an Integer/Float column, an
+    unparseable datetime -- rather than letting the underlying ``ValueError``
+    escape :meth:`_parse_form_value` as an unhandled 500. The generated
+    ``<input type="number">``/``type="datetime-local"`` steers a browser
+    away from sending that, but the request body is client-controlled data
+    regardless (curl, a hand-edited form, a modified request) -- the server
+    can't rely on a browser's own input validation to protect it.
+    """
+    attributes: dict[str, Any] = {}
+    errors: dict[str, list[str]] = {}
+    for column in _editable_columns(model):
+        raw = form.get(column.name)
+        try:
+            attributes[column.name] = _parse_form_value(column.type, raw)
+        except (ValueError, TypeError):
+            errors[column.name] = [f"{raw!r} is not a valid value for this field."]
+    if errors:
+        raise ValidationException(errors)
+    return attributes
+
+
 def _encode_errors(errors: dict[str, list[str]]) -> str:
     return f"errors={quote(json.dumps(errors))}"
 
@@ -338,8 +366,8 @@ class AdminServiceProvider(ServiceProvider):
             await _check_access(request)
             model = _model_or_404(request.path_params["model"])
             form = await request.form()
-            attributes = {c.name: _parse_form_value(c.type, form.get(c.name)) for c in _editable_columns(model)}
             try:
+                attributes = _parse_attributes(model, form)
                 await model.create(**attributes)
             except (ValidationException, ValueError) as exc:
                 errors = exc.errors if isinstance(exc, ValidationException) else {"__all__": [str(exc)]}
@@ -362,8 +390,8 @@ class AdminServiceProvider(ServiceProvider):
             if instance is None:
                 raise NotFoundException("Record not found.")
             form = await request.form()
-            attributes = {c.name: _parse_form_value(c.type, form.get(c.name)) for c in _editable_columns(model)}
             try:
+                attributes = _parse_attributes(model, form)
                 await instance.update(**attributes)
             except (ValidationException, ValueError) as exc:
                 errors = exc.errors if isinstance(exc, ValidationException) else {"__all__": [str(exc)]}

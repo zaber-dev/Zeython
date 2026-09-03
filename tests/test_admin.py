@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sqlalchemy import Boolean, String
+from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from zeython.admin import AdminServiceProvider
@@ -37,6 +37,7 @@ class AdminTestPost(Model):
     __tablename__ = "admin_test_posts"
 
     title: Mapped[str] = mapped_column(String(255))
+    views: Mapped[int | None] = mapped_column(Integer, nullable=True, default=0)
 
 
 async def _make_app(tmp_path: Path, *, guard=lambda user: user.is_admin) -> Application:
@@ -193,6 +194,36 @@ async def test_create_via_post_persists_a_new_row(tmp_path: Path) -> None:
     assert any(post.title == "A new post" for post in posts)
 
 
+async def test_create_with_a_non_numeric_integer_field_shows_a_validation_error(tmp_path: Path) -> None:
+    # Regression guard: the generated <input type="number"> only steers a
+    # browser away from sending this -- the request body is still
+    # client-controlled data (curl, a hand-edited form). Submitting
+    # something non-numeric for an Integer column used to reach int()
+    # unguarded inside a dict comprehension that ran *before* the create()
+    # handler's own try/except, so it crashed the request with an
+    # unhandled ValueError (500) instead of redisplaying the form with a
+    # clean validation error.
+    app = await _make_app(tmp_path)
+    user = await _create_user(app, is_admin=True)
+
+    async with client(app) as http:
+        login_as(http, app, user)
+        await http.get("/admin/admin_test_posts/new")
+        response = await http.post(
+            "/admin/admin_test_posts",
+            data={"title": "A new post", "views": "not-a-number"},
+            follow_redirects=True,
+        )
+
+    assert response.status_code == 200
+    assert "is not a valid value for this field" in response.text
+
+    database = app.container.make(Database)
+    async with database.session():
+        posts = await AdminTestPost.all()
+    assert not any(post.title == "A new post" for post in posts)
+
+
 async def test_edit_form_shows_current_values(tmp_path: Path) -> None:
     app = await _make_app(tmp_path)
     user = await _create_user(app, is_admin=True)
@@ -229,6 +260,31 @@ async def test_update_via_put_persists_the_change(tmp_path: Path) -> None:
         updated = await AdminTestPost.find(post_id)
     assert updated is not None
     assert updated.title == "After"
+
+
+async def test_update_with_a_non_numeric_integer_field_shows_a_validation_error(tmp_path: Path) -> None:
+    app = await _make_app(tmp_path)
+    user = await _create_user(app, is_admin=True)
+    database = app.container.make(Database)
+    async with database.session():
+        post = await AdminTestPost.create(title="Before")
+        post_id = post.id
+
+    async with client(app) as http:
+        login_as(http, app, user)
+        await http.get(f"/admin/admin_test_posts/{post_id}/edit")
+        response = await http.put(
+            f"/admin/admin_test_posts/{post_id}",
+            data={"title": "After", "views": "not-a-number"},
+            follow_redirects=True,
+        )
+
+    assert response.status_code == 200
+    assert "is not a valid value for this field" in response.text
+    async with database.session():
+        unchanged = await AdminTestPost.find(post_id)
+    assert unchanged is not None
+    assert unchanged.title == "Before"
 
 
 async def test_destroy_via_delete_soft_deletes_the_row(tmp_path: Path) -> None:

@@ -178,7 +178,10 @@ end-to-end tutorial. Licensed under MIT.
 - A plugin registry for third-party packages (auto-discovered service
   providers, no per-package wiring).
 - Localization: translation strings and per-request locale resolution.
-- An auto-generated CRUD admin panel for registered models.
+- An auto-generated CRUD admin panel for registered models -- a submitted
+  value that doesn't parse as its column's type (e.g. non-numeric text for
+  an `Integer` column) redisplays the form with a validation error instead
+  of crashing the request with an unhandled `ValueError`.
 - Custom console commands (`app/Console/Commands/`, `zeython command`).
 
 ### CLI
