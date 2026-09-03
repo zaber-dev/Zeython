@@ -67,6 +67,15 @@ saving. A raw database error (e.g. a `NOT NULL` violation on a column
 with no explicit rule) is caught too and shown the same way, rather than
 a raw 500.
 
+The submitted value for an `Integer`/`Float`/`DateTime` column is parsed
+before any of that runs -- the generated `<input type="number">`/
+`type="datetime-local">` only steers a browser away from sending
+something that doesn't parse, and the request body is client-controlled
+data regardless (curl, a hand-edited form). A value that doesn't parse
+(`views=not-a-number` for an `Integer` column) redisplays the form with
+"... is not a valid value for this field" the same way a failing
+`__rules__` check does, rather than crashing the request.
+
 ## How form submission actually works
 
 `CsrfMiddleware` reads its token from a header
