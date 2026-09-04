@@ -223,4 +223,16 @@ end-to-end tutorial. Licensed under MIT.
 - A `py.typed` marker (PEP 561), actually shipped in the built wheel and
   verified there in CI — the `"Typing :: Typed"` classifier was previously
   aspirational only.
+- The sdist now includes `docs/` -- previously only the wheel's
+  `force-include` step pulled it in directly from the source tree, so
+  `python -m build` (sdist first, then a wheel built *from* that sdist)
+  failed with `FileNotFoundError` the moment `docs/` wasn't there to
+  force-include, even though building a wheel directly from a checkout
+  (what CI's own smoke test does) never went through that path and never
+  caught it.
+- A `publish.yml` GitHub Actions workflow: builds the sdist/wheel, checks
+  them with `twine check`, and publishes to PyPI via
+  `pypa/gh-action-pypi-publish` on every published GitHub Release (a
+  `PYPI_API_TOKEN` repository secret is required; see
+  [Contributing](CONTRIBUTING.md)).
 

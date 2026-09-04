@@ -90,6 +90,7 @@ include = [
     "src/zeython/**/*.py",
     "src/zeython/py.typed",
     "src/zeython/cli/templates/**/*",
+    "docs/**/*",
 ]
 
 [tool.pytest.ini_options]

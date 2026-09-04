@@ -87,10 +87,8 @@ scaffolding on every project. Zeython does that assembly once:
 
 ## Quick start
 
-Not yet on PyPI — install straight from GitHub:
-
 ```bash
-pip install git+https://github.com/zaber-dev/Zeython.git
+pip install zeython
 zeython new "My Blog"
 cd my_blog
 pip install -e .

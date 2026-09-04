@@ -73,6 +73,17 @@ docs/                     # mkdocs source
 3. `pytest && ruff check src tests && mypy src/zeython`
 4. Open a PR describing the change and, for behavior changes, why it's needed.
 
+## Releasing to PyPI
+
+`.github/workflows/publish.yml` builds the sdist/wheel, checks them with
+`twine check`, and publishes to PyPI whenever a GitHub Release is
+published — bump `version` in `pyproject.toml` to match the release tag
+first (the workflow fails the release rather than publish a mismatched
+version). Requires a `PYPI_API_TOKEN` repository secret (Settings →
+Secrets and variables → Actions) holding a PyPI API token scoped to this
+project; `workflow_dispatch` re-runs the same job manually (e.g. PyPI was
+down on the first attempt) without needing a new release.
+
 ## License
 
 By contributing, you agree your contributions are licensed under the project's
