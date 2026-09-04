@@ -87,8 +87,8 @@ nav:
       - Extensibility: reference/extensibility.md
 theme:
   name: material
-  logo: assets/logo.svg
-  favicon: assets/favicon.svg
+  logo: assets/zeython.png
+  favicon: assets/zeython.png
   font:
     text: Inter
     code: JetBrains Mono
