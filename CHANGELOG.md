@@ -43,6 +43,11 @@ GPL-3.0 to MIT.
   search service required. `query` is always treated as plain text, never
   a query mini-language -- a stray quote, hyphen, colon, or bare `AND` in
   a search box no longer crashes the request with an FTS5 syntax error.
+  `search()` is scoped to the current tenant on a model with a `tenant_id`
+  column, the same as `find`/`all`/`find_by`/`paginate` -- it used to
+  build its own raw SQL with no tenant filter at all, leaking every
+  tenant's rows into search results on a model that combined `tenant_id`
+  with `__searchable__`.
 - An application-level event dispatcher (`zeython.events`) — `emit()`,
   decoupled `listen()` handlers, an `EventServiceProvider` for wiring an
   app's own listeners in one place.

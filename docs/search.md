@@ -95,6 +95,12 @@ need it, and keep them in sync.
 await Post.search("draft", include_deleted=True)
 ```
 
+## Multi-tenant apps
+
+A model that declares a `tenant_id` column (see [Multi-Tenancy](multi-tenancy.md))
+gets `search()` scoped to [`current_tenant_id()`](multi-tenancy.md), the
+same as `find`/`all`/`find_by`/`paginate` — no separate opt-in needed.
+
 ## Limiting results
 
 ```python
@@ -120,8 +126,6 @@ whitespace-separated term as an FTS5 string literal before it reaches
 `MATCH`, so a raw query string can never be parsed as FTS5's own operator
 syntax (`AND`/`OR`/`NOT`, `col:` filters, unbalanced `"`/`(`) and crash
 the request with a syntax error the way it would unquoted.
-
-## API reference
 
 ## What this isn't
 
