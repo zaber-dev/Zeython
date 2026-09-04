@@ -74,7 +74,11 @@ t(request, "greeting", name="Ana")   # "Hello, Ana!" (locale=en)
 
 A placeholder with no matching argument is left as-is rather than
 raising — a missing translation parameter shouldn't 500 a page that would
-otherwise render fine.
+otherwise render fine. Same for a stray unescaped `{`/`}` a translator
+left in a translation string by mistake (a literal brace needs doubling
+to `{{`/`}}` in `str.format` syntax, an easy slip in ordinary prose) — a
+typo in a translation file shouldn't 500 every request that hits it
+either.
 
 ## How the locale is resolved
 

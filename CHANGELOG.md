@@ -114,7 +114,10 @@ end-to-end tutorial. Licensed under MIT.
   (`InMemoryBatchTracker`/`RedisBatchTracker` picked automatically to
   match `QUEUE_DRIVER`).
 - In-app task scheduler (`zeython.schedule`) — recurring jobs defined in
-  code, no separate cron entry needed.
+  code, no separate cron entry needed. Day-of-month and weekday combine
+  the standard cron way when both are restricted (a match on either is
+  enough, e.g. `cron("0 0 1 * 1")` for "the 1st of the month, or every
+  Monday") rather than always requiring both at once.
 - Outbound mail (`zeython.mail`: `LogMailer`, `SmtpMailer`).
 - Multi-channel notifications (`zeython.notifications`) — one `Notification`
   class describes its `mail`/`database`/`broadcast` rendering per
@@ -182,7 +185,11 @@ end-to-end tutorial. Licensed under MIT.
 
 - A plugin registry for third-party packages (auto-discovered service
   providers, no per-package wiring).
-- Localization: translation strings and per-request locale resolution.
+- Localization: translation strings and per-request locale resolution --
+  a stray unescaped `{`/`}` in a translation string (needs doubling to
+  `{{`/`}}` in `str.format` syntax, an easy slip for a non-programmer
+  translator to make) degrades to the raw string instead of raising and
+  500ing every request that hits that key.
 - An auto-generated CRUD admin panel for registered models -- a submitted
   value that doesn't parse as its column's type (e.g. non-numeric text for
   an `Integer` column) redisplays the form with a validation error instead

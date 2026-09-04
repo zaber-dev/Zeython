@@ -56,6 +56,34 @@ def test_weekday_field_sunday_is_zero() -> None:
     assert cron_matches("0 0 * * 1", datetime(2026, 8, 17, 0, 0))
 
 
+def test_day_and_weekday_combine_with_or_when_both_restricted() -> None:
+    # Regression guard: standard cron treats day-of-month and weekday as
+    # cumulative (OR'd) once *both* are restricted (neither is "*") --
+    # "0 0 1 * 1" means "midnight on the 1st of the month, or every
+    # Monday", not "only when the 1st happens to be a Monday". This used
+    # to AND every field unconditionally, so it silently matched far less
+    # often than a real crontab entry using this pattern expects.
+    monday_not_the_first = datetime(2025, 11, 10, 0, 0)  # a Monday
+    the_first_not_a_monday = datetime(2025, 11, 1, 0, 0)  # a Saturday
+    neither = datetime(2025, 11, 11, 0, 0)  # a Tuesday, not the 1st
+
+    assert cron_matches("0 0 1 * 1", monday_not_the_first)
+    assert cron_matches("0 0 1 * 1", the_first_not_a_monday)
+    assert not cron_matches("0 0 1 * 1", neither)
+
+
+def test_day_and_weekday_and_together_when_only_one_is_restricted() -> None:
+    # With only one of the two restricted, that field alone decides --
+    # the OR-combination rule only kicks in once *both* are restricted.
+    monday_not_the_first = datetime(2025, 11, 10, 0, 0)  # a Monday
+    the_first_not_a_monday = datetime(2025, 11, 1, 0, 0)  # a Saturday
+
+    assert cron_matches("0 0 * * 1", monday_not_the_first)  # weekday only
+    assert not cron_matches("0 0 * * 1", the_first_not_a_monday)
+    assert cron_matches("0 0 1 * *", the_first_not_a_monday)  # day only
+    assert not cron_matches("0 0 1 * *", monday_not_the_first)
+
+
 def test_invalid_expression_raises_value_error() -> None:
     with pytest.raises(ValueError, match="5 space-separated fields"):
         cron_matches("* * * *", datetime.now())
