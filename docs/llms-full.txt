@@ -1229,6 +1229,10 @@ def upgrade() -> None:
 await Post.search("draft", include_deleted=True)
 ```
 
+## Multi-tenant apps
+
+A model that declares a `tenant_id` column (see [Multi-Tenancy](https://zeython.zaber.dev/docs/multi-tenancy/index.md)) gets `search()` scoped to [`current_tenant_id()`](https://zeython.zaber.dev/docs/multi-tenancy/index.md), the same as `find`/`all`/`find_by`/`paginate` — no separate opt-in needed.
+
 ## Limiting results
 
 ```python
@@ -1246,8 +1250,6 @@ await Post.search("")                   # [] -- nothing to search for, no query 
 ```
 
 Both engines are safe here for the same reason (each does its own thing to get there): Postgres's `plainto_tsquery()` already always treats its input as plain text; on SQLite, `Model.search()` quotes each whitespace-separated term as an FTS5 string literal before it reaches `MATCH`, so a raw query string can never be parsed as FTS5's own operator syntax (`AND`/`OR`/`NOT`, `col:` filters, unbalanced `"`/`(`) and crash the request with a syntax error the way it would unquoted.
-
-## API reference
 
 ## What this isn't
 
@@ -2784,7 +2786,7 @@ class Post(Model):
 
 That's the whole opt-in. From here:
 
-- `Post.find(id)`, `Post.all()`, `Post.find_by(...)`, `Post.paginate(...)` all scope to the current request's resolved tenant automatically — including `find()` by ID, so a request can't read another tenant's row just by guessing (or enumerating) its ID.
+- `Post.find(id)`, `Post.all()`, `Post.find_by(...)`, `Post.paginate(...)`, and `Post.search(...)` (see [Full-Text Search](https://zeython.zaber.dev/docs/search/index.md)) all scope to the current request's resolved tenant automatically — including `find()` by ID, so a request can't read another tenant's row just by guessing (or enumerating) its ID.
 - `Post.create(...)` (and `save()` on a freshly-constructed `Post()`) assigns `tenant_id` from the current tenant automatically, if you didn't already set it explicitly.
 - A model with **no** `tenant_id` column is completely unaffected — registering `TenancyServiceProvider` changes nothing for it.
 
@@ -7909,6 +7911,8 @@ Dispatches to SQLite's FTS5 (`MATCH` + built-in `rank`) or Postgres's `tsvector`
 
 A blank `query` (or one that's only whitespace) returns `[]` without touching the database -- there's nothing to search for. Otherwise `query` is treated as plain text a user typed, not a query mini-language: every term matches literally, so a stray quote, hyphen, colon, or the word "AND" is searched for as text instead of raising a syntax error or being parsed as an operator.
 
+A model that declares a `tenant_id` column is scoped to :func:`~zeython.tenancy.current_tenant_id`, the same as `find`/`all`/`find_by`/`paginate` (see :meth:`_base_select`) -- this hand-written SQL doesn't build on `_base_select()` the way those do, so without this it would silently search every tenant's rows.
+
 Source code in `src/zeython/db/model.py`
 
 ```python
@@ -7936,10 +7940,24 @@ async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = Fa
     query mini-language: every term matches literally, so a stray
     quote, hyphen, colon, or the word "AND" is searched for as text
     instead of raising a syntax error or being parsed as an operator.
+
+    A model that declares a ``tenant_id`` column is scoped to
+    :func:`~zeython.tenancy.current_tenant_id`, the same as
+    ``find``/``all``/``find_by``/``paginate`` (see
+    :meth:`_base_select`) -- this hand-written SQL doesn't build on
+    ``_base_select()`` the way those do, so without this it would
+    silently search every tenant's rows.
     """
     session = current_session()
     dialect = session.bind.dialect.name if session.bind is not None else None
-    sql = cls._search_sql(dialect, include_deleted=include_deleted)
+
+    tenant_id: Any = None
+    if hasattr(cls, "tenant_id"):
+        from zeython.tenancy import current_tenant_id
+
+        tenant_id = current_tenant_id()
+
+    sql = cls._search_sql(dialect, include_deleted=include_deleted, tenant_scoped=tenant_id is not None)
     if not query.strip():
         return []
     if dialect == "sqlite":
@@ -7947,6 +7965,8 @@ async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = Fa
     params: dict[str, Any] = {"query": query, "limit": limit}
     if dialect == "postgresql":
         params["language"] = cls.__search_language__
+    if tenant_id is not None:
+        params["tenant_id"] = tenant_id
 
     stmt = select(cls).from_statement(text(sql)).params(**params)
     result = await session.execute(stmt)

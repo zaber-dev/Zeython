@@ -76,6 +76,10 @@ def upgrade() -> None:
 await Post.search("draft", include_deleted=True)
 ```
 
+## Multi-tenant apps
+
+A model that declares a `tenant_id` column (see [Multi-Tenancy](https://zeython.zaber.dev/docs/multi-tenancy/index.md)) gets `search()` scoped to [`current_tenant_id()`](https://zeython.zaber.dev/docs/multi-tenancy/index.md), the same as `find`/`all`/`find_by`/`paginate` — no separate opt-in needed.
+
 ## Limiting results
 
 ```python
@@ -93,8 +97,6 @@ await Post.search("")                   # [] -- nothing to search for, no query 
 ```
 
 Both engines are safe here for the same reason (each does its own thing to get there): Postgres's `plainto_tsquery()` already always treats its input as plain text; on SQLite, `Model.search()` quotes each whitespace-separated term as an FTS5 string literal before it reaches `MATCH`, so a raw query string can never be parsed as FTS5's own operator syntax (`AND`/`OR`/`NOT`, `col:` filters, unbalanced `"`/`(`) and crash the request with a syntax error the way it would unquoted.
-
-## API reference
 
 ## What this isn't
 

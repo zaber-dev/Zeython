@@ -3146,10 +3146,11 @@ tenant <code>None</code>".</p>
 </span></code></pre></div>
 <p>That's the whole opt-in. From here:</p>
 <ul>
-<li><code>Post.find(id)</code>, <code>Post.all()</code>, <code>Post.find_by(...)</code>, <code>Post.paginate(...)</code>
-  all scope to the current request's resolved tenant automatically —
-  including <code>find()</code> by ID, so a request can't read another tenant's row
-  just by guessing (or enumerating) its ID.</li>
+<li><code>Post.find(id)</code>, <code>Post.all()</code>, <code>Post.find_by(...)</code>, <code>Post.paginate(...)</code>,
+  and <code>Post.search(...)</code> (see <a href="../search/">Full-Text Search</a>) all scope to
+  the current request's resolved tenant automatically — including
+  <code>find()</code> by ID, so a request can't read another tenant's row just by
+  guessing (or enumerating) its ID.</li>
 <li><code>Post.create(...)</code> (and <code>save()</code> on a freshly-constructed <code>Post()</code>)
   assigns <code>tenant_id</code> from the current tenant automatically, if you
   didn't already set it explicitly.</li>

@@ -1048,6 +1048,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#multi-tenant-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-tenant apps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#limiting-results" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1070,17 +1081,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-this-isnt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1092,7 +1092,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference_1" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
         API reference
@@ -3107,6 +3107,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#multi-tenant-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-tenant apps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#limiting-results" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3129,17 +3140,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-this-isnt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3151,7 +3151,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference_1" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
         API reference
@@ -3255,6 +3255,10 @@ need it, and keep them in sync.</p>
 <code>find_by()</code> — pass <code>include_deleted=True</code> to include them:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">"draft"</span><span class="p">,</span> <span class="n">include_deleted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
+<h2 id="multi-tenant-apps">Multi-tenant apps<a class="headerlink" href="#multi-tenant-apps" title="Permanent link">&para;</a></h2>
+<p>A model that declares a <code>tenant_id</code> column (see <a href="../multi-tenancy/">Multi-Tenancy</a>)
+gets <code>search()</code> scoped to <a href="../multi-tenancy/"><code>current_tenant_id()</code></a>, the
+same as <code>find</code>/<code>all</code>/<code>find_by</code>/<code>paginate</code> — no separate opt-in needed.</p>
 <h2 id="limiting-results">Limiting results<a class="headerlink" href="#limiting-results" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">await</span> <span class="n">Post</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">"async orm"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># default 20</span>
 </span></code></pre></div>
@@ -3273,7 +3277,6 @@ whitespace-separated term as an FTS5 string literal before it reaches
 <code>MATCH</code>, so a raw query string can never be parsed as FTS5's own operator
 syntax (<code>AND</code>/<code>OR</code>/<code>NOT</code>, <code>col:</code> filters, unbalanced <code>"</code>/<code>(</code>) and crash
 the request with a syntax error the way it would unquoted.</p>
-<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <h2 id="what-this-isnt">What this isn't<a class="headerlink" href="#what-this-isnt" title="Permanent link">&para;</a></h2>
 <p><code>Model.search()</code> is a thin, honest dispatch over each database's own
 full-text SQL — not a search engine. It doesn't give you: relevance
@@ -3289,7 +3292,7 @@ service to run, not every case.</p>
 naming the dialect) — its own full-text indexes work differently enough
 from SQLite/Postgres's that adding a third dispatch branch is deliberately
 left for when someone actually needs it, not implemented speculatively.</p>
-<h2 id="api-reference_1">API reference<a class="headerlink" href="#api-reference_1" title="Permanent link">&para;</a></h2>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <p>See <a href="../reference/database/"><code>zeython.search</code></a> for the full API, and
 <a href="../reference/database/"><code>Model.search()</code></a> alongside the rest of <code>Model</code>.</p>
 

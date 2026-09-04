@@ -315,6 +315,8 @@ Dispatches to SQLite's FTS5 (`MATCH` + built-in `rank`) or Postgres's `tsvector`
 
 A blank `query` (or one that's only whitespace) returns `[]` without touching the database -- there's nothing to search for. Otherwise `query` is treated as plain text a user typed, not a query mini-language: every term matches literally, so a stray quote, hyphen, colon, or the word "AND" is searched for as text instead of raising a syntax error or being parsed as an operator.
 
+A model that declares a `tenant_id` column is scoped to :func:`~zeython.tenancy.current_tenant_id`, the same as `find`/`all`/`find_by`/`paginate` (see :meth:`_base_select`) -- this hand-written SQL doesn't build on `_base_select()` the way those do, so without this it would silently search every tenant's rows.
+
 Source code in `src/zeython/db/model.py`
 
 ```python
@@ -342,10 +344,24 @@ async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = Fa
     query mini-language: every term matches literally, so a stray
     quote, hyphen, colon, or the word "AND" is searched for as text
     instead of raising a syntax error or being parsed as an operator.
+
+    A model that declares a ``tenant_id`` column is scoped to
+    :func:`~zeython.tenancy.current_tenant_id`, the same as
+    ``find``/``all``/``find_by``/``paginate`` (see
+    :meth:`_base_select`) -- this hand-written SQL doesn't build on
+    ``_base_select()`` the way those do, so without this it would
+    silently search every tenant's rows.
     """
     session = current_session()
     dialect = session.bind.dialect.name if session.bind is not None else None
-    sql = cls._search_sql(dialect, include_deleted=include_deleted)
+
+    tenant_id: Any = None
+    if hasattr(cls, "tenant_id"):
+        from zeython.tenancy import current_tenant_id
+
+        tenant_id = current_tenant_id()
+
+    sql = cls._search_sql(dialect, include_deleted=include_deleted, tenant_scoped=tenant_id is not None)
     if not query.strip():
         return []
     if dialect == "sqlite":
@@ -353,6 +369,8 @@ async def search(cls, query: str, *, limit: int = 20, include_deleted: bool = Fa
     params: dict[str, Any] = {"query": query, "limit": limit}
     if dialect == "postgresql":
         params["language"] = cls.__search_language__
+    if tenant_id is not None:
+        params["tenant_id"] = tenant_id
 
     stmt = select(cls).from_statement(text(sql)).params(**params)
     result = await session.execute(stmt)
