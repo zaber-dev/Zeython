@@ -107,7 +107,12 @@ class Translator:
         :func:`current_locale` (or ``default_locale`` outside a request).
         Any keyword arguments fill ``{name}``-style placeholders in the
         translated string via ``str.format`` -- a placeholder with no
-        matching argument is left as-is rather than raising.
+        matching argument, or a stray unescaped ``{``/``}`` a translator
+        left in by mistake (a literal ``{`` needs doubling to ``{{}}`` in
+        ``str.format`` syntax, an easy slip in ordinary prose that isn't
+        otherwise a template language), is left as-is rather than raising
+        -- a typo in a translation resource file shouldn't 500 every
+        request that hits that key.
         """
         resolved_locale = locale or current_locale() or self.default_locale
         translations = self._translations_for(resolved_locale)
@@ -115,7 +120,7 @@ class Translator:
             translations = self._translations_for(self.fallback_locale)
         text = translations.get(key, key)
         if params:
-            with contextlib.suppress(KeyError, IndexError):
+            with contextlib.suppress(KeyError, IndexError, ValueError):
                 text = text.format(**params)
         return text
 

@@ -72,6 +72,23 @@ def test_a_missing_format_argument_leaves_the_raw_string_instead_of_raising(tmp_
     assert translator.t("greeting", locale="en") == "Hello, {name}!"
 
 
+def test_a_stray_unescaped_brace_leaves_the_raw_string_instead_of_raising(tmp_path: Path) -> None:
+    # Regression guard: a translator pasting a literal "{" or "}" into a
+    # translation file (needs doubling to "{{"/"}}" in str.format syntax,
+    # an easy slip in ordinary prose) used to raise an uncaught ValueError
+    # from str.format() -- ValueError wasn't among the caught exceptions,
+    # only KeyError/IndexError -- 500ing every request that hit that key
+    # instead of degrading to the raw string the way a missing argument
+    # already does.
+    lang_dir = tmp_path / "lang"
+    lang_dir.mkdir(parents=True, exist_ok=True)
+    (lang_dir / "en.json").write_text('{"price": "Total: {", "percent": "Save {0:d}%"}')
+    translator = Translator(lang_dir, default_locale="en")
+
+    assert translator.t("price", locale="en", amount=100) == "Total: {"
+    assert translator.t("percent", locale="en", amount=100) == "Save {0:d}%"
+
+
 def test_available_locales_reflects_the_files_on_disk(tmp_path: Path) -> None:
     _write_locale_files(tmp_path / "lang")
     translator = Translator(tmp_path / "lang", default_locale="en")

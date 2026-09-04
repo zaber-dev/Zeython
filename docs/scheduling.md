@@ -48,6 +48,12 @@ schedule.call(custom).cron("*/10 8-17 * * 1-5")  # any raw 5-field expression
 (`0` = Sunday) — unlike some cron implementations, `7` isn't accepted as
 an alias for Sunday.
 
+Day-of-month and weekday follow standard cron's one special-case rule:
+restrict *both* (neither is `*`) and a match on **either** is enough --
+`cron("0 0 1 * 1")` runs at midnight on the 1st of the month, *or* every
+Monday, not only when the 1st happens to land on a Monday. Restrict just
+one of the two and it alone decides, same as every other field.
+
 ## Setup
 
 ```python
