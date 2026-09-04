@@ -384,7 +384,7 @@ class Model(Base):
         return results[0] if results else None
 
     @classmethod
-    def _search_sql(cls, dialect: str | None, *, include_deleted: bool) -> str:
+    def _search_sql(cls, dialect: str | None, *, include_deleted: bool, tenant_scoped: bool = False) -> str:
         if not cls.__searchable__:
             raise RuntimeError(
                 f"{cls.__name__} has no __searchable__ columns declared -- add e.g. "
@@ -394,17 +394,19 @@ class Model(Base):
         table = cls.__tablename__
         if dialect == "sqlite":
             deleted_filter = "" if include_deleted else f" AND {table}.is_deleted = 0"
+            tenant_filter = f" AND {table}.tenant_id = :tenant_id" if tenant_scoped else ""
             return (
                 f"SELECT {table}.* FROM {table} "
                 f"JOIN {table}_fts ON {table}.id = {table}_fts.rowid "
-                f"WHERE {table}_fts MATCH :query{deleted_filter} "
+                f"WHERE {table}_fts MATCH :query{deleted_filter}{tenant_filter} "
                 f"ORDER BY rank LIMIT :limit"
             )
         if dialect == "postgresql":
             deleted_filter = "" if include_deleted else " AND is_deleted = false"
+            tenant_filter = " AND tenant_id = :tenant_id" if tenant_scoped else ""
             return (
                 f"SELECT * FROM {table} "
-                f"WHERE search_vector @@ plainto_tsquery(:language, :query){deleted_filter} "
+                f"WHERE search_vector @@ plainto_tsquery(:language, :query){deleted_filter}{tenant_filter} "
                 f"ORDER BY ts_rank(search_vector, plainto_tsquery(:language, :query)) DESC LIMIT :limit"
             )
         raise RuntimeError(
@@ -452,10 +454,24 @@ class Model(Base):
         query mini-language: every term matches literally, so a stray
         quote, hyphen, colon, or the word "AND" is searched for as text
         instead of raising a syntax error or being parsed as an operator.
+
+        A model that declares a ``tenant_id`` column is scoped to
+        :func:`~zeython.tenancy.current_tenant_id`, the same as
+        ``find``/``all``/``find_by``/``paginate`` (see
+        :meth:`_base_select`) -- this hand-written SQL doesn't build on
+        ``_base_select()`` the way those do, so without this it would
+        silently search every tenant's rows.
         """
         session = current_session()
         dialect = session.bind.dialect.name if session.bind is not None else None
-        sql = cls._search_sql(dialect, include_deleted=include_deleted)
+
+        tenant_id: Any = None
+        if hasattr(cls, "tenant_id"):
+            from zeython.tenancy import current_tenant_id
+
+            tenant_id = current_tenant_id()
+
+        sql = cls._search_sql(dialect, include_deleted=include_deleted, tenant_scoped=tenant_id is not None)
         if not query.strip():
             return []
         if dialect == "sqlite":
@@ -463,6 +479,8 @@ class Model(Base):
         params: dict[str, Any] = {"query": query, "limit": limit}
         if dialect == "postgresql":
             params["language"] = cls.__search_language__
+        if tenant_id is not None:
+            params["tenant_id"] = tenant_id
 
         stmt = select(cls).from_statement(text(sql)).params(**params)
         result = await session.execute(stmt)

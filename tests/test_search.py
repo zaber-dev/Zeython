@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import String, Text, text
+from sqlalchemy import Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from zeython.db import Model
@@ -25,6 +25,7 @@ from zeython.search import (
     drop_fts5_index,
     drop_tsvector_index,
 )
+from zeython.tenancy import as_tenant
 
 
 class SearchPost(Model):
@@ -33,6 +34,14 @@ class SearchPost(Model):
 
     title: Mapped[str] = mapped_column(String(255))
     body: Mapped[str] = mapped_column(Text)
+
+
+class TenantSearchPost(Model):
+    __tablename__ = "tenant_search_posts"
+    __searchable__ = ("title",)
+
+    tenant_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    title: Mapped[str] = mapped_column(String(255))
 
 
 class UnsearchablePost(Model):
@@ -61,6 +70,9 @@ async def database() -> AsyncIterator[Database]:
     async with db.engine.begin() as connection:
         await connection.run_sync(Model.metadata.create_all)
         await connection.run_sync(lambda sync_conn: create_fts5_index(_SyncOpAdapter(sync_conn), "search_posts", ["title", "body"]))
+        await connection.run_sync(
+            lambda sync_conn: create_fts5_index(_SyncOpAdapter(sync_conn), "tenant_search_posts", ["title"])
+        )
     yield db
     await db.dispose()
 
@@ -217,6 +229,59 @@ async def test_search_multi_word_query_still_matches_regardless_of_term_order(da
         # as two independent terms the way an unquoted multi-word MATCH
         # already does.
         assert [r.title for r in await SearchPost.search("database async")] == ["Async ORM basics"]
+
+
+# -- Model.search() tenant isolation -----------------------------------------------
+
+
+async def test_search_is_scoped_to_the_current_tenant(database: Database) -> None:
+    # Regression guard: search() builds its own raw SQL rather than going
+    # through Model._base_select() the way find()/all()/find_by()/paginate()
+    # do, so it used to have no tenant filter at all -- a model with both
+    # __searchable__ and tenant_id columns (a normal combination: a
+    # searchable table in a multi-tenant app) leaked every tenant's rows to
+    # this one's search results.
+    async with session_scope(database):
+        with as_tenant(1):
+            await TenantSearchPost.create(title="Tenant one secret roadmap")
+        with as_tenant(2):
+            await TenantSearchPost.create(title="Tenant two secret roadmap")
+
+    async with session_scope(database):
+        with as_tenant(1):
+            results = await TenantSearchPost.search("secret")
+
+    assert [r.title for r in results] == ["Tenant one secret roadmap"]
+
+
+async def test_search_outside_any_tenant_context_is_unfiltered(database: Database) -> None:
+    # Matches all()'s own documented behavior: no tenant context resolved
+    # means no filter applied at all, not "filter to tenant None".
+    async with session_scope(database):
+        with as_tenant(1):
+            await TenantSearchPost.create(title="Tenant one secret roadmap")
+        with as_tenant(2):
+            await TenantSearchPost.create(title="Tenant two secret roadmap")
+
+    async with session_scope(database):
+        results = await TenantSearchPost.search("secret")
+
+    assert sorted(r.title for r in results) == ["Tenant one secret roadmap", "Tenant two secret roadmap"]
+
+
+def test_search_sql_sqlite_adds_tenant_filter_when_scoped() -> None:
+    sql = TenantSearchPost._search_sql("sqlite", include_deleted=False, tenant_scoped=True)
+    assert "tenant_search_posts.tenant_id = :tenant_id" in sql
+
+
+def test_search_sql_sqlite_omits_tenant_filter_by_default() -> None:
+    sql = TenantSearchPost._search_sql("sqlite", include_deleted=False)
+    assert "tenant_id" not in sql
+
+
+def test_search_sql_postgresql_adds_tenant_filter_when_scoped() -> None:
+    sql = TenantSearchPost._search_sql("postgresql", include_deleted=False, tenant_scoped=True)
+    assert "tenant_id = :tenant_id" in sql
 
 
 def test_drop_fts5_index_removes_table_and_triggers() -> None:

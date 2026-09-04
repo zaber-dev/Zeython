@@ -59,10 +59,11 @@ class Post(Model):
 
 That's the whole opt-in. From here:
 
-- `Post.find(id)`, `Post.all()`, `Post.find_by(...)`, `Post.paginate(...)`
-  all scope to the current request's resolved tenant automatically —
-  including `find()` by ID, so a request can't read another tenant's row
-  just by guessing (or enumerating) its ID.
+- `Post.find(id)`, `Post.all()`, `Post.find_by(...)`, `Post.paginate(...)`,
+  and `Post.search(...)` (see [Full-Text Search](search.md)) all scope to
+  the current request's resolved tenant automatically — including
+  `find()` by ID, so a request can't read another tenant's row just by
+  guessing (or enumerating) its ID.
 - `Post.create(...)` (and `save()` on a freshly-constructed `Post()`)
   assigns `tenant_id` from the current tenant automatically, if you
   didn't already set it explicitly.
