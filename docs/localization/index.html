@@ -3218,7 +3218,11 @@ keyword arguments via <code>str.format</code>:</p>
 </span></code></pre></div>
 <p>A placeholder with no matching argument is left as-is rather than
 raising — a missing translation parameter shouldn't 500 a page that would
-otherwise render fine.</p>
+otherwise render fine. Same for a stray unescaped <code>{</code>/<code>}</code> a translator
+left in a translation string by mistake (a literal brace needs doubling
+to <code>{{</code>/<code>}}</code> in <code>str.format</code> syntax, an easy slip in ordinary prose) — a
+typo in a translation file shouldn't 500 every request that hits it
+either.</p>
 <h2 id="how-the-locale-is-resolved">How the locale is resolved<a class="headerlink" href="#how-the-locale-is-resolved" title="Permanent link">&para;</a></h2>
 <p>For each request, in order:</p>
 <ol>

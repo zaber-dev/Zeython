@@ -871,6 +871,8 @@ Whether a standard 5-field cron expression (`minute hour day month weekday`) mat
 
 The weekday field is `0`-`6` (`0` = Sunday) only -- unlike some cron implementations, `7` is not accepted as an alias for Sunday.
 
+Day-of-month and weekday combine the standard cron way when **both** are restricted (neither is `*`): a match on *either* field is enough (`"0 0 1 * 1"` -- midnight on the 1st of the month, *or* every Monday -- matches far more often than requiring both at once would). With only one of the two restricted, that field alone decides, same as every other field.
+
 Source code in `src/zeython/schedule.py`
 
 ```python
@@ -881,18 +883,31 @@ def cron_matches(expression: str, at: datetime) -> bool:
 
     The weekday field is ``0``-``6`` (``0`` = Sunday) only -- unlike some
     cron implementations, ``7`` is not accepted as an alias for Sunday.
+
+    Day-of-month and weekday combine the standard cron way when **both**
+    are restricted (neither is ``*``): a match on *either* field is enough
+    (``"0 0 1 * 1"`` -- midnight on the 1st of the month, *or* every
+    Monday -- matches far more often than requiring both at once would).
+    With only one of the two restricted, that field alone decides, same
+    as every other field.
     """
     fields = expression.split()
     if len(fields) != 5:
         raise ValueError(f"Invalid cron expression (expected 5 space-separated fields): {expression!r}")
     minute, hour, day, month, weekday = fields
     cron_weekday = (at.weekday() + 1) % 7  # Python: Monday=0..Sunday=6 -> cron: Sunday=0..Saturday=6
+
+    day_matches = _field_matches(at.day, day)
+    weekday_matches = _field_matches(cron_weekday, weekday)
+    day_or_weekday_matches = (
+        (day_matches or weekday_matches) if day != "*" and weekday != "*" else (day_matches and weekday_matches)
+    )
+
     return (
         _field_matches(at.minute, minute)
         and _field_matches(at.hour, hour)
-        and _field_matches(at.day, day)
         and _field_matches(at.month, month)
-        and _field_matches(cron_weekday, weekday)
+        and day_or_weekday_matches
     )
 ```
 

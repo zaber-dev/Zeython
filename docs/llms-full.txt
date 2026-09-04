@@ -3554,7 +3554,7 @@ A `{name}`-style placeholder in a translation string is filled from keyword argu
 t(request, "greeting", name="Ana")   # "Hello, Ana!" (locale=en)
 ```
 
-A placeholder with no matching argument is left as-is rather than raising — a missing translation parameter shouldn't 500 a page that would otherwise render fine.
+A placeholder with no matching argument is left as-is rather than raising — a missing translation parameter shouldn't 500 a page that would otherwise render fine. Same for a stray unescaped `{`/`}` a translator left in a translation string by mistake (a literal brace needs doubling to `{{`/`}}` in `str.format` syntax, an easy slip in ordinary prose) — a typo in a translation file shouldn't 500 every request that hits it either.
 
 ## How the locale is resolved
 
@@ -4451,6 +4451,8 @@ schedule.call(custom).cron("*/10 8-17 * * 1-5")  # any raw 5-field expression
 ```
 
 `cron()` supports `*`, single values, comma lists (`1,3,5`), ranges (`1-5`), and step values (`*/15`, `1-10/2`) across all five fields (`minute hour day month weekday`). The weekday field is `0`-`6` (`0` = Sunday) — unlike some cron implementations, `7` isn't accepted as an alias for Sunday.
+
+Day-of-month and weekday follow standard cron's one special-case rule: restrict *both* (neither is `*`) and a match on **either** is enough -- `cron("0 0 1 * 1")` runs at midnight on the 1st of the month, *or* every Monday, not only when the 1st happens to land on a Monday. Restrict just one of the two and it alone decides, same as every other field.
 
 ## Setup
 
@@ -13116,6 +13118,8 @@ Whether a standard 5-field cron expression (`minute hour day month weekday`) mat
 
 The weekday field is `0`-`6` (`0` = Sunday) only -- unlike some cron implementations, `7` is not accepted as an alias for Sunday.
 
+Day-of-month and weekday combine the standard cron way when **both** are restricted (neither is `*`): a match on *either* field is enough (`"0 0 1 * 1"` -- midnight on the 1st of the month, *or* every Monday -- matches far more often than requiring both at once would). With only one of the two restricted, that field alone decides, same as every other field.
+
 Source code in `src/zeython/schedule.py`
 
 ```python
@@ -13126,18 +13130,31 @@ def cron_matches(expression: str, at: datetime) -> bool:
 
     The weekday field is ``0``-``6`` (``0`` = Sunday) only -- unlike some
     cron implementations, ``7`` is not accepted as an alias for Sunday.
+
+    Day-of-month and weekday combine the standard cron way when **both**
+    are restricted (neither is ``*``): a match on *either* field is enough
+    (``"0 0 1 * 1"`` -- midnight on the 1st of the month, *or* every
+    Monday -- matches far more often than requiring both at once would).
+    With only one of the two restricted, that field alone decides, same
+    as every other field.
     """
     fields = expression.split()
     if len(fields) != 5:
         raise ValueError(f"Invalid cron expression (expected 5 space-separated fields): {expression!r}")
     minute, hour, day, month, weekday = fields
     cron_weekday = (at.weekday() + 1) % 7  # Python: Monday=0..Sunday=6 -> cron: Sunday=0..Saturday=6
+
+    day_matches = _field_matches(at.day, day)
+    weekday_matches = _field_matches(cron_weekday, weekday)
+    day_or_weekday_matches = (
+        (day_matches or weekday_matches) if day != "*" and weekday != "*" else (day_matches and weekday_matches)
+    )
+
     return (
         _field_matches(at.minute, minute)
         and _field_matches(at.hour, hour)
-        and _field_matches(at.day, day)
         and _field_matches(at.month, month)
-        and _field_matches(cron_weekday, weekday)
+        and day_or_weekday_matches
     )
 ```
 
@@ -15407,7 +15424,7 @@ t(
 ) -> str
 ```
 
-Translate `key`, in `locale` if given, otherwise :func:`current_locale` (or `default_locale` outside a request). Any keyword arguments fill `{name}`-style placeholders in the translated string via `str.format` -- a placeholder with no matching argument is left as-is rather than raising.
+Translate `key`, in `locale` if given, otherwise :func:`current_locale` (or `default_locale` outside a request). Any keyword arguments fill `{name}`-style placeholders in the translated string via `str.format` -- a placeholder with no matching argument, or a stray unescaped `{`/`}` a translator left in by mistake (a literal `{` needs doubling to `{{}}` in `str.format` syntax, an easy slip in ordinary prose that isn't otherwise a template language), is left as-is rather than raising -- a typo in a translation resource file shouldn't 500 every request that hits that key.
 
 Source code in `src/zeython/localization.py`
 
@@ -15417,7 +15434,12 @@ def t(self, key: str, *, locale: str | None = None, **params: Any) -> str:
     :func:`current_locale` (or ``default_locale`` outside a request).
     Any keyword arguments fill ``{name}``-style placeholders in the
     translated string via ``str.format`` -- a placeholder with no
-    matching argument is left as-is rather than raising.
+    matching argument, or a stray unescaped ``{``/``}`` a translator
+    left in by mistake (a literal ``{`` needs doubling to ``{{}}`` in
+    ``str.format`` syntax, an easy slip in ordinary prose that isn't
+    otherwise a template language), is left as-is rather than raising
+    -- a typo in a translation resource file shouldn't 500 every
+    request that hits that key.
     """
     resolved_locale = locale or current_locale() or self.default_locale
     translations = self._translations_for(resolved_locale)
@@ -15425,7 +15447,7 @@ def t(self, key: str, *, locale: str | None = None, **params: Any) -> str:
         translations = self._translations_for(self.fallback_locale)
     text = translations.get(key, key)
     if params:
-        with contextlib.suppress(KeyError, IndexError):
+        with contextlib.suppress(KeyError, IndexError, ValueError):
             text = text.format(**params)
     return text
 ```

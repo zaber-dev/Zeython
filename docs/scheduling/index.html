@@ -3183,6 +3183,11 @@ method to set when it's due:</p>
 (<code>minute hour day month weekday</code>). The weekday field is <code>0</code>-<code>6</code>
 (<code>0</code> = Sunday) — unlike some cron implementations, <code>7</code> isn't accepted as
 an alias for Sunday.</p>
+<p>Day-of-month and weekday follow standard cron's one special-case rule:
+restrict <em>both</em> (neither is <code>*</code>) and a match on <strong>either</strong> is enough --
+<code>cron("0 0 1 * 1")</code> runs at midnight on the 1st of the month, <em>or</em> every
+Monday, not only when the 1st happens to land on a Monday. Restrict just
+one of the two and it alone decides, same as every other field.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># main.py</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span><span class="p">,</span> <span class="n">ScheduleServiceProvider</span>
