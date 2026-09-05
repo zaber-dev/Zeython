@@ -195,6 +195,14 @@ end-to-end tutorial. Licensed under MIT.
   an `Integer` column) redisplays the form with a validation error instead
   of crashing the request with an unhandled `ValueError`.
 - Custom console commands (`app/Console/Commands/`, `zeython command`).
+- `zeython.ai` gained `OpenAIAI` and `GeminiAI` alongside `AnthropicAI` --
+  `AI_PROVIDER=openai|gemini` plus the matching `OPENAI_API_KEY`/
+  `GEMINI_API_KEY`, all three implementing the identical `AI` interface so
+  switching providers is a one-line `.env` change, not a code change. The
+  starter scaffold's default `/` route now renders `resources/views/welcome.html`
+  through `zeython.views` instead of returning a bare JSON message -- a
+  fresh `zeython new` project shows a real server-rendered page on first
+  boot, not just a JSON API.
 
 ### CLI
 

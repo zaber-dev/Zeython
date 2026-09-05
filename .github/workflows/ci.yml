@@ -105,7 +105,7 @@ jobs:
           zeython serve --port 8000 --no-reload &
           for i in $(seq 1 20); do curl -sf -c /tmp/cookies.txt http://127.0.0.1:8000/ && break || sleep 0.5; done
           curl -sf http://127.0.0.1:8000/ | grep -q "CI Smoke Test"
-          curl -sf http://127.0.0.1:8000/welcome | grep -q "Rendered by Jinja2"
+          curl -sf http://127.0.0.1:8000/ | grep -q "Rendered by Jinja2"
           # CSRF is on by default and protects every unsafe request regardless
           # of whether a session cookie exists yet -- closing a login-CSRF hole
           # means even this very first POST needs the token cookie the health

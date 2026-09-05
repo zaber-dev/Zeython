@@ -9,8 +9,8 @@ Vercel's AI SDK or LangChain's chat models play, kept to a fraction of the
 surface area.
 
 Requires the ``ai`` extra (``pip install zeython[ai]``) only if you use
-:class:`AnthropicAI`; the interface and :class:`EchoAI` have no extra
-dependency.
+:class:`AnthropicAI`, :class:`OpenAIAI`, or :class:`GeminiAI`; the
+interface and :class:`EchoAI` have no extra dependency.
 """
 
 from __future__ import annotations
@@ -75,33 +75,108 @@ class AnthropicAI(AI):
         return AIResponse(text=text, model=self.model)
 
 
+class OpenAIAI(AI):
+    """Calls the OpenAI API via the official SDK. Requires the ``ai`` extra
+    (``pip install zeython[ai]``)."""
+
+    def __init__(self, *, api_key: str, model: str) -> None:
+        try:
+            from openai import AsyncOpenAI
+        except ImportError as exc:
+            raise ImportError(
+                "OpenAIAI requires the openai package. Install it with: pip install zeython[ai]"
+            ) from exc
+
+        self._client = AsyncOpenAI(api_key=api_key)
+        self.model = model
+
+    async def complete(self, prompt: str, *, system: str | None = None, max_tokens: int = 1024) -> AIResponse:
+        messages: list[dict[str, str]] = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        response = await self._client.chat.completions.create(
+            model=self.model,
+            messages=messages,  # type: ignore[arg-type]
+            max_tokens=max_tokens,
+        )
+        text = response.choices[0].message.content or ""
+        return AIResponse(text=text, model=self.model)
+
+
+class GeminiAI(AI):
+    """Calls the Google Gemini API via the official ``google-genai`` SDK.
+    Requires the ``ai`` extra (``pip install zeython[ai]``)."""
+
+    def __init__(self, *, api_key: str, model: str) -> None:
+        try:
+            from google import genai
+        except ImportError as exc:
+            raise ImportError(
+                "GeminiAI requires the google-genai package. Install it with: pip install zeython[ai]"
+            ) from exc
+
+        self._client = genai.Client(api_key=api_key)
+        self.model = model
+
+    async def complete(self, prompt: str, *, system: str | None = None, max_tokens: int = 1024) -> AIResponse:
+        from google.genai import types
+
+        response = await self._client.aio.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system or None,
+                max_output_tokens=max_tokens,
+            ),
+        )
+        return AIResponse(text=response.text or "", model=self.model)
+
+
 class AIServiceProvider(ServiceProvider):
     """Binds an :class:`AI` client into the container from ``.env``.
 
-    - ``AI_PROVIDER`` -- ``echo`` (default, no network/credentials) or ``anthropic``
-    - ``ANTHROPIC_API_KEY`` -- required when ``AI_PROVIDER=anthropic``
-    - ``AI_MODEL`` -- default ``claude-sonnet-5``, only used by the ``anthropic`` provider
+    - ``AI_PROVIDER`` -- ``echo`` (default, no network/credentials),
+      ``anthropic``, ``openai``, or ``gemini``
+    - ``ANTHROPIC_API_KEY`` / ``OPENAI_API_KEY`` / ``GEMINI_API_KEY`` --
+      required for the matching provider
+    - ``AI_MODEL`` -- the model name for whichever provider is active;
+      defaults to a current model for that provider if unset
 
     Not registered by default -- opt in with ``app.register(AIServiceProvider)``
     once your app actually calls an LLM.
     """
+
+    _DEFAULT_MODELS = {
+        "anthropic": "claude-sonnet-5",
+        "openai": "gpt-4o",
+        "gemini": "gemini-2.5-flash",
+    }
 
     def register(self) -> None:
         provider = self.config.get("ai.provider", "echo")
         client: AI
         if provider == "echo":
             client = EchoAI()
-        elif provider == "anthropic":
-            api_key = self.config.get("anthropic_api_key", "")
+        elif provider in self._DEFAULT_MODELS:
+            env_key = f"{provider}_api_key"
+            api_key = self.config.get(env_key, "")
             if not api_key:
                 raise RuntimeError(
-                    "AI_PROVIDER=anthropic requires ANTHROPIC_API_KEY to be set in .env. "
+                    f"AI_PROVIDER={provider} requires {env_key.upper()} to be set in .env. "
                     "Use AI_PROVIDER=echo (the default) for local dev/tests without an API key."
                 )
-            client = AnthropicAI(api_key=api_key, model=self.config.get("ai.model", "claude-sonnet-5"))
+            model = self.config.get("ai.model", self._DEFAULT_MODELS[provider])
+            if provider == "anthropic":
+                client = AnthropicAI(api_key=api_key, model=model)
+            elif provider == "openai":
+                client = OpenAIAI(api_key=api_key, model=model)
+            else:
+                client = GeminiAI(api_key=api_key, model=model)
         else:
             raise RuntimeError(f"Unknown AI_PROVIDER: {provider!r}")
         self.container.singleton(AI, lambda: client)
 
 
-__all__ = ["AI", "AIResponse", "EchoAI", "AnthropicAI", "AIServiceProvider"]
+__all__ = ["AI", "AIResponse", "EchoAI", "AnthropicAI", "OpenAIAI", "GeminiAI", "AIServiceProvider"]

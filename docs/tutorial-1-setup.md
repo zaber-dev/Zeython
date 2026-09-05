@@ -62,9 +62,12 @@ zeython db migrate
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you'll get a small JSON welcome payload.
-`zeython serve` auto-reloads on file changes, so leave it running for the
-rest of this tutorial.
+Visit `http://127.0.0.1:8000` — you'll get a real, server-rendered welcome
+page, not a JSON payload: `routes/web.py`'s `/` handler calls
+`zeython.views.render()` against `resources/views/welcome.html` (Jinja2).
+That's the "V" in MVC -- see [Views](views.md) for building your own pages
+the same way. `zeython serve` auto-reloads on file changes, so leave it
+running for the rest of this tutorial.
 
 ## Try the auth that's already there
 
