@@ -429,7 +429,7 @@ AI-assisted app features: a small, provider-agnostic LLM client bound in the con
 
 This is a different thing from `zeython.mcp`: that module lets an AI *agent* introspect and operate on a Zeython project (Laravel Boost's role). This module lets a Zeython *app* call an LLM as part of its own logic -- summarizing text, drafting a reply, classifying input -- the same role Vercel's AI SDK or LangChain's chat models play, kept to a fraction of the surface area.
 
-Requires the `ai` extra (`pip install zeython[ai]`) only if you use :class:`AnthropicAI`; the interface and :class:`EchoAI` have no extra dependency.
+Requires the `ai` extra (`pip install zeython[ai]`) only if you use :class:`AnthropicAI`, :class:`OpenAIAI`, or :class:`GeminiAI`; the interface and :class:`EchoAI` have no extra dependency.
 
 ### AI
 
@@ -491,6 +491,56 @@ def __init__(self, *, api_key: str, model: str) -> None:
     self.model = model
 ```
 
+### OpenAIAI
+
+```python
+OpenAIAI(*, api_key: str, model: str)
+```
+
+Bases: `AI`
+
+Calls the OpenAI API via the official SDK. Requires the `ai` extra (`pip install zeython[ai]`).
+
+Source code in `src/zeython/ai.py`
+
+```python
+def __init__(self, *, api_key: str, model: str) -> None:
+    try:
+        from openai import AsyncOpenAI
+    except ImportError as exc:
+        raise ImportError(
+            "OpenAIAI requires the openai package. Install it with: pip install zeython[ai]"
+        ) from exc
+
+    self._client = AsyncOpenAI(api_key=api_key)
+    self.model = model
+```
+
+### GeminiAI
+
+```python
+GeminiAI(*, api_key: str, model: str)
+```
+
+Bases: `AI`
+
+Calls the Google Gemini API via the official `google-genai` SDK. Requires the `ai` extra (`pip install zeython[ai]`).
+
+Source code in `src/zeython/ai.py`
+
+```python
+def __init__(self, *, api_key: str, model: str) -> None:
+    try:
+        from google import genai
+    except ImportError as exc:
+        raise ImportError(
+            "GeminiAI requires the google-genai package. Install it with: pip install zeython[ai]"
+        ) from exc
+
+    self._client = genai.Client(api_key=api_key)
+    self.model = model
+```
+
 ### AIServiceProvider
 
 ```python
@@ -501,9 +551,9 @@ Bases: `ServiceProvider`
 
 Binds an :class:`AI` client into the container from `.env`.
 
-- `AI_PROVIDER` -- `echo` (default, no network/credentials) or `anthropic`
-- `ANTHROPIC_API_KEY` -- required when `AI_PROVIDER=anthropic`
-- `AI_MODEL` -- default `claude-sonnet-5`, only used by the `anthropic` provider
+- `AI_PROVIDER` -- `echo` (default, no network/credentials), `anthropic`, `openai`, or `gemini`
+- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY` -- required for the matching provider
+- `AI_MODEL` -- the model name for whichever provider is active; defaults to a current model for that provider if unset
 
 Not registered by default -- opt in with `app.register(AIServiceProvider)` once your app actually calls an LLM.
 

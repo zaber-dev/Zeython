@@ -105,7 +105,7 @@ my_blog/
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you should see a JSON welcome message. Try registering a user and listing them. CSRF protection is on by default and needs its token back via a header on every unsafe request, even the very first one — a plain `GET` hands you that token as a cookie (see [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)):
+Visit `http://127.0.0.1:8000` — you'll see a real server-rendered welcome page (Jinja2, from `resources/views/welcome.html`), not just a JSON blob; see [Views](https://zeython.zaber.dev/docs/views/index.md). Try registering a user and listing them. CSRF protection is on by default and needs its token back via a header on every unsafe request, even the very first one — a plain `GET` hands you that token as a cookie (see [CSRF Protection](https://zeython.zaber.dev/docs/csrf/index.md)):
 
 ```bash
 curl -c cookies.txt http://127.0.0.1:8000/ -o /dev/null
@@ -318,7 +318,7 @@ zeython db migrate
 zeython serve
 ```
 
-Visit `http://127.0.0.1:8000` — you'll get a small JSON welcome payload. `zeython serve` auto-reloads on file changes, so leave it running for the rest of this tutorial.
+Visit `http://127.0.0.1:8000` — you'll get a real, server-rendered welcome page, not a JSON payload: `routes/web.py`'s `/` handler calls `zeython.views.render()` against `resources/views/welcome.html` (Jinja2). That's the "V" in MVC -- see [Views](https://zeython.zaber.dev/docs/views/index.md) for building your own pages the same way. `zeython serve` auto-reloads on file changes, so leave it running for the rest of this tutorial.
 
 ## Try the auth that's already there
 
@@ -4989,26 +4989,30 @@ async def summarize(self, request):
 AI_PROVIDER=echo          # default -- no network, no credentials required
 # AI_PROVIDER=anthropic
 # ANTHROPIC_API_KEY=sk-ant-...
-# AI_MODEL=claude-sonnet-5
+# AI_PROVIDER=openai
+# OPENAI_API_KEY=sk-...
+# AI_PROVIDER=gemini
+# GEMINI_API_KEY=...
+# AI_MODEL=claude-sonnet-5   # optional -- defaults to a current model for whichever provider is active
 ```
 
 `AI_PROVIDER` defaults to `echo` — the same role `LogMailer` and `InMemoryQueue` play for their subsystems: a fresh `zeython new` project (and its tests) work immediately with zero external credentials. `EchoAI.complete()` returns the prompt back verbatim, prefixed with `[echo]`, so you can wire the plumbing (routes, request handling, response shape) before you have an API key.
 
-Switch to `AI_PROVIDER=anthropic` once you do. `AIServiceProvider` raises a clear `RuntimeError` at registration time (not on the first request) if `ANTHROPIC_API_KEY` is missing — a misconfigured AI provider should fail loudly at boot, not silently on whichever request happens to hit it first.
+Switch to `AI_PROVIDER=anthropic`, `openai`, or `gemini` once you do -- all three ship in `zeython[ai]` and implement the exact same `AI` interface, so swapping providers is a one-line `.env` change, not a code change. `AIServiceProvider` raises a clear `RuntimeError` at registration time (not on the first request) if the matching API key (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`) is missing -- a misconfigured AI provider should fail loudly at boot, not silently on whichever request happens to hit it first. Leaving `AI_MODEL` unset uses a sensible current default for whichever provider is active (`claude-sonnet-5`, `gpt-4o`, or `gemini-2.5-flash` respectively).
 
 ## Other providers
 
-There's no plugin registry — implement `AI` yourself and bind it in place of the default, the same pattern as `RateLimiter`, `Cache`, and `Storage`:
+There's no plugin registry — implement `AI` yourself and bind it in place of the default, the same pattern as `RateLimiter`, `Cache`, and `Storage`. Useful for a provider not built in (Mistral, a local Ollama model, a self-hosted vLLM endpoint) or for wrapping one of the built-in providers with your own retry/logging behavior:
 
 ```python
 from zeython import AI, AIResponse
 
-class MyOpenAI(AI):
+class MyCustomAI(AI):
     async def complete(self, prompt, *, system=None, max_tokens=1024):
         ...
         return AIResponse(text=..., model=...)
 
-app.container.singleton(AI, lambda: MyOpenAI())
+app.container.singleton(AI, lambda: MyCustomAI())
 ```
 
 ## Scope
@@ -15625,7 +15629,7 @@ AI-assisted app features: a small, provider-agnostic LLM client bound in the con
 
 This is a different thing from `zeython.mcp`: that module lets an AI *agent* introspect and operate on a Zeython project (Laravel Boost's role). This module lets a Zeython *app* call an LLM as part of its own logic -- summarizing text, drafting a reply, classifying input -- the same role Vercel's AI SDK or LangChain's chat models play, kept to a fraction of the surface area.
 
-Requires the `ai` extra (`pip install zeython[ai]`) only if you use :class:`AnthropicAI`; the interface and :class:`EchoAI` have no extra dependency.
+Requires the `ai` extra (`pip install zeython[ai]`) only if you use :class:`AnthropicAI`, :class:`OpenAIAI`, or :class:`GeminiAI`; the interface and :class:`EchoAI` have no extra dependency.
 
 ### AI
 
@@ -15687,6 +15691,56 @@ def __init__(self, *, api_key: str, model: str) -> None:
     self.model = model
 ```
 
+### OpenAIAI
+
+```python
+OpenAIAI(*, api_key: str, model: str)
+```
+
+Bases: `AI`
+
+Calls the OpenAI API via the official SDK. Requires the `ai` extra (`pip install zeython[ai]`).
+
+Source code in `src/zeython/ai.py`
+
+```python
+def __init__(self, *, api_key: str, model: str) -> None:
+    try:
+        from openai import AsyncOpenAI
+    except ImportError as exc:
+        raise ImportError(
+            "OpenAIAI requires the openai package. Install it with: pip install zeython[ai]"
+        ) from exc
+
+    self._client = AsyncOpenAI(api_key=api_key)
+    self.model = model
+```
+
+### GeminiAI
+
+```python
+GeminiAI(*, api_key: str, model: str)
+```
+
+Bases: `AI`
+
+Calls the Google Gemini API via the official `google-genai` SDK. Requires the `ai` extra (`pip install zeython[ai]`).
+
+Source code in `src/zeython/ai.py`
+
+```python
+def __init__(self, *, api_key: str, model: str) -> None:
+    try:
+        from google import genai
+    except ImportError as exc:
+        raise ImportError(
+            "GeminiAI requires the google-genai package. Install it with: pip install zeython[ai]"
+        ) from exc
+
+    self._client = genai.Client(api_key=api_key)
+    self.model = model
+```
+
 ### AIServiceProvider
 
 ```python
@@ -15697,9 +15751,9 @@ Bases: `ServiceProvider`
 
 Binds an :class:`AI` client into the container from `.env`.
 
-- `AI_PROVIDER` -- `echo` (default, no network/credentials) or `anthropic`
-- `ANTHROPIC_API_KEY` -- required when `AI_PROVIDER=anthropic`
-- `AI_MODEL` -- default `claude-sonnet-5`, only used by the `anthropic` provider
+- `AI_PROVIDER` -- `echo` (default, no network/credentials), `anthropic`, `openai`, or `gemini`
+- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY` -- required for the matching provider
+- `AI_MODEL` -- the model name for whichever provider is active; defaults to a current model for that provider if unset
 
 Not registered by default -- opt in with `app.register(AIServiceProvider)` once your app actually calls an LLM.
 

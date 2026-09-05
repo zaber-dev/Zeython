@@ -3131,8 +3131,9 @@
 <h2 id="run-it">Run it<a class="headerlink" href="#run-it" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zeython<span class="w"> </span>serve
 </span></code></pre></div>
-<p>Visit <code>http://127.0.0.1:8000</code> — you should see a JSON welcome message. Try
-registering a user and listing them. CSRF protection is on by default
+<p>Visit <code>http://127.0.0.1:8000</code> — you'll see a real server-rendered welcome
+page (Jinja2, from <code>resources/views/welcome.html</code>), not just a JSON blob;
+see <a href="../views/">Views</a>. Try registering a user and listing them. CSRF protection is on by default
 and needs its token back via a header on every unsafe request, even the
 very first one — a plain <code>GET</code> hands you that token as a cookie (see
 <a href="../csrf/">CSRF Protection</a>):</p>

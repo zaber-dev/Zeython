@@ -3133,7 +3133,11 @@ default:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>AI_PROVIDER=echo          # default -- no network, no credentials required
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a># AI_PROVIDER=anthropic
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a># ANTHROPIC_API_KEY=sk-ant-...
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a># AI_MODEL=claude-sonnet-5
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a># AI_PROVIDER=openai
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a># OPENAI_API_KEY=sk-...
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a># AI_PROVIDER=gemini
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a># GEMINI_API_KEY=...
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a># AI_MODEL=claude-sonnet-5   # optional -- defaults to a current model for whichever provider is active
 </span></code></pre></div>
 <p><code>AI_PROVIDER</code> defaults to <code>echo</code> — the same role <code>LogMailer</code> and
 <code>InMemoryQueue</code> play for their subsystems: a fresh <code>zeython new</code> project
@@ -3141,21 +3145,30 @@ default:</p>
 <code>EchoAI.complete()</code> returns the prompt back verbatim, prefixed with
 <code>[echo]</code>, so you can wire the plumbing (routes, request handling, response
 shape) before you have an API key.</p>
-<p>Switch to <code>AI_PROVIDER=anthropic</code> once you do. <code>AIServiceProvider</code> raises a
-clear <code>RuntimeError</code> at registration time (not on the first request) if
-<code>ANTHROPIC_API_KEY</code> is missing — a misconfigured AI provider should fail
-loudly at boot, not silently on whichever request happens to hit it first.</p>
+<p>Switch to <code>AI_PROVIDER=anthropic</code>, <code>openai</code>, or <code>gemini</code> once you do --
+all three ship in <code>zeython[ai]</code> and implement the exact same <code>AI</code>
+interface, so swapping providers is a one-line <code>.env</code> change, not a code
+change. <code>AIServiceProvider</code> raises a clear <code>RuntimeError</code> at registration
+time (not on the first request) if the matching API key
+(<code>ANTHROPIC_API_KEY</code> / <code>OPENAI_API_KEY</code> / <code>GEMINI_API_KEY</code>) is missing --
+a misconfigured AI provider should fail loudly at boot, not silently on
+whichever request happens to hit it first. Leaving <code>AI_MODEL</code> unset uses
+a sensible current default for whichever provider is active
+(<code>claude-sonnet-5</code>, <code>gpt-4o</code>, or <code>gemini-2.5-flash</code> respectively).</p>
 <h2 id="other-providers">Other providers<a class="headerlink" href="#other-providers" title="Permanent link">&para;</a></h2>
 <p>There's no plugin registry — implement <code>AI</code> yourself and bind it in place
-of the default, the same pattern as <code>RateLimiter</code>, <code>Cache</code>, and <code>Storage</code>:</p>
+of the default, the same pattern as <code>RateLimiter</code>, <code>Cache</code>, and <code>Storage</code>.
+Useful for a provider not built in (Mistral, a local Ollama model, a
+self-hosted vLLM endpoint) or for wrapping one of the built-in providers
+with your own retry/logging behavior:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">zeython</span><span class="w"> </span><span class="kn">import</span> <span class="n">AI</span><span class="p">,</span> <span class="n">AIResponse</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyOpenAI</span><span class="p">(</span><span class="n">AI</span><span class="p">):</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyCustomAI</span><span class="p">(</span><span class="n">AI</span><span class="p">):</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="o">...</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="k">return</span> <span class="n">AIResponse</span><span class="p">(</span><span class="n">text</span><span class="o">=...</span><span class="p">,</span> <span class="n">model</span><span class="o">=...</span><span class="p">)</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">AI</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyOpenAI</span><span class="p">())</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">app</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">AI</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">MyCustomAI</span><span class="p">())</span>
 </span></code></pre></div>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
 <p><code>complete()</code> is deliberately the entire interface — no streaming, no tool

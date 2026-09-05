@@ -3106,9 +3106,12 @@ models against the (empty) database, <code>migrate</code> applies it:</p>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>zeython<span class="w"> </span>db<span class="w"> </span>migrate
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>zeython<span class="w"> </span>serve
 </span></code></pre></div>
-<p>Visit <code>http://127.0.0.1:8000</code> — you'll get a small JSON welcome payload.
-<code>zeython serve</code> auto-reloads on file changes, so leave it running for the
-rest of this tutorial.</p>
+<p>Visit <code>http://127.0.0.1:8000</code> — you'll get a real, server-rendered welcome
+page, not a JSON payload: <code>routes/web.py</code>'s <code>/</code> handler calls
+<code>zeython.views.render()</code> against <code>resources/views/welcome.html</code> (Jinja2).
+That's the "V" in MVC -- see <a href="../views/">Views</a> for building your own pages
+the same way. <code>zeython serve</code> auto-reloads on file changes, so leave it
+running for the rest of this tutorial.</p>
 <h2 id="try-the-auth-thats-already-there">Try the auth that's already there<a class="headerlink" href="#try-the-auth-thats-already-there" title="Permanent link">&para;</a></h2>
 <p>A generated project ships with a working <code>User</code> model and session
 authentication out of the box (see <a href="../authentication/">Authentication</a>
